@@ -1,5 +1,4 @@
-using Frierun.Server.Models;
-using Frierun.Server.Services;
+using Frierun.Server;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,13 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
-
-builder.Services.AddSingleton<DockerService>();
-builder.Services.AddSingleton<PackageRegistry>();
-builder.Services.AddSingleton<StateManager>();
-builder.Services.AddSingleton<InstallService>();
-builder.Services.AddSingleton<UninstallService>();
-builder.Services.AddSingleton<State>(services => services.GetRequiredService<StateManager>().Load());
+builder.Services.RegisterServices();
 
 var app = builder.Build();
 
