@@ -1,7 +1,7 @@
 ﻿using Frierun.Server.Models;
 using Newtonsoft.Json.Serialization;
 
-namespace Frierun.Server.Services.Serialization;
+namespace Frierun.Server.Services;
 
 public class ContractResolver(PackageRegistry packageRegistry) : DefaultContractResolver
 {

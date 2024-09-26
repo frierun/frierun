@@ -1,8 +1,7 @@
 using Frierun.Server.Models;
 using Frierun.Server.Services;
-using Frierun.Server.Services.Serialization;
 
-namespace Frierun.Tests.Services.Serialization;
+namespace Frierun.Tests.Services;
 
 public class StateManagerTests : BaseTests
 {

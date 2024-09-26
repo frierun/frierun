@@ -2,7 +2,7 @@
 using Frierun.Server.Models;
 using Newtonsoft.Json;
 
-namespace Frierun.Server.Services.Serialization;
+namespace Frierun.Server.Services;
 
 public class StateManager
 {

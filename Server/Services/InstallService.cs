@@ -1,5 +1,4 @@
 ﻿using Frierun.Server.Models;
-using Frierun.Server.Services.Serialization;
 
 namespace Frierun.Server.Services;
 

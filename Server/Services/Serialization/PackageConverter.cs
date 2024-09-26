@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
-namespace Frierun.Server.Services.Serialization;
+namespace Frierun.Server.Services;
 
 public class PackageConverter(PackageRegistry packageRegistry) : JsonConverter<Package>
 {
