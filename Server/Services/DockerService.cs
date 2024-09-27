@@ -80,7 +80,7 @@ public class DockerService(ILogger<DockerService> logger)
         if (containerId == null)
         {
             logger.LogError("Container {ContainerName} not found", containerName);
-            return false;
+            return true;
         }
 
         if (!await _client.Containers.StopContainerAsync(containerId, new ContainerStopParameters()))
