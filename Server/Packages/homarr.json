@@ -1,0 +1,12 @@
+﻿{
+  "Name": "Homarr",
+  "Url": "https://homarr.dev/docs/getting-started/installation/",
+  "ImageName": "ghcr.io/ajnart/homarr:latest",
+  "Port": 7575,
+  "Volumes": {
+    "Configs": "/app/data/configs",
+    "Icons": "/app/public/icons",
+    "Data": "/data"
+  },
+  "RequireDocker": true
+}

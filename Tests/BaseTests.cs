@@ -13,6 +13,7 @@ public abstract class BaseTests
         if (Provider == null)
         {
             var services = new ServiceCollection();
+            services.AddLogging();
             services.RegisterServices();
             Provider = services.BuildServiceProvider();
         }
