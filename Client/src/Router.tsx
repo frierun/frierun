@@ -1,5 +1,6 @@
-﻿import Root from "./Root";
-import {createBrowserRouter, RouterProvider} from "react-router-dom";
+﻿import {createBrowserRouter, RouterProvider} from "react-router-dom";
+import Root from "./pages/Root.tsx";
+import Package from "./pages/Package.tsx";
 
 
 const router = createBrowserRouter([
@@ -7,6 +8,10 @@ const router = createBrowserRouter([
         path: "/",
         element: <Root />,
     },
+    {
+        path: "/packages/:name",
+        Component: Package,
+    }
 ]);
 
 export default function Router()

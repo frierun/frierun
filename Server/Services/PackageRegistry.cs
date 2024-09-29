@@ -7,6 +7,9 @@ public class PackageRegistry(ILogger<PackageRegistry> logger)
 {
     public IList<Package> Packages { get; } = [];
 
+    /// <summary>
+    /// Loads packages from the "Packages" directory in the same directory as the executing assembly.
+    /// </summary>
     public void Load()
     {
         var assemblyLocation = System.Reflection.Assembly.GetEntryAssembly()?.Location ??

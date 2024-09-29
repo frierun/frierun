@@ -10,7 +10,7 @@ public class DockerService(ILogger<DockerService> logger)
     /// <summary>
     /// Starts container with specified name, image and port
     /// </summary>
-    public async Task<bool> StartContainer(string containerName, string imageName, int port)
+    public async Task<bool> StartContainer(string containerName, string imageName, int externalPort, int internalPort)
     {
         logger.LogInformation("Starting container {ContainerName} from image {ImageName}", containerName, imageName);
 
@@ -32,12 +32,12 @@ public class DockerService(ILogger<DockerService> logger)
                 PortBindings = new Dictionary<string, IList<PortBinding>>
                 {
                     {
-                        $"{port}/tcp",
+                        $"{internalPort}/tcp",
                         new List<PortBinding>
                         {
                             new()
                             {
-                                HostPort = "80"
+                                HostPort = externalPort.ToString()
                             }
                         }
                     }

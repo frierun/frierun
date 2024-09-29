@@ -6,7 +6,7 @@ public class UninstallService(DockerService dockerService, State state, StateMan
 {
     public async Task Handle(Application application)
     {
-        var result = await dockerService.StopContainer(application.Package.Name);
+        var result = await dockerService.StopContainer(application.Name);
         if (result)
         {
             state.Applications.Remove(application);

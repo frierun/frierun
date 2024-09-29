@@ -1,6 +1,6 @@
 import useAxios from "axios-hooks";
-import Install from "./Install.tsx";
 import Package from "../models/Package.ts";
+import {Link} from "react-router-dom";
 
 export default function Packages() {
     const [{data, loading, error}] = useAxios<Package[]>('/api/v1/packages')
@@ -15,7 +15,10 @@ export default function Packages() {
             </h2>
             <ul>
                 {data.map((item) => (
-                    <li key={item.name}>{item.name} <Install packageId={item.name} /></li>
+                    <li key={item.name}>
+                        {item.name}
+                        <Link to={`/packages/${item.name}`}>Install</Link>
+                    </li>
                 ))}
             </ul>
         </>

@@ -1,5 +1,5 @@
 ﻿type Package = {
-    name: string
+    name: string;
 }
 
 export default Package;

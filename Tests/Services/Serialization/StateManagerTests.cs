@@ -27,7 +27,7 @@ public class StateManagerTests : BaseTests
         var packageRegistry = GetService<PackageRegistry>();
         packageRegistry.Packages.Add(package);
         
-        var application = new Application(Guid.NewGuid(), package);
+        var application = new Application(Guid.NewGuid(), "test", 80, package);
         var state = new State();
         state.Applications.Add(application);
         var stateManager = GetService<StateManager>();
@@ -44,7 +44,7 @@ public class StateManagerTests : BaseTests
     public void DoesntSerializePackageContent()
     {
         var package = new Package("test", "testimagename", 80);
-        var application = new Application(Guid.NewGuid(), package);
+        var application = new Application(Guid.NewGuid(), "test", 80, package);
         var state = new State();
         state.Applications.Add(application);
         var stateManager = GetService<StateManager>();
