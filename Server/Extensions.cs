@@ -13,6 +13,5 @@ public static class Extensions
         services.AddSingleton<InstallService>();
         services.AddSingleton<UninstallService>();
         services.AddSingleton<State>(s => s.GetRequiredService<StateManager>().Load());
-        
     }
 }
