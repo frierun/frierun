@@ -2,7 +2,7 @@
   "Name": "portainer",
   "Url": "https://docs.portainer.io/start/install-ce/server/docker/linux",
   "ImageName": "portainer/portainer-ce:latest",
-  "Port": 8000,
+  "Port": 9000,
   "Volumes": [
     {
       "Name": "data",

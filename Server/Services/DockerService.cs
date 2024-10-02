@@ -34,6 +34,15 @@ public class DockerService(ILogger<DockerService> logger)
                 Type = "volume"
             }));
         }
+        if (package.RequireDocker)
+        {
+            mounts.Add(new Mount
+            {
+                Source = "/var/run/docker.sock",
+                Target = "/var/run/docker.sock",
+                Type = "bind"
+            });
+        }
 
         var result = await _client.Containers.CreateContainerAsync(new CreateContainerParameters
         {
