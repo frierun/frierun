@@ -57,6 +57,7 @@ public class StateManagerTests : BaseTests
         stateManager.Save(state);
 
         var content = File.ReadAllText(stateManager.Path);
+        Assert.NotNull(application.Package);
         Assert.DoesNotContain(application.Package.ImageName, content);
     }
 }

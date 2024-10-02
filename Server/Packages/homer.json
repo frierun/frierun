@@ -1,9 +1,12 @@
 ﻿{
-  "Name": "Homer",
+  "Name": "homer",
   "Url": "https://github.com/bastienwirtz/homer",
   "ImageName": "b4bz/homer:latest",
   "Port": 8080,
-  "Volumes": {
-    "Assets": "/www/assets"
-  }
+  "Volumes": [
+    {
+      "Name": "assets",
+      "Path": "/www/assets"
+    }
+  ]
 }

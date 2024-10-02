@@ -1,10 +1,13 @@
 ﻿{
-  "Name": "Portainer",
+  "Name": "portainer",
   "Url": "https://docs.portainer.io/start/install-ce/server/docker/linux",
   "ImageName": "portainer/portainer-ce:latest",
   "Port": 8000,
-  "Volumes": {
-    "Data": "/data"
-  },
+  "Volumes": [
+    {
+      "Name": "data",
+      "Path": "/data"
+    }
+  ],
   "RequireDocker": true
 }

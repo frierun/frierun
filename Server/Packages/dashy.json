@@ -1,9 +1,12 @@
 ﻿{
-  "Name": "Dashy",
+  "Name": "dashy",
   "Url": "https://dashy.to/docs/quick-start",
   "ImageName": "lissy93/dashy:latest",
   "Port": 8080,
-  "Volumes": {
-    "Data": "/app/user-data"
-  }
+  "Volumes": [
+    {
+      "Name": "data",
+      "Path": "/app/user-data"
+    }
+  ]
 }

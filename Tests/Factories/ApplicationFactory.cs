@@ -14,5 +14,9 @@ public sealed class ApplicationFactory : Faker<Application>
         RuleFor(p => p.Name, f => f.Lorem.Word());
         RuleFor(p => p.Port, f => f.Random.Number(1, 65535));
         RuleFor(p => p.Package, _ => packageFactory.Generate());
+        RuleFor(
+            p => p.VolumeNames,
+            (f, a) => a.Package?.Volumes?.Select(v => $"{a.Name}-{v.Name}").ToList()
+        );
     }
 }

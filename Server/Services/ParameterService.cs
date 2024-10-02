@@ -11,14 +11,33 @@ public class ParameterService(State state)
     {
         var name = package.Name;
         var count = 0;
-        while (state.Applications.Any(application => application.Name == name))
+        while (!CanUseName(name, package))
         {
             count++;
             name = $"{package.Name}-{count}"; 
         }
         return name;
     }
-    
+
+    private bool CanUseName(string name, Package package)
+    {
+        if (state.Applications.Any(application => application.Name == name))
+        {
+            return false;
+        }
+
+        foreach (var volume in package.Volumes ?? Enumerable.Empty<Volume>())
+        {
+            var volumeName = $"{name}-{volume.Name}";
+            if (state.Applications.Any(application => application.VolumeNames?.Contains(volumeName) == true))
+            {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
     /// <summary>
     /// Gets default port for the new package installation
     /// </summary>

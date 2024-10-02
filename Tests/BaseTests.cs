@@ -22,13 +22,17 @@ public abstract class BaseTests
         return Provider.GetRequiredService<T>();
     }
     
-    protected virtual void RegisterServices(IServiceCollection services)
+    private void RegisterServices(IServiceCollection services)
     {
         services.AddLogging();
         services.RegisterServices();
+        
+        // clear state
+        services.AddSingleton<State>(_ => new State());
 
-        services.AddSingleton<Faker<Package>, PackageFactory>();
         services.AddSingleton<Faker<Application>, ApplicationFactory>();
+        services.AddSingleton<Faker<Package>, PackageFactory>();
+        services.AddSingleton<Faker<Volume>, VolumeFactory>();
     }
     
     /// <summary>
@@ -37,6 +41,18 @@ public abstract class BaseTests
     protected Faker<T> GetFactory<T>()
         where T : class
     {
-        return GetService<Faker<T>>();
+        return GetService<Faker<T>>().Clone();
     }
+    
+    /// <summary>
+    /// Gets state
+    /// </summary>
+    protected State GetState()
+    {
+        var state = GetService<State>();
+        state.Applications.Clear();
+        return state;
+    }
+
+    
 }

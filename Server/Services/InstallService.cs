@@ -6,10 +6,11 @@ public class InstallService(DockerService dockerService, State state, StateManag
 {
     public async Task Handle(string name, int externalPort, Package package)
     {
-        var result = await dockerService.StartContainer(name, package.ImageName, externalPort, package.Port);
+        var result = await dockerService.StartContainer(name, externalPort, package);
         if (result)
         {
-            state.Applications.Add(new Application(Guid.NewGuid(), name, externalPort, package));
+            var volumeNames = package.Volumes?.Select(volume => $"{name}-{volume.Name}").ToList();
+            state.Applications.Add(new Application(Guid.NewGuid(), name, externalPort, volumeNames, package));
             stateManager.Save(state);
         }
     }

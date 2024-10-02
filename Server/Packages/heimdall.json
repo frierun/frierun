@@ -1,9 +1,12 @@
 ﻿{
-  "Name": "Heimdall",
+  "Name": "heimdall",
   "Url": "https://hub.docker.com/r/linuxserver/heimdall/",
   "ImageName": "lscr.io/linuxserver/heimdall:latest",
   "Port": 80,
-  "Volumes": {
-    "Config": "/config"
-  }
+  "Volumes": [
+    {
+      "Name": "config",
+      "Path": "/config"
+    }
+  ]
 }
