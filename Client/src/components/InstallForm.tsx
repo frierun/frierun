@@ -3,17 +3,19 @@ import Package from "../models/Package.ts";
 import {useEffect, useState} from "react";
 
 type Props = {
+    defaultName: string;
+    defaultPort: number;
     pkg: Package;
 }
 
-export default function InstallForm({pkg}: Props) {
-    const [name, setName] = useState(pkg.name);
-    const [port, setPort] = useState(80);
+export default function InstallForm({pkg, defaultName, defaultPort}: Props) {
+    const [name, setName] = useState(defaultName);
+    const [port, setPort] = useState(defaultPort);
     
     useEffect(() => {
-        setName(pkg.name);
-        setPort(80);
-    }, [pkg]);
+        setName(defaultName);
+        setPort(defaultPort);
+    }, [defaultName, defaultPort]);
 
     const [{loading: sending}, send] = useAxios(
         {
