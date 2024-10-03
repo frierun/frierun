@@ -2,7 +2,7 @@
 
 namespace Frierun.Server.Services;
 
-public class UninstallService(DockerService dockerService, State state, StateManager stateManager)
+public class UninstallService(DockerService dockerService, State state, StateSerializer stateSerializer)
 {
     public async Task Handle(Application application)
     {
@@ -18,7 +18,7 @@ public class UninstallService(DockerService dockerService, State state, StateMan
         if (result)
         {
             state.Applications.Remove(application);
-            stateManager.Save(state);
+            stateSerializer.Save(state);
         }
     }
 }

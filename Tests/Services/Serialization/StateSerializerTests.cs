@@ -3,12 +3,12 @@ using Frierun.Server.Services;
 
 namespace Frierun.Tests.Services;
 
-public class StateManagerTests : BaseTests
+public class StateSerializerTests : BaseTests
 {
     [Fact]
     public void Load_EmptyFile_ReturnsEmptyState()
     {
-        var stateManager = GetService<StateManager>();
+        var stateManager = Resolve<StateSerializer>();
         File.Delete(stateManager.Path);
 
         var state = stateManager.Load();
@@ -22,7 +22,7 @@ public class StateManagerTests : BaseTests
         var application = GetFactory<Application>().Generate();
         var state = new State();
         state.Applications.Add(application);
-        var stateManager = GetService<StateManager>();
+        var stateManager = Resolve<StateSerializer>();
         stateManager.Save(state);
         
         var loadedState = stateManager.Load();
@@ -38,7 +38,7 @@ public class StateManagerTests : BaseTests
         var application = GetFactory<Application>().Generate();
         var state = new State();
         state.Applications.Add(application);
-        var stateManager = GetService<StateManager>();
+        var stateManager = Resolve<StateSerializer>();
         stateManager.Save(state);
         
         var loadedState = stateManager.Load();
@@ -52,7 +52,7 @@ public class StateManagerTests : BaseTests
         var application = GetFactory<Application>().Generate();
         var state = new State();
         state.Applications.Add(application);
-        var stateManager = GetService<StateManager>();
+        var stateManager = Resolve<StateSerializer>();
 
         stateManager.Save(state);
 

@@ -9,30 +9,44 @@ namespace Frierun.Tests;
 public abstract class BaseTests
 {
     private ServiceProvider? Provider { get; set; }
+    private IServiceCollection? Services { get; set; }
     
-    protected T GetService<T>()
+    /// <summary>
+    /// Resolves object from the provider.
+    /// </summary>
+    protected T Resolve<T>()
         where T : notnull
     {
-        if (Provider == null)
-        {
-            var services = new ServiceCollection();
-            RegisterServices(services);
-            Provider = services.BuildServiceProvider();
-        }
+        Provider ??= GetServices().BuildServiceProvider();
         return Provider.GetRequiredService<T>();
     }
     
-    private void RegisterServices(IServiceCollection services)
+    private IServiceCollection GetServices()
     {
-        services.AddLogging();
-        services.RegisterServices();
-        
-        // clear state
-        services.AddSingleton<State>(_ => new State());
+        if (Services != null)
+        {
+            return Services;
+        }
 
-        services.AddSingleton<Faker<Application>, ApplicationFactory>();
-        services.AddSingleton<Faker<Package>, PackageFactory>();
-        services.AddSingleton<Faker<Volume>, VolumeFactory>();
+        Services = new ServiceCollection();
+        Services.AddLogging();
+        Services.RegisterServices();
+        
+        Services.AddSingleton<Faker<Application>, ApplicationFactory>();
+        Services.AddSingleton<Faker<Package>, PackageFactory>();
+        Services.AddSingleton<Faker<Volume>, VolumeFactory>();
+        
+        return Services;
+    }
+
+    protected void RegisterServices(Action<IServiceCollection> action)
+    {
+        if (Provider != null)
+        {
+            throw new InvalidOperationException("Cannot register services after provider has been built.");
+        }
+        
+        action(GetServices());
     }
     
     /// <summary>
@@ -41,18 +55,6 @@ public abstract class BaseTests
     protected Faker<T> GetFactory<T>()
         where T : class
     {
-        return GetService<Faker<T>>().Clone();
+        return Resolve<Faker<T>>().Clone();
     }
-    
-    /// <summary>
-    /// Gets state
-    /// </summary>
-    protected State GetState()
-    {
-        var state = GetService<State>();
-        state.Applications.Clear();
-        return state;
-    }
-
-    
 }

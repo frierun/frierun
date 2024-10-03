@@ -1,15 +1,25 @@
 ﻿using Frierun.Server.Models;
 using Frierun.Server.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Frierun.Tests.Services;
 
 public class ParameterServiceTests : BaseTests
 {
+    public ParameterServiceTests()
+    {
+        RegisterServices(services =>
+        {
+            // clear state
+            services.AddSingleton<State>(_ => new State());
+        });
+    }
+
     [Fact]
     public void GetDefaultName_WhenNoApplications_ReturnsPackageName()
     {
         var package = GetFactory<Package>().Generate();
-        var service = GetService<ParameterService>();
+        var service = Resolve<ParameterService>();
 
         var result = service.GetDefaultName(package);
 
@@ -21,8 +31,8 @@ public class ParameterServiceTests : BaseTests
     {
         var package = GetFactory<Package>().Generate();
         var application = GetFactory<Application>().RuleFor(p => p.Name, package.Name).Generate();
-        GetState().Applications.Add(application);
-        var service = GetService<ParameterService>();
+        Resolve<State>().Applications.Add(application);
+        var service = Resolve<ParameterService>();
 
         var result = service.GetDefaultName(package);
 
@@ -35,8 +45,8 @@ public class ParameterServiceTests : BaseTests
         var volume = GetFactory<Volume>().Generate();
         var package = GetFactory<Package>().RuleFor(p => p.Volumes, () => new List<Volume> {volume}).Generate();
         var application = GetFactory<Application>().RuleFor(p => p.VolumeNames, new List<string> { $"{package.Name}-{volume.Name}" }).Generate();
-        GetState().Applications.Add(application);
-        var service = GetService<ParameterService>();
+        Resolve<State>().Applications.Add(application);
+        var service = Resolve<ParameterService>();
 
         var result = service.GetDefaultName(package);
 
@@ -46,7 +56,7 @@ public class ParameterServiceTests : BaseTests
     [Fact]
     public void GetDefaultPort_WhenNoApplications_Returns80()
     {
-        var service = GetService<ParameterService>();
+        var service = Resolve<ParameterService>();
 
         var result = service.GetDefaultPort();
 
@@ -57,8 +67,8 @@ public class ParameterServiceTests : BaseTests
     public void GetDefaultPort_WhenApplicationWithSamePortExists_ReturnsNextPort()
     {
         var application = GetFactory<Application>().RuleFor(p => p.Port, 80).Generate();
-        GetState().Applications.Add(application);
-        var service = GetService<ParameterService>();
+        Resolve<State>().Applications.Add(application);
+        var service = Resolve<ParameterService>();
         
         var result = service.GetDefaultPort();
 

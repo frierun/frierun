@@ -2,7 +2,7 @@
 
 namespace Frierun.Server.Services;
 
-public class InstallService(DockerService dockerService, State state, StateManager stateManager)
+public class InstallService(DockerService dockerService, State state, StateSerializer stateSerializer)
 {
     public async Task Handle(string name, int externalPort, Package package)
     {
@@ -11,7 +11,7 @@ public class InstallService(DockerService dockerService, State state, StateManag
         {
             var volumeNames = package.Volumes?.Select(volume => $"{name}-{volume.Name}").ToList();
             state.Applications.Add(new Application(Guid.NewGuid(), name, externalPort, volumeNames, package));
-            stateManager.Save(state);
+            stateSerializer.Save(state);
         }
     }
 }

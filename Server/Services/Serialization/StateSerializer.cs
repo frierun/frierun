@@ -4,12 +4,12 @@ using Newtonsoft.Json;
 
 namespace Frierun.Server.Services;
 
-public class StateManager
+public class StateSerializer
 {
     public string Path { get; }
     private readonly JsonSerializer _serializer;
 
-    public StateManager(PackageRegistry packageRegistry)
+    public StateSerializer(PackageRegistry packageRegistry)
     {
         _serializer = new()
         {
