@@ -2,23 +2,35 @@
 
 namespace Frierun.Server.Services;
 
-public class UninstallService(DockerService dockerService, State state, StateSerializer stateSerializer)
+public class UninstallService(DockerService dockerService, State state, StateSerializer stateSerializer, StateManager stateManager)
 {
     public async Task Handle(Application application)
     {
-        var result = await dockerService.StopContainer(application.Name);
-        if (application.Package is { Volumes: not null })
+        if (!stateManager.StartTask("uninstall"))
         {
-            foreach (var volumeName in application.VolumeNames ?? Enumerable.Empty<string>())
+            return;
+        }
+
+        try
+        {
+            var result = await dockerService.StopContainer(application.Name);
+            if (application.Package is { Volumes: not null })
             {
-                await dockerService.RemoveVolume(volumeName);
+                foreach (var volumeName in application.VolumeNames ?? Enumerable.Empty<string>())
+                {
+                    await dockerService.RemoveVolume(volumeName);
+                }
+            }
+
+            if (result)
+            {
+                state.Applications.Remove(application);
+                stateSerializer.Save(state);
             }
         }
-        
-        if (result)
+        finally
         {
-            state.Applications.Remove(application);
-            stateSerializer.Save(state);
+            stateManager.FinishTask();
         }
     }
 }

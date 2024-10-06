@@ -1,12 +1,11 @@
-import useAxios from "axios-hooks";
-import Application from "../models/Application.ts";
 import Uninstall from "./Uninstall.tsx";
+import {useGetApplications} from "../api/endpoints/applications.ts";
 
 export default function Applications() {
-    const [{data, loading, error}] = useAxios<Application[]>('/api/v1/applications')
+    const {data, isPending, isError} = useGetApplications();
 
-    if (loading) return <p>Loading...</p>
-    if (error || !data) return <p>Error!</p>
+    if (isPending) return <p>Loading...</p>
+    if (isError) return <p>Error!</p>
 
     return (
         <>
@@ -14,10 +13,10 @@ export default function Applications() {
                 Applications
             </h2>
             <ul>
-                {data.map((item) => (
+                {data.data.map((item) => (
                     <li key={item.id}>
                         {item.id}
-                        <Uninstall applicationId={item.id}/>
+                        <Uninstall applicationId={item.id} />
                     </li>
                 ))}
             </ul>

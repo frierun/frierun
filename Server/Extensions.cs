@@ -12,6 +12,7 @@ public static class Extensions
         services.AddSingleton<PackageRegistry>();
         services.AddSingleton<ParameterService>();
         services.AddSingleton<StateSerializer>();
+        services.AddSingleton<StateManager>();
         services.AddSingleton<UninstallService>();
         
         services.AddSingleton<State>(s => s.GetRequiredService<StateSerializer>().Load());

@@ -1,12 +1,11 @@
-import useAxios from "axios-hooks";
-import Package from "../models/Package.ts";
 import {Link} from "react-router-dom";
+import {useGetPackages} from "../api/endpoints/packages.ts";
 
 export default function Packages() {
-    const [{data, loading, error}] = useAxios<Package[]>('/api/v1/packages')
+    const {data, isPending, isError} = useGetPackages();
 
-    if (loading) return <p>Loading...</p>
-    if (error || !data) return <p>Error!</p>
+    if (isPending) return <p>Loading...</p>
+    if (isError) return <p>Error!</p>
 
     return (
         <>
@@ -14,7 +13,7 @@ export default function Packages() {
                 Packages
             </h2>
             <ul>
-                {data.map((item) => (
+                {data.data.map((item) => (
                     <li key={item.name}>
                         {item.name}
                         <Link to={`/packages/${item.name}`}>Install</Link>

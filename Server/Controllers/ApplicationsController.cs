@@ -4,8 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Frierun.Server.Controllers;
 
-[ApiController]
-[Route("/api/v1/applications")]
+[Route("/applications")]
 public class ApplicationsController : ControllerBase
 {
     [HttpGet]

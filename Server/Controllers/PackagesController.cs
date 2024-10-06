@@ -1,12 +1,11 @@
-﻿using Docker.DotNet.Models;
+﻿using System.Diagnostics.CodeAnalysis;
 using Frierun.Server.Models;
 using Frierun.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Frierun.Server.Controllers;
 
-[ApiController]
-[Route("/api/v1/packages")]
+[Route("/packages")]
 public class PackagesController(ILogger<PackagesController> logger) : ControllerBase
 {
     [HttpGet]
@@ -15,7 +14,7 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
         return packageRegistry.Packages;
     }
 
-    public record ParametersResponse(Package Package, string Name, int Port);
+    public record ParametersResponse(Package Package, [NotNull] string Name, int Port);
 
     /// <summary>
     /// Gets package and default parameters
