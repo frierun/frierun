@@ -18,6 +18,9 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 import type { InstallRequest, Package, ParametersResponse } from "../schemas";
+import { customFetch } from "../../custom-fetch";
+
+type SecondParameter<T extends (...args: any) => any> = Parameters<T>[1];
 
 export type getPackagesResponse = {
   data: Package[];
@@ -31,13 +34,10 @@ export const getGetPackagesUrl = () => {
 export const getPackages = async (
   options?: RequestInit,
 ): Promise<getPackagesResponse> => {
-  const res = await fetch(getGetPackagesUrl(), {
+  return customFetch<Promise<getPackagesResponse>>(getGetPackagesUrl(), {
     ...options,
     method: "GET",
   });
-  const data = await res.json();
-
-  return { status: res.status, data };
 };
 
 export const getGetPackagesQueryKey = () => {
@@ -51,15 +51,15 @@ export const getGetPackagesQueryOptions = <
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getPackages>>, TError, TData>
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetPackagesQueryKey();
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getPackages>>> = ({
     signal,
-  }) => getPackages({ signal, ...fetchOptions });
+  }) => getPackages({ signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getPackages>>,
@@ -88,7 +88,7 @@ export function useGetPackages<
       >,
       "initialData"
     >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): DefinedUseQueryResult<TData, TError> & { queryKey: QueryKey };
 export function useGetPackages<
   TData = Awaited<ReturnType<typeof getPackages>>,
@@ -105,7 +105,7 @@ export function useGetPackages<
       >,
       "initialData"
     >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey };
 export function useGetPackages<
   TData = Awaited<ReturnType<typeof getPackages>>,
@@ -114,7 +114,7 @@ export function useGetPackages<
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getPackages>>, TError, TData>
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 export function useGetPackages<
@@ -124,7 +124,7 @@ export function useGetPackages<
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getPackages>>, TError, TData>
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetPackagesQueryOptions(options);
 
@@ -150,13 +150,13 @@ export const getPackagesIdParameters = async (
   id: string,
   options?: RequestInit,
 ): Promise<getPackagesIdParametersResponse> => {
-  const res = await fetch(getGetPackagesIdParametersUrl(id), {
-    ...options,
-    method: "GET",
-  });
-  const data = await res.json();
-
-  return { status: res.status, data };
+  return customFetch<Promise<getPackagesIdParametersResponse>>(
+    getGetPackagesIdParametersUrl(id),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
 };
 
 export const getGetPackagesIdParametersQueryKey = (id: string) => {
@@ -176,17 +176,18 @@ export const getGetPackagesIdParametersQueryOptions = <
         TData
       >
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
 ) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
     queryOptions?.queryKey ?? getGetPackagesIdParametersQueryKey(id);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getPackagesIdParameters>>
-  > = ({ signal }) => getPackagesIdParameters(id, { signal, ...fetchOptions });
+  > = ({ signal }) =>
+    getPackagesIdParameters(id, { signal, ...requestOptions });
 
   return {
     queryKey,
@@ -226,7 +227,7 @@ export function useGetPackagesIdParameters<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
 ): DefinedUseQueryResult<TData, TError> & { queryKey: QueryKey };
 export function useGetPackagesIdParameters<
@@ -250,7 +251,7 @@ export function useGetPackagesIdParameters<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey };
 export function useGetPackagesIdParameters<
@@ -266,7 +267,7 @@ export function useGetPackagesIdParameters<
         TData
       >
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -283,7 +284,7 @@ export function useGetPackagesIdParameters<
         TData
       >
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetPackagesIdParametersQueryOptions(id, options);
@@ -311,15 +312,15 @@ export const postPackagesId = async (
   installRequest: InstallRequest,
   options?: RequestInit,
 ): Promise<postPackagesIdResponse> => {
-  const res = await fetch(getPostPackagesIdUrl(id), {
-    ...options,
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(installRequest),
-  });
-  const data = await res.json();
-
-  return { status: res.status, data };
+  return customFetch<Promise<postPackagesIdResponse>>(
+    getPostPackagesIdUrl(id),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(installRequest),
+    },
+  );
 };
 
 export const getPostPackagesIdMutationOptions = <
@@ -332,14 +333,14 @@ export const getPostPackagesIdMutationOptions = <
     { id: string; data: InstallRequest },
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postPackagesId>>,
   TError,
   { id: string; data: InstallRequest },
   TContext
 > => {
-  const { mutation: mutationOptions, fetch: fetchOptions } = options ?? {};
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postPackagesId>>,
@@ -347,7 +348,7 @@ export const getPostPackagesIdMutationOptions = <
   > = (props) => {
     const { id, data } = props ?? {};
 
-    return postPackagesId(id, data, fetchOptions);
+    return postPackagesId(id, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -369,7 +370,7 @@ export const usePostPackagesId = <
     { id: string; data: InstallRequest },
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
   Awaited<ReturnType<typeof postPackagesId>>,
   TError,

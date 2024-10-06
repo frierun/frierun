@@ -18,6 +18,9 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 import type { Application } from "../schemas";
+import { customFetch } from "../../custom-fetch";
+
+type SecondParameter<T extends (...args: any) => any> = Parameters<T>[1];
 
 export type getApplicationsResponse = {
   data: Application[];
@@ -31,13 +34,13 @@ export const getGetApplicationsUrl = () => {
 export const getApplications = async (
   options?: RequestInit,
 ): Promise<getApplicationsResponse> => {
-  const res = await fetch(getGetApplicationsUrl(), {
-    ...options,
-    method: "GET",
-  });
-  const data = await res.json();
-
-  return { status: res.status, data };
+  return customFetch<Promise<getApplicationsResponse>>(
+    getGetApplicationsUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
 };
 
 export const getGetApplicationsQueryKey = () => {
@@ -51,15 +54,15 @@ export const getGetApplicationsQueryOptions = <
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getApplications>>, TError, TData>
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetApplicationsQueryKey();
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getApplications>>> = ({
     signal,
-  }) => getApplications({ signal, ...fetchOptions });
+  }) => getApplications({ signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApplications>>,
@@ -88,7 +91,7 @@ export function useGetApplications<
       >,
       "initialData"
     >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): DefinedUseQueryResult<TData, TError> & { queryKey: QueryKey };
 export function useGetApplications<
   TData = Awaited<ReturnType<typeof getApplications>>,
@@ -105,7 +108,7 @@ export function useGetApplications<
       >,
       "initialData"
     >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey };
 export function useGetApplications<
   TData = Awaited<ReturnType<typeof getApplications>>,
@@ -114,7 +117,7 @@ export function useGetApplications<
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getApplications>>, TError, TData>
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 export function useGetApplications<
@@ -124,7 +127,7 @@ export function useGetApplications<
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getApplications>>, TError, TData>
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetApplicationsQueryOptions(options);
 
@@ -150,17 +153,17 @@ export const deleteApplicationsId = async (
   id: string,
   options?: RequestInit,
 ): Promise<deleteApplicationsIdResponse> => {
-  const res = await fetch(getDeleteApplicationsIdUrl(id), {
-    ...options,
-    method: "DELETE",
-  });
-  const data = await res.json();
-
-  return { status: res.status, data };
+  return customFetch<Promise<deleteApplicationsIdResponse>>(
+    getDeleteApplicationsIdUrl(id),
+    {
+      ...options,
+      method: "DELETE",
+    },
+  );
 };
 
 export const getDeleteApplicationsIdMutationOptions = <
-  TError = unknown,
+  TError = void,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -169,14 +172,14 @@ export const getDeleteApplicationsIdMutationOptions = <
     { id: string },
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof deleteApplicationsId>>,
   TError,
   { id: string },
   TContext
 > => {
-  const { mutation: mutationOptions, fetch: fetchOptions } = options ?? {};
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof deleteApplicationsId>>,
@@ -184,7 +187,7 @@ export const getDeleteApplicationsIdMutationOptions = <
   > = (props) => {
     const { id } = props ?? {};
 
-    return deleteApplicationsId(id, fetchOptions);
+    return deleteApplicationsId(id, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -194,10 +197,10 @@ export type DeleteApplicationsIdMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteApplicationsId>>
 >;
 
-export type DeleteApplicationsIdMutationError = unknown;
+export type DeleteApplicationsIdMutationError = void;
 
 export const useDeleteApplicationsId = <
-  TError = unknown,
+  TError = void,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -206,7 +209,7 @@ export const useDeleteApplicationsId = <
     { id: string },
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
   Awaited<ReturnType<typeof deleteApplicationsId>>,
   TError,

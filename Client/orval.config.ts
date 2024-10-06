@@ -10,6 +10,12 @@
             baseUrl: '/api/v1',
             prettier: true,
             clean: ['src/api/endpoints', 'src/api/schemas'],
+            override: {
+                mutator: {
+                    path: './src/custom-fetch.ts',
+                    name: 'customFetch',
+                },
+            },
         }
     },
 };

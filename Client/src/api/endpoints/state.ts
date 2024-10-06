@@ -15,6 +15,9 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 import type { State } from "../schemas";
+import { customFetch } from "../../custom-fetch";
+
+type SecondParameter<T extends (...args: any) => any> = Parameters<T>[1];
 
 export type getStateResponse = {
   data: State;
@@ -28,13 +31,10 @@ export const getGetStateUrl = () => {
 export const getState = async (
   options?: RequestInit,
 ): Promise<getStateResponse> => {
-  const res = await fetch(getGetStateUrl(), {
+  return customFetch<Promise<getStateResponse>>(getGetStateUrl(), {
     ...options,
     method: "GET",
   });
-  const data = await res.json();
-
-  return { status: res.status, data };
 };
 
 export const getGetStateQueryKey = () => {
@@ -48,15 +48,15 @@ export const getGetStateQueryOptions = <
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getState>>, TError, TData>
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetStateQueryKey();
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getState>>> = ({
     signal,
-  }) => getState({ signal, ...fetchOptions });
+  }) => getState({ signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getState>>,
@@ -85,7 +85,7 @@ export function useGetState<
       >,
       "initialData"
     >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): DefinedUseQueryResult<TData, TError> & { queryKey: QueryKey };
 export function useGetState<
   TData = Awaited<ReturnType<typeof getState>>,
@@ -102,7 +102,7 @@ export function useGetState<
       >,
       "initialData"
     >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey };
 export function useGetState<
   TData = Awaited<ReturnType<typeof getState>>,
@@ -111,7 +111,7 @@ export function useGetState<
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getState>>, TError, TData>
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 export function useGetState<
@@ -121,7 +121,7 @@ export function useGetState<
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getState>>, TError, TData>
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetStateQueryOptions(options);
 

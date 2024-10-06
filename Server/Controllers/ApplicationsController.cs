@@ -14,6 +14,8 @@ public class ApplicationsController : ControllerBase
     }
     
     [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status202Accepted)]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(void))]
     public IActionResult Uninstall(Guid id, State state, UninstallService uninstallService)
     {
         var application = state.Applications.FirstOrDefault(a => a.Id == id);
