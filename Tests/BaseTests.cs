@@ -1,6 +1,7 @@
-﻿using Bogus;
+﻿using System.Reflection;
+using Bogus;
 using Frierun.Server;
-using Frierun.Server.Models;
+using Frierun.Server.Resources;
 using Frierun.Tests.Factories;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -31,10 +32,22 @@ public abstract class BaseTests
         Services = new ServiceCollection();
         Services.AddLogging();
         Services.RegisterServices();
-        
-        Services.AddSingleton<Faker<Application>, ApplicationFactory>();
-        Services.AddSingleton<Faker<Package>, PackageFactory>();
-        Services.AddSingleton<Faker<Volume>, VolumeFactory>();
+
+        // find all factories
+        foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
+        {
+            var iterator = type;
+            while (iterator != null)
+            {
+                if (iterator.IsGenericType && iterator.GetGenericTypeDefinition() == typeof(Faker<>))
+                {
+                    Services.AddSingleton(iterator, type);
+                    break;
+                }
+                
+                iterator = iterator.BaseType;
+            }
+        }
         
         return Services;
     }

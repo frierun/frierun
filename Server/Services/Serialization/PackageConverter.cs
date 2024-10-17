@@ -1,32 +1,26 @@
-﻿using Frierun.Server.Models;
-using Newtonsoft.Json;
-using JsonSerializer = Newtonsoft.Json.JsonSerializer;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using Frierun.Server.Models;
+using Frierun.Server.Resources;
 
 namespace Frierun.Server.Services;
 
 public class PackageConverter(PackageRegistry packageRegistry) : JsonConverter<Package>
 {
     /// <inheritdoc />
-    public override void WriteJson(JsonWriter writer, Package? value, JsonSerializer serializer)
+    public override Package? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (value == null)
-        {
-            writer.WriteNull();
-            return;
-        }
-        
-        writer.WriteValue(value.Name);
-    }
-
-    /// <inheritdoc />
-    public override Package? ReadJson(JsonReader reader, Type objectType, Package? existingValue, bool hasExistingValue,
-        JsonSerializer serializer)
-    {
-        if (reader.TokenType != JsonToken.String || !(reader.Value is string name))
+        var name = reader.GetString();
+        if (name is null)
         {
             return null;
         }
-        
         return packageRegistry.Find(name);
+    }
+
+    /// <inheritdoc />
+    public override void Write(Utf8JsonWriter writer, Package value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.Name);
     }
 }

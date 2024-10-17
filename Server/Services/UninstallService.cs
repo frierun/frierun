@@ -1,4 +1,5 @@
 ﻿using Frierun.Server.Models;
+using Frierun.Server.Resources;
 
 namespace Frierun.Server.Services;
 
@@ -13,20 +14,18 @@ public class UninstallService(DockerService dockerService, State state, StateSer
 
         try
         {
-            var result = await dockerService.StopContainer(application.Name);
-            if (application.Package is { Volumes: not null })
+            foreach (var container in application.Resources?.OfType<Container>() ?? Enumerable.Empty<Container>())
             {
-                foreach (var volumeName in application.VolumeNames ?? Enumerable.Empty<string>())
-                {
-                    await dockerService.RemoveVolume(volumeName);
-                }
+                await dockerService.StopContainer(container.Name);
+            }
+            
+            foreach (var volume in application.Resources?.OfType<Volume>() ?? Enumerable.Empty<Volume>())
+            {
+                await dockerService.RemoveVolume(volume.Name);
             }
 
-            if (result)
-            {
-                state.Applications.Remove(application);
-                stateSerializer.Save(state);
-            }
+            state.Applications.Remove(application);
+            stateSerializer.Save(state);
         }
         finally
         {

@@ -4,13 +4,10 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { Volume } from "./volume";
+import type { ResourceDefinition } from "./resourceDefinition";
 
 export interface Package {
-  imageName: string;
   name: string;
-  port: number;
-  requireDocker: boolean;
-  /** @nullable */
-  volumes?: Volume[] | null;
+  resources: ResourceDefinition[];
+  url: string;
 }

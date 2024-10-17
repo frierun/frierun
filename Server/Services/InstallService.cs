@@ -1,10 +1,16 @@
 ﻿using Frierun.Server.Models;
+using Frierun.Server.Resources;
 
 namespace Frierun.Server.Services;
 
-public class InstallService(DockerService dockerService, State state, StateSerializer stateSerializer, StateManager stateManager)
+public class InstallService(
+    State state,
+    StateSerializer stateSerializer,
+    StateManager stateManager,
+    ILogger<InstallService> logger
+)
 {
-    public async Task Handle(string name, int externalPort, Package package)
+    public void Handle(ExecutionPlan executionPlan)
     {
         if (!stateManager.StartTask("install"))
         {
@@ -13,13 +19,32 @@ public class InstallService(DockerService dockerService, State state, StateSeria
 
         try
         {
-            var result = await dockerService.StartContainer(name, externalPort, package);
-            if (result)
+            var resources = new List<Resource>();
+            foreach (var resourceDefinition in executionPlan.ResourcesToInstall)
             {
-                var volumeNames = package.Volumes?.Select(volume => $"{name}-{volume.Name}").ToList();
-                state.Applications.Add(new Application(Guid.NewGuid(), name, externalPort, volumeNames, package));
-                stateSerializer.Save(state);
+                var provider = executionPlan.Providers[resourceDefinition];
+
+                var resource = provider.Install(
+                    executionPlan,
+                    provider.GetParameters(executionPlan, resourceDefinition),
+                    resourceDefinition
+                ) as Resource;
+                if (resource == null)
+                {
+                    logger.LogError("Provider {ProviderType} failed to create resource",
+                        resourceDefinition.ResourceType);
+                    return;
+                }
+
+                resources.Add(resource);
             }
+
+            state.Applications.Add(new Application(Guid.NewGuid(), executionPlan.Name, resources, executionPlan.Package));
+            stateSerializer.Save(state);
+        }
+        catch (Exception e)
+        {
+            logger.LogError("Failed to install package {PackageName}: {ErrorMessage}", executionPlan.Package.Name, e.Message);
         }
         finally
         {

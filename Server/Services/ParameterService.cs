@@ -1,4 +1,5 @@
 ﻿using Frierun.Server.Models;
+using Frierun.Server.Resources;
 
 namespace Frierun.Server.Services;
 
@@ -25,11 +26,16 @@ public class ParameterService(State state)
         {
             return false;
         }
+        
+        if (state.Resources.OfType<Container>().Any(container => container.Name == name))
+        {
+            return false;
+        }
 
-        foreach (var volume in package.Volumes ?? Enumerable.Empty<Volume>())
+        foreach (var volume in package.Resources.OfType<VolumeDefinition>())
         {
             var volumeName = $"{name}-{volume.Name}";
-            if (state.Applications.Any(application => application.VolumeNames?.Contains(volumeName) == true))
+            if (state.Resources.OfType<Volume>().Any(installedVolume => installedVolume.Name == volumeName))
             {
                 return false;
             }
@@ -45,7 +51,7 @@ public class ParameterService(State state)
     {
         var port = 80;
         var count = 0;
-        while (state.Applications.Any(application => application.Port == port))
+        while (state.Resources.OfType<HttpEndpoint>().Any(httpEndpoint => httpEndpoint.Port == port))
         {
             port = 8080 + count;
             count++;

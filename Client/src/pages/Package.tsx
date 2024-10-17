@@ -16,7 +16,7 @@ export default function Package() {
             <h2 className="text-3xl font-bold underline">
                 Install {name}
             </h2>
-            <InstallForm defaultName={data.data.name} defaultPort={data.data.port} pkg={data.data.package} />
+            <InstallForm response={data.data} />
         </>
     );
 } 

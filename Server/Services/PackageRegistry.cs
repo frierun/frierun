@@ -1,9 +1,10 @@
 ﻿using Frierun.Server.Models;
+using Frierun.Server.Resources;
 using Newtonsoft.Json;
 
 namespace Frierun.Server.Services;
 
-public class PackageRegistry(ILogger<PackageRegistry> logger)
+public class PackageRegistry(PackageSerializer packageSerializer)
 {
     public IList<Package> Packages { get; } = [];
 
@@ -12,26 +13,9 @@ public class PackageRegistry(ILogger<PackageRegistry> logger)
     /// </summary>
     public void Load()
     {
-        var assemblyLocation = System.Reflection.Assembly.GetEntryAssembly()?.Location ??
-                               throw new InvalidOperationException();
-        var assemblyDirectory = Path.GetDirectoryName(assemblyLocation) ??
-                                throw new InvalidOperationException();
-        var packagesDirectory = Path.Combine(assemblyDirectory, "Packages");
-
-        if (Directory.Exists(packagesDirectory))
+        foreach (var package in packageSerializer.Load())
         {
-            foreach (var fileName in Directory.EnumerateFiles(packagesDirectory, "*.json"))
-            {
-                var package = JsonConvert.DeserializeObject<Package>(File.ReadAllText(fileName));
-                if (package == null)
-                {
-                    logger.LogWarning("Failed to load package from {FileName}", fileName);
-                }
-                else
-                {
-                    Packages.Add(package);
-                }
-            }
+            Packages.Add(package);
         }
     }
 

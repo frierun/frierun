@@ -1,18 +1,16 @@
 ﻿using Bogus;
-using Frierun.Server.Models;
 using Frierun.Server.Resources;
 
 namespace Frierun.Tests.Factories;
 
-public sealed class ApplicationFactory : Faker<Application>
+public sealed class ContainerFactory : Faker<Container>
 {
     /// <inheritdoc />
-    public ApplicationFactory(Faker<Package> packageFactory, Faker<Container> containerFactory)
+    public ContainerFactory(Faker<Volume> volumeFactory)
     {
         StrictMode(true);
         this.SkipConstructor();
         RuleFor(p => p.Id, f => f.Random.Guid());
         RuleFor(p => p.Name, f => f.Lorem.Word());
-        RuleFor(p => p.Package, _ => packageFactory.Generate());
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Docker.DotNet;
 using Docker.DotNet.Models;
-using Frierun.Server.Models;
+using Frierun.Server.Resources;
 
 namespace Frierun.Server.Services;
 
@@ -11,61 +11,20 @@ public class DockerService(ILogger<DockerService> logger)
     /// <summary>
     /// Starts container with specified name, image and port
     /// </summary>
-    public async Task<bool> StartContainer(string containerName, int externalPort, Package package)
+    public async Task<bool> StartContainer(CreateContainerParameters dockerParameters)
     {
-        logger.LogInformation("Starting container {ContainerName} from package {PackageName}", containerName, package.Name);
+        logger.LogInformation("Starting container {ContainerName}", dockerParameters.Name);
 
         await _client.Images.CreateImageAsync(
             new ImagesCreateParameters
             {
-                FromImage = package.ImageName
+                FromImage = dockerParameters.Image
             },
             null,
             new Progress<JSONMessage>()
         );
-
-        var mounts = new List<Mount>();
-        if (package.Volumes != null)
-        {
-            mounts.AddRange(package.Volumes.Select(volume => new Mount
-            {
-                Source = $"{containerName}-{volume.Name}",
-                Target = volume.Path,
-                Type = "volume"
-            }));
-        }
-        if (package.RequireDocker)
-        {
-            mounts.Add(new Mount
-            {
-                Source = "/var/run/docker.sock",
-                Target = "/var/run/docker.sock",
-                Type = "bind"
-            });
-        }
-
-        var result = await _client.Containers.CreateContainerAsync(new CreateContainerParameters
-        {
-            Image = package.ImageName,
-            Name = containerName,
-            HostConfig = new HostConfig
-            {
-                PortBindings = new Dictionary<string, IList<PortBinding>>
-                {
-                    {
-                        $"{package.Port}/tcp",
-                        new List<PortBinding>
-                        {
-                            new()
-                            {
-                                HostPort = externalPort.ToString()
-                            }
-                        }
-                    }
-                },
-                Mounts = mounts,
-            },
-        });
+        
+        var result = await _client.Containers.CreateContainerAsync(dockerParameters);
 
         logger.LogInformation("Started container {ContainerId}", result.ID);
 
@@ -117,8 +76,17 @@ public class DockerService(ILogger<DockerService> logger)
     /// <summary>
     /// Removes volume by name
     /// </summary>
-    public async Task RemoveVolume(string volumeName)
+    public async Task<bool> RemoveVolume(string volumeName)
     {
-        await _client.Volumes.RemoveAsync(volumeName, true);
+        try
+        {
+            await _client.Volumes.RemoveAsync(volumeName, true);            
+        } catch (Exception e)
+        {
+            logger.LogError(e, "Failed to remove volume {VolumeName}", volumeName);
+            return false;
+        }
+
+        return true;
     }
 }

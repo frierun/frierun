@@ -1,12 +1,19 @@
 ﻿{
   "Name": "homer",
   "Url": "https://github.com/bastienwirtz/homer",
-  "ImageName": "b4bz/homer:latest",
-  "Port": 8080,
-  "Volumes": [
+  "Resources": [
     {
+      "Type": "Container",
+      "ImageName": "b4bz/homer:latest"
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 8080
+    },
+    {
+      "Type": "Volume",
       "Name": "assets",
       "Path": "/www/assets"
     }
-  ]
+  ]  
 }

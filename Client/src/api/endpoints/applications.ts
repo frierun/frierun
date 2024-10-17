@@ -17,7 +17,7 @@ import type {
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
-import type { Application } from "../schemas";
+import type { Application, ProblemDetails } from "../schemas";
 import { customFetch } from "../../custom-fetch";
 
 type SecondParameter<T extends (...args: any) => any> = Parameters<T>[1];
@@ -163,7 +163,7 @@ export const deleteApplicationsId = async (
 };
 
 export const getDeleteApplicationsIdMutationOptions = <
-  TError = void,
+  TError = ProblemDetails,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -197,10 +197,10 @@ export type DeleteApplicationsIdMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteApplicationsId>>
 >;
 
-export type DeleteApplicationsIdMutationError = void;
+export type DeleteApplicationsIdMutationError = ProblemDetails;
 
 export const useDeleteApplicationsId = <
-  TError = void,
+  TError = ProblemDetails,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<

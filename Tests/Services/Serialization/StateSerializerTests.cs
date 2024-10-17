@@ -1,4 +1,5 @@
 using Frierun.Server.Models;
+using Frierun.Server.Resources;
 using Frierun.Server.Services;
 
 namespace Frierun.Tests.Services;
@@ -58,6 +59,6 @@ public class StateSerializerTests : BaseTests
 
         var content = File.ReadAllText(stateManager.Path);
         Assert.NotNull(application.Package);
-        Assert.DoesNotContain(application.Package.ImageName, content);
+        Assert.DoesNotContain(application.Package.Url, content);
     }
 }

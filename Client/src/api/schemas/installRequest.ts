@@ -4,8 +4,9 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { StringStringKeyValuePair } from "./stringStringKeyValuePair";
 
 export interface InstallRequest {
   name: string;
-  port: number;
+  parameters: StringStringKeyValuePair[][];
 }

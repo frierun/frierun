@@ -5,7 +5,6 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface Volume {
-  name: string;
-  path: string;
+export interface Resource {
+  id: string;
 }

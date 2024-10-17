@@ -1,6 +1,13 @@
-﻿namespace Frierun.Server.Models;
+﻿using Frierun.Server.Resources;
+using Newtonsoft.Json;
 
-public class State
+namespace Frierun.Server.Models;
+
+public record State
 {
-    public IList<Application> Applications { get; } = new List<Application>();
+    public IList<Application> Applications { get; init; } = [];
+
+    [JsonIgnore]
+    public IEnumerable<Resource> Resources =>
+        Applications.SelectMany(application => application.Resources ?? Array.Empty<Resource>());
 }

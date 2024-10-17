@@ -1,28 +1,29 @@
 ﻿using System.Runtime.InteropServices;
+using System.Text.Json;
 using Frierun.Server.Models;
-using Newtonsoft.Json;
+using Frierun.Server.Resources;
 
 namespace Frierun.Server.Services;
 
 public class StateSerializer
 {
     public string Path { get; }
-    private readonly JsonSerializer _serializer;
+    private readonly JsonSerializerOptions _serializerOptions;
 
     public StateSerializer(PackageRegistry packageRegistry)
     {
-        _serializer = new()
+        _serializerOptions = new JsonSerializerOptions
         {
-            Formatting = Formatting.Indented,
-            ContractResolver = new ContractResolver(packageRegistry)
-        };        
-        
+            WriteIndented = true,
+            Converters = { new PackageConverter(packageRegistry) },
+        };
+
         var localData = Environment.GetEnvironmentVariable(
             RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? "LocalAppData"
                 : "Home"
         );
-        
+
         var directory = System.IO.Path.Combine(localData ?? "", "Frierun");
         if (!Directory.Exists(directory))
         {
@@ -41,10 +42,9 @@ public class StateSerializer
         {
             return new State();
         }
-
-        using StreamReader file = File.OpenText(Path);
-        JsonReader reader = new JsonTextReader(file);
-        return _serializer.Deserialize<State>(reader) ?? new State();
+        
+        var json = File.ReadAllText(Path);
+        return JsonSerializer.Deserialize<State>(json, _serializerOptions) ?? new State();
     }
 
     /// <summary>
@@ -52,7 +52,7 @@ public class StateSerializer
     /// </summary>
     public void Save(State state)
     {
-        using StreamWriter file = File.CreateText(Path);
-        _serializer.Serialize(file, state);
+        using Stream stream = File.Open(Path, FileMode.Create, FileAccess.Write);
+        JsonSerializer.Serialize(stream, state, _serializerOptions);
     }
 }

@@ -5,12 +5,12 @@
  * OpenAPI spec version: 1.0
  */
 import type { Package } from "./package";
+import type { Resource } from "./resource";
 
 export interface Application {
   id: string;
   name: string;
   package?: Package;
-  port: number;
   /** @nullable */
-  volumeNames?: string[] | null;
+  resources?: Resource[] | null;
 }

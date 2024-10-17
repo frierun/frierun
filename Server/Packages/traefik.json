@@ -1,0 +1,16 @@
+﻿{
+  "Name": "traefik",
+  "Url": "https://doc.traefik.io/traefik/getting-started/install-traefik/",
+  "Resources": [
+    {
+      "Type": "Container",
+      "ImageName": "traefik:v3.1",
+      "Command": "--api.insecure=true --providers.docker",
+      "RequireDocker": true
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 80
+    }
+  ]  
+}

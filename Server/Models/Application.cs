@@ -1,9 +1,10 @@
-﻿namespace Frierun.Server.Models;
+﻿using Frierun.Server.Resources;
+
+namespace Frierun.Server.Models;
 
 public record Application(
     Guid Id,
     string Name,
-    int Port,
-    IList<string>? VolumeNames = null,
+    IReadOnlyList<Resource>? Resources = null,
     Package? Package = null
 );

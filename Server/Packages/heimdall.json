@@ -1,10 +1,17 @@
 ﻿{
   "Name": "heimdall",
   "Url": "https://hub.docker.com/r/linuxserver/heimdall/",
-  "ImageName": "lscr.io/linuxserver/heimdall:latest",
-  "Port": 80,
-  "Volumes": [
+  "Resources": [
     {
+      "Type": "Container",
+      "ImageName": "lscr.io/linuxserver/heimdall:latest"
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 80
+    },
+    {
+      "Type": "Volume",
       "Name": "config",
       "Path": "/config"
     }

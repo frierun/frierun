@@ -1,9 +1,9 @@
-﻿namespace Frierun.Server.Models;
+﻿using Frierun.Server.Resources;
+
+namespace Frierun.Server.Models;
 
 public record Package(
     string Name,
-    string ImageName,
-    int Port,
-    IList<Volume>? Volumes = null,
-    bool RequireDocker = false
+    string Url,
+    IList<ResourceDefinition> Resources
 );

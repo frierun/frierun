@@ -1,5 +1,5 @@
 ﻿using Bogus;
-using Frierun.Server.Models;
+using Frierun.Server.Resources;
 using Frierun.Server.Services;
 
 namespace Frierun.Tests.Factories;
@@ -13,6 +13,5 @@ public sealed class VolumeFactory : Faker<Volume>
         StrictMode(true);
         this.SkipConstructor();
         RuleFor(p => p.Name, f => f.Lorem.Word());
-        RuleFor(p => p.Path, f => f.System.DirectoryPath());
     }
 }

@@ -5,9 +5,10 @@
  * OpenAPI spec version: 1.0
  */
 import type { Package } from "./package";
+import type { StringStringKeyValuePair } from "./stringStringKeyValuePair";
 
 export interface ParametersResponse {
   name: string;
   package: Package;
-  port: number;
+  parameters: StringStringKeyValuePair[][];
 }

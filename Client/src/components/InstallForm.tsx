@@ -1,33 +1,27 @@
-﻿import {useContext, useEffect, useState} from "react";
+﻿import {useContext, useState} from "react";
 import StateContext from "../providers/StateContext.tsx";
-import {Package} from "../api/schemas";
+import {ParametersResponse} from "../api/schemas";
 import {getGetApplicationsQueryKey} from "../api/endpoints/applications.ts";
 import {usePostPackagesId} from "../api/endpoints/packages.ts";
 import {useQueryClient} from "@tanstack/react-query";
 import {useNavigate} from "react-router-dom";
+import ResourceParameters from "./ResourceParameters.tsx";
 
 type Props = {
-    defaultName: string;
-    defaultPort: number;
-    pkg: Package;
+    response: ParametersResponse;
 }
 
-export default function InstallForm({pkg, defaultName, defaultPort}: Props) {
+export default function InstallForm({response}: Props) {
     const {waitForReady} = useContext(StateContext);
     const {mutateAsync, isPending} = usePostPackagesId();
     const queryClient = useQueryClient()
-    const navigate = useNavigate();    
-    
-    const [name, setName] = useState(defaultName);
-    const [port, setPort] = useState(defaultPort);
+    const navigate = useNavigate();
 
-    useEffect(() => {
-        setName(defaultName);
-        setPort(defaultPort);
-    }, [defaultName, defaultPort]);
+    const [name, setName] = useState(response.name);
+    const [parameters, setParameters] = useState(response.parameters);
 
     const install = () => {
-        mutateAsync({id: pkg.name, data: {name, port}})
+        mutateAsync({id: response.package.name, data: {name: name, parameters: parameters}})
             .then(waitForReady)
             .then(() => queryClient.invalidateQueries({queryKey: getGetApplicationsQueryKey()}))
             .then(() => navigate('/'));
@@ -35,18 +29,33 @@ export default function InstallForm({pkg, defaultName, defaultPort}: Props) {
 
     return (
         <>
-            <div>
-                <label>
-                    Name:
-                    <input type="text" value={name} onChange={(e) => setName(e.target.value)}/>
-                </label>
+            <div className={'m-2'}>
+                <div>
+                    resource: Package
+                </div>
+                <div>
+                    <label>
+                        name:
+                        <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                    </label>
+                </div>
             </div>
-            <div>
-                <label>
-                    Port:
-                    <input type="number" value={port} onChange={(e) => setPort(parseInt(e.target.value))}/>
-                </label>
-            </div>
+            {response.package.resources.map((resource, index) => (
+                <ResourceParameters
+                    key={index}
+                    resource={resource}
+                    parameters={parameters[index]}
+                    onParametersChange={(newParameters) =>
+                        setParameters(parameters => parameters.map(
+                            (p, i) => i === index ? newParameters : p
+                        ))
+                    }
+                />
+            ))}
             <button onClick={install} disabled={isPending}>
                 Install
             </button>
