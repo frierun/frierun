@@ -27,7 +27,9 @@ public class ExecutionPlan(State state, Provider provider, ExecutionPlan? parent
 
     public bool Validate()
     {
-        return Provider.Validate(this);
+        if (Provider.Validate(this)) return true;
+        
+        return Children.All(child => child.Validate());
     }
     
     public Resource Install()

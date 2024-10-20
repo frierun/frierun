@@ -23,6 +23,33 @@ export default function ExecutionPlan({executionPlan, onChange}: Props) {
         onChange({children, parameters});
     }, [children, parameters]);
 
+    if (executionPlan.typeName === 'SelectorProvider') {
+        return (
+            <div className={'m-2'}>
+                <label>
+                    provider:
+                    <select value={parameters.selected} onChange={e => setParameters({selected: e.target.value})}>
+                        {executionPlan.children.map((child, index) => (
+                            <option key={child.typeName} value={index}>{child.typeName}</option>
+                        ))}
+                    </select>
+                </label>
+                <div className={'m-2'}>
+                    {executionPlan.children.map((child, index) => (
+                        <div key={index} className={index.toString() === parameters.selected ? '' : 'hidden'}>
+                            <ExecutionPlan
+                                executionPlan={child}
+                                onChange={
+                                    (result) => setChildren((oldChildren) => oldChildren.map((c, i) => i === index ? result : c))
+                                }
+                            />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className={'m-2'}>
             <div>
@@ -52,7 +79,7 @@ export default function ExecutionPlan({executionPlan, onChange}: Props) {
                         executionPlan={child}
                         onChange={
                             (result) => setChildren((oldChildren) => oldChildren.map((c, i) => i === index ? result : c))
-                    }
+                        }
                     />
                 ))}
             </div>

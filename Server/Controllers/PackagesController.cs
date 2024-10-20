@@ -88,7 +88,7 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
         var executionPlan = executionService.Create(package);
         FromRequest(executionPlan, data.ExecutionPlan);
 
-        if (!executionService.Validate(executionPlan))
+        if (!executionPlan.Validate())
         {
             return BadRequest();
         }

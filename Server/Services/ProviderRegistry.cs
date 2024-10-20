@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Models;
+﻿using Docker.DotNet.Models;
+using Frierun.Server.Models;
 using Frierun.Server.Providers;
 using Frierun.Server.Resources;
 
@@ -6,7 +7,7 @@ namespace Frierun.Server.Services;
 
 public class ProviderRegistry
 {
-    private readonly Dictionary<Type, object> _providers = new();
+    private readonly Dictionary<Type, IList<Provider>> _providers = new();
 
     public ProviderRegistry(
         State state,
@@ -17,11 +18,11 @@ public class ProviderRegistry
         TraefikHttpEndpointProvider traefikHttpEndpointProvider
     )
     {
-        _providers.Add(typeof(Application), applicationProvider);
-        _providers.Add(typeof(Container), containerProvider);
-        _providers.Add(typeof(HttpEndpoint), portHttpEndpointProvider);
-        _providers.Add(typeof(TraefikHttpEndpointProvider), traefikHttpEndpointProvider);
-        _providers.Add(typeof(Volume), volumeProvider);
+        Add(typeof(Application), applicationProvider);
+        Add(typeof(Container), containerProvider);
+        Add(typeof(HttpEndpoint), portHttpEndpointProvider);
+        Add(typeof(TraefikHttpEndpoint), traefikHttpEndpointProvider);
+        Add(typeof(Volume), volumeProvider);
         
         if (state.Applications.Any(a => a.Package?.Name == "traefik"))
         {
@@ -29,13 +30,28 @@ public class ProviderRegistry
         }
     }
 
-    public void UseTraefik()
+    private void Add(Type resourceType, Provider provider)
     {
-        _providers[typeof(HttpEndpoint)] = _providers[typeof(TraefikHttpEndpointProvider)];
+        if (!_providers.ContainsKey(resourceType))
+        {
+            _providers[resourceType] = new List<Provider>();
+        }
+        
+        _providers[resourceType].Add(provider);
     }
 
-    public Provider? Get(Type resourceType)
+    public void UseTraefik()
     {
-        return _providers[resourceType] as Provider;
+        var traefikHttpEndpointProvider = Get(typeof(TraefikHttpEndpoint)).FirstOrDefault();
+        if (traefikHttpEndpointProvider == null)
+        {
+            throw new Exception("TraefikHttpEndpointProvider not found");
+        }
+        Add(typeof(HttpEndpoint), traefikHttpEndpointProvider);
+    }
+
+    public IList<Provider> Get(Type resourceType)
+    {
+        return _providers[resourceType];
     }
 }

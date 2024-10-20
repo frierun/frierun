@@ -1,4 +1,5 @@
 ﻿using Frierun.Server.Models;
+using Frierun.Server.Providers;
 using Frierun.Server.Resources;
 
 namespace Frierun.Server.Services;
@@ -10,11 +11,30 @@ public class ExecutionService(
 {
     public ExecutionPlan Create(ResourceDefinition definition, ExecutionPlan? parent = null)
     {
-        var provider = providerRegistry.Get(definition.ResourceType);
-        if (provider == null)
+        var providers = providerRegistry.Get(definition.ResourceType);
+        if (providers.Count == 0)
         {
             throw new Exception($"Can't find provider for resource {typeof(Application)}");
         }
+        
+        if (providers.Count == 1)
+        {
+            return Create(definition, parent, providers[0]);
+        }
+
+        var provider = new SelectorProvider();
+        var executionPlan = provider.CreatePlan(state, definition, parent);
+
+        foreach (var childProvider in providers)
+        {
+            executionPlan.Children.Add(Create(definition, parent, childProvider));
+        }
+        
+        return executionPlan;
+    }
+    
+    private ExecutionPlan Create(ResourceDefinition definition, ExecutionPlan? parent, Provider provider)
+    {
         var executionPlan = provider.CreatePlan(state, definition, parent);
 
         foreach (var childResource in definition.Children)
@@ -23,18 +43,5 @@ public class ExecutionService(
         }
         
         return executionPlan;
-    }
-    
-    /// <summary>
-    /// Validates the execution plan and all its children
-    /// </summary>
-    public bool Validate(ExecutionPlan executionPlan)
-    {
-        if (!executionPlan.Validate())
-        {
-            return false;
-        }
-
-        return executionPlan.Children.All(Validate);
-    }
+    }    
 }
