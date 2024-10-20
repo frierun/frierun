@@ -12,7 +12,8 @@ public static class Extensions
         // Providers
         services.AddSingleton<ApplicationProvider>();
         services.AddSingleton<ContainerProvider>();
-        services.AddSingleton<HttpEndpointProvider>();
+        services.AddSingleton<PortHttpEndpointProvider>();
+        services.AddSingleton<TraefikHttpEndpointProvider>();
         services.AddSingleton<VolumeProvider>();
         
         // Services
@@ -20,7 +21,6 @@ public static class Extensions
         services.AddSingleton<ExecutionService>();
         services.AddSingleton<InstallService>();
         services.AddSingleton<PackageRegistry>();
-        services.AddSingleton<ParameterService>();
         services.AddSingleton<ProviderRegistry>();
         services.AddSingleton<StateManager>();
         services.AddSingleton<UninstallService>();

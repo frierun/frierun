@@ -8,10 +8,20 @@ namespace Frierun.Server.Controllers;
 [Route("/applications")]
 public class ApplicationsController : ControllerBase
 {
+    public record ApplicationResponse(
+        Guid Id,
+        string Name,
+        string? ServiceUrl
+    );
+    
     [HttpGet]
-    public IEnumerable<Application> List(State state)
+    public IEnumerable<ApplicationResponse> List(State state)
     {
-        return state.Applications;
+        return state.Applications.Select(application => new ApplicationResponse(
+            application.Id,
+            application.Name,
+            application.AllResources.OfType<HttpEndpoint>().FirstOrDefault()?.Url
+        ));
     }
     
     [HttpDelete("{id}")]

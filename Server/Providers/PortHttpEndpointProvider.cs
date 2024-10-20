@@ -4,7 +4,7 @@ using Frierun.Server.Resources;
 
 namespace Frierun.Server.Providers;
 
-public class HttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDefinition>, IChangesContainer
+public class PortHttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDefinition>, IChangesContainer
 {
     /// <inheritdoc />
     protected override void FillParameters(ExecutionPlan<HttpEndpoint, HttpEndpointDefinition> plan)
@@ -16,6 +16,11 @@ public class HttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDefinitio
         {
             plan.Parameters["port"] = (8080 + count).ToString();
             count++;
+            
+            if (count > 1000)
+            {
+                throw new Exception("Port not found");
+            }
         }
     }
 
@@ -26,16 +31,23 @@ public class HttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDefinitio
         {
             return false;
         }
-
+        
         var intPort = int.Parse(port);
-        return plan.State.Resources.OfType<HttpEndpoint>().All(resource => resource.Port != intPort);
+        
+        if (intPort < 1 || intPort > 65535)
+        {
+            return false;
+        }
+        
+        return plan.State.Resources.OfType<PortHttpEndpoint>().All(resource => resource.Port != intPort);
     }
 
     /// <inheritdoc />
     protected override HttpEndpoint Install(ExecutionPlan<HttpEndpoint, HttpEndpointDefinition> plan)
     {
         var port = int.Parse(plan.Parameters["port"]);
-        return new HttpEndpoint(Guid.NewGuid(), port);
+        // TODO: fill the correct ip of the host
+        return new PortHttpEndpoint(Guid.NewGuid(), "127.0.0.1", port);
     }
     
     /// <inheritdoc />

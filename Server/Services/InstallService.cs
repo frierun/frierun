@@ -1,4 +1,5 @@
 ﻿using Frierun.Server.Models;
+using Frierun.Server.Providers;
 using Frierun.Server.Resources;
 
 namespace Frierun.Server.Services;
@@ -7,7 +8,7 @@ public class InstallService(
     State state,
     StateSerializer stateSerializer,
     StateManager stateManager,
-    ILogger<InstallService> logger
+    ProviderRegistry providerRegistry
 )
 {
     public void Handle(ExecutionPlan executionPlan)
@@ -19,13 +20,13 @@ public class InstallService(
 
         try
         {
-            var resource = executionPlan.Install();
-            state.Applications.Add((Application)resource);
+            var resource = (Application)executionPlan.Install();
+            state.Applications.Add(resource);
             stateSerializer.Save(state);
-        }
-        catch (Exception e)
-        {
-            logger.LogError("Failed to install package: {ErrorMessage}", e.Message);
+            if (resource.Package?.Name == "traefik")
+            {
+                providerRegistry.UseTraefik();
+            }
         }
         finally
         {

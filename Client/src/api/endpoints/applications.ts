@@ -17,13 +17,13 @@ import type {
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
-import type { Application, ProblemDetails } from "../schemas";
+import type { ApplicationResponse, ProblemDetails } from "../schemas";
 import { customFetch } from "../../custom-fetch";
 
 type SecondParameter<T extends (...args: any) => any> = Parameters<T>[1];
 
 export type getApplicationsResponse = {
-  data: Application[];
+  data: ApplicationResponse[];
   status: number;
 };
 

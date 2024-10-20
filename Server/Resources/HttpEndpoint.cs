@@ -1,3 +1,3 @@
 ﻿namespace Frierun.Server.Resources;
 
-public record HttpEndpoint(Guid Id, int Port) : Resource(Id, new List<Resource>());
+public record HttpEndpoint(Guid Id, string Url) : Resource(Id, new List<Resource>());

@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export * from "./application";
+export * from "./applicationResponse";
 export * from "./executionPlanRequest";
 export * from "./executionPlanRequestParameters";
 export * from "./executionPlanResponse";
@@ -14,6 +14,5 @@ export * from "./installRequest";
 export * from "./package";
 export * from "./parametersResponse";
 export * from "./problemDetails";
-export * from "./resource";
 export * from "./resourceDefinition";
 export * from "./state";

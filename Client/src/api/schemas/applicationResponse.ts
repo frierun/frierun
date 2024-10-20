@@ -5,7 +5,9 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface Resource {
+export interface ApplicationResponse {
   id: string;
-  resources: Resource[];
+  name: string;
+  /** @nullable */
+  serviceUrl?: string | null;
 }

@@ -5,6 +5,8 @@ namespace Frierun.Server.Resources;
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
 [JsonDerivedType(typeof(Container), "Container")]
 [JsonDerivedType(typeof(HttpEndpoint), "HttpEndpoint")]
+[JsonDerivedType(typeof(PortHttpEndpoint), "PortHttpEndpoint")]
+[JsonDerivedType(typeof(TraefikHttpEndpoint), "TraefikHttpEndpoint")]
 [JsonDerivedType(typeof(Volume), "Volume")]
 public abstract record Resource(Guid Id, IReadOnlyList<Resource> Children)
 {

@@ -44,14 +44,15 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
         
         var dockerParameters = new CreateContainerParameters
         {
-            Image = plan.Definition.ImageName,
-            Name = name,
             Cmd = plan.Definition.Command?.Split(' '),
+            Image = plan.Definition.ImageName,
             HostConfig = new HostConfig
             {
                 PortBindings = new Dictionary<string, IList<PortBinding>>(),
                 Mounts = new List<Mount>()
             },
+            Labels = new Dictionary<string, string>(),
+            Name = name,
         };
         
         if (plan.Definition.RequireDocker)

@@ -15,8 +15,19 @@ export default function Applications() {
             <ul>
                 {data.data.map((item) => (
                     <li key={item.id}>
-                        {item.id}
-                        <Uninstall applicationId={item.id} />
+                        <div>
+                            {item.name} ({item.id})
+                        </div>
+                        {item.serviceUrl && (
+                            <div>
+                                <a href={item.serviceUrl} target="_blank" rel="noreferrer noopener">
+                                    <span className="text-blue-500">{item.serviceUrl}</span>
+                                </a>
+                            </div>
+                        )}
+                        <div>
+                            <Uninstall applicationId={item.id}/>
+                        </div>
                     </li>
                 ))}
             </ul>
