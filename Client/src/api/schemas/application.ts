@@ -11,6 +11,5 @@ export interface Application {
   id: string;
   name: string;
   package?: Package;
-  /** @nullable */
-  resources?: Resource[] | null;
+  resources: Resource[];
 }

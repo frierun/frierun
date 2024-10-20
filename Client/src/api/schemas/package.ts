@@ -7,7 +7,8 @@
 import type { ResourceDefinition } from "./resourceDefinition";
 
 export interface Package {
+  readonly children: readonly ResourceDefinition[];
+  id: string;
   name: string;
-  resources: ResourceDefinition[];
   url: string;
 }

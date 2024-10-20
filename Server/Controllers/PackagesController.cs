@@ -1,4 +1,5 @@
 ﻿using Frierun.Server.Models;
+using Frierun.Server.Resources;
 using Frierun.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,11 +14,17 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
         return packageRegistry.Packages;
     }
 
+    public record ExecutionPlanResponse(
+        string TypeName,
+        IDictionary<string, string> Parameters,
+        IList<ExecutionPlanResponse> Children
+    );
+    
     public record ParametersResponse(
         Package Package,
-        string Name,
-        IEnumerable<List<KeyValuePair<string, string>>> Parameters);
-
+        ExecutionPlanResponse ExecutionPlan
+    );
+    
     /// <summary>
     /// Gets package and default parameters
     /// </summary>
@@ -31,23 +38,31 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
         }
 
         var executionPlan = executionService.Create(package);
-        if (executionPlan == null)
-        {
-            return null;
-        }
 
         return new ParametersResponse(
             package,
-            executionPlan.Name,
-            package.Resources
-                .Select(resourceDefinition =>
-                    executionPlan.Providers[resourceDefinition].GetParameters(executionPlan, resourceDefinition)
-                )
-                .Select(parameters => parameters.ToList())
+            ToResponse(executionPlan)
         );
     }
-
-    public record InstallRequest(string Name, IEnumerable<List<KeyValuePair<string, string>>> Parameters);
+    
+    /// <summary>
+    /// Recursively converts an execution plan to a response json
+    /// </summary>
+    private ExecutionPlanResponse ToResponse(ExecutionPlan executionPlan)
+    {
+        return new ExecutionPlanResponse(
+            executionPlan.Provider.GetType().Name,
+            executionPlan.Parameters,
+            executionPlan.Children.Select(ToResponse).ToList()
+        );
+    }
+    
+    public record ExecutionPlanRequest(
+        IDictionary<string, string> Parameters,
+        IList<ExecutionPlanRequest> Children
+    );
+    
+    public record InstallRequest(string Name, ExecutionPlanRequest ExecutionPlan);
 
     /// <summary>
     /// Installs the given package
@@ -71,25 +86,29 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
         }
 
         var executionPlan = executionService.Create(package);
-        if (executionPlan == null)
-        {
-            return Conflict();
-        }
-        
-        executionPlan.Name = data.Name;
-        for (var i = 0; i < package.Resources.Count; i++)
-        {
-            var resourceDefinition = package.Resources[i];
-            var parameters = data.Parameters.ElementAt(i);
-            executionPlan.Parameters[resourceDefinition] = parameters.ToDictionary();
-        }
-        
+        FromRequest(executionPlan, data.ExecutionPlan);
+
         if (!executionService.Validate(executionPlan))
         {
             return BadRequest();
         }
-        
+
         Task.Run(() => installService.Handle(executionPlan));
         return Accepted();
+    }
+
+    /// <summary>
+    /// Recursively fills the execution plan with the given request
+    /// </summary>
+    private void FromRequest(ExecutionPlan executionPlan, ExecutionPlanRequest request)
+    {
+        foreach (var pair in request.Parameters)
+        {
+            executionPlan.Parameters[pair.Key] = pair.Value;
+        }
+        for (var i = 0; i < executionPlan.Children.Count; i++)
+        {
+            FromRequest(executionPlan.Children[i], request.Children[i]);
+        }
     }
 }

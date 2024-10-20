@@ -6,6 +6,10 @@
  */
 
 export * from "./application";
+export * from "./executionPlanRequest";
+export * from "./executionPlanRequestParameters";
+export * from "./executionPlanResponse";
+export * from "./executionPlanResponseParameters";
 export * from "./installRequest";
 export * from "./package";
 export * from "./parametersResponse";
@@ -13,4 +17,3 @@ export * from "./problemDetails";
 export * from "./resource";
 export * from "./resourceDefinition";
 export * from "./state";
-export * from "./stringStringKeyValuePair";

@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Models;
+﻿using System.Diagnostics;
+using Frierun.Server.Models;
 using Frierun.Server.Resources;
 
 namespace Frierun.Server.Providers;
@@ -7,29 +8,37 @@ public abstract class Provider<TResource, TDefinition> : Provider
     where TResource : Resource
     where TDefinition : ResourceDefinition<TResource>
 {
-    protected abstract IDictionary<string, string> GetParameters(ExecutionPlan plan, TDefinition definition);
+    public override ExecutionPlan CreatePlan(State state, ResourceDefinition definition, ExecutionPlan? parent = null)
+    {
+        var plan = new ExecutionPlan<TResource, TDefinition>(state, (TDefinition)definition, this, parent);
+        FillParameters(plan);
+        return plan;
+    }
+    
+    protected abstract void FillParameters(ExecutionPlan<TResource, TDefinition> plan);
+    
+    protected abstract bool Validate(ExecutionPlan<TResource, TDefinition> plan);
 
     /// <inheritdoc />
-    public override IDictionary<string, string> GetParameters(ExecutionPlan plan, ResourceDefinition definition)
+    [DebuggerStepThrough]
+    public override bool Validate(ExecutionPlan plan)
     {
-        return GetParameters(plan, (TDefinition)definition);
+        return Validate((ExecutionPlan<TResource, TDefinition>)plan);
     }
 
-    protected abstract TResource Create(ExecutionPlan plan, IDictionary<string, string> parameters,
-        TDefinition definition);
+    protected abstract TResource Install(ExecutionPlan<TResource, TDefinition> plan);
 
     /// <inheritdoc />
-    public override object Install(ExecutionPlan plan, IDictionary<string, string> parameters,
-        ResourceDefinition definition)
+    [DebuggerStepThrough]
+    public override Resource Install(ExecutionPlan plan)
     {
-        return Create(plan, parameters, (TDefinition)definition);
+        return Install((ExecutionPlan<TResource, TDefinition>)plan);
     }
 }
 
 public abstract class Provider
 {
-    public abstract IDictionary<string, string> GetParameters(ExecutionPlan plan, ResourceDefinition definition);
-    public abstract bool Validate(ExecutionPlan plan, IDictionary<string, string> parameters);
-    public abstract object Install(ExecutionPlan plan, IDictionary<string, string> parameters,
-        ResourceDefinition definition);
+    public abstract ExecutionPlan CreatePlan(State state, ResourceDefinition definition, ExecutionPlan? parent = null);
+    public abstract bool Validate(ExecutionPlan plan);
+    public abstract Resource Install(ExecutionPlan plan);
 }

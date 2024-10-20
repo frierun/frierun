@@ -1,56 +1,40 @@
 ﻿using Frierun.Server.Models;
+using Frierun.Server.Resources;
 
 namespace Frierun.Server.Services;
 
 public class ExecutionService(
-    ILogger<ExecutionService> logger,
     ProviderRegistry providerRegistry,
     State state
 )
 {
-    public ExecutionPlan? Create(Package package)
+    public ExecutionPlan Create(ResourceDefinition definition, ExecutionPlan? parent = null)
     {
-        var name = package.Name;
-        int count = 1;
-        while (state.Applications.Any(application => application.Name == name))
+        var provider = providerRegistry.Get(definition.ResourceType);
+        if (provider == null)
         {
-            count++;
-            name = $"{package.Name}{count}";
+            throw new Exception($"Can't find provider for resource {typeof(Application)}");
+        }
+        var executionPlan = provider.CreatePlan(state, definition, parent);
+
+        foreach (var childResource in definition.Children)
+        {
+            executionPlan.Children.Add(Create(childResource, executionPlan));
         }
         
-        var executionPlan = new ExecutionPlan(state, package, name);
-        foreach (var resourceDefinition in executionPlan.Resources)
-        {
-            var provider = providerRegistry.Get(resourceDefinition.ResourceType);
-            if (provider == null)
-            {
-                logger.LogError("Can't find provider for resource {ProviderType}", resourceDefinition.ResourceType);
-                return null;
-            }
-
-            executionPlan.Providers[resourceDefinition] = provider;
-            executionPlan.Parameters[resourceDefinition] = provider.GetParameters(executionPlan, resourceDefinition);
-        }
-
         return executionPlan;
     }
     
+    /// <summary>
+    /// Validates the execution plan and all its children
+    /// </summary>
     public bool Validate(ExecutionPlan executionPlan)
     {
-        if (state.Applications.Any(application => application.Name == executionPlan.Name))
+        if (!executionPlan.Validate())
         {
             return false;
         }
-        
-        foreach (var resourceDefinition in executionPlan.Resources)
-        {
-            var provider = executionPlan.Providers[resourceDefinition];
-            if (!provider.Validate(executionPlan, executionPlan.Parameters[resourceDefinition]))
-            {
-                return false;
-            }
-        }
 
-        return true;
+        return executionPlan.Children.All(Validate);
     }
 }

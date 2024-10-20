@@ -8,10 +8,12 @@ public class ProviderRegistry
     private readonly Dictionary<Type, object> _providers = new();
 
     public ProviderRegistry(
+        ApplicationProvider applicationProvider,
         ContainerProvider containerProvider, 
         HttpEndpointProvider httpEndpointProvider,
         VolumeProvider volumeProvider)
     {
+        _providers.Add(typeof(Application), applicationProvider);
         _providers.Add(typeof(Container), containerProvider);
         _providers.Add(typeof(HttpEndpoint), httpEndpointProvider);
         _providers.Add(typeof(Volume), volumeProvider);

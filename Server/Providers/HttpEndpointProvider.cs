@@ -4,30 +4,25 @@ using Frierun.Server.Resources;
 
 namespace Frierun.Server.Providers;
 
-public class HttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDefinition>
+public class HttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDefinition>, IChangesContainer
 {
     /// <inheritdoc />
-    protected override IDictionary<string, string> GetParameters(ExecutionPlan plan, HttpEndpointDefinition definition)
+    protected override void FillParameters(ExecutionPlan<HttpEndpoint, HttpEndpointDefinition> plan)
     {
-        var result = new Dictionary<string, string>
-        {
-            ["port"] = "80"
-        };
+        plan.Parameters["port"] = "80";
         
         var count = 0;
-        while (!Validate(plan, result))
+        while (!Validate(plan))
         {
-            result["port"] = (8080 + count).ToString();
+            plan.Parameters["port"] = (8080 + count).ToString();
             count++;
         }
-
-        return result;
     }
 
     /// <inheritdoc />
-    public override bool Validate(ExecutionPlan plan, IDictionary<string, string> parameters)
+    protected override bool Validate(ExecutionPlan<HttpEndpoint, HttpEndpointDefinition> plan)
     {
-        if (!parameters.TryGetValue("port", out var port))
+        if (!plan.Parameters.TryGetValue("port", out var port))
         {
             return false;
         }
@@ -37,23 +32,25 @@ public class HttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDefinitio
     }
 
     /// <inheritdoc />
-    protected override HttpEndpoint Create(ExecutionPlan plan,
-        IDictionary<string, string> parameters,
-        HttpEndpointDefinition definition)
+    protected override HttpEndpoint Install(ExecutionPlan<HttpEndpoint, HttpEndpointDefinition> plan)
     {
-        var port = int.Parse(parameters["port"]);
-
-        plan.ContainerParameters.Add(containerParameters =>
-                containerParameters.HostConfig.PortBindings[$"{definition.Port}/tcp"] =
-                    new List<PortBinding>
-                    {
-                        new()
-                        {
-                            HostPort = port.ToString()
-                        }
-                    }
-            );
-
+        var port = int.Parse(plan.Parameters["port"]);
         return new HttpEndpoint(Guid.NewGuid(), port);
     }
+    
+    /// <inheritdoc />
+    public void ChangeContainer(ExecutionPlan plan, CreateContainerParameters parameters)
+    {
+        var httpEndpointPlan = (ExecutionPlan<HttpEndpoint, HttpEndpointDefinition>)plan;
+        var port = int.Parse(httpEndpointPlan.Parameters["port"]);
+        
+        parameters.HostConfig.PortBindings[$"{httpEndpointPlan.Definition.Port}/tcp"] =
+            new List<PortBinding>
+            {
+                new()
+                {
+                    HostPort = port.ToString()
+                }
+            };
+    }    
 }

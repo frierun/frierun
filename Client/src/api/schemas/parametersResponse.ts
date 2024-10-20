@@ -4,11 +4,10 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { ExecutionPlanResponse } from "./executionPlanResponse";
 import type { Package } from "./package";
-import type { StringStringKeyValuePair } from "./stringStringKeyValuePair";
 
 export interface ParametersResponse {
-  name: string;
+  executionPlan: ExecutionPlanResponse;
   package: Package;
-  parameters: StringStringKeyValuePair[][];
 }

@@ -19,32 +19,13 @@ public class InstallService(
 
         try
         {
-            var resources = new List<Resource>();
-            foreach (var resourceDefinition in executionPlan.ResourcesToInstall)
-            {
-                var provider = executionPlan.Providers[resourceDefinition];
-
-                var resource = provider.Install(
-                    executionPlan,
-                    provider.GetParameters(executionPlan, resourceDefinition),
-                    resourceDefinition
-                ) as Resource;
-                if (resource == null)
-                {
-                    logger.LogError("Provider {ProviderType} failed to create resource",
-                        resourceDefinition.ResourceType);
-                    return;
-                }
-
-                resources.Add(resource);
-            }
-
-            state.Applications.Add(new Application(Guid.NewGuid(), executionPlan.Name, resources, executionPlan.Package));
+            var resource = executionPlan.Install();
+            state.Applications.Add((Application)resource);
             stateSerializer.Save(state);
         }
         catch (Exception e)
         {
-            logger.LogError("Failed to install package {PackageName}: {ErrorMessage}", executionPlan.Package.Name, e.Message);
+            logger.LogError("Failed to install package: {ErrorMessage}", e.Message);
         }
         finally
         {

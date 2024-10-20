@@ -5,7 +5,4 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface ResourceDefinition {
-  readonly children: readonly ResourceDefinition[];
-  id: string;
-}
+export type ExecutionPlanResponseParameters = { [key: string]: string };

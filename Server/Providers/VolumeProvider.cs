@@ -4,34 +4,31 @@ using Frierun.Server.Resources;
 
 namespace Frierun.Server.Providers;
 
-public class VolumeProvider : Provider<Volume, VolumeDefinition>
+public class VolumeProvider : Provider<Volume, VolumeDefinition>, IChangesContainer
 {
     /// <inheritdoc />
-    protected override IDictionary<string, string> GetParameters(ExecutionPlan plan, VolumeDefinition definition)
+    protected override void FillParameters(ExecutionPlan<Volume, VolumeDefinition> plan)
     {
-        var containerDefinition = plan.ResourcesToInstall.OfType<ContainerDefinition>().First();
-        var containerParameters = plan.Parameters[containerDefinition];
-        var containerName = containerParameters["name"];
-        
-        var result = new Dictionary<string, string>
+        var containerName = plan.Parent?.Parameters["name"];
+        if (containerName == null)
         {
-            ["name"] = $"{containerName}-{definition.Name}"
-        };
-
-        var count = 1;
-        while (!Validate(plan, result))
-        {
-            count++;
-            result["name"] = $"{containerName}-{definition.Name}{count}";
+            throw new InvalidOperationException("Volume must be created as a child of a container");
         }
         
-        return result;
+        plan.Parameters["name"] = $"{containerName}-{plan.Definition.Name}";
+
+        var count = 1;
+        while (!Validate(plan))
+        {
+            count++;
+            plan.Parameters["name"] = $"{containerName}-{plan.Definition.Name}{count}";
+        }
     }
 
     /// <inheritdoc />
-    public override bool Validate(ExecutionPlan plan, IDictionary<string, string> parameters)
+    protected override bool Validate(ExecutionPlan<Volume, VolumeDefinition> plan)
     {
-        if (!parameters.TryGetValue("name", out var name))
+        if (!plan.Parameters.TryGetValue("name", out var name))
         {
             return false;
         }
@@ -40,24 +37,23 @@ public class VolumeProvider : Provider<Volume, VolumeDefinition>
     }
 
     /// <inheritdoc />
-    protected override Volume Create(ExecutionPlan plan,
-        IDictionary<string, string> parameters,
-        VolumeDefinition definition)
+    protected override Volume Install(ExecutionPlan<Volume, VolumeDefinition> plan)
     {
-        var name = parameters["name"];
+        return new Volume(Guid.NewGuid(), plan.Parameters["name"]);
+    }
 
-        plan.ContainerParameters.Add(containerParameters =>
+    /// <inheritdoc />
+    public void ChangeContainer(ExecutionPlan plan, CreateContainerParameters parameters)
+    {
+        var volumePlan = (ExecutionPlan<Volume, VolumeDefinition>)plan;
+        var name = volumePlan.Parameters["name"];
+        
+        parameters.HostConfig.Mounts.Add(new Mount
             {
-                containerParameters.HostConfig.Mounts.Add(new Mount
-                    {
-                        Source = name,
-                        Target = definition.Path,
-                        Type = "volume"
-                    }
-                );
+                Source = name,
+                Target = volumePlan.Definition.Path,
+                Type = "volume"
             }
         );
-
-        return new Volume(Guid.NewGuid(), name);
     }
 }

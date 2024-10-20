@@ -7,4 +7,5 @@
 
 export interface Resource {
   id: string;
+  resources: Resource[];
 }

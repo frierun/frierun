@@ -1,19 +1,21 @@
 ﻿{
   "Name": "dashy",
   "Url": "https://dashy.to/docs/quick-start",
-  "Resources": [
+  "Children": [
     {
       "Type": "Container",
-      "ImageName": "lissy93/dashy:latest"
-    },
-    {
-      "Type": "HttpEndpoint",
-      "Port": 8080
-    },
-    {
-      "Type": "Volume",
-      "Name": "data",
-      "Path": "/app/user-data"
+      "ImageName": "lissy93/dashy:latest",
+      "Children": [
+        {
+          "Type": "HttpEndpoint",
+          "Port": 8080
+        },
+        {
+          "Type": "Volume",
+          "Name": "data",
+          "Path": "/app/user-data"
+        }
+      ]
     }
   ]
 }

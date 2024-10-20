@@ -32,7 +32,7 @@ public class ParameterService(State state)
             return false;
         }
 
-        foreach (var volume in package.Resources.OfType<VolumeDefinition>())
+        foreach (var volume in package.Children.OfType<VolumeDefinition>())
         {
             var volumeName = $"{name}-{volume.Name}";
             if (state.Resources.OfType<Volume>().Any(installedVolume => installedVolume.Name == volumeName))

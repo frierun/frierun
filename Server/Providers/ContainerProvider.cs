@@ -7,30 +7,30 @@ namespace Frierun.Server.Providers;
 
 public class ContainerProvider(DockerService dockerService) : Provider<Container, ContainerDefinition>
 {
-    public delegate void ExtendContainerParameters(CreateContainerParameters parameters);
-
     /// <inheritdoc />
-    protected override IDictionary<string, string> GetParameters(ExecutionPlan plan, ContainerDefinition definition)
+    protected override void FillParameters(ExecutionPlan<Container, ContainerDefinition> plan)
     {
-        var result = new Dictionary<string, string>()
+        var applicationName = plan.Parent?.Parameters["name"];
+        
+        if (applicationName == null)
         {
-            ["name"] = plan.Name
-        };
+            throw new Exception("Application name not found");
+        }
+        
+        plan.Parameters["name"] = applicationName;
 
         var count = 1;
-        while (!Validate(plan, result))
+        while (!Validate(plan))
         {
             count++;
-            result["name"] = $"{plan.Name}{count}";
+            plan.Parameters["name"] = $"{applicationName}{count}";
         }
-
-        return result;
     }
 
     /// <inheritdoc />
-    public override bool Validate(ExecutionPlan plan, IDictionary<string, string> parameters)
+    protected override bool Validate(ExecutionPlan<Container, ContainerDefinition> plan)
     {
-        if (!parameters.TryGetValue("name", out var name))
+        if (!plan.Parameters.TryGetValue("name", out var name))
         {
             return false;
         }
@@ -38,17 +38,15 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
     }
 
     /// <inheritdoc />
-    protected override Container Create(ExecutionPlan plan,
-        IDictionary<string, string> parameters,
-        ContainerDefinition definition)
+    protected override Container Install(ExecutionPlan<Container, ContainerDefinition> plan)
     {
-        var name = parameters["name"];
+        var name = plan.Parameters["name"];
         
         var dockerParameters = new CreateContainerParameters
         {
-            Image = definition.ImageName,
+            Image = plan.Definition.ImageName,
             Name = name,
-            Cmd = definition.Command?.Split(' '),
+            Cmd = plan.Definition.Command?.Split(' '),
             HostConfig = new HostConfig
             {
                 PortBindings = new Dictionary<string, IList<PortBinding>>(),
@@ -56,7 +54,7 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
             },
         };
         
-        if (definition.RequireDocker)
+        if (plan.Definition.RequireDocker)
         {
             dockerParameters.HostConfig.Mounts.Add(new Mount
             {
@@ -66,9 +64,15 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
             });
         }
 
-        foreach (var extendParameter in plan.ContainerParameters)
+        var children = new List<Resource>();
+        foreach (var childPlan in plan.Children)
         {
-            extendParameter(dockerParameters);
+            if (childPlan.Provider is IChangesContainer changesContainer)
+            {
+                changesContainer.ChangeContainer(childPlan, dockerParameters);
+            }
+
+            children.Add(childPlan.Install());
         }
 
         var result = dockerService.StartContainer(dockerParameters).Result;
@@ -78,7 +82,7 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
             throw new Exception("Failed to start container");
         }
 
-        return new Container(Guid.NewGuid(), name);
+        return new Container(Guid.NewGuid(), name, children);
 
     }
 }

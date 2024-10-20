@@ -15,7 +15,7 @@ public sealed class PackageFactory : Faker<Package>
         this.SkipConstructor();
         this.UniqueRuleFor(p => p.Name, f => f.Lorem.Word(), _uniqueNames);
         RuleFor(p => p.Url, f => f.Internet.Url());
-        RuleFor(p => p.Resources, _ => new List<ResourceDefinition>(containerDefinitionFactory.Generate(1)));
+        RuleFor(p => p.Children, _ => new List<ResourceDefinition>(containerDefinitionFactory.Generate(1)));
         FinishWith((_, package) => packageRegistry.Packages.Add(package));
     }
 }

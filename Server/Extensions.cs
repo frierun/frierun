@@ -10,6 +10,7 @@ public static class Extensions
     public static void RegisterServices(this IServiceCollection services)
     {
         // Providers
+        services.AddSingleton<ApplicationProvider>();
         services.AddSingleton<ContainerProvider>();
         services.AddSingleton<HttpEndpointProvider>();
         services.AddSingleton<VolumeProvider>();

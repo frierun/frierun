@@ -4,9 +4,9 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { StringStringKeyValuePair } from "./stringStringKeyValuePair";
+import type { ExecutionPlanRequest } from "./executionPlanRequest";
 
 export interface InstallRequest {
+  executionPlan: ExecutionPlanRequest;
   name: string;
-  parameters: StringStringKeyValuePair[][];
 }

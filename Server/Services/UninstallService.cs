@@ -14,12 +14,12 @@ public class UninstallService(DockerService dockerService, State state, StateSer
 
         try
         {
-            foreach (var container in application.Resources?.OfType<Container>() ?? Enumerable.Empty<Container>())
+            foreach (var container in application.Children.OfType<Container>())
             {
                 await dockerService.StopContainer(container.Name);
             }
             
-            foreach (var volume in application.Resources?.OfType<Volume>() ?? Enumerable.Empty<Volume>())
+            foreach (var volume in application.AllResources.OfType<Volume>())
             {
                 await dockerService.RemoveVolume(volume.Name);
             }

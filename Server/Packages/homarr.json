@@ -1,31 +1,32 @@
 ﻿{
   "Name": "homarr",
   "Url": "https://homarr.dev/docs/getting-started/installation/",
-  "Resources": [
+  "Children": [
     {
       "Type": "Container",
       "ImageName": "ghcr.io/ajnart/homarr:latest",
-      "RequireDocker": true
-    },
-    {
-      "Type": "HttpEndpoint",
-      "Port": 7575
-    },
-    {
-      "Type": "Volume",
-      "Name": "configs",
-      "Path": "/app/data/configs"
-    },
-    {
-      "Type": "Volume",
-      "Name": "icons",
-      "Path": "/app/public/icons"
-    },
-    {
-      "Type": "Volume",
-      "Name": "data",
-      "Path": "/data"
+      "RequireDocker": true,
+      "Children": [
+        {
+          "Type": "HttpEndpoint",
+          "Port": 7575
+        },
+        {
+          "Type": "Volume",
+          "Name": "configs",
+          "Path": "/app/data/configs"
+        },
+        {
+          "Type": "Volume",
+          "Name": "icons",
+          "Path": "/app/public/icons"
+        },
+        {
+          "Type": "Volume",
+          "Name": "data",
+          "Path": "/data"
+        }
+      ]
     }
   ]
-
 }
