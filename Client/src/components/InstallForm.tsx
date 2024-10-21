@@ -23,7 +23,7 @@ export default function InstallForm({response}: Props) {
             return;
         }
         
-        mutateAsync({id: response.package.name, data: {name: response.package.name, executionPlan}})
+        mutateAsync({id: response.package.name, data: {executionPlan}})
             .then(waitForReady)
             .then(() => queryClient.invalidateQueries({queryKey: getGetApplicationsQueryKey()}))
             .then(() => navigate('/'));

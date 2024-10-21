@@ -1,0 +1,31 @@
+﻿{
+  "Name": "jellyfin",
+  "Url": "https://jellyfin.org/docs/general/installation/container",
+  "Children": [
+    {
+      "Type": "Container",
+      "ImageName": "jellyfin/jellyfin:latest",
+      "Children": [
+        {
+          "Type": "HttpEndpoint",
+          "Port": 8096
+        },
+        {
+          "Type": "Volume",
+          "Name": "config",
+          "Path": "/config"
+        },
+        {
+          "Type": "Volume",
+          "Name": "cache",
+          "Path": "/cache"
+        },
+        {
+          "Type": "Volume",
+          "Name": "media",
+          "Path": "/media"
+        }
+      ]
+    }
+  ]
+}

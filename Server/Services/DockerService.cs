@@ -15,6 +15,7 @@ public class DockerService(ILogger<DockerService> logger)
     {
         logger.LogInformation("Starting container {ContainerName}", dockerParameters.Name);
 
+        logger.LogInformation("Loading image {ImageName}", dockerParameters.Image);
         await _client.Images.CreateImageAsync(
             new ImagesCreateParameters
             {

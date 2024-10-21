@@ -8,5 +8,4 @@ import type { ExecutionPlanRequest } from "./executionPlanRequest";
 
 export interface InstallRequest {
   executionPlan: ExecutionPlanRequest;
-  name: string;
 }

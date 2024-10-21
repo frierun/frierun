@@ -1,0 +1,21 @@
+﻿{
+  "Name": "home-assistant",
+  "Url": "https://jellyfin.org/docs/general/installation/container",
+  "Children": [
+    {
+      "Type": "Container",
+      "ImageName": "ghcr.io/home-assistant/home-assistant:stable",
+      "Children": [
+        {
+          "Type": "HttpEndpoint",
+          "Port": 8123
+        },
+        {
+          "Type": "Volume",
+          "Name": "config",
+          "Path": "/config"
+        }
+      ]
+    }
+  ]
+}

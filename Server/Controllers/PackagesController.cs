@@ -62,7 +62,7 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
         IList<ExecutionPlanRequest> Children
     );
     
-    public record InstallRequest(string Name, ExecutionPlanRequest ExecutionPlan);
+    public record InstallRequest(ExecutionPlanRequest ExecutionPlan);
 
     /// <summary>
     /// Installs the given package
@@ -76,7 +76,7 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
         ExecutionService executionService
     )
     {
-        logger.LogInformation("Installing package {id} with name {name} and port {port}", id, data.Name, 80);
+        logger.LogInformation("Installing package {id}", id);
 
         var package = packageRegistry.Find(id);
 
