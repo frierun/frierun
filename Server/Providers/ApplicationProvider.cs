@@ -6,7 +6,7 @@ namespace Frierun.Server.Providers;
 public class ApplicationProvider : Provider<Application, Package>
 {
     /// <inheritdoc />
-    protected override void FillParameters(ExecutionPlan<Application, Package> plan)
+    protected override void FillParameters(ExecutionPlan<Package> plan)
     {
         plan.Parameters["name"] = plan.Definition.Name;
 
@@ -19,7 +19,7 @@ public class ApplicationProvider : Provider<Application, Package>
     }
     
     /// <inheritdoc />
-    protected override bool Validate(ExecutionPlan<Application, Package> plan)
+    protected override bool Validate(ExecutionPlan<Package> plan)
     {
         if (!plan.Parameters.TryGetValue("name", out var name))
         {
@@ -29,7 +29,7 @@ public class ApplicationProvider : Provider<Application, Package>
     }
 
     /// <inheritdoc />
-    protected override Application Install(ExecutionPlan<Application, Package> plan)
+    protected override Application Install(ExecutionPlan<Package> plan)
     {
         var name = plan.Parameters["name"];
         var resources = plan.Children.Select(childPlan => childPlan.Install()).ToList();

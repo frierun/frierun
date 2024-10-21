@@ -37,9 +37,9 @@ public class ExecutionService(
     {
         var executionPlan = provider.CreatePlan(state, definition, parent);
 
-        foreach (var childResource in definition.Children)
+        foreach (var childDefinition in definition.Children)
         {
-            executionPlan.Children.Add(Create(childResource, executionPlan));
+            executionPlan.Children.Add(Create(childDefinition, executionPlan));
         }
         
         return executionPlan;

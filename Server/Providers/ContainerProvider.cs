@@ -5,10 +5,18 @@ using Frierun.Server.Services;
 
 namespace Frierun.Server.Providers;
 
-public class ContainerProvider(DockerService dockerService) : Provider<Container, ContainerDefinition>
+public class ContainerProvider(DockerService dockerService) : Provider<Container, ContainerDefinition, ContainerExecutionPlan>
 {
     /// <inheritdoc />
-    protected override void FillParameters(ExecutionPlan<Container, ContainerDefinition> plan)
+    public override ExecutionPlan CreatePlan(State state, ResourceDefinition definition, ExecutionPlan? parent)
+    {
+        var plan = new ContainerExecutionPlan(state, (ContainerDefinition)definition, this, parent);
+        FillParameters(plan);
+        return plan;
+    }
+
+    /// <inheritdoc />
+    protected override void FillParameters(ContainerExecutionPlan plan)
     {
         var applicationName = plan.Parent?.Parameters["name"];
         
@@ -28,7 +36,7 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
     }
 
     /// <inheritdoc />
-    protected override bool Validate(ExecutionPlan<Container, ContainerDefinition> plan)
+    protected override bool Validate(ContainerExecutionPlan plan)
     {
         if (!plan.Parameters.TryGetValue("name", out var name))
         {
@@ -38,7 +46,7 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
     }
 
     /// <inheritdoc />
-    protected override Container Install(ExecutionPlan<Container, ContainerDefinition> plan)
+    protected override Container Install(ContainerExecutionPlan plan)
     {
         var name = plan.Parameters["name"];
         
@@ -65,16 +73,9 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
             });
         }
 
-        var children = new List<Resource>();
-        foreach (var childPlan in plan.Children)
-        {
-            if (childPlan.Provider is IChangesContainer changesContainer)
-            {
-                changesContainer.ChangeContainer(childPlan, dockerParameters);
-            }
+        var children = plan.Children.Select(childPlan => childPlan.Install()).ToList();
 
-            children.Add(childPlan.Install());
-        }
+        plan.OnStartContainer(dockerParameters);
 
         var result = dockerService.StartContainer(dockerParameters).Result;
 

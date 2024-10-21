@@ -3,10 +3,10 @@ using Frierun.Server.Resources;
 
 namespace Frierun.Server.Providers;
 
-public class SelectorProvider: Provider
+public class SelectorProvider : Provider
 {
     /// <inheritdoc />
-    public override ExecutionPlan CreatePlan(State state, ResourceDefinition definition, ExecutionPlan? parent = null)
+    public override ExecutionPlan CreatePlan(State state, ResourceDefinition definition, ExecutionPlan? parent)
     {
         return new ExecutionPlan(state, this, parent)
         {
@@ -24,7 +24,7 @@ public class SelectorProvider: Provider
         {
             return false;
         }
-        
+
         var intSelected = int.Parse(selected);
         if (intSelected < 0 || intSelected > plan.Children.Count - 1)
         {

@@ -4,10 +4,10 @@ using Frierun.Server.Resources;
 
 namespace Frierun.Server.Providers;
 
-public class VolumeProvider : Provider<Volume, VolumeDefinition>, IChangesContainer
+public class VolumeProvider : Provider<Volume, VolumeDefinition>
 {
     /// <inheritdoc />
-    protected override void FillParameters(ExecutionPlan<Volume, VolumeDefinition> plan)
+    protected override void FillParameters(ExecutionPlan<VolumeDefinition> plan)
     {
         var containerName = plan.Parent?.Parameters["name"];
         if (containerName == null)
@@ -26,7 +26,7 @@ public class VolumeProvider : Provider<Volume, VolumeDefinition>, IChangesContai
     }
 
     /// <inheritdoc />
-    protected override bool Validate(ExecutionPlan<Volume, VolumeDefinition> plan)
+    protected override bool Validate(ExecutionPlan<VolumeDefinition> plan)
     {
         if (!plan.Parameters.TryGetValue("name", out var name))
         {
@@ -37,23 +37,27 @@ public class VolumeProvider : Provider<Volume, VolumeDefinition>, IChangesContai
     }
 
     /// <inheritdoc />
-    protected override Volume Install(ExecutionPlan<Volume, VolumeDefinition> plan)
+    protected override Volume Install(ExecutionPlan<VolumeDefinition> plan)
     {
-        return new Volume(Guid.NewGuid(), plan.Parameters["name"]);
-    }
+        var name = plan.Parameters["name"];
 
-    /// <inheritdoc />
-    public void ChangeContainer(ExecutionPlan plan, CreateContainerParameters parameters)
-    {
-        var volumePlan = (ExecutionPlan<Volume, VolumeDefinition>)plan;
-        var name = volumePlan.Parameters["name"];
-        
-        parameters.HostConfig.Mounts.Add(new Mount
-            {
-                Source = name,
-                Target = volumePlan.Definition.Path,
-                Type = "volume"
-            }
-        );
+        var parentPlan = plan.Parent as ContainerExecutionPlan;
+        if (parentPlan == null)
+        {
+            throw new Exception("Parent plan must be a container");
+        }
+
+        parentPlan.StartContainer += (parameters) =>
+        {
+            parameters.HostConfig.Mounts.Add(new Mount
+                {
+                    Source = name,
+                    Target = plan.Definition.Path,
+                    Type = "volume"
+                }
+            );
+        };
+
+        return new Volume(Guid.NewGuid(), name);
     }
 }

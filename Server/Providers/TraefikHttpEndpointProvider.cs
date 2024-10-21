@@ -1,13 +1,12 @@
-﻿using Docker.DotNet.Models;
-using Frierun.Server.Models;
+﻿using Frierun.Server.Models;
 using Frierun.Server.Resources;
 
 namespace Frierun.Server.Providers;
 
-public class TraefikHttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDefinition>, IChangesContainer
+public class TraefikHttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDefinition>
 {
     /// <inheritdoc />
-    protected override void FillParameters(ExecutionPlan<HttpEndpoint, HttpEndpointDefinition> plan)
+    protected override void FillParameters(ExecutionPlan<HttpEndpointDefinition> plan)
     {
         var name = plan.Parent?.Parameters["name"];
         
@@ -27,7 +26,7 @@ public class TraefikHttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDe
     }
 
     /// <inheritdoc />
-    protected override bool Validate(ExecutionPlan<HttpEndpoint, HttpEndpointDefinition> plan)
+    protected override bool Validate(ExecutionPlan<HttpEndpointDefinition> plan)
     {
         if (!plan.Parameters.TryGetValue("domain", out var domain))
         {
@@ -38,22 +37,27 @@ public class TraefikHttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDe
     }
 
     /// <inheritdoc />
-    protected override HttpEndpoint Install(ExecutionPlan<HttpEndpoint, HttpEndpointDefinition> plan)
+    protected override HttpEndpoint Install(ExecutionPlan<HttpEndpointDefinition> plan)
     {
         var domain = plan.Parameters["domain"];
+        
+        var parentPlan = plan.Parent as ContainerExecutionPlan;
+        if (parentPlan == null)
+        {
+            throw new Exception("Parent plan must be a container");
+        }
+
+
+        parentPlan.StartContainer += (parameters) =>
+        {
+            var subdomain = domain.Split('.')[0];
+            
+            parameters.Labels["traefik.enable"] = "true";
+            parameters.Labels["traefik.http.routers." + subdomain + ".rule"] = "Host(`" + domain + "`)";
+            parameters.Labels["traefik.http.services." + subdomain + ".loadbalancer.server.port"] = plan.Definition.Port.ToString();            
+        };
+
         // TODO: fill the correct port of the host
         return new TraefikHttpEndpoint(Guid.NewGuid(), domain, 80);
-    }
-
-    /// <inheritdoc />
-    public void ChangeContainer(ExecutionPlan plan, CreateContainerParameters parameters)
-    {
-        var httpEndpointPlan = (ExecutionPlan<HttpEndpoint, HttpEndpointDefinition>)plan;
-        var domain = httpEndpointPlan.Parameters["domain"];
-        var subdomain = domain.Split('.')[0];
-        
-        parameters.Labels["traefik.enable"] = "true";
-        parameters.Labels["traefik.http.routers." + subdomain + ".rule"] = "Host(`" + domain + "`)";
-        parameters.Labels["traefik.http.services." + subdomain + ".loadbalancer.server.port"] = httpEndpointPlan.Definition.Port.ToString();
     }
 }
