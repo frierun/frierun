@@ -53,7 +53,8 @@ public class VolumeProvider : Provider<Volume, VolumeDefinition>
                 {
                     Source = name,
                     Target = plan.Definition.Path,
-                    Type = "volume"
+                    Type = "volume",
+                    ReadOnly = plan.Definition.ReadOnly
                 }
             );
         };

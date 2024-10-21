@@ -23,7 +23,8 @@
         {
           "Type": "Volume",
           "Name": "media",
-          "Path": "/media"
+          "Path": "/media",
+          "ReadOnly": true
         }
       ]
     }
