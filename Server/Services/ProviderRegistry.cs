@@ -37,7 +37,8 @@ public class ProviderRegistry
             _providers[resourceType] = new List<Provider>();
         }
         
-        _providers[resourceType].Add(provider);
+        // Add the provider to the beginning of the list so that it is used first
+        _providers[resourceType].Insert(0, provider);
     }
 
     public void UseTraefik()
