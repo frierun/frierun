@@ -1,6 +1,7 @@
 import Uninstall from "./Uninstall.tsx";
 import {useGetApplications} from "../api/endpoints/applications.ts";
 
+
 export default function Applications() {
     const {data, isPending, isError} = useGetApplications();
 
@@ -8,30 +9,38 @@ export default function Applications() {
     if (isError) return <p>Error!</p>
 
     return (
-        <>
-            <h2 className="text-3xl font-bold underline">
-                Applications
+        <div className={"mx-2 lg:mx-10 my-6"}>
+            <h2 className="text-xl font-bold mb-4">
+                Installed Applications
             </h2>
-            <ul>
+            <div className={"grid lg:grid-cols-2 gap-4"}>
                 {data.data.map((item) => (
-                    <li key={item.id}>
+                    <div className={"bg-gray p-2 lg:p-4 rounded-md flex justify-between"} key={item.id}>
+                        <div className={"flex gap-3"}>
+                        <div className={"h-24 w-24 bg-secondary rounded flex-shrink-0"}></div>
                         <div>
-                            {item.name} ({item.id})
-                        </div>
-                        {item.serviceUrl && (
-                            <div>
-                                <a href={item.serviceUrl} target="_blank" rel="noreferrer noopener">
-                                    <span className="text-blue-500">{item.serviceUrl}</span>
-                                </a>
+                            <div className={"font-bold text-lg"}>
+                                {item.name}
                             </div>
-                        )}
+                            <div className={"text-sm"}>
+                                {item.id}
+                            </div>
+                            {item.serviceUrl && (
+                                <div>
+                                    <a href={item.serviceUrl} target="_blank" rel="noreferrer noopener" className={"text-black"}>
+                                        <span className="text-blue-500">{item.serviceUrl}</span>
+                                    </a>
+                                </div>
+                            )}
+                        </div>
+                        </div>
                         <div>
                             <Uninstall applicationId={item.id}/>
                         </div>
-                    </li>
+                    </div>
                 ))}
-            </ul>
-        </>
+            </div>
+        </div>
     )
 }
 

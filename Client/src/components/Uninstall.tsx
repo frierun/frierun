@@ -2,6 +2,7 @@
 import {useContext} from "react";
 import {getGetApplicationsQueryKey, useDeleteApplicationsId} from "../api/endpoints/applications.ts";
 import {useQueryClient} from "@tanstack/react-query";
+import Button from "./Button";
 
 type Props = {
     applicationId: string;
@@ -19,12 +20,6 @@ export default function Uninstall({applicationId}: Props) {
     }
 
     return (
-        <button
-            disabled={isPending}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            onClick={uninstall}
-        >
-            Uninstall
-        </button>
+        <Button type={"default"} onClick={uninstall} disabled={isPending}>Uninstall</Button>
     );
 }

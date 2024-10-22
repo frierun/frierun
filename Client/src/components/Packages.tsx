@@ -1,5 +1,6 @@
 import {Link} from "react-router-dom";
 import {useGetPackages} from "../api/endpoints/packages.ts";
+import Button from "./Button";
 
 export default function Packages() {
     const {data, isPending, isError} = useGetPackages();
@@ -8,19 +9,24 @@ export default function Packages() {
     if (isError) return <p>Error!</p>
 
     return (
-        <>
-            <h2 className="text-3xl font-bold underline">
+        <div className={"mx-2 lg:mx-10 my-6"}>
+            <h2 className="text-xl font-bold mb-4">
                 Packages
             </h2>
-            <ul>
+            <div className={"grid lg:grid-cols-3 gap-3"}>
                 {data.data.map((item) => (
-                    <li key={item.name}>
-                        {item.name}
-                        <Link to={`/packages/${item.name}`}>Install</Link>
-                    </li>
+                    <div key={item.name} className={"bg-gray p-2 lg:p-3 rounded-md flex justify-between items-center"}>
+                        <div className={"flex gap-3"}>
+                            <div className={"h-12 w-12 bg-secondary rounded flex-shrink-0"}></div>
+                        <div className={"text-bold text-md font-bold"}>{item.name}</div>
+                        </div>
+                        <Button type={"primary"}>
+                            <Link to={`/packages/${item.name}`}>Install</Link>
+                        </Button>
+                    </div>
                 ))}
-            </ul>
-        </>
+            </div>
+        </div>
     )
 }
 
