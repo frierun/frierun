@@ -34,4 +34,12 @@ public class ExecutionPlan(State state, Provider provider, ExecutionPlan? parent
     {
         return Provider.Install(this);
     }
+
+    /// <summary>
+    /// Installs all children
+    /// </summary>
+    public IReadOnlyList<Resource> InstallChildren()
+    {
+        return Children.Select(childPlan => childPlan.Install()).ToList();
+    }
 }

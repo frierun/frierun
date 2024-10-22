@@ -12,6 +12,7 @@ public static class Extensions
         // Providers
         services.AddSingleton<ApplicationProvider>();
         services.AddSingleton<ContainerProvider>();
+        services.AddSingleton<FileProvider>();
         services.AddSingleton<PortHttpEndpointProvider>();
         services.AddSingleton<TraefikHttpEndpointProvider>();
         services.AddSingleton<VolumeProvider>();

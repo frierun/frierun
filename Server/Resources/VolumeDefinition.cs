@@ -3,5 +3,6 @@
 public record VolumeDefinition(
     string Name,
     string Path,
+    IReadOnlyList<ResourceDefinition> Children,
     bool ReadOnly = false
-) : ResourceDefinition<Volume>(new List<ResourceDefinition>());
+) : ResourceDefinition<Volume>(Children);

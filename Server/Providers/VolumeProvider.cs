@@ -41,13 +41,12 @@ public class VolumeProvider : Provider<Volume, VolumeDefinition>
     {
         var name = plan.Parameters["name"];
 
-        var parentPlan = plan.Parent as ContainerExecutionPlan;
-        if (parentPlan == null)
+        if (plan.Parent is not ContainerExecutionPlan parentPlan)
         {
             throw new Exception("Parent plan must be a container");
         }
 
-        parentPlan.StartContainer += (parameters) =>
+        parentPlan.StartContainer += parameters =>
         {
             parameters.HostConfig.Mounts.Add(new Mount
                 {
@@ -59,6 +58,6 @@ public class VolumeProvider : Provider<Volume, VolumeDefinition>
             );
         };
 
-        return new Volume(Guid.NewGuid(), name);
+        return new Volume(Guid.NewGuid(), name, plan.InstallChildren());
     }
 }

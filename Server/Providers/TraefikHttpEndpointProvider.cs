@@ -40,15 +40,13 @@ public class TraefikHttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDe
     protected override HttpEndpoint Install(ExecutionPlan<HttpEndpointDefinition> plan)
     {
         var domain = plan.Parameters["domain"];
-        
-        var parentPlan = plan.Parent as ContainerExecutionPlan;
-        if (parentPlan == null)
+
+        if (plan.Parent is not ContainerExecutionPlan parentPlan)
         {
             throw new Exception("Parent plan must be a container");
         }
 
-
-        parentPlan.StartContainer += (parameters) =>
+        parentPlan.StartContainer += parameters =>
         {
             var subdomain = domain.Split('.')[0];
             

@@ -47,13 +47,12 @@ public class PortHttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDefin
     {
         var port = int.Parse(plan.Parameters["port"]);
 
-        var parentPlan = plan.Parent as ContainerExecutionPlan;
-        if (parentPlan == null)
+        if (plan.Parent is not ContainerExecutionPlan parentPlan)
         {
             throw new Exception("Parent plan must be a container");
         }
 
-        parentPlan.StartContainer += (parameters) =>
+        parentPlan.StartContainer += parameters =>
         {
             parameters.HostConfig.PortBindings[$"{plan.Definition.Port}/tcp"] =
                 new List<PortBinding>

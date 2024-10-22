@@ -73,7 +73,7 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
             });
         }
 
-        var children = plan.Children.Select(childPlan => childPlan.Install()).ToList();
+        var children = plan.InstallChildren();
 
         plan.OnStartContainer(dockerParameters);
 

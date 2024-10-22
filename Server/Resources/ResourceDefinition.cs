@@ -7,6 +7,7 @@ public record ResourceDefinition<T>(IReadOnlyList<ResourceDefinition> Children) 
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
 [JsonDerivedType(typeof(ContainerDefinition), "Container")]
+[JsonDerivedType(typeof(FileDefinition), "File")]
 [JsonDerivedType(typeof(HttpEndpointDefinition), "HttpEndpoint")]
 [JsonDerivedType(typeof(VolumeDefinition), "Volume")]
 public abstract record ResourceDefinition(

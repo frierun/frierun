@@ -32,8 +32,7 @@ public class ApplicationProvider : Provider<Application, Package>
     protected override Application Install(ExecutionPlan<Package> plan)
     {
         var name = plan.Parameters["name"];
-        var resources = plan.Children.Select(childPlan => childPlan.Install()).ToList();
 
-        return new Application(Guid.NewGuid(), name, resources, plan.Definition);
+        return new Application(Guid.NewGuid(), name, plan.InstallChildren(), plan.Definition);
     }
 }

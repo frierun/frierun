@@ -2,6 +2,7 @@
 using Frierun.Server.Models;
 using Frierun.Server.Providers;
 using Frierun.Server.Resources;
+using File = Frierun.Server.Resources.File;
 
 namespace Frierun.Server.Services;
 
@@ -12,7 +13,8 @@ public class ProviderRegistry
     public ProviderRegistry(
         State state,
         ApplicationProvider applicationProvider,
-        ContainerProvider containerProvider, 
+        ContainerProvider containerProvider,
+        FileProvider fileProvider,
         PortHttpEndpointProvider portHttpEndpointProvider,
         VolumeProvider volumeProvider,
         TraefikHttpEndpointProvider traefikHttpEndpointProvider
@@ -20,6 +22,7 @@ public class ProviderRegistry
     {
         Add(typeof(Application), applicationProvider);
         Add(typeof(Container), containerProvider);
+        Add(typeof(File), fileProvider);
         Add(typeof(HttpEndpoint), portHttpEndpointProvider);
         Add(typeof(TraefikHttpEndpoint), traefikHttpEndpointProvider);
         Add(typeof(Volume), volumeProvider);

@@ -13,7 +13,14 @@
         {
           "Type": "Volume",
           "Name": "config",
-          "Path": "/config"
+          "Path": "/config",
+          "Children": [
+            {
+              "Type": "File",
+              "Path": "configuration.yaml",
+              "Text": "http:\n  use_x_forwarded_for: true\n  trusted_proxies:\n    - 172.16.0.0/12\n"
+            }
+          ]
         }
       ]
     }
