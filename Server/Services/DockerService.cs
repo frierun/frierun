@@ -1,8 +1,8 @@
 ﻿using System.Formats.Tar;
+using System.IO.Pipelines;
 using System.Text;
 using Docker.DotNet;
 using Docker.DotNet.Models;
-using Frierun.Server.Resources;
 
 namespace Frierun.Server.Services;
 
@@ -98,16 +98,14 @@ public class DockerService(ILogger<DockerService> logger)
             return false;
         }
 
-        using var stream = new MemoryStream();
-        await using (var tarArchive = new TarWriter(stream, true))
+        var pipe = new Pipe();
+        await using (var tarArchive = new TarWriter(pipe.Writer.AsStream()))
         {
             await tarArchive.WriteEntryAsync(new PaxTarEntry(TarEntryType.RegularFile, path)
             {
                 DataStream = new MemoryStream(Encoding.UTF8.GetBytes(content))
             });
         }
-
-        stream.Position = 0;
 
         logger.LogInformation("Putting file {path} to container {ContainerId}", path, containerId);
         await _client.Containers.ExtractArchiveToContainerAsync(
@@ -116,7 +114,7 @@ public class DockerService(ILogger<DockerService> logger)
             {
                 Path = "/mnt"
             },
-            stream
+            pipe.Reader.AsStream()
         );
 
         logger.LogInformation("Deleting temporary container {ContainerId}", containerId);
