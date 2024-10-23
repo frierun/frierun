@@ -1,0 +1,21 @@
+﻿{
+  "Name": "vaultwarden",
+  "Url": "https://github.com/dani-garcia/vaultwarden/",
+  "Children": [
+    {
+      "Type": "Container",
+      "ImageName": "vaultwarden/server:latest",
+      "Children": [
+        {
+          "Type": "HttpEndpoint",
+          "Port": 80
+        },
+        {
+          "Type": "Volume",
+          "Name": "data",
+          "Path": "/data"
+        }
+      ]
+    }
+  ]
+}

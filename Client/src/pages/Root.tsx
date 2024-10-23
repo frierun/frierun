@@ -6,14 +6,14 @@ export default function Root() {
         <>
             <div className={"w-full h-16 bg-primary flex items-center overflow-x-hidden"}>
                 <div className={"ml-2 lg:ml-10 flex-shrink-0"}>
-                    <img src={'/public/logo-full.svg'}/>
+                    <img src={'/svg/logo-full.svg'}/>
                 </div>
                 <div className={"lg:ml-12 flex-shrink-0"}>
-                    <img src={'/public/deco.svg'}/>
+                    <img src={'/svg/deco.svg'}/>
                 </div>
             </div>
             <div className={"w-full bg-secondary-darker"} style={{height: 4}}>
-                <img src={'/public/deco-stripe.svg'}/>
+                <img src={'/svg/deco-stripe.svg'}/>
             </div>
             <Applications />
             <Packages />
