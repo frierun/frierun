@@ -8,7 +8,7 @@ export default function Root() {
                 <div className={"ml-2 lg:ml-10 flex-shrink-0"}>
                     <img src={'/svg/logo-full.svg'}/>
                 </div>
-                <div className={"lg:ml-12 flex-shrink-0"}>
+                <div className={"lg:ml-auto lg:mr-20 flex-shrink-0"}>
                     <img src={'/svg/deco.svg'}/>
                 </div>
             </div>
