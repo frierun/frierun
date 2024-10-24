@@ -9,4 +9,5 @@ import type { ExecutionPlanRequestParameters } from "./executionPlanRequestParam
 export interface ExecutionPlanRequest {
   children: ExecutionPlanRequest[];
   parameters: ExecutionPlanRequestParameters;
+  selectedIndex: number;
 }

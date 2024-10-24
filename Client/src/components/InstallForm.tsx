@@ -32,7 +32,7 @@ export default function InstallForm({response}: Props) {
     return (
         <>
             <ExecutionPlan
-                executionPlan={response.executionPlan}
+                selector={response.executionPlan}
                 onChange={(executionPlan) => setExecutionPlan(executionPlan)}
             />
             <button onClick={install} disabled={isPending}>

@@ -5,4 +5,4 @@
  * OpenAPI spec version: 1.0
  */
 
-export type ExecutionPlanResponseParameters = { [key: string]: string };
+export type ExecutionPlanParameters = { [key: string]: string };

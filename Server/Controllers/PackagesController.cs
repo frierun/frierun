@@ -13,16 +13,10 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
     {
         return packageRegistry.Packages;
     }
-
-    public record ExecutionPlanResponse(
-        string TypeName,
-        IDictionary<string, string> Parameters,
-        IList<ExecutionPlanResponse> Children
-    );
     
     public record ParametersResponse(
         Package Package,
-        ExecutionPlanResponse ExecutionPlan
+        ExecutionPlanSelector ExecutionPlan
     );
     
     /// <summary>
@@ -37,27 +31,16 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
             return null;
         }
 
-        var executionPlan = executionService.Create(package);
+        var selector = executionService.Create(package);
 
         return new ParametersResponse(
             package,
-            ToResponse(executionPlan)
-        );
-    }
-    
-    /// <summary>
-    /// Recursively converts an execution plan to a response json
-    /// </summary>
-    private ExecutionPlanResponse ToResponse(ExecutionPlan executionPlan)
-    {
-        return new ExecutionPlanResponse(
-            executionPlan.Provider.GetType().Name,
-            executionPlan.Parameters,
-            executionPlan.Children.Select(ToResponse).ToList()
+            selector
         );
     }
     
     public record ExecutionPlanRequest(
+        int SelectedIndex,
         IDictionary<string, string> Parameters,
         IList<ExecutionPlanRequest> Children
     );
@@ -85,23 +68,25 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
             return NotFound();
         }
 
-        var executionPlan = executionService.Create(package);
-        FromRequest(executionPlan, data.ExecutionPlan);
+        var selector = executionService.Create(package);
+        FromRequest(selector, data.ExecutionPlan);
 
-        if (!executionPlan.Validate())
+        if (!selector.Selected.Validate())
         {
             return BadRequest();
         }
 
-        Task.Run(() => installService.Handle(executionPlan));
+        Task.Run(() => installService.Handle(selector.Selected));
         return Accepted();
     }
 
     /// <summary>
     /// Recursively fills the execution plan with the given request
     /// </summary>
-    private void FromRequest(ExecutionPlan executionPlan, ExecutionPlanRequest request)
+    private void FromRequest(ExecutionPlanSelector selector, ExecutionPlanRequest request)
     {
+        selector.SelectedIndex = request.SelectedIndex;
+        var executionPlan = selector.Selected;
         foreach (var pair in request.Parameters)
         {
             executionPlan.Parameters[pair.Key] = pair.Value;

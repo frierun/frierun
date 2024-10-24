@@ -9,28 +9,22 @@ public class ExecutionService(
     State state
 )
 {
-    public ExecutionPlan Create(ResourceDefinition definition, ExecutionPlan? parent = null)
+    public ExecutionPlanSelector Create(ResourceDefinition definition, ExecutionPlan? parent = null)
     {
         var providers = providerRegistry.Get(definition.ResourceType);
         if (providers.Count == 0)
         {
             throw new Exception($"Can't find provider for resource {typeof(Application)}");
         }
-        
-        if (providers.Count == 1)
-        {
-            return Create(definition, parent, providers[0]);
-        }
 
-        var provider = new SelectorProvider();
-        var executionPlan = provider.CreatePlan(state, definition, parent);
 
-        foreach (var childProvider in providers)
+        var result = new ExecutionPlanSelector();
+        foreach (var provider in providers)
         {
-            executionPlan.Children.Add(Create(definition, parent, childProvider));
+            result.Children.Add(Create(definition, parent, provider));
         }
         
-        return executionPlan;
+        return result;
     }
     
     private ExecutionPlan Create(ResourceDefinition definition, ExecutionPlan? parent, Provider provider)

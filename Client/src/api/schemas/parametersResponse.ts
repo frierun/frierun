@@ -4,10 +4,10 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { ExecutionPlanResponse } from "./executionPlanResponse";
+import type { ExecutionPlanSelector } from "./executionPlanSelector";
 import type { Package } from "./package";
 
 export interface ParametersResponse {
-  executionPlan: ExecutionPlanResponse;
+  executionPlan: ExecutionPlanSelector;
   package: Package;
 }

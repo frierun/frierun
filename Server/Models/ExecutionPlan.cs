@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Providers;
+﻿using System.Text.Json.Serialization;
+using Frierun.Server.Providers;
 using Frierun.Server.Resources;
 
 namespace Frierun.Server.Models;
@@ -16,18 +17,24 @@ public class ExecutionPlan<TDefinition>(
 
 public class ExecutionPlan(State state, Provider provider, ExecutionPlan? parent)
 {
+    [JsonIgnore]
     public State State => state;
+    
+    [JsonIgnore]
     public Provider Provider => provider;
+    
+    [JsonIgnore]
     public ExecutionPlan? Parent => parent;
 
+    public string TypeName => provider.GetType().Name;
     public IDictionary<string, string> Parameters { get; } = new Dictionary<string, string>();
-    public IList<ExecutionPlan> Children { get; } = new List<ExecutionPlan>();
+    public IList<ExecutionPlanSelector> Children { get; } = new List<ExecutionPlanSelector>();
 
     public bool Validate()
     {
         if (Provider.Validate(this)) return true;
 
-        return Children.All(child => child.Validate());
+        return Children.All(child => child.Selected.Validate());
     }
 
     public Resource Install()
@@ -40,6 +47,6 @@ public class ExecutionPlan(State state, Provider provider, ExecutionPlan? parent
     /// </summary>
     public IReadOnlyList<Resource> InstallChildren()
     {
-        return Children.Select(childPlan => childPlan.Install()).ToList();
+        return Children.Select(selector => selector.Selected.Install()).ToList();
     }
 }

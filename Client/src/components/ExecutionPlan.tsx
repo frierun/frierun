@@ -2,59 +2,42 @@
 import {
     ExecutionPlanRequest,
     ExecutionPlanRequestParameters,
-    ExecutionPlanResponse,
+    type ExecutionPlanSelector,
 } from "../api/schemas";
 
 type Props = {
-    executionPlan: ExecutionPlanResponse;
+    selector: ExecutionPlanSelector;
     onChange: (executionPlan: ExecutionPlanRequest) => void;
 }
 
-export default function ExecutionPlan({executionPlan, onChange}: Props) {
+export default function ExecutionPlan({selector, onChange}: Props) {
+    const [selectedIndex, setSelectedIndex] = useState(selector.selectedIndex);
+    const executionPlan = selector.children[selectedIndex];
+    
     const [parameters, setParameters] = useState<ExecutionPlanRequestParameters>(executionPlan.parameters);
-    const [children, setChildren] = useState<ExecutionPlanRequest[]>(executionPlan.children);
+    const [children, setChildren] = useState<ExecutionPlanRequest[]>(
+        () => Array(executionPlan.children.length).fill({children: [], parameters: {}, selectedIndex: 0})
+    );
 
     useEffect(() => {
         setParameters(executionPlan.parameters);
-        setChildren(executionPlan.children);
+        setChildren(Array(executionPlan.children.length).fill({children: [], parameters: {}, selectedIndex: 0}));
     }, [executionPlan]);
 
     useEffect(() => {
-        onChange({children, parameters});
+        onChange({selectedIndex, children, parameters});
     }, [children, parameters]);
-
-    if (executionPlan.typeName === 'SelectorProvider') {
-        return (
-            <div className={'m-2'}>
-                <label>
-                    provider:
-                    <select value={parameters.selected} onChange={e => setParameters({selected: e.target.value})}>
-                        {executionPlan.children.map((child, index) => (
-                            <option key={child.typeName} value={index}>{child.typeName}</option>
-                        ))}
-                    </select>
-                </label>
-                <div className={'m-2'}>
-                    {executionPlan.children.map((child, index) => (
-                        <div key={index} className={index.toString() === parameters.selected ? '' : 'hidden'}>
-                            <ExecutionPlan
-                                executionPlan={child}
-                                onChange={
-                                    (result) => setChildren((oldChildren) => oldChildren.map((c, i) => i === index ? result : c))
-                                }
-                            />
-                        </div>
-                    ))}
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className={'m-2'}>
-            <div>
-                provider: {executionPlan.typeName}
-            </div>
+            <label>
+                provider:
+                <select value={parameters.selected} onChange={e => setSelectedIndex(parseInt(e.target.value))}>
+                    {selector.children.map((child, index) => (
+                        <option key={child.typeName} value={index}>{child.typeName}</option>
+                    ))}
+                </select>
+            </label>
             {Object.entries(parameters).map((pair) => (
                 <div key={pair[0]}>
                     <label>
@@ -76,7 +59,7 @@ export default function ExecutionPlan({executionPlan, onChange}: Props) {
                 {executionPlan.children.map((child, index) => (
                     <ExecutionPlan
                         key={index}
-                        executionPlan={child}
+                        selector={child}
                         onChange={
                             (result) => setChildren((oldChildren) => oldChildren.map((c, i) => i === index ? result : c))
                         }
