@@ -16,6 +16,10 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+#header {
+  height: 65px;
+  @apply w-full h-16 bg-primary flex items-center overflow-hidden;
+}
 .btn {
   @apply font-bold;
 }
@@ -53,11 +57,5 @@ button:focus-visible {
   :root {
     color: #213547;
     background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
   }
 }
