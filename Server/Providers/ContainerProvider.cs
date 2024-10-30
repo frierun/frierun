@@ -5,7 +5,8 @@ using Frierun.Server.Services;
 
 namespace Frierun.Server.Providers;
 
-public class ContainerProvider(DockerService dockerService) : Provider<Container, ContainerDefinition, ContainerExecutionPlan>
+public class ContainerProvider(DockerService dockerService)
+    : Provider<Container, ContainerDefinition, ContainerExecutionPlan>
 {
     /// <inheritdoc />
     public override ExecutionPlan CreatePlan(State state, ResourceDefinition definition, ExecutionPlan? parent)
@@ -18,51 +19,47 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
     /// <inheritdoc />
     protected override void FillParameters(ContainerExecutionPlan plan)
     {
-        var applicationName = plan.Parent?.Parameters["name"];
-        
-        if (applicationName == null)
-        {
-            throw new Exception("Application name not found");
-        }
-        
-        plan.Parameters["name"] = applicationName;
+        var defaultName = plan.Definition.Name ?? "";
+        plan.Parameters["name"] = defaultName;
 
         var count = 1;
         while (!Validate(plan))
         {
             count++;
-            plan.Parameters["name"] = $"{applicationName}{count}";
+            plan.Parameters["name"] = $"{defaultName}{count}";
         }
     }
 
     /// <inheritdoc />
     protected override bool Validate(ContainerExecutionPlan plan)
     {
-        if (!plan.Parameters.TryGetValue("name", out var name))
-        {
-            return false;
-        }
+        var name = plan.GetFullName();
         return plan.State.Resources.OfType<Container>().All(resource => resource.Name != name);
     }
 
     /// <inheritdoc />
     protected override Container Install(ContainerExecutionPlan plan)
     {
-        var name = plan.Parameters["name"];
-        
+        var name = plan.GetFullName();
+
         var dockerParameters = new CreateContainerParameters
         {
-            Cmd = plan.Definition.Command?.Split(' '),
+            Cmd = plan.Definition.Command.ToList(),
+            Env = plan.Definition.Env.Select(kv => $"{kv.Key}={kv.Value}").ToList(),
             Image = plan.Definition.ImageName,
             HostConfig = new HostConfig
             {
-                PortBindings = new Dictionary<string, IList<PortBinding>>(),
-                Mounts = new List<Mount>()
+                Mounts = new List<Mount>(),
+                PortBindings = new Dictionary<string, IList<PortBinding>>()
             },
             Labels = new Dictionary<string, string>(),
             Name = name,
+            NetworkingConfig = new NetworkingConfig()
+            {
+                EndpointsConfig = new Dictionary<string, EndpointSettings>()
+            }
         };
-        
+
         if (plan.Definition.RequireDocker)
         {
             dockerParameters.HostConfig.Mounts.Add(new Mount
@@ -85,6 +82,5 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
         }
 
         return new Container(Guid.NewGuid(), name, children);
-
     }
 }

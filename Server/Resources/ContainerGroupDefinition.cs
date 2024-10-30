@@ -1,7 +1,6 @@
 ﻿namespace Frierun.Server.Resources;
 
-public record Package(
-    string Url,
+public record ContainerGroupDefinition(
     IReadOnlyList<ResourceDefinition> Children,
     string? Name = null
-) : ResourceDefinition<Application>(Children, Name);
+) : ResourceDefinition<ContainerGroup>(Children, Name);

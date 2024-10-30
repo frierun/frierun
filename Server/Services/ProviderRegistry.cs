@@ -13,6 +13,7 @@ public class ProviderRegistry
     public ProviderRegistry(
         State state,
         ApplicationProvider applicationProvider,
+        ContainerGroupProvider containerGroupProvider,
         ContainerProvider containerProvider,
         FileProvider fileProvider,
         PortHttpEndpointProvider portHttpEndpointProvider,
@@ -21,6 +22,7 @@ public class ProviderRegistry
     )
     {
         Add(typeof(Application), applicationProvider);
+        Add(typeof(ContainerGroup), containerGroupProvider);
         Add(typeof(Container), containerProvider);
         Add(typeof(File), fileProvider);
         Add(typeof(HttpEndpoint), portHttpEndpointProvider);

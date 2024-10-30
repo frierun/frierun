@@ -1,6 +1,6 @@
 ﻿namespace Frierun.Server.Resources;
 
-public record Container(
+public record ContainerGroup(
     Guid Id,
     string Name,
     IReadOnlyList<Resource> Children

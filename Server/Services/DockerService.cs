@@ -84,7 +84,7 @@ public class DockerService(ILogger<DockerService> logger)
         });
 
         var containerId = result.ID;
-        
+
         logger.LogInformation("Starting container {ContainerId}", containerId);
 
         var started = await _client.Containers.StartContainerAsync(
@@ -123,7 +123,7 @@ public class DockerService(ILogger<DockerService> logger)
             containerId,
             new ContainerRemoveParameters { RemoveVolumes = false }
         );
-        
+
         return true;
     }
 
@@ -134,27 +134,30 @@ public class DockerService(ILogger<DockerService> logger)
     {
         logger.LogInformation("Stopping container {ContainerName}", containerName);
 
-        var container = await _client.Containers.ListContainersAsync(new ContainersListParameters
+        var response = await _client.Containers.ListContainersAsync(new ContainersListParameters
         {
             All = true
         });
 
-        var containerId = container.FirstOrDefault(c => c.Names.Contains($"/{containerName}"))?.ID;
-
-        if (containerId == null)
+        var container = response.FirstOrDefault(c => c.Names.Contains($"/{containerName}"));
+        if (container == null)
         {
             logger.LogError("Container {ContainerName} not found", containerName);
             return true;
         }
 
-        if (!await _client.Containers.StopContainerAsync(containerId, new ContainerStopParameters()))
+        if (container.State == "running")
         {
-            logger.LogError("Failed to stop container {ContainerName}", containerName);
-            return false;
+            logger.LogInformation("Stopping container {ContainerName}", containerName);
+            if (!await _client.Containers.StopContainerAsync(container.ID, new ContainerStopParameters()))
+            {
+                logger.LogError("Failed to stop container {ContainerName}", containerName);
+                return false;
+            }
         }
 
         await _client.Containers.RemoveContainerAsync(
-            containerId,
+            container.ID,
             new ContainerRemoveParameters { RemoveVolumes = true }
         );
 
@@ -173,6 +176,47 @@ public class DockerService(ILogger<DockerService> logger)
         catch (Exception e)
         {
             logger.LogError(e, "Failed to remove volume {VolumeName}", volumeName);
+            return false;
+        }
+
+        return true;
+    }
+    
+    /// <summary>
+    /// Creates new network for a container group
+    /// </summary>
+    public async Task<bool> CreateNetwork(string networkName)
+    {
+        logger.LogInformation("Creating network {NetworkName}", networkName);
+        try
+        {
+            await _client.Networks.CreateNetworkAsync(new NetworksCreateParameters
+            {
+                Name = networkName
+            });
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to create network {NetworkName}", networkName);
+            return false;
+        }
+
+        return true;
+    }
+    
+    /// <summary>
+    /// Removes network
+    /// </summary>
+    public async Task<bool> RemoveNetwork(string networkName)
+    {
+        logger.LogInformation("Removing network {NetworkName}", networkName);
+        try
+        {
+            await _client.Networks.DeleteNetworkAsync(networkName);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to remove network {NetworkName}", networkName);
             return false;
         }
 

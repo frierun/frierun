@@ -9,30 +9,21 @@ public class VolumeProvider : Provider<Volume, VolumeDefinition>
     /// <inheritdoc />
     protected override void FillParameters(ExecutionPlan<VolumeDefinition> plan)
     {
-        var containerName = plan.Parent?.Parameters["name"];
-        if (containerName == null)
-        {
-            throw new InvalidOperationException("Volume must be created as a child of a container");
-        }
+        var defaultName = plan.Definition.Name ?? "";
+        plan.Parameters["name"] = defaultName;
         
-        plan.Parameters["name"] = $"{containerName}-{plan.Definition.Name}";
-
         var count = 1;
         while (!Validate(plan))
         {
             count++;
-            plan.Parameters["name"] = $"{containerName}-{plan.Definition.Name}{count}";
+            plan.Parameters["name"] = $"{defaultName}{count}";
         }
     }
 
     /// <inheritdoc />
     protected override bool Validate(ExecutionPlan<VolumeDefinition> plan)
     {
-        if (!plan.Parameters.TryGetValue("name", out var name))
-        {
-            return false;
-        }
-
+        var name = plan.GetFullName();
         return plan.State.Resources.OfType<Volume>().All(resource => resource.Name != name);
     }
 

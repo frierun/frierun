@@ -8,13 +8,14 @@ public class ApplicationProvider : Provider<Application, Package>
     /// <inheritdoc />
     protected override void FillParameters(ExecutionPlan<Package> plan)
     {
-        plan.Parameters["name"] = plan.Definition.Name;
+        var packageName = plan.Definition.Name ?? throw new InvalidOperationException("Package name is required");
+        plan.Parameters["name"] = packageName;
 
         var count = 1;
         while (!Validate(plan))
         {
             count++;
-            plan.Parameters["name"] = $"{plan.Definition.Name}{count}";
+            plan.Parameters["name"] = $"{packageName}-{count}";
         }
     }
     

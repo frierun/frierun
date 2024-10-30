@@ -5,7 +5,10 @@
     {
       "Type": "Container",
       "ImageName": "traefik:v3.1",
-      "Command": "--api.insecure=true --providers.docker",
+      "Command": [
+        "--api.insecure=true",
+        "--providers.docker"
+      ],
       "RequireDocker": true,
       "Children": [
         {

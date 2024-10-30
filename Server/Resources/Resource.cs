@@ -4,6 +4,7 @@ namespace Frierun.Server.Resources;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
 [JsonDerivedType(typeof(Container), "Container")]
+[JsonDerivedType(typeof(ContainerGroup), "ContainerGroup")]
 [JsonDerivedType(typeof(File), "File")]
 [JsonDerivedType(typeof(HttpEndpoint), "HttpEndpoint")]
 [JsonDerivedType(typeof(PortHttpEndpoint), "PortHttpEndpoint")]

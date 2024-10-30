@@ -41,6 +41,33 @@ public abstract class Provider<TResource, TDefinition, TExecutionPlan> : Provide
     {
         return Install((TExecutionPlan)plan);
     }
+
+    private string GetFullName(TExecutionPlan plan)
+    {
+        if (!plan.Parameters.TryGetValue("name", out var name))
+        {
+            name = plan.Definition.Name ?? "";
+        }
+
+        if (plan.Parent == null)
+        {
+            return name;
+        }
+        
+        var parentName = plan.Parent.GetFullName();
+        if (name == "")
+        {
+            return parentName;
+        }
+        
+        return $"{parentName}-{name}";
+    }
+
+    /// <inheritdoc />
+    public override string GetFullName(ExecutionPlan plan)
+    {
+        return GetFullName((TExecutionPlan)plan);
+    }
 }
 
 public abstract class Provider
@@ -48,4 +75,6 @@ public abstract class Provider
     public abstract ExecutionPlan CreatePlan(State state, ResourceDefinition definition, ExecutionPlan? parent);
     public abstract bool Validate(ExecutionPlan plan);
     public abstract Resource Install(ExecutionPlan plan);
+
+    public abstract string GetFullName(ExecutionPlan plan);
 }

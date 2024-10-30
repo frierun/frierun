@@ -14,7 +14,7 @@ public class UninstallService(DockerService dockerService, State state, StateSer
 
         try
         {
-            foreach (var container in application.Children.OfType<Container>())
+            foreach (var container in application.AllResources.OfType<Container>())
             {
                 await dockerService.StopContainer(container.Name);
             }
@@ -22,6 +22,11 @@ public class UninstallService(DockerService dockerService, State state, StateSer
             foreach (var volume in application.AllResources.OfType<Volume>())
             {
                 await dockerService.RemoveVolume(volume.Name);
+            }
+
+            foreach (var containerGroup in application.AllResources.OfType<ContainerGroup>())
+            {
+                await dockerService.RemoveNetwork(containerGroup.Name);
             }
 
             state.Applications.Remove(application);

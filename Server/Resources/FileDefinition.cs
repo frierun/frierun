@@ -2,5 +2,6 @@
 
 public record FileDefinition(
     string Path,
-    string Text
-) : ResourceDefinition<File>(new List<ResourceDefinition>());
+    string Text,
+    string? Name = null
+) : ResourceDefinition<File>(new List<ResourceDefinition>(), Name);

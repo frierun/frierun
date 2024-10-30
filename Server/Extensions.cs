@@ -11,6 +11,7 @@ public static class Extensions
     {
         // Providers
         services.AddSingleton<ApplicationProvider>();
+        services.AddSingleton<ContainerGroupProvider>();
         services.AddSingleton<ContainerProvider>();
         services.AddSingleton<FileProvider>();
         services.AddSingleton<PortHttpEndpointProvider>();

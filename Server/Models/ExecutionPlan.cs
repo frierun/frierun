@@ -43,10 +43,15 @@ public class ExecutionPlan(State state, Provider provider, ExecutionPlan? parent
     }
 
     /// <summary>
-    /// Installs all children
+    /// Install all children
     /// </summary>
     public IReadOnlyList<Resource> InstallChildren()
     {
         return Children.Select(selector => selector.Selected.Install()).ToList();
+    }
+
+    public string GetFullName()
+    {
+        return Provider.GetFullName(this);
     }
 }

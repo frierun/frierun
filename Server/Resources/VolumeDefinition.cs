@@ -1,8 +1,8 @@
 ﻿namespace Frierun.Server.Resources;
 
 public record VolumeDefinition(
-    string Name,
     string Path,
     IReadOnlyList<ResourceDefinition> Children,
+    string? Name = null,
     bool ReadOnly = false
-) : ResourceDefinition<Volume>(Children);
+) : ResourceDefinition<Volume>(Children, Name);
