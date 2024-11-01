@@ -8,6 +8,7 @@ namespace Frierun.Server.Services;
 
 public class ProviderRegistry
 {
+    private readonly DockerService _dockerService;
     private readonly Dictionary<Type, IList<Provider>> _providers = new();
 
     public ProviderRegistry(
@@ -18,20 +19,21 @@ public class ProviderRegistry
         FileProvider fileProvider,
         PortHttpEndpointProvider portHttpEndpointProvider,
         VolumeProvider volumeProvider,
-        TraefikHttpEndpointProvider traefikHttpEndpointProvider
+        DockerService dockerService
     )
     {
+        _dockerService = dockerService;
         Add(typeof(Application), applicationProvider);
         Add(typeof(ContainerGroup), containerGroupProvider);
         Add(typeof(Container), containerProvider);
         Add(typeof(File), fileProvider);
         Add(typeof(HttpEndpoint), portHttpEndpointProvider);
-        Add(typeof(TraefikHttpEndpoint), traefikHttpEndpointProvider);
         Add(typeof(Volume), volumeProvider);
         
-        if (state.Applications.Any(a => a.Package?.Name == "traefik"))
+        var traefik = state.Applications.FirstOrDefault(a => a.Package?.Name == "traefik");
+        if (traefik != null)
         {
-            UseTraefik();
+            UseTraefik(traefik);
         }
     }
 
@@ -46,14 +48,11 @@ public class ProviderRegistry
         _providers[resourceType].Insert(0, provider);
     }
 
-    public void UseTraefik()
+    public void UseTraefik(Application application)
     {
-        var traefikHttpEndpointProvider = Get(typeof(TraefikHttpEndpoint)).FirstOrDefault();
-        if (traefikHttpEndpointProvider == null)
-        {
-            throw new Exception("TraefikHttpEndpointProvider not found");
-        }
+        var traefikHttpEndpointProvider = new TraefikHttpEndpointProvider(_dockerService, application);
         Add(typeof(HttpEndpoint), traefikHttpEndpointProvider);
+        Add(typeof(TraefikHttpEndpoint), traefikHttpEndpointProvider);
     }
 
     public IList<Provider> Get(Type resourceType)

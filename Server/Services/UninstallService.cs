@@ -3,9 +3,14 @@ using Frierun.Server.Resources;
 
 namespace Frierun.Server.Services;
 
-public class UninstallService(DockerService dockerService, State state, StateSerializer stateSerializer, StateManager stateManager)
+public class UninstallService(
+    State state,
+    StateSerializer stateSerializer,
+    StateManager stateManager,
+    ProviderRegistry providerRegistry,
+    ILogger<UninstallService> logger)
 {
-    public async Task Handle(Application application)
+    public void Handle(Application application)
     {
         if (!stateManager.StartTask("uninstall"))
         {
@@ -16,17 +21,27 @@ public class UninstallService(DockerService dockerService, State state, StateSer
         {
             foreach (var container in application.AllResources.OfType<Container>())
             {
-                await dockerService.StopContainer(container.Name);
-            }
-            
-            foreach (var volume in application.AllResources.OfType<Volume>())
-            {
-                await dockerService.RemoveVolume(volume.Name);
+                UninstallResource(container);
             }
 
+            foreach (var volume in application.AllResources.OfType<Volume>())
+            {
+                UninstallResource(volume);
+            }
+
+            foreach (var volume in application.AllResources.OfType<Volume>())
+            {
+                UninstallResource(volume);
+            }
+
+            foreach (var resource in application.AllResources.OfType<TraefikHttpEndpoint>())
+            {
+                UninstallResource(resource);
+            }
+            
             foreach (var containerGroup in application.AllResources.OfType<ContainerGroup>())
             {
-                await dockerService.RemoveNetwork(containerGroup.Name);
+                UninstallResource(containerGroup);
             }
 
             state.Applications.Remove(application);
@@ -36,5 +51,27 @@ public class UninstallService(DockerService dockerService, State state, StateSer
         {
             stateManager.FinishTask();
         }
+    }
+
+    /// <summary>
+    /// Uninstalls a resource
+    /// </summary>
+    private void UninstallResource(Resource resource)
+    {
+        var providers = providerRegistry.Get(resource.GetType());
+        if (providers.Count > 1)
+        {
+            logger.LogError("Multiple providers found for resource type {ResourceType}", resource.GetType().Name);
+            return;
+        }
+        
+        if (providers.Count == 0)
+        {
+            logger.LogError("No providers found for resource type {ResourceType}", resource.GetType().Name);
+            return;
+        }
+
+        var provider = providers[0];
+        provider.Uninstall(resource);
     }
 }

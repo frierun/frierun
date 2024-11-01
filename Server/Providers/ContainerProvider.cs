@@ -83,4 +83,10 @@ public class ContainerProvider(DockerService dockerService)
 
         return new Container(Guid.NewGuid(), name, children);
     }
+
+    /// <inheritdoc />
+    protected override void Uninstall(Container resource)
+    {
+        dockerService.StopContainer(resource.Name).Wait();
+    }
 }

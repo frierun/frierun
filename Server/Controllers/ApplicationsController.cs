@@ -35,8 +35,8 @@ public class ApplicationsController : ControllerBase
         {
             return NotFound();
         }
-        
-        _ = uninstallService.Handle(application);
+
+        Task.Run(() => uninstallService.Handle(application));
         
         return Accepted();
     }

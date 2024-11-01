@@ -222,4 +222,48 @@ public class DockerService(ILogger<DockerService> logger)
 
         return true;
     }
+
+    /// <summary>
+    /// Attaches container to network
+    /// </summary>
+    public async Task<bool> AttachNetwork(string networkName, string containerName)
+    {
+        logger.LogInformation("Attaching container {ContainerName} to network {NetworkName}", containerName, networkName);
+        try
+        {
+            await _client.Networks.ConnectNetworkAsync(networkName, new NetworkConnectParameters
+            {
+                Container = containerName
+            });
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to attach container {ContainerName} to network {NetworkName}", containerName, networkName);
+            return false;
+        }
+
+        return true;
+    }
+    
+    /// <summary>
+    /// Detaches container from network
+    /// </summary>
+    public async Task<bool> DetachNetwork(string networkName, string containerName)
+    {
+        logger.LogInformation("Detaching container {ContainerName} to network {NetworkName}", containerName, networkName);
+        try
+        {
+            await _client.Networks.DisconnectNetworkAsync(networkName, new NetworkDisconnectParameters()
+            {
+                Container = containerName
+            });
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to detach container {ContainerName} from network {NetworkName}", containerName, networkName);
+            return false;
+        }
+
+        return true;
+    }    
 }

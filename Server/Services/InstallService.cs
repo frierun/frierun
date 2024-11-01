@@ -20,12 +20,12 @@ public class InstallService(
 
         try
         {
-            var resource = (Application)executionPlan.Install();
-            state.Applications.Add(resource);
+            var application = (Application)executionPlan.Install();
+            state.Applications.Add(application);
             stateSerializer.Save(state);
-            if (resource.Package?.Name == "traefik")
+            if (application.Package?.Name == "traefik")
             {
-                providerRegistry.UseTraefik();
+                providerRegistry.UseTraefik(application);
             }
         }
         finally

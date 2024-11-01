@@ -41,6 +41,15 @@ public abstract class Provider<TResource, TDefinition, TExecutionPlan> : Provide
     {
         return Install((TExecutionPlan)plan);
     }
+    
+    protected abstract void Uninstall(TResource resource);
+
+    /// <inheritdoc />
+    [DebuggerStepThrough]
+    public override void Uninstall(Resource resource)
+    {
+        Uninstall((TResource)resource);
+    }
 
     private string GetFullName(TExecutionPlan plan)
     {
@@ -75,6 +84,7 @@ public abstract class Provider
     public abstract ExecutionPlan CreatePlan(State state, ResourceDefinition definition, ExecutionPlan? parent);
     public abstract bool Validate(ExecutionPlan plan);
     public abstract Resource Install(ExecutionPlan plan);
+    public abstract void Uninstall(Resource resource);
 
     public abstract string GetFullName(ExecutionPlan plan);
 }

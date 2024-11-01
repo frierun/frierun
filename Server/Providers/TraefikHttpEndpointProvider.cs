@@ -1,9 +1,10 @@
 ﻿using Frierun.Server.Models;
 using Frierun.Server.Resources;
+using Frierun.Server.Services;
 
 namespace Frierun.Server.Providers;
 
-public class TraefikHttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDefinition>
+public class TraefikHttpEndpointProvider(DockerService dockerService, Application application) : Provider<HttpEndpoint, HttpEndpointDefinition>
 {
     /// <inheritdoc />
     protected override void FillParameters(ExecutionPlan<HttpEndpointDefinition> plan)
@@ -41,21 +42,45 @@ public class TraefikHttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDe
     {
         var domain = plan.Parameters["domain"];
 
-        if (plan.Parent is not ContainerExecutionPlan parentPlan)
+        if (plan.Parent is not ContainerExecutionPlan containerPlan)
         {
             throw new Exception("Parent plan must be a container");
         }
+        
+        var traefikContainer = application.AllResources.OfType<Container>().FirstOrDefault();
+        if (traefikContainer == null)
+        {
+            throw new Exception("Traefik container not found");
+        }
+        
+        var containerGroupPlan = containerPlan.Parent as ExecutionPlan<ContainerGroupDefinition>;
 
-        parentPlan.StartContainer += parameters =>
+        containerPlan.StartContainer += parameters =>
         {
             var subdomain = domain.Split('.')[0];
             
             parameters.Labels["traefik.enable"] = "true";
             parameters.Labels["traefik.http.routers." + subdomain + ".rule"] = "Host(`" + domain + "`)";
-            parameters.Labels["traefik.http.services." + subdomain + ".loadbalancer.server.port"] = plan.Definition.Port.ToString();            
+            parameters.Labels["traefik.http.services." + subdomain + ".loadbalancer.server.port"] = plan.Definition.Port.ToString();
+            
+            if (containerGroupPlan != null)
+            {
+                var networkName = containerGroupPlan.GetFullName();
+                dockerService.AttachNetwork(networkName, traefikContainer.Name).Wait();
+            }
         };
 
-        // TODO: fill the correct port of the host
-        return new TraefikHttpEndpoint(Guid.NewGuid(), domain, 80);
+        var traefikPort = application.AllResources.OfType<PortHttpEndpoint>().FirstOrDefault();
+        if (traefikPort == null)
+        {
+            throw new Exception("Traefik port not found");
+        }
+        return new TraefikHttpEndpoint(Guid.NewGuid(), domain, traefikPort.Port);
+    }
+
+    /// <inheritdoc />
+    protected override void Uninstall(HttpEndpoint resource)
+    {
+        // TODO detach network
     }
 }

@@ -33,4 +33,9 @@ public class FileProvider(DockerService dockerService) : Provider<File, FileDefi
 
         return new File(Guid.NewGuid());
     }
+
+    /// <inheritdoc />
+    protected override void Uninstall(File resource)
+    {
+    }
 }

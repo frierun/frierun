@@ -36,4 +36,9 @@ public class ApplicationProvider : Provider<Application, Package>
 
         return new Application(Guid.NewGuid(), name, plan.InstallChildren(), plan.Definition);
     }
+
+    /// <inheritdoc />
+    protected override void Uninstall(Application resource)
+    {
+    }
 }

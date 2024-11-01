@@ -54,4 +54,10 @@ public class ContainerGroupProvider(DockerService dockerService) : Provider<Cont
 
         return new ContainerGroup(Guid.NewGuid(), name, containers);
     }
+
+    /// <inheritdoc />
+    protected override void Uninstall(ContainerGroup resource)
+    {
+        dockerService.RemoveNetwork(resource.Name).Wait();
+    }
 }

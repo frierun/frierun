@@ -1,10 +1,11 @@
 ﻿using Docker.DotNet.Models;
 using Frierun.Server.Models;
 using Frierun.Server.Resources;
+using Frierun.Server.Services;
 
 namespace Frierun.Server.Providers;
 
-public class VolumeProvider : Provider<Volume, VolumeDefinition>
+public class VolumeProvider(DockerService dockerService) : Provider<Volume, VolumeDefinition>
 {
     /// <inheritdoc />
     protected override void FillParameters(ExecutionPlan<VolumeDefinition> plan)
@@ -30,7 +31,7 @@ public class VolumeProvider : Provider<Volume, VolumeDefinition>
     /// <inheritdoc />
     protected override Volume Install(ExecutionPlan<VolumeDefinition> plan)
     {
-        var name = plan.Parameters["name"];
+        var name = plan.GetFullName();
 
         if (plan.Parent is not ContainerExecutionPlan parentPlan)
         {
@@ -50,5 +51,11 @@ public class VolumeProvider : Provider<Volume, VolumeDefinition>
         };
 
         return new Volume(Guid.NewGuid(), name, plan.InstallChildren());
+    }
+
+    /// <inheritdoc />
+    protected override void Uninstall(Volume resource)
+    {
+        dockerService.RemoveVolume(resource.Name).Wait();
     }
 }
