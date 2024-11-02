@@ -1,5 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using Frierun.Server.Models;
 using Frierun.Server.Resources;
 using File = System.IO.File;
@@ -18,7 +20,7 @@ public class StateSerializer
             WriteIndented = true,
             Converters = { new PackageConverter(packageRegistry) },
         };
-
+        
         var localData = Environment.GetEnvironmentVariable(
             RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? "LocalAppData"
@@ -33,7 +35,7 @@ public class StateSerializer
 
         Path = System.IO.Path.Combine(directory, "state.json");
     }
-
+    
     /// <summary>
     /// Loads state from disk
     /// </summary>

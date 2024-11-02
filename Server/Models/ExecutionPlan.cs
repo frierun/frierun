@@ -39,7 +39,9 @@ public class ExecutionPlan(State state, Provider provider, ExecutionPlan? parent
 
     public Resource Install()
     {
-        return Provider.Install(this);
+        var resource = Provider.Install(this);
+        State.Resources.Add(resource);
+        return resource;
     }
 
     /// <summary>

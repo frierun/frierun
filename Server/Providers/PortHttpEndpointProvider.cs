@@ -65,7 +65,7 @@ public class PortHttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDefin
         };
 
         // TODO: fill the correct ip of the host
-        return new PortHttpEndpoint(Guid.NewGuid(), "127.0.0.1", port);
+        return new PortHttpEndpoint("127.0.0.1", port);
     }
 
     /// <inheritdoc />

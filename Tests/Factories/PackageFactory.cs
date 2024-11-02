@@ -7,7 +7,7 @@ namespace Frierun.Tests.Factories;
 
 public sealed class PackageFactory : Faker<Package>
 {
-    private readonly HashSet<string> _uniqueNames = [];
+    private readonly HashSet<string?> _uniqueNames = [];
     
     public PackageFactory(PackageRegistry packageRegistry, Faker<ContainerDefinition> containerDefinitionFactory)
     {

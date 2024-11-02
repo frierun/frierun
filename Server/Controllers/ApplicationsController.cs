@@ -17,10 +17,10 @@ public class ApplicationsController : ControllerBase
     [HttpGet]
     public IEnumerable<ApplicationResponse> List(State state)
     {
-        return state.Applications.Select(application => new ApplicationResponse(
+        return state.Resources.OfType<Application>().Select(application => new ApplicationResponse(
             application.Id,
             application.Name,
-            application.AllResources.OfType<HttpEndpoint>().FirstOrDefault()?.Url
+            application.AllDependencies.OfType<HttpEndpoint>().FirstOrDefault()?.Url
         ));
     }
     
@@ -29,7 +29,7 @@ public class ApplicationsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(void))]
     public IActionResult Uninstall(Guid id, State state, UninstallService uninstallService)
     {
-        var application = state.Applications.FirstOrDefault(a => a.Id == id);
+        var application = state.Resources.OfType<Application>().FirstOrDefault(a => a.Id == id);
         
         if (application == null)
         {

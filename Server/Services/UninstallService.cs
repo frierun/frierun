@@ -19,32 +19,32 @@ public class UninstallService(
 
         try
         {
-            foreach (var container in application.AllResources.OfType<Container>())
+            foreach (var container in application.AllDependencies.OfType<Container>())
             {
                 UninstallResource(container);
             }
 
-            foreach (var volume in application.AllResources.OfType<Volume>())
+            foreach (var volume in application.AllDependencies.OfType<Volume>())
             {
                 UninstallResource(volume);
             }
 
-            foreach (var volume in application.AllResources.OfType<Volume>())
+            foreach (var volume in application.AllDependencies.OfType<Volume>())
             {
                 UninstallResource(volume);
             }
 
-            foreach (var resource in application.AllResources.OfType<TraefikHttpEndpoint>())
+            foreach (var resource in application.AllDependencies.OfType<TraefikHttpEndpoint>())
             {
                 UninstallResource(resource);
             }
             
-            foreach (var containerGroup in application.AllResources.OfType<ContainerGroup>())
+            foreach (var containerGroup in application.AllDependencies.OfType<ContainerGroup>())
             {
                 UninstallResource(containerGroup);
             }
 
-            state.Applications.Remove(application);
+            state.Resources.Remove(application);
             stateSerializer.Save(state);
         }
         finally
@@ -73,5 +73,6 @@ public class UninstallService(
 
         var provider = providers[0];
         provider.Uninstall(resource);
+        state.Resources.Remove(resource);
     }
 }

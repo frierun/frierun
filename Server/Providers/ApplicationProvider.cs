@@ -26,7 +26,7 @@ public class ApplicationProvider : Provider<Application, Package>
         {
             return false;
         }
-        return plan.State.Applications.All(application => application.Name != name);
+        return plan.State.Resources.OfType<Application>().All(application => application.Name != name);
     }
 
     /// <inheritdoc />
@@ -34,7 +34,10 @@ public class ApplicationProvider : Provider<Application, Package>
     {
         var name = plan.Parameters["name"];
 
-        return new Application(Guid.NewGuid(), name, plan.InstallChildren(), plan.Definition);
+        return new Application(Guid.NewGuid(), name, plan.Definition)
+        {
+            DependsOn = plan.InstallChildren()
+        };
     }
 
     /// <inheritdoc />

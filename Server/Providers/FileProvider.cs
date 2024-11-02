@@ -31,7 +31,7 @@ public class FileProvider(DockerService dockerService) : Provider<File, FileDefi
         
         dockerService.PutFile(volumeName, plan.Definition.Path, plan.Definition.Text).Wait();
 
-        return new File(Guid.NewGuid());
+        return new File();
     }
 
     /// <inheritdoc />

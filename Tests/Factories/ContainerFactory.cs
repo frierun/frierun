@@ -10,7 +10,7 @@ public sealed class ContainerFactory : Faker<Container>
     {
         StrictMode(true);
         this.SkipConstructor();
-        RuleFor(p => p.Id, f => f.Random.Guid());
+        //RuleFor(p => p.Id, f => f.Random.Guid());
         RuleFor(p => p.Name, f => f.Lorem.Word());
     }
 }

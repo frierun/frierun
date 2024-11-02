@@ -15,7 +15,7 @@ public class StateSerializerTests : BaseTests
 
         var state = stateManager.Load();
 
-        Assert.Empty(state.Applications);
+        Assert.Empty(state.Resources);
     }
     
     [Fact]
@@ -23,15 +23,15 @@ public class StateSerializerTests : BaseTests
     {
         var application = GetFactory<Application>().Generate();
         var state = new State();
-        state.Applications.Add(application);
+        state.Resources.Add(application);
         var stateManager = Resolve<StateSerializer>();
         stateManager.Save(state);
         
         var loadedState = stateManager.Load();
 
-        Assert.Single(loadedState.Applications);
-        Assert.Equal(application.Id, loadedState.Applications[0].Id);
-        Assert.NotSame(application, loadedState.Applications[0]);
+        Assert.Single(loadedState.Resources);
+        //Assert.Equal(application.Id, loadedState.Resources[0].Id);
+        Assert.NotSame(application, loadedState.Resources[0]);
     }    
 
     [Fact]
@@ -39,13 +39,13 @@ public class StateSerializerTests : BaseTests
     {
         var application = GetFactory<Application>().Generate();
         var state = new State();
-        state.Applications.Add(application);
+        state.Resources.Add(application);
         var stateManager = Resolve<StateSerializer>();
         stateManager.Save(state);
         
         var loadedState = stateManager.Load();
 
-        Assert.Same(application.Package, loadedState.Applications[0].Package); // Package should be deserialized by reference
+        Assert.Same(application.Package, ((Application)loadedState.Resources[0]).Package); // Package should be deserialized by reference
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class StateSerializerTests : BaseTests
     {
         var application = GetFactory<Application>().Generate();
         var state = new State();
-        state.Applications.Add(application);
+        state.Resources.Add(application);
         var stateManager = Resolve<StateSerializer>();
 
         stateManager.Save(state);

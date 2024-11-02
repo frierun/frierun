@@ -21,7 +21,6 @@ public class InstallService(
         try
         {
             var application = (Application)executionPlan.Install();
-            state.Applications.Add(application);
             stateSerializer.Save(state);
             if (application.Package?.Name == "traefik")
             {

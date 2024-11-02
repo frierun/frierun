@@ -47,7 +47,7 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
             throw new Exception("Parent plan must be a container");
         }
         
-        var traefikContainer = application.AllResources.OfType<Container>().FirstOrDefault();
+        var traefikContainer = application.AllDependencies.OfType<Container>().FirstOrDefault();
         if (traefikContainer == null)
         {
             throw new Exception("Traefik container not found");
@@ -70,12 +70,12 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
             }
         };
 
-        var traefikPort = application.AllResources.OfType<PortHttpEndpoint>().FirstOrDefault();
+        var traefikPort = application.AllDependencies.OfType<PortHttpEndpoint>().FirstOrDefault();
         if (traefikPort == null)
         {
             throw new Exception("Traefik port not found");
         }
-        return new TraefikHttpEndpoint(Guid.NewGuid(), domain, traefikPort.Port);
+        return new TraefikHttpEndpoint(domain, traefikPort.Port);
     }
 
     /// <inheritdoc />

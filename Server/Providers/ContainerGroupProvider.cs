@@ -52,7 +52,10 @@ public class ContainerGroupProvider(DockerService dockerService) : Provider<Cont
 
         var containers = plan.InstallChildren();
 
-        return new ContainerGroup(Guid.NewGuid(), name, containers);
+        return new ContainerGroup(name)
+        {
+            DependsOn = containers
+        };
     }
 
     /// <inheritdoc />

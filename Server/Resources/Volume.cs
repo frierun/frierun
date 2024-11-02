@@ -1,3 +1,3 @@
 ﻿namespace Frierun.Server.Resources;
 
-public record Volume(Guid Id, string Name, IReadOnlyList<Resource> Children) : Resource(Id, Children);
+public record Volume(string Name) : Resource;

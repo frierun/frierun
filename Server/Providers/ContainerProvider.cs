@@ -81,7 +81,10 @@ public class ContainerProvider(DockerService dockerService)
             throw new Exception("Failed to start container");
         }
 
-        return new Container(Guid.NewGuid(), name, children);
+        return new Container(name)
+        {
+            DependsOn = children
+        };
     }
 
     /// <inheritdoc />

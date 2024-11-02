@@ -12,7 +12,7 @@ public class VolumeProvider(DockerService dockerService) : Provider<Volume, Volu
     {
         var defaultName = plan.Definition.Name ?? "";
         plan.Parameters["name"] = defaultName;
-        
+
         var count = 1;
         while (!Validate(plan))
         {
@@ -50,7 +50,10 @@ public class VolumeProvider(DockerService dockerService) : Provider<Volume, Volu
             );
         };
 
-        return new Volume(Guid.NewGuid(), name, plan.InstallChildren());
+        return new Volume(name)
+        {
+            DependsOn = plan.InstallChildren()
+        };
     }
 
     /// <inheritdoc />

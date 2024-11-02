@@ -1,3 +1,3 @@
 ﻿namespace Frierun.Server.Resources;
 
-public record TraefikHttpEndpoint(Guid Id, string Domain, int Port) : HttpEndpoint(Id, $"http://{Domain}:{Port}");
+public record TraefikHttpEndpoint(string Domain, int Port) : HttpEndpoint($"http://{Domain}:{Port}");

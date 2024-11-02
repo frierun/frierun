@@ -30,7 +30,7 @@ public class ProviderRegistry
         Add(typeof(HttpEndpoint), portHttpEndpointProvider);
         Add(typeof(Volume), volumeProvider);
         
-        var traefik = state.Applications.FirstOrDefault(a => a.Package?.Name == "traefik");
+        var traefik = state.Resources.OfType<Application>().FirstOrDefault(a => a.Package?.Name == "traefik");
         if (traefik != null)
         {
             UseTraefik(traefik);
