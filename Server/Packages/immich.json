@@ -56,6 +56,11 @@
             {
               "Type": "HttpEndpoint",
               "Port": 2283
+            },
+            {
+              "Type": "Volume",
+              "Name": "upload",
+              "Path": "/usr/src/app/upload"
             }
           ]
         },

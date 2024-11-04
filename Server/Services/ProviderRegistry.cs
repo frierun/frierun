@@ -28,6 +28,7 @@ public class ProviderRegistry
         Add(typeof(Container), containerProvider);
         Add(typeof(File), fileProvider);
         Add(typeof(HttpEndpoint), portHttpEndpointProvider);
+        Add(typeof(PortHttpEndpoint), portHttpEndpointProvider);
         Add(typeof(Volume), volumeProvider);
         
         var traefik = state.Resources.OfType<Application>().FirstOrDefault(a => a.Package?.Name == "traefik");

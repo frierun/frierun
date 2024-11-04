@@ -71,6 +71,10 @@ public class ContainerProvider(DockerService dockerService)
         }
 
         var children = plan.InstallChildren();
+        if (plan.Parent is ExecutionPlan<ContainerGroup, ContainerGroupDefinition> groupPlan)
+        {
+            children.Add(plan.Parent.Install());
+        }
 
         plan.OnStartContainer(dockerParameters);
 

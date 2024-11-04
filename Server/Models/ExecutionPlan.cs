@@ -4,15 +4,22 @@ using Frierun.Server.Resources;
 
 namespace Frierun.Server.Models;
 
-public class ExecutionPlan<TDefinition>(
+public class ExecutionPlan<TResource, TDefinition>(
     State state,
     TDefinition definition,
     Provider provider,
     ExecutionPlan? parent
 ) : ExecutionPlan(state, provider, parent)
-    where TDefinition : ResourceDefinition
+    where TResource : Resource
+    where TDefinition : ResourceDefinition<TResource>
 {
     public TDefinition Definition => definition;
+
+    /// <inheritdoc />
+    public override TResource Install()
+    {
+        return (TResource)base.Install();
+    }
 }
 
 public class ExecutionPlan(State state, Provider provider, ExecutionPlan? parent)
@@ -20,8 +27,8 @@ public class ExecutionPlan(State state, Provider provider, ExecutionPlan? parent
     [JsonIgnore]
     public State State => state;
     
-    [JsonIgnore]
-    public Provider Provider => provider;
+    private Provider Provider => provider;
+    private Resource? _resource;
     
     [JsonIgnore]
     public ExecutionPlan? Parent => parent;
@@ -37,17 +44,21 @@ public class ExecutionPlan(State state, Provider provider, ExecutionPlan? parent
         return Children.All(child => child.Selected.Validate());
     }
 
-    public Resource Install()
+    public virtual Resource Install()
     {
-        var resource = Provider.Install(this);
-        State.Resources.Add(resource);
-        return resource;
+        if (_resource == null)
+        {
+            _resource = Provider.Install(this);
+            State.Resources.Add(_resource);
+        }
+
+        return _resource;
     }
 
     /// <summary>
     /// Install all children
     /// </summary>
-    public IReadOnlyList<Resource> InstallChildren()
+    public List<Resource> InstallChildren()
     {
         return Children.Select(selector => selector.Selected.Install()).ToList();
     }

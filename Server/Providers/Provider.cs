@@ -5,13 +5,13 @@ using Frierun.Server.Resources;
 namespace Frierun.Server.Providers;
 
 public abstract class
-    Provider<TResource, TDefinition> : Provider<TResource, TDefinition, ExecutionPlan<TDefinition>>
+    Provider<TResource, TDefinition> : Provider<TResource, TDefinition, ExecutionPlan<TResource, TDefinition>>
     where TResource : Resource
     where TDefinition : ResourceDefinition<TResource>
 {
     public override ExecutionPlan CreatePlan(State state, ResourceDefinition definition, ExecutionPlan? parent)
     {
-        var plan = new ExecutionPlan<TDefinition>(state, (TDefinition)definition, this, parent);
+        var plan = new ExecutionPlan<TResource, TDefinition>(state, (TDefinition)definition, this, parent);
         FillParameters(plan);
         return plan;
     }
@@ -20,7 +20,7 @@ public abstract class
 public abstract class Provider<TResource, TDefinition, TExecutionPlan> : Provider
     where TResource : Resource
     where TDefinition : ResourceDefinition<TResource>
-    where TExecutionPlan : ExecutionPlan<TDefinition>
+    where TExecutionPlan : ExecutionPlan<TResource, TDefinition>
 {
     protected abstract void FillParameters(TExecutionPlan plan);
 

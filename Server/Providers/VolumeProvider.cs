@@ -8,7 +8,7 @@ namespace Frierun.Server.Providers;
 public class VolumeProvider(DockerService dockerService) : Provider<Volume, VolumeDefinition>
 {
     /// <inheritdoc />
-    protected override void FillParameters(ExecutionPlan<VolumeDefinition> plan)
+    protected override void FillParameters(ExecutionPlan<Volume, VolumeDefinition> plan)
     {
         var defaultName = plan.Definition.Name ?? "";
         plan.Parameters["name"] = defaultName;
@@ -22,14 +22,14 @@ public class VolumeProvider(DockerService dockerService) : Provider<Volume, Volu
     }
 
     /// <inheritdoc />
-    protected override bool Validate(ExecutionPlan<VolumeDefinition> plan)
+    protected override bool Validate(ExecutionPlan<Volume, VolumeDefinition> plan)
     {
         var name = plan.GetFullName();
         return plan.State.Resources.OfType<Volume>().All(resource => resource.Name != name);
     }
 
     /// <inheritdoc />
-    protected override Volume Install(ExecutionPlan<VolumeDefinition> plan)
+    protected override Volume Install(ExecutionPlan<Volume, VolumeDefinition> plan)
     {
         var name = plan.GetFullName();
 

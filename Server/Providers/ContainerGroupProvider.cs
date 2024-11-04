@@ -8,19 +8,19 @@ namespace Frierun.Server.Providers;
 public class ContainerGroupProvider(DockerService dockerService) : Provider<ContainerGroup, ContainerGroupDefinition>
 {
     /// <inheritdoc />
-    protected override void FillParameters(ExecutionPlan<ContainerGroupDefinition> plan)
+    protected override void FillParameters(ExecutionPlan<ContainerGroup, ContainerGroupDefinition> plan)
     {
         return;
     }
 
     /// <inheritdoc />
-    protected override bool Validate(ExecutionPlan<ContainerGroupDefinition> plan)
+    protected override bool Validate(ExecutionPlan<ContainerGroup, ContainerGroupDefinition> plan)
     {
         return true;
     }
 
     /// <inheritdoc />
-    protected override ContainerGroup Install(ExecutionPlan<ContainerGroupDefinition> plan)
+    protected override ContainerGroup Install(ExecutionPlan<ContainerGroup, ContainerGroupDefinition> plan)
     {
         var name = GetFullName(plan);
 
@@ -50,12 +50,7 @@ public class ContainerGroupProvider(DockerService dockerService) : Provider<Cont
             };
         }
 
-        var containers = plan.InstallChildren();
-
-        return new ContainerGroup(name)
-        {
-            DependsOn = containers
-        };
+        return new ContainerGroup(name);
     }
 
     /// <inheritdoc />

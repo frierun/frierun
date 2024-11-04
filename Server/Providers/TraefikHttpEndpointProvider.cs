@@ -7,7 +7,7 @@ namespace Frierun.Server.Providers;
 public class TraefikHttpEndpointProvider(DockerService dockerService, Application application) : Provider<HttpEndpoint, HttpEndpointDefinition>
 {
     /// <inheritdoc />
-    protected override void FillParameters(ExecutionPlan<HttpEndpointDefinition> plan)
+    protected override void FillParameters(ExecutionPlan<HttpEndpoint, HttpEndpointDefinition> plan)
     {
         var name = plan.Parent?.Parameters["name"];
         
@@ -27,7 +27,7 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
     }
 
     /// <inheritdoc />
-    protected override bool Validate(ExecutionPlan<HttpEndpointDefinition> plan)
+    protected override bool Validate(ExecutionPlan<HttpEndpoint, HttpEndpointDefinition> plan)
     {
         if (!plan.Parameters.TryGetValue("domain", out var domain))
         {
@@ -38,7 +38,7 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
     }
 
     /// <inheritdoc />
-    protected override HttpEndpoint Install(ExecutionPlan<HttpEndpointDefinition> plan)
+    protected override HttpEndpoint Install(ExecutionPlan<HttpEndpoint, HttpEndpointDefinition> plan)
     {
         var domain = plan.Parameters["domain"];
 
@@ -53,8 +53,6 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
             throw new Exception("Traefik container not found");
         }
         
-        var containerGroupPlan = containerPlan.Parent as ExecutionPlan<ContainerGroupDefinition>;
-
         containerPlan.StartContainer += parameters =>
         {
             var subdomain = domain.Split('.')[0];
@@ -63,11 +61,6 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
             parameters.Labels["traefik.http.routers." + subdomain + ".rule"] = "Host(`" + domain + "`)";
             parameters.Labels["traefik.http.services." + subdomain + ".loadbalancer.server.port"] = plan.Definition.Port.ToString();
             
-            if (containerGroupPlan != null)
-            {
-                var networkName = containerGroupPlan.GetFullName();
-                dockerService.AttachNetwork(networkName, traefikContainer.Name).Wait();
-            }
         };
 
         var traefikPort = application.AllDependencies.OfType<PortHttpEndpoint>().FirstOrDefault();
@@ -75,12 +68,41 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
         {
             throw new Exception("Traefik port not found");
         }
-        return new TraefikHttpEndpoint(domain, traefikPort.Port);
+        
+        var dependsOn = new List<Resource>
+        {
+            application,
+        };
+        
+        var containerGroupPlan = containerPlan.Parent as ExecutionPlan<ContainerGroup, ContainerGroupDefinition>;
+        var containerGroup = containerGroupPlan?.Install();
+        if (containerGroup != null)
+        {
+            dependsOn.Add(containerGroup);
+            
+            dockerService.AttachNetwork(containerGroup.Name, traefikContainer.Name).Wait();
+        }
+        
+        return new TraefikHttpEndpoint(domain, traefikPort.Port){
+            DependsOn = dependsOn
+        };
     }
 
     /// <inheritdoc />
     protected override void Uninstall(HttpEndpoint resource)
     {
-        // TODO detach network
+        var containerGroup = resource.DependsOn.OfType<ContainerGroup>().FirstOrDefault();
+        if (containerGroup == null)
+        {
+            return;
+        }
+        
+        var traefikContainer = application.AllDependencies.OfType<Container>().FirstOrDefault();
+        if (traefikContainer == null)
+        {
+            throw new Exception("Traefik container not found");
+        }
+
+        dockerService.DetachNetwork(containerGroup.Name, traefikContainer.Name).Wait();
     }
 }

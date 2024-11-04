@@ -12,7 +12,7 @@ namespace Frierun.Server.Resources;
 [JsonDerivedType(typeof(PortHttpEndpoint), "PortHttpEndpoint")]
 [JsonDerivedType(typeof(TraefikHttpEndpoint), "TraefikHttpEndpoint")]
 [JsonDerivedType(typeof(Volume), "Volume")]
-public abstract record Resource()
+public abstract record Resource
 {
     private readonly List<Resource> _dependsOn = [];
     private readonly List<Resource> _requiredBy = [];
@@ -106,5 +106,21 @@ public abstract record Resource()
         }
 
         _hydrated = true;
+    }
+
+    /// <summary>
+    /// Uninstalls the resource.
+    /// </summary>
+    public void Uninstall()
+    {
+        if (RequiredBy.Count > 0)
+        {
+            throw new InvalidOperationException("Resource is required by other resources.");
+        }
+
+        foreach (var resource in _dependsOn)
+        {
+            resource._requiredBy.Remove(this);
+        }
     }
 }

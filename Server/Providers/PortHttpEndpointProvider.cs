@@ -7,7 +7,7 @@ namespace Frierun.Server.Providers;
 public class PortHttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDefinition>
 {
     /// <inheritdoc />
-    protected override void FillParameters(ExecutionPlan<HttpEndpointDefinition> plan)
+    protected override void FillParameters(ExecutionPlan<HttpEndpoint, HttpEndpointDefinition> plan)
     {
         plan.Parameters["port"] = "80";
 
@@ -25,7 +25,7 @@ public class PortHttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDefin
     }
 
     /// <inheritdoc />
-    protected override bool Validate(ExecutionPlan<HttpEndpointDefinition> plan)
+    protected override bool Validate(ExecutionPlan<HttpEndpoint, HttpEndpointDefinition> plan)
     {
         if (!plan.Parameters.TryGetValue("port", out var port))
         {
@@ -43,7 +43,7 @@ public class PortHttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointDefin
     }
 
     /// <inheritdoc />
-    protected override HttpEndpoint Install(ExecutionPlan<HttpEndpointDefinition> plan)
+    protected override HttpEndpoint Install(ExecutionPlan<HttpEndpoint, HttpEndpointDefinition> plan)
     {
         var port = int.Parse(plan.Parameters["port"]);
 

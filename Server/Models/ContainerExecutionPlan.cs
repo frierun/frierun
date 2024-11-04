@@ -9,7 +9,7 @@ public class ContainerExecutionPlan(
     ContainerDefinition definition,
     ContainerProvider provider,
     ExecutionPlan? parent
-) : ExecutionPlan<ContainerDefinition>(state, definition, provider, parent)
+) : ExecutionPlan<Container, ContainerDefinition>(state, definition, provider, parent)
 {
     public delegate void StartContainerDelegate(CreateContainerParameters parameters);
     public event StartContainerDelegate? StartContainer;

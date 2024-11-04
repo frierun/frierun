@@ -19,32 +19,35 @@ public class UninstallService(
 
         try
         {
-            foreach (var container in application.AllDependencies.OfType<Container>())
+            var changedNodes = new Dictionary<Resource, int>();
+            var uninstallQueue = new Queue<Resource>();
+            
+            uninstallQueue.Enqueue(application);
+            while (uninstallQueue.Count > 0)
             {
-                UninstallResource(container);
-            }
-
-            foreach (var volume in application.AllDependencies.OfType<Volume>())
-            {
-                UninstallResource(volume);
-            }
-
-            foreach (var volume in application.AllDependencies.OfType<Volume>())
-            {
-                UninstallResource(volume);
-            }
-
-            foreach (var resource in application.AllDependencies.OfType<TraefikHttpEndpoint>())
-            {
+                var resource = uninstallQueue.Dequeue();
+                foreach (var dependency in resource.DependsOn)
+                {
+                    if (dependency is Application)
+                    {
+                        continue;
+                    }
+                    
+                    if (!changedNodes.TryGetValue(dependency, out var edgesCount))
+                    {
+                        edgesCount = dependency.RequiredBy.Count;
+                    }
+                    
+                    changedNodes[dependency] = edgesCount - 1;
+                    if (edgesCount == 1)
+                    {
+                        uninstallQueue.Enqueue(dependency);
+                    }
+                }
+                
                 UninstallResource(resource);
             }
             
-            foreach (var containerGroup in application.AllDependencies.OfType<ContainerGroup>())
-            {
-                UninstallResource(containerGroup);
-            }
-
-            state.Resources.Remove(application);
             stateSerializer.Save(state);
         }
         finally
@@ -73,6 +76,7 @@ public class UninstallService(
 
         var provider = providers[0];
         provider.Uninstall(resource);
+        resource.Uninstall();
         state.Resources.Remove(resource);
     }
 }

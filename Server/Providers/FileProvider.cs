@@ -8,21 +8,21 @@ namespace Frierun.Server.Providers;
 public class FileProvider(DockerService dockerService) : Provider<File, FileDefinition>
 {
     /// <inheritdoc />
-    protected override void FillParameters(ExecutionPlan<FileDefinition> plan)
+    protected override void FillParameters(ExecutionPlan<File, FileDefinition> plan)
     {
         return;
     }
 
     /// <inheritdoc />
-    protected override bool Validate(ExecutionPlan<FileDefinition> plan)
+    protected override bool Validate(ExecutionPlan<File, FileDefinition> plan)
     {
         return true;
     }
 
     /// <inheritdoc />
-    protected override File Install(ExecutionPlan<FileDefinition> plan)
+    protected override File Install(ExecutionPlan<File, FileDefinition> plan)
     {
-        if (plan.Parent is not ExecutionPlan<VolumeDefinition> volumePlan)
+        if (plan.Parent is not ExecutionPlan<Volume, VolumeDefinition> volumePlan)
         {
             throw new Exception("Parent plan must be a volume");
         }
