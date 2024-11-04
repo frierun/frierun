@@ -9,7 +9,7 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
     /// <inheritdoc />
     protected override void FillParameters(ExecutionPlan<HttpEndpoint, HttpEndpointDefinition> plan)
     {
-        var name = plan.Parent?.Parameters["name"];
+        var name = plan.Parent?.GetFullName();
         
         if (name == null)
         {
