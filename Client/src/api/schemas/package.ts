@@ -4,11 +4,13 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { ResourceDefinition } from "./resourceDefinition";
+import type { Contract } from "./contract";
 
 export interface Package {
-  readonly children: readonly ResourceDefinition[];
-  id: string;
+  contracts: Contract[];
   name: string;
-  url: string;
+  /** @nullable */
+  readonly providerType?: string | null;
+  /** @nullable */
+  url?: string | null;
 }

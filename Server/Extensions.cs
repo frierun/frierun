@@ -1,6 +1,4 @@
-﻿using Frierun.Server.Models;
-using Frierun.Server.Providers;
-using Frierun.Server.Resources;
+﻿using Frierun.Server.Data;
 using Frierun.Server.Services;
 
 namespace Frierun.Server;
@@ -11,9 +9,10 @@ public static class Extensions
     {
         // Providers
         services.AddSingleton<ApplicationProvider>();
-        services.AddSingleton<ContainerGroupProvider>();
         services.AddSingleton<ContainerProvider>();
         services.AddSingleton<FileProvider>();
+        services.AddSingleton<MountProvider>();
+        services.AddSingleton<NetworkProvider>();
         services.AddSingleton<PortHttpEndpointProvider>();
         //services.AddSingleton<TraefikHttpEndpointProvider>();
         services.AddSingleton<VolumeProvider>();

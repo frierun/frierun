@@ -1,21 +1,19 @@
 ﻿{
   "Name": "heimdall",
   "Url": "https://hub.docker.com/r/linuxserver/heimdall/",
-  "Children": [
+  "Contracts": [
     {
       "Type": "Container",
-      "ImageName": "lscr.io/linuxserver/heimdall:latest",
-      "Children": [
-        {
-          "Type": "HttpEndpoint",
-          "Port": 80
-        },
-        {
-          "Type": "Volume",
-          "Name": "config",
-          "Path": "/config"
-        }
-      ]
+      "ImageName": "lscr.io/linuxserver/heimdall:latest"
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 80
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "config",
+      "Path": "/config"
     }
   ]
 }

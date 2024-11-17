@@ -66,22 +66,24 @@ public class DockerService(ILogger<DockerService> logger)
 
 
         logger.LogInformation("Creating temporary container");
-        var result = await _client.Containers.CreateContainerAsync(new CreateContainerParameters()
-        {
-            Image = imageName,
-            HostConfig = new HostConfig()
+        var result = await _client.Containers.CreateContainerAsync(
+            new CreateContainerParameters()
             {
-                Mounts = new List<Mount>
+                Image = imageName,
+                HostConfig = new HostConfig()
                 {
-                    new()
+                    Mounts = new List<Mount>
                     {
-                        Source = volumeName,
-                        Target = "/mnt",
-                        Type = "volume",
+                        new()
+                        {
+                            Source = volumeName,
+                            Target = "/mnt",
+                            Type = "volume",
+                        }
                     }
-                }
-            },
-        });
+                },
+            }
+        );
 
         var containerId = result.ID;
 
@@ -101,10 +103,12 @@ public class DockerService(ILogger<DockerService> logger)
         var pipe = new Pipe();
         await using (var tarArchive = new TarWriter(pipe.Writer.AsStream()))
         {
-            await tarArchive.WriteEntryAsync(new PaxTarEntry(TarEntryType.RegularFile, path)
-            {
-                DataStream = new MemoryStream(Encoding.UTF8.GetBytes(content))
-            });
+            await tarArchive.WriteEntryAsync(
+                new PaxTarEntry(TarEntryType.RegularFile, path)
+                {
+                    DataStream = new MemoryStream(Encoding.UTF8.GetBytes(content))
+                }
+            );
         }
 
         logger.LogInformation("Putting file {path} to container {ContainerId}", path, containerId);
@@ -134,10 +138,12 @@ public class DockerService(ILogger<DockerService> logger)
     {
         logger.LogInformation("Stopping container {ContainerName}", containerName);
 
-        var response = await _client.Containers.ListContainersAsync(new ContainersListParameters
-        {
-            All = true
-        });
+        var response = await _client.Containers.ListContainersAsync(
+            new ContainersListParameters
+            {
+                All = true
+            }
+        );
 
         var container = response.FirstOrDefault(c => c.Names.Contains($"/{containerName}"));
         if (container == null)
@@ -167,6 +173,30 @@ public class DockerService(ILogger<DockerService> logger)
     /// <summary>
     /// Removes volume by name
     /// </summary>
+    public async Task<bool> CreateVolume(string volumeName)
+    {
+        try
+        {
+            await _client.Volumes.CreateAsync(
+                new VolumesCreateParameters()
+                {
+                    Name = volumeName
+                }
+            );
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to remove volume {VolumeName}", volumeName);
+            return false;
+        }
+
+        return true;
+    }
+
+
+    /// <summary>
+    /// Removes volume by name
+    /// </summary>
     public async Task<bool> RemoveVolume(string volumeName)
     {
         try
@@ -181,7 +211,7 @@ public class DockerService(ILogger<DockerService> logger)
 
         return true;
     }
-    
+
     /// <summary>
     /// Creates new network for a container group
     /// </summary>
@@ -190,10 +220,12 @@ public class DockerService(ILogger<DockerService> logger)
         logger.LogInformation("Creating network {NetworkName}", networkName);
         try
         {
-            await _client.Networks.CreateNetworkAsync(new NetworksCreateParameters
-            {
-                Name = networkName
-            });
+            await _client.Networks.CreateNetworkAsync(
+                new NetworksCreateParameters
+                {
+                    Name = networkName
+                }
+            );
         }
         catch (Exception e)
         {
@@ -203,7 +235,7 @@ public class DockerService(ILogger<DockerService> logger)
 
         return true;
     }
-    
+
     /// <summary>
     /// Removes network
     /// </summary>
@@ -228,42 +260,54 @@ public class DockerService(ILogger<DockerService> logger)
     /// </summary>
     public async Task<bool> AttachNetwork(string networkName, string containerName)
     {
-        logger.LogInformation("Attaching container {ContainerName} to network {NetworkName}", containerName, networkName);
+        logger.LogInformation(
+            "Attaching container {ContainerName} to network {NetworkName}", containerName, networkName
+        );
         try
         {
-            await _client.Networks.ConnectNetworkAsync(networkName, new NetworkConnectParameters
-            {
-                Container = containerName
-            });
+            await _client.Networks.ConnectNetworkAsync(
+                networkName, new NetworkConnectParameters
+                {
+                    Container = containerName
+                }
+            );
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Failed to attach container {ContainerName} to network {NetworkName}", containerName, networkName);
+            logger.LogError(
+                e, "Failed to attach container {ContainerName} to network {NetworkName}", containerName, networkName
+            );
             return false;
         }
 
         return true;
     }
-    
+
     /// <summary>
     /// Detaches container from network
     /// </summary>
     public async Task<bool> DetachNetwork(string networkName, string containerName)
     {
-        logger.LogInformation("Detaching container {ContainerName} to network {NetworkName}", containerName, networkName);
+        logger.LogInformation(
+            "Detaching container {ContainerName} to network {NetworkName}", containerName, networkName
+        );
         try
         {
-            await _client.Networks.DisconnectNetworkAsync(networkName, new NetworkDisconnectParameters()
-            {
-                Container = containerName
-            });
+            await _client.Networks.DisconnectNetworkAsync(
+                networkName, new NetworkDisconnectParameters()
+                {
+                    Container = containerName
+                }
+            );
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Failed to detach container {ContainerName} from network {NetworkName}", containerName, networkName);
+            logger.LogError(
+                e, "Failed to detach container {ContainerName} from network {NetworkName}", containerName, networkName
+            );
             return false;
         }
 
         return true;
-    }    
+    }
 }

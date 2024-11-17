@@ -17,7 +17,7 @@ import type {
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
-import type { InstallRequest, Package, ParametersResponse } from "../schemas";
+import type { Contract, Package } from "../schemas";
 import { customFetch } from "../../custom-fetch";
 
 type SecondParameter<T extends (...args: any) => any> = Parameters<T>[1];
@@ -138,7 +138,7 @@ export function useGetPackages<
 }
 
 export type getPackagesIdParametersResponse = {
-  data: ParametersResponse;
+  data: Contract[];
   status: number;
 };
 
@@ -309,7 +309,6 @@ export const getPostPackagesIdUrl = (id: string) => {
 
 export const postPackagesId = async (
   id: string,
-  installRequest: InstallRequest,
   options?: RequestInit,
 ): Promise<postPackagesIdResponse> => {
   return customFetch<Promise<postPackagesIdResponse>>(
@@ -317,8 +316,6 @@ export const postPackagesId = async (
     {
       ...options,
       method: "POST",
-      headers: { "Content-Type": "application/json", ...options?.headers },
-      body: JSON.stringify(installRequest),
     },
   );
 };
@@ -330,25 +327,25 @@ export const getPostPackagesIdMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postPackagesId>>,
     TError,
-    { id: string; data: InstallRequest },
+    { id: string },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postPackagesId>>,
   TError,
-  { id: string; data: InstallRequest },
+  { id: string },
   TContext
 > => {
   const { mutation: mutationOptions, request: requestOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postPackagesId>>,
-    { id: string; data: InstallRequest }
+    { id: string }
   > = (props) => {
-    const { id, data } = props ?? {};
+    const { id } = props ?? {};
 
-    return postPackagesId(id, data, requestOptions);
+    return postPackagesId(id, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -357,7 +354,7 @@ export const getPostPackagesIdMutationOptions = <
 export type PostPackagesIdMutationResult = NonNullable<
   Awaited<ReturnType<typeof postPackagesId>>
 >;
-export type PostPackagesIdMutationBody = InstallRequest;
+
 export type PostPackagesIdMutationError = unknown;
 
 export const usePostPackagesId = <
@@ -367,14 +364,14 @@ export const usePostPackagesId = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postPackagesId>>,
     TError,
-    { id: string; data: InstallRequest },
+    { id: string },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
   Awaited<ReturnType<typeof postPackagesId>>,
   TError,
-  { id: string; data: InstallRequest },
+  { id: string },
   TContext
 > => {
   const mutationOptions = getPostPackagesIdMutationOptions(options);

@@ -1,8 +1,5 @@
-﻿using Docker.DotNet.Models;
-using Frierun.Server.Models;
-using Frierun.Server.Providers;
-using Frierun.Server.Resources;
-using File = Frierun.Server.Resources.File;
+﻿using Frierun.Server.Data;
+using File = Frierun.Server.Data.File;
 
 namespace Frierun.Server.Services;
 
@@ -14,9 +11,10 @@ public class ProviderRegistry
     public ProviderRegistry(
         State state,
         ApplicationProvider applicationProvider,
-        ContainerGroupProvider containerGroupProvider,
         ContainerProvider containerProvider,
         FileProvider fileProvider,
+        MountProvider mountProvider,
+        NetworkProvider networkProvider,
         PortHttpEndpointProvider portHttpEndpointProvider,
         VolumeProvider volumeProvider,
         DockerService dockerService
@@ -24,10 +22,11 @@ public class ProviderRegistry
     {
         _dockerService = dockerService;
         Add(typeof(Application), applicationProvider);
-        Add(typeof(ContainerGroup), containerGroupProvider);
         Add(typeof(Container), containerProvider);
         Add(typeof(File), fileProvider);
         Add(typeof(HttpEndpoint), portHttpEndpointProvider);
+        Add(typeof(Mount), mountProvider);
+        Add(typeof(Network), networkProvider);
         Add(typeof(PortHttpEndpoint), portHttpEndpointProvider);
         Add(typeof(Volume), volumeProvider);
         

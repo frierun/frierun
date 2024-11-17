@@ -16,7 +16,7 @@ export default function Package() {
             <h2 className="text-3xl font-bold underline">
                 Install {name}
             </h2>
-            <InstallForm response={data.data} />
+            <InstallForm contracts={data.data} name={name ?? ""} />
         </>
     );
 } 

@@ -1,5 +1,4 @@
-﻿using Frierun.Server.Models;
-using Frierun.Server.Resources;
+﻿using Frierun.Server.Data;
 using Frierun.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,16 +13,11 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
         return packageRegistry.Packages;
     }
     
-    public record ParametersResponse(
-        Package Package,
-        ExecutionPlanSelector ExecutionPlan
-    );
-    
     /// <summary>
     /// Gets package and default parameters
     /// </summary>
     [HttpGet("{id}/parameters")]
-    public ParametersResponse? Parameters(string id, PackageRegistry packageRegistry, ExecutionService executionService)
+    public IEnumerable<Contract>? Parameters(string id, PackageRegistry packageRegistry, ExecutionService executionService)
     {
         var package = packageRegistry.Find(id);
         if (package == null)
@@ -31,29 +25,15 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
             return null;
         }
 
-        var selector = executionService.Create(package);
-
-        return new ParametersResponse(
-            package,
-            selector
-        );
+        return executionService.Create(package).Contracts.Values;
     }
     
-    public record ExecutionPlanRequest(
-        int SelectedIndex,
-        IDictionary<string, string> Parameters,
-        IList<ExecutionPlanRequest> Children
-    );
-    
-    public record InstallRequest(ExecutionPlanRequest ExecutionPlan);
-
     /// <summary>
     /// Installs the given package
     /// </summary>
     [HttpPost("{id}")]
     public IActionResult Install(
         string id,
-        [FromBody] InstallRequest data,
         PackageRegistry packageRegistry,
         InstallService installService,
         ExecutionService executionService
@@ -68,32 +48,9 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
             return NotFound();
         }
 
-        var selector = executionService.Create(package);
-        FromRequest(selector, data.ExecutionPlan);
+        var plan = executionService.Create(package);
 
-        if (!selector.Selected.Validate())
-        {
-            return BadRequest();
-        }
-
-        Task.Run(() => installService.Handle(selector.Selected));
+        Task.Run(() => installService.Handle(plan));
         return Accepted();
-    }
-
-    /// <summary>
-    /// Recursively fills the execution plan with the given request
-    /// </summary>
-    private void FromRequest(ExecutionPlanSelector selector, ExecutionPlanRequest request)
-    {
-        selector.SelectedIndex = request.SelectedIndex;
-        var executionPlan = selector.Selected;
-        foreach (var pair in request.Parameters)
-        {
-            executionPlan.Parameters[pair.Key] = pair.Value;
-        }
-        for (var i = 0; i < executionPlan.Children.Count; i++)
-        {
-            FromRequest(executionPlan.Children[i], request.Children[i]);
-        }
     }
 }

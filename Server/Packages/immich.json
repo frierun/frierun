@@ -1,82 +1,74 @@
 ﻿{
   "Name": "immich",
   "Url": "https://immich.app/docs/install/docker-compose",
-  "Children": [
+  "Contracts": [
     {
-      "Type": "ContainerGroup",
-      "Children": [
-        {
-          "Type": "Container",
-          "Name": "database",
-          "ImageName": "docker.io/tensorchord/pgvecto-rs:pg14-v0.2.0@sha256:90724186f0a3517cf6914295b5ab410db9ce23190a2d9d0b9dd6463e3fa298f0",
-          "Command": [
-            "postgres",
-            "-c",
-            "shared_preload_libraries=vectors.so",
-            "-c",
-            "search_path=\"$$user\", public, vectors",
-            "-c",
-            "logging_collector=on",
-            "-c",
-            "max_wal_size=2GB",
-            "-c",
-            "shared_buffers=512MB",
-            "-c",
-            "wal_compression=on"
-          ],
-          "Env": {
-            "POSTGRES_PASSWORD": "postgres",
-            "POSTGRES_USER": "postgres",
-            "POSTGRES_DB": "immich",
-            "POSTGRES_INITDB_ARGS": "--data-checksums"
-          },
-          "Children": [
-            {
-              "Type": "Volume",
-              "Name": "db",
-              "Path": "/var/lib/postgresql/data"
-            }
-          ]
-        },
-        {
-          "Type": "Container",
-          "Name": "redis",
-          "ImageName": "docker.io/redis:6.2-alpine@sha256:2ba50e1ac3a0ea17b736ce9db2b0a9f6f8b85d4c27d5f5accc6a416d8f42c6d5"
-        },
-        {
-          "Type": "Container",
-          "Name": "server",
-          "ImageName": "ghcr.io/immich-app/immich-server:release",
-          "Env": {
-            "DB_USERNAME": "postgres",
-            "DB_PASSWORD": "postgres",
-            "DB_DATABASE_NAME": "immich"
-          },
-          "Children": [
-            {
-              "Type": "HttpEndpoint",
-              "Port": 2283
-            },
-            {
-              "Type": "Volume",
-              "Name": "upload",
-              "Path": "/usr/src/app/upload"
-            }
-          ]
-        },
-        {
-          "Type": "Container",
-          "Name": "machine-learning",
-          "ImageName": "ghcr.io/immich-app/immich-machine-learning:release",
-          "Children": [
-            {
-              "Type": "Volume",
-              "Name": "model-cache",
-              "Path": "/cache"
-            }
-          ]
-        }
-      ]
+      "Type": "Container",
+      "Name": "database",
+      "ImageName": "docker.io/tensorchord/pgvecto-rs:pg14-v0.2.0@sha256:90724186f0a3517cf6914295b5ab410db9ce23190a2d9d0b9dd6463e3fa298f0",
+      "Command": [
+        "postgres",
+        "-c",
+        "shared_preload_libraries=vectors.so",
+        "-c",
+        "search_path=\"$$user\", public, vectors",
+        "-c",
+        "logging_collector=on",
+        "-c",
+        "max_wal_size=2GB",
+        "-c",
+        "shared_buffers=512MB",
+        "-c",
+        "wal_compression=on"
+      ],
+      "Env": {
+        "POSTGRES_PASSWORD": "postgres",
+        "POSTGRES_USER": "postgres",
+        "POSTGRES_DB": "immich",
+        "POSTGRES_INITDB_ARGS": "--data-checksums"
+      }
+    },
+    {
+      "Type": "Mount",
+      "ContainerName": "database",
+      "VolumeName": "db",
+      "Path": "/var/lib/postgresql/data"
+    },
+    {
+      "Type": "Container",
+      "Name": "redis",
+      "ImageName": "docker.io/redis:6.2-alpine@sha256:2ba50e1ac3a0ea17b736ce9db2b0a9f6f8b85d4c27d5f5accc6a416d8f42c6d5"
+    },
+    {
+      "Type": "Container",
+      "Name": "server",
+      "ImageName": "ghcr.io/immich-app/immich-server:release",
+      "Env": {
+        "DB_USERNAME": "postgres",
+        "DB_PASSWORD": "postgres",
+        "DB_DATABASE_NAME": "immich"
+      }
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 2283
+    },
+    {
+      "Type": "Mount",
+      "ContainerName": "server",
+      "VolumeName": "upload",
+      "Path": "/usr/src/app/upload"
+    },
+    {
+      "Type": "Container",
+      "Name": "machine-learning",
+      "ImageName": "ghcr.io/immich-app/immich-machine-learning:release"
+    },
+    {
+      "Type": "Mount",
+      "ContainerName": "machine-learning",
+      "VolumeName": "model-cache",
+      "Path": "/cache"
     }
   ]
 }

@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Bogus;
 using Frierun.Server;
-using Frierun.Server.Resources;
 using Frierun.Tests.Factories;
 using Microsoft.Extensions.DependencyInjection;
 

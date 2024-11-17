@@ -1,32 +1,30 @@
 ﻿{
   "Name": "jellyfin",
   "Url": "https://jellyfin.org/docs/general/installation/container",
-  "Children": [
+  "Contracts": [
     {
       "Type": "Container",
-      "ImageName": "jellyfin/jellyfin:latest",
-      "Children": [
-        {
-          "Type": "HttpEndpoint",
-          "Port": 8096
-        },
-        {
-          "Type": "Volume",
-          "Name": "config",
-          "Path": "/config"
-        },
-        {
-          "Type": "Volume",
-          "Name": "cache",
-          "Path": "/cache"
-        },
-        {
-          "Type": "Volume",
-          "Name": "media",
-          "Path": "/media",
-          "ReadOnly": true
-        }
-      ]
+      "ImageName": "jellyfin/jellyfin:latest"
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 8096
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "config",
+      "Path": "/config"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "cache",
+      "Path": "/cache"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "media",
+      "Path": "/media",
+      "ReadOnly": true
     }
   ]
 }

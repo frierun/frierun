@@ -1,22 +1,20 @@
 ﻿{
   "Name": "portainer",
   "Url": "https://docs.portainer.io/start/install-ce/server/docker/linux",
-  "Children": [
+  "Contracts": [
     {
       "Type": "Container",
       "ImageName": "portainer/portainer-ce:latest",
-      "RequireDocker": true,
-      "Children": [
-        {
-          "Type": "HttpEndpoint",
-          "Port": 9000
-        },
-        {
-          "Type": "Volume",
-          "Name": "data",
-          "Path": "/data"
-        }
-      ]
+      "RequireDocker": true
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 9000
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "data",
+      "Path": "/data"
     }
   ]
 }

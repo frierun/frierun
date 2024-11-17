@@ -1,6 +1,4 @@
-﻿using Frierun.Server.Models;
-using Frierun.Server.Providers;
-using Frierun.Server.Resources;
+﻿using Frierun.Server.Data;
 
 namespace Frierun.Server.Services;
 
@@ -9,33 +7,11 @@ public class ExecutionService(
     State state
 )
 {
-    public ExecutionPlanSelector Create(ResourceDefinition definition, ExecutionPlan? parent = null)
+    /// <summary>
+    /// Creates an execution plan for the given package.
+    /// </summary>
+    public ExecutionPlan Create(Package package)
     {
-        var providers = providerRegistry.Get(definition.ResourceType);
-        if (providers.Count == 0)
-        {
-            throw new Exception($"Can't find provider for resource {typeof(Application)}");
-        }
-
-
-        var result = new ExecutionPlanSelector();
-        foreach (var provider in providers)
-        {
-            result.Children.Add(Create(definition, parent, provider));
-        }
-        
-        return result;
+        return new ExecutionPlan(package, state, providerRegistry);
     }
-    
-    private ExecutionPlan Create(ResourceDefinition definition, ExecutionPlan? parent, Provider provider)
-    {
-        var executionPlan = provider.CreatePlan(state, definition, parent);
-
-        foreach (var childDefinition in definition.Children)
-        {
-            executionPlan.Children.Add(Create(childDefinition, executionPlan));
-        }
-        
-        return executionPlan;
-    }    
 }

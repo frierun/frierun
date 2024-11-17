@@ -1,6 +1,4 @@
-﻿using Frierun.Server.Models;
-using Frierun.Server.Providers;
-using Frierun.Server.Resources;
+﻿using Frierun.Server.Data;
 
 namespace Frierun.Server.Services;
 
@@ -20,7 +18,8 @@ public class InstallService(
 
         try
         {
-            var application = (Application)executionPlan.Install();
+            executionPlan.Install();
+            var application = executionPlan.GetResource<Application>(executionPlan.Package.Id);
             stateSerializer.Save(state);
             if (application.Package?.Name == "traefik")
             {

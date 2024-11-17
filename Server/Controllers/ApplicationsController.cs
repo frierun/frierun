@@ -1,5 +1,4 @@
-﻿using Frierun.Server.Models;
-using Frierun.Server.Resources;
+﻿using Frierun.Server.Data;
 using Frierun.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 

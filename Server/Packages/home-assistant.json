@@ -1,28 +1,25 @@
 ﻿{
   "Name": "home-assistant",
   "Url": "https://jellyfin.org/docs/general/installation/container",
-  "Children": [
+  "Contracts": [
     {
       "Type": "Container",
-      "ImageName": "ghcr.io/home-assistant/home-assistant:stable",
-      "Children": [
-        {
-          "Type": "HttpEndpoint",
-          "Port": 8123
-        },
-        {
-          "Type": "Volume",
-          "Name": "config",
-          "Path": "/config",
-          "Children": [
-            {
-              "Type": "File",
-              "Path": "configuration.yaml",
-              "Text": "http:\n  use_x_forwarded_for: true\n  trusted_proxies:\n    - 172.16.0.0/12\n"
-            }
-          ]
-        }
-      ]
+      "ImageName": "ghcr.io/home-assistant/home-assistant:stable"
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 8123
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "config",
+      "Path": "/config"
+    },
+    {
+      "Type": "File",
+      "VolumeName": "config",
+      "Path": "configuration.yaml",
+      "Text": "http:\n  use_x_forwarded_for: true\n  trusted_proxies:\n    - 172.16.0.0/12\n"
     }
   ]
 }

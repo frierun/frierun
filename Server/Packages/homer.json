@@ -1,21 +1,19 @@
 ﻿{
   "Name": "homer",
   "Url": "https://github.com/bastienwirtz/homer",
-  "Children": [
+  "Contracts": [
     {
       "Type": "Container",
-      "ImageName": "b4bz/homer:latest",
-      "Children": [
-        {
-          "Type": "HttpEndpoint",
-          "Port": 8080
-        },
-        {
-          "Type": "Volume",
-          "Name": "assets",
-          "Path": "/www/assets"
-        }
-      ]
+      "ImageName": "b4bz/homer:latest"
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 8080
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "assets",
+      "Path": "/www/assets"
     }
   ]
 }

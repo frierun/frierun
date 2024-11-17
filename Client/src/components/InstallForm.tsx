@@ -1,29 +1,24 @@
-﻿import {useContext, useState} from "react";
+﻿import {useContext} from "react";
 import StateContext from "../providers/StateContext.tsx";
-import {ExecutionPlanRequest, ParametersResponse} from "../api/schemas";
+import {type Contract} from "../api/schemas";
 import {getGetApplicationsQueryKey} from "../api/endpoints/applications.ts";
 import {usePostPackagesId} from "../api/endpoints/packages.ts";
 import {useQueryClient} from "@tanstack/react-query";
 import {useNavigate} from "react-router-dom";
-import ExecutionPlan from "./ExecutionPlan.tsx";
 
 type Props = {
-    response: ParametersResponse;
+    contracts: Contract[];
+    name: string;
 }
 
-export default function InstallForm({response}: Props) {
+export default function InstallForm({name}: Props) {
     const {waitForReady} = useContext(StateContext);
     const {mutateAsync, isPending} = usePostPackagesId();
     const queryClient = useQueryClient()
     const navigate = useNavigate();
-    const [executionPlan, setExecutionPlan] = useState<ExecutionPlanRequest>();
-
+    
     const install = () => {
-        if (!executionPlan) {
-            return;
-        }
-        
-        mutateAsync({id: response.package.name, data: {executionPlan}})
+        mutateAsync({id: name})
             .then(waitForReady)
             .then(() => queryClient.invalidateQueries({queryKey: getGetApplicationsQueryKey()}))
             .then(() => navigate('/'));
@@ -31,10 +26,6 @@ export default function InstallForm({response}: Props) {
 
     return (
         <>
-            <ExecutionPlan
-                selector={response.executionPlan}
-                onChange={(executionPlan) => setExecutionPlan(executionPlan)}
-            />
             <button onClick={install} disabled={isPending}>
                 Install
             </button>

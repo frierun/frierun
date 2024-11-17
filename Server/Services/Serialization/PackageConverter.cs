@@ -1,7 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using Frierun.Server.Models;
-using Frierun.Server.Resources;
+using Frierun.Server.Data;
 
 namespace Frierun.Server.Services;
 

@@ -1,7 +1,7 @@
 ﻿{
   "Name": "traefik",
   "Url": "https://doc.traefik.io/traefik/getting-started/install-traefik/",
-  "Children": [
+  "Contracts": [
     {
       "Type": "Container",
       "ImageName": "traefik:v3.1",
@@ -9,13 +9,11 @@
         "--api.insecure=true",
         "--providers.docker"
       ],
-      "RequireDocker": true,
-      "Children": [
-        {
-          "Type": "HttpEndpoint",
-          "Port": 80
-        }
-      ]
+      "RequireDocker": true
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 80
     }
   ]
 }
