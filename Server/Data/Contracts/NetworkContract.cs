@@ -1,5 +1,6 @@
 ﻿namespace Frierun.Server.Data;
 
 public record NetworkContract(
-    string Name
+    string Name,
+    string? NetworkName = null
 ) : Contract<Network>(Name);

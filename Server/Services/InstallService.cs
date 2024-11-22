@@ -19,7 +19,7 @@ public class InstallService(
         try
         {
             executionPlan.Install();
-            var application = executionPlan.GetResource<Application>(executionPlan.Package.Id);
+            var application = executionPlan.GetResource<Application>(executionPlan.RootContractId);
             stateSerializer.Save(state);
             if (application.Package?.Name == "traefik")
             {

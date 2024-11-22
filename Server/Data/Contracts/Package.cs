@@ -2,6 +2,7 @@
 
 public record Package(
     string Name,
+    string ?Prefix = null,
     string? Url = null,
     IReadOnlyList<Contract>? Contracts = null
 ) : Contract<Application>(Name)

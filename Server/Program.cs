@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Frierun.Server;
 using Frierun.Server.Services;
 using Microsoft.AspNetCore.Antiforgery;
@@ -8,22 +9,55 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SchemaGeneratorOptions.SupportNonNullableReferenceTypes = true;
-    options.SchemaGeneratorOptions.NonNullableReferenceTypesAsRequired = true;
-});
-builder.Services.AddAntiforgery(options =>
-{
-    options.HeaderName = "X-XSRF-TOKEN";
-    options.SuppressXFrameOptionsHeader = false;
-});
+builder.Services.AddSwaggerGen(
+    options =>
+    {
+        options.SchemaGeneratorOptions.SupportNonNullableReferenceTypes = true;
+        options.SchemaGeneratorOptions.NonNullableReferenceTypesAsRequired = true;
 
-builder.Services.AddControllersWithViews(options =>
-{
-    options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = false;
-    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
-});
+        options.UseOneOfForPolymorphism();
+        options.UseAllOfForInheritance();
+
+        options.CustomSchemaIds(type => type.ToString());
+
+        // TODO: remove when https://github.com/domaindrivendev/Swashbuckle.AspNetCore/pull/2671 gets merged
+        options.SelectSubTypesUsing(
+            type => type
+                .GetCustomAttributes(false)
+                .OfType<JsonDerivedTypeAttribute>()
+                .Select(attr => attr.DerivedType)
+        );
+        options.SelectDiscriminatorNameUsing(
+            type =>
+                type.GetCustomAttributes(false)
+                    .OfType<JsonPolymorphicAttribute>()
+                    .FirstOrDefault()
+                    ?.TypeDiscriminatorPropertyName
+        );
+        options.SelectDiscriminatorValueUsing(
+            type =>
+                type.BaseType?.GetCustomAttributes(false)
+                    .OfType<JsonDerivedTypeAttribute>()
+                    .FirstOrDefault(attr => attr.DerivedType == type)
+                    ?.TypeDiscriminator?.ToString()
+        );
+    }
+);
+builder.Services.AddAntiforgery(
+    options =>
+    {
+        options.HeaderName = "X-XSRF-TOKEN";
+        options.SuppressXFrameOptionsHeader = false;
+    }
+);
+
+builder.Services.AddControllersWithViews(
+    options =>
+    {
+        options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = false;
+        options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+    }
+);
 
 builder.Services.RegisterServices();
 
@@ -33,14 +67,18 @@ var app = builder.Build();
 app.Services.GetRequiredService<PackageRegistry>().Load();
 
 // Configure the HTTP request pipeline.
-app.UseSwagger(c =>
-{
-    c.PreSerializeFilters.Add((swagger, httpReq) =>
+app.UseSwagger(
+    c =>
     {
-        swagger.Servers = new List<OpenApiServer>
-            { new() { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}/api/v1" } };
-    });
-});
+        c.PreSerializeFilters.Add(
+            (swagger, httpReq) =>
+            {
+                swagger.Servers = new List<OpenApiServer>
+                    { new() { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}/api/v1" } };
+            }
+        );
+    }
+);
 
 if (app.Environment.IsDevelopment())
 {
@@ -49,16 +87,20 @@ if (app.Environment.IsDevelopment())
 
 var antiForgery = app.Services.GetRequiredService<IAntiforgery>();
 
-app.Use((context, next) =>
-{
-    if (!context.Request.Cookies.ContainsKey("XSRF-TOKEN"))
+app.Use(
+    (context, next) =>
     {
-        var tokenSet = antiForgery.GetAndStoreTokens(context);
-        context.Response.Cookies.Append("XSRF-TOKEN", tokenSet.RequestToken!, new CookieOptions { HttpOnly = false });
-    }
+        if (!context.Request.Cookies.ContainsKey("XSRF-TOKEN"))
+        {
+            var tokenSet = antiForgery.GetAndStoreTokens(context);
+            context.Response.Cookies.Append(
+                "XSRF-TOKEN", tokenSet.RequestToken!, new CookieOptions { HttpOnly = false }
+            );
+        }
 
-    return next(context);
-});
+        return next(context);
+    }
+);
 
 app.UseStaticFiles();
 app.UsePathBase("/api/v1");

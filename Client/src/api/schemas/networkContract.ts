@@ -5,10 +5,9 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface Contract {
+export interface NetworkContract {
   name: string;
   /** @nullable */
   readonly providerType?: string | null;
   readonly type: string;
-  Type: string;
 }

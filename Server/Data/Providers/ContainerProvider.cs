@@ -15,10 +15,29 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
     }
 
     /// <inheritdoc />
+    protected override ContainerContract Initialize(ContainerContract contract, ExecutionPlan plan)
+    {
+        var baseName = contract.ContainerName ?? plan.Prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
+        
+        var count = 0;
+        var name = baseName;
+        while (plan.State.Resources.OfType<Container>().Any(c => c.Name == name))
+        {
+            count++;
+            name = $"{baseName}{count}";
+        }
+
+        return contract.ContainerName == name
+            ? contract
+            : contract with
+            {
+                ContainerName = name
+            };
+    }
+
+    /// <inheritdoc />
     protected override Container Install(ContainerContract contract, ExecutionPlan plan)
     {
-        var name = plan.GetPrefixedName(contract.Name);
-        
         var dockerParameters = new CreateContainerParameters
         {
             Cmd = contract.Command.ToList(),
@@ -30,7 +49,7 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
                 PortBindings = new Dictionary<string, IList<PortBinding>>()
             },
             Labels = new Dictionary<string, string>(),
-            Name = name,
+            Name = contract.ContainerName!,
             NetworkingConfig = new NetworkingConfig()
             {
                 EndpointsConfig = new Dictionary<string, EndpointSettings>()
@@ -59,7 +78,7 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
             throw new Exception("Failed to start container");
         }
 
-        return new Container(name)
+        return new Container(contract.ContainerName!)
         {
             DependsOn = contract.DependsOn.ToList()
         };

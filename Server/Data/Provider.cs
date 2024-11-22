@@ -17,6 +17,18 @@ public abstract class Provider<TResource, TContract> : Provider
     {
         yield break;
     }
+
+    /// <inheritdoc />
+    [DebuggerStepThrough]
+    public sealed override Contract Initialize(Contract contract, ExecutionPlan plan)
+    {
+        return Initialize((TContract)contract, plan);
+    }
+
+    protected virtual TContract Initialize(TContract contract, ExecutionPlan plan)
+    {
+        return contract;
+    }
     
     /// <inheritdoc />
     [DebuggerStepThrough]
@@ -43,6 +55,7 @@ public abstract class Provider<TResource, TContract> : Provider
 public abstract class Provider
 {
     public abstract IEnumerable<ContractDependency> Dependencies(Contract contract, ExecutionPlan plan);
+    public abstract Contract Initialize(Contract contract, ExecutionPlan plan);
     public abstract Resource Install(Contract contract, ExecutionPlan plan);
     public abstract void Uninstall(Resource resource);
 }

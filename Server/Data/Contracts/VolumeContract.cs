@@ -1,3 +1,6 @@
 ﻿namespace Frierun.Server.Data;
 
-public record VolumeContract(string Name) : Contract<Volume>(Name);
+public record VolumeContract(
+    string Name,
+    string? VolumeName = null
+) : Contract<Volume>(Name);

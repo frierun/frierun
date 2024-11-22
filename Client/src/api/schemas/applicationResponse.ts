@@ -4,10 +4,12 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { ApplicationResponseResourcesItem } from "./applicationResponseResourcesItem";
 
 export interface ApplicationResponse {
   id: string;
   name: string;
+  resources: ApplicationResponseResourcesItem[];
   /** @nullable */
   serviceUrl?: string | null;
 }

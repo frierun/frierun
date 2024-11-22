@@ -17,7 +17,7 @@ import type {
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
-import type { Contract, Package } from "../schemas";
+import type { GetPackagesIdParameters200Item, Package } from "../schemas";
 import { customFetch } from "../../custom-fetch";
 
 type SecondParameter<T extends (...args: any) => any> = Parameters<T>[1];
@@ -138,7 +138,7 @@ export function useGetPackages<
 }
 
 export type getPackagesIdParametersResponse = {
-  data: Contract[];
+  data: GetPackagesIdParameters200Item[];
   status: number;
 };
 

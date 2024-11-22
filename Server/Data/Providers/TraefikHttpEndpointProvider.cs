@@ -17,14 +17,37 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
         yield return new ContractDependency(
             new NetworkContract(container.NetworkName),
             contract
-        );        
+        );
     }
+    
+    /// <inheritdoc />
+    protected override HttpEndpointContract Initialize(HttpEndpointContract contract, ExecutionPlan plan)
+    {
+        var baseName = contract.DomainName ?? $"{plan.Prefix}.localhost";
+        var subdomain = baseName.Split('.')[0];
+        var domain = baseName.Substring(subdomain.Length + 1);
+        
+        var count = 0;
+        var name = baseName;
+        while (plan.State.Resources.OfType<TraefikHttpEndpoint>().Any(c => c.Domain == name))
+        {
+            count++;
+            name = $"{subdomain}{count}.{domain}";
+        }
+
+        return contract.DomainName == name
+            ? contract
+            : contract with
+            {
+                DomainName = name
+            };
+    }    
     
     /// <inheritdoc />
     protected override HttpEndpoint Install(HttpEndpointContract contract, ExecutionPlan plan)
     {
-        var subdomain = plan.Prefix;
-        var domain = subdomain + ".localhost";
+        var domain = contract.DomainName!;
+        var subdomain = domain.Split('.')[0];
 
         var containerContract = plan.GetContract<ContainerContract>(contract.ContainerId);
 

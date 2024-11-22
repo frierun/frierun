@@ -1,17 +1,18 @@
 ﻿import {useContext} from "react";
 import StateContext from "../providers/StateContext.tsx";
-import {type Contract} from "../api/schemas";
+import {type GetPackagesIdParameters200Item} from "../api/schemas";
 import {getGetApplicationsQueryKey} from "../api/endpoints/applications.ts";
 import {usePostPackagesId} from "../api/endpoints/packages.ts";
 import {useQueryClient} from "@tanstack/react-query";
 import {useNavigate} from "react-router-dom";
+import Button from "./Button.tsx";
 
 type Props = {
-    contracts: Contract[];
+    contracts: GetPackagesIdParameters200Item[];
     name: string;
 }
 
-export default function InstallForm({name}: Props) {
+export default function InstallForm({contracts, name}: Props) {
     const {waitForReady} = useContext(StateContext);
     const {mutateAsync, isPending} = usePostPackagesId();
     const queryClient = useQueryClient()
@@ -26,9 +27,17 @@ export default function InstallForm({name}: Props) {
 
     return (
         <>
-            <button onClick={install} disabled={isPending}>
+            <Button onClick={install} disabled={isPending}>
                 Install
-            </button>
+            </Button>
+            <div>
+                {contracts.map(contract => (
+                    <div key={`${contract.type} ${contract.name}`}>
+                        <p>{contract.type}</p>
+                        <pre>{JSON.stringify(contract, null, 2)}</pre>
+                    </div>
+                ))}
+            </div>
         </>
     );
 }

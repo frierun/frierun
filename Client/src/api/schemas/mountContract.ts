@@ -5,10 +5,13 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface Contract {
+export interface MountContract {
+  containerName: string;
   name: string;
+  path: string;
   /** @nullable */
   readonly providerType?: string | null;
+  readOnly: boolean;
   readonly type: string;
-  Type: string;
+  volumeName: string;
 }

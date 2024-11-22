@@ -5,10 +5,8 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface Contract {
-  name: string;
-  /** @nullable */
-  readonly providerType?: string | null;
-  readonly type: string;
+export interface Resource {
+  dependsOnIds: string[];
+  id: string;
   Type: string;
 }

@@ -13,7 +13,7 @@ public abstract record Contract<T>(
 [JsonDerivedType(typeof(HttpEndpointContract), "HttpEndpoint")]
 [JsonDerivedType(typeof(MountContract), "Mount")]
 [JsonDerivedType(typeof(NetworkContract), "Network")]
-[JsonDerivedType(typeof(Package), "Package")]
+[JsonDerivedType(typeof(Package), "Application")]
 [JsonDerivedType(typeof(VolumeContract), "Volume")]
 public abstract record Contract(
     [property:JsonIgnore]Type ResourceType,
@@ -21,6 +21,9 @@ public abstract record Contract(
     [property:JsonIgnore]Provider? Provider = null
 )
 {
+    // for swagger
+    public string Type => ResourceType.Name;
+    
     [JsonIgnore] public ContractId Id => new(ResourceType, Name);
     public string? ProviderType => Provider?.GetType().Name;
 }

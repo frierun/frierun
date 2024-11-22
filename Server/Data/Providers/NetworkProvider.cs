@@ -6,14 +6,34 @@ namespace Frierun.Server.Data;
 public class NetworkProvider(DockerService dockerService) : Provider<Network, NetworkContract>
 {
     /// <inheritdoc />
+    protected override NetworkContract Initialize(NetworkContract contract, ExecutionPlan plan)
+    {
+        var baseName = contract.NetworkName ?? plan.Prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
+        
+        var count = 0;
+        var name = baseName;
+        while (plan.State.Resources.OfType<Network>().Any(c => c.Name == name))
+        {
+            count++;
+            name = $"{baseName}{count}";
+        }
+
+        return contract.NetworkName == name
+            ? contract
+            : contract with
+            {
+                NetworkName = name
+            };
+    }
+    
+    /// <inheritdoc />
     protected override Network Install(NetworkContract contract, ExecutionPlan plan)
     {
-        var networkName = plan.GetPrefixedName(contract.Name);
+        var networkName = contract.NetworkName!;
 
         dockerService.CreateNetwork(networkName).Wait();
 
         var containerGroup = new Network(networkName);
-
         foreach (var containerContract in plan.GetResourcesOfType<ContainerContract>())
         {
             plan.UpdateContract(

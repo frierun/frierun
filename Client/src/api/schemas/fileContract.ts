@@ -5,10 +5,12 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface Contract {
+export interface FileContract {
   name: string;
+  path: string;
   /** @nullable */
   readonly providerType?: string | null;
+  text: string;
   readonly type: string;
-  Type: string;
+  volumeName: string;
 }

@@ -4,11 +4,10 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { ApplicationAllOfPackage } from "./applicationAllOfPackage";
 
-export interface Contract {
+export type ApplicationAllOf = {
   name: string;
   /** @nullable */
-  readonly providerType?: string | null;
-  readonly type: string;
-  Type: string;
-}
+  package?: ApplicationAllOfPackage;
+};

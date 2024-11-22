@@ -1,13 +1,12 @@
-import {ReactElement} from "react";
+import {PropsWithChildren} from "react";
 
 
 type Props = {
     disabled?: boolean
     onClick?: () => void
     type?: 'default' | 'primary';
-    children: Array<ReactElement>
 }
-export default function Button({disabled = false, onClick = ()=>{}, type = 'default', children}:Props)
+export default function Button({disabled = false, onClick = ()=>{}, type = 'default', children}:PropsWithChildren<Props>)
 {
     if(type === 'default')
         return (
