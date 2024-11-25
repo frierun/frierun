@@ -28,7 +28,7 @@ public class ApplicationsController : ControllerBase
                     var portEndpoint = dependencies.OfType<PortEndpoint>().FirstOrDefault();
                     if (portEndpoint != null)
                     {
-                        url = $"{portEndpoint.PortType.ToString().ToLower()}://{portEndpoint.Ip}:{portEndpoint.Port}";
+                        url = $"{portEndpoint.Protocol.ToString().ToLower()}://{portEndpoint.Ip}:{portEndpoint.Port}";
                     }
                 }
                 

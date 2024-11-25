@@ -13,7 +13,7 @@ public class PortHttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointContr
         );
 
         yield return new ContractDependency(
-            new PortEndpointContract(PortType.Tcp, contract.Port, contract.ContainerName, 80),
+            new PortEndpointContract(Protocol.Tcp, contract.Port, contract.ContainerName, 80),
             contract
         );
     }
@@ -22,7 +22,7 @@ public class PortHttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointContr
     protected override HttpEndpoint Install(HttpEndpointContract contract, ExecutionPlan plan)
     {
         var portEndpoint = plan.GetResource<PortEndpoint>(
-            new PortEndpointContract(PortType.Tcp, contract.Port, contract.ContainerName, 80).Id
+            new PortEndpointContract(Protocol.Tcp, contract.Port, contract.ContainerName, 80).Id
         );
         var containerContract = plan.GetContract<ContainerContract>(contract.ContainerId);
 

@@ -33,7 +33,7 @@ export default function PortEndpointForm({contract, updateContract}: Props) {
         <>
             <div>
                 <p>
-                    {contract.portType} endpoint to port {contract.port}
+                    {contract.protocol} endpoint to port {contract.port}
                     {contract.containerName && ` in container ${contract.containerName}`}
                 </p>
                 <label>

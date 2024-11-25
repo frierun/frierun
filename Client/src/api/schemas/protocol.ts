@@ -5,10 +5,10 @@
  * OpenAPI spec version: 1.0
  */
 
-export type PortType = (typeof PortType)[keyof typeof PortType];
+export type Protocol = (typeof Protocol)[keyof typeof Protocol];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PortType = {
+export const Protocol = {
   Tcp: "Tcp",
   Udp: "Udp",
 } as const;

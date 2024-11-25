@@ -4,11 +4,11 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { PortType } from "./portType";
+import type { Protocol } from "./protocol";
 
 export type PortEndpointContractAllOf = {
   containerName: string;
   destinationPort: number;
   port: number;
-  portType: PortType;
+  protocol: Protocol;
 };

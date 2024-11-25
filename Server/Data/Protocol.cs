@@ -3,7 +3,7 @@
 namespace Frierun.Server.Data;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum PortType
+public enum Protocol
 {
     Tcp,
     Udp

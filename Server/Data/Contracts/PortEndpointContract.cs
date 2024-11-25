@@ -3,11 +3,11 @@
 namespace Frierun.Server.Data;
 
 public record PortEndpointContract(
-    PortType PortType,
+    Protocol Protocol,
     int Port,
     string? ContainerName = null,
     int DestinationPort = 0
-) : Contract<PortEndpoint>($"{ContainerName ?? ""}:{Port}/{PortType}")
+) : Contract<PortEndpoint>($"{ContainerName ?? ""}:{Port}/{Protocol}")
 {
     public string ContainerName { get; init; } = ContainerName ?? "";
     [JsonIgnore] public ContractId ContainerId => new (typeof(Container), ContainerName);

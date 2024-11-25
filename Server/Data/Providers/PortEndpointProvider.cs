@@ -19,7 +19,7 @@ public class PortEndpointProvider : Provider<PortEndpoint, PortEndpointContract>
         int port = contract.DestinationPort == 0 ? contract.Port : contract.DestinationPort;
 
         while (plan.State.Resources.OfType<PortEndpoint>()
-               .Any(endpoint => endpoint.Port == port && endpoint.PortType == contract.PortType))
+               .Any(endpoint => endpoint.Port == port && endpoint.Protocol == contract.Protocol))
         {
             port += 1000;
             if (port > 65535)
@@ -50,7 +50,7 @@ public class PortEndpointProvider : Provider<PortEndpoint, PortEndpointContract>
         var internalPort = contract.Port;
 
         // TODO: fill the correct ip of the host
-        var endpoint = new PortEndpoint("127.0.0.1", externalPort, contract.PortType);
+        var endpoint = new PortEndpoint("127.0.0.1", externalPort, contract.Protocol);
 
         plan.UpdateContract(
             containerContract with
@@ -58,7 +58,7 @@ public class PortEndpointProvider : Provider<PortEndpoint, PortEndpointContract>
                 Configure = containerContract.Configure.Append(
                     parameters =>
                     {
-                        parameters.HostConfig.PortBindings[$"{internalPort}/{contract.PortType}"] =
+                        parameters.HostConfig.PortBindings[$"{internalPort}/{contract.Protocol.ToString().ToLower()}"] =
                             new List<PortBinding>
                             {
                                 new()

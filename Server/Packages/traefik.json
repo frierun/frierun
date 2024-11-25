@@ -13,7 +13,8 @@
     },
     {
       "Type": "PortEndpoint",
-      "Port": 80
+      "Port": 80,
+      "Protocol": "tcp"
     }
   ]
 }
