@@ -5,9 +5,10 @@
  * OpenAPI spec version: 1.0
  */
 
-export type ContainerType = (typeof ContainerType)[keyof typeof ContainerType];
+export type MountContractType =
+  (typeof MountContractType)[keyof typeof MountContractType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const ContainerType = {
-  Container: "Container",
+export const MountContractType = {
+  Mount: "Mount",
 } as const;

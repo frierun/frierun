@@ -5,10 +5,10 @@
  * OpenAPI spec version: 1.0
  */
 
-export type ApplicationType =
-  (typeof ApplicationType)[keyof typeof ApplicationType];
+export type ContainerContractType =
+  (typeof ContainerContractType)[keyof typeof ContainerContractType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const ApplicationType = {
-  Application: "Application",
+export const ContainerContractType = {
+  Container: "Container",
 } as const;

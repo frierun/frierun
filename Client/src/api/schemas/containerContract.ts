@@ -4,17 +4,11 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { ContainerContractEnv } from "./containerContractEnv";
+import type { Contract } from "./contract";
+import type { ContainerContractAllOf } from "./containerContractAllOf";
+import type { ContainerContractType } from "./containerContractType";
 
-export interface ContainerContract {
-  command: string[];
-  env: ContainerContractEnv;
-  /** @nullable */
-  imageName?: string | null;
-  name: string;
-  networkName: string;
-  /** @nullable */
-  readonly providerType?: string | null;
-  requireDocker: boolean;
-  readonly type: string;
-}
+export type ContainerContract = Contract &
+  ContainerContractAllOf & {
+    Type: ContainerContractType;
+  };

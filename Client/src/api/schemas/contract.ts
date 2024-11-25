@@ -9,6 +9,5 @@ export interface Contract {
   name: string;
   /** @nullable */
   readonly providerType?: string | null;
-  readonly type: string;
   Type: string;
 }

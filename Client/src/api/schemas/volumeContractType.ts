@@ -5,9 +5,10 @@
  * OpenAPI spec version: 1.0
  */
 
-export type FileType = (typeof FileType)[keyof typeof FileType];
+export type VolumeContractType =
+  (typeof VolumeContractType)[keyof typeof VolumeContractType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const FileType = {
-  File: "File",
+export const VolumeContractType = {
+  Volume: "Volume",
 } as const;

@@ -5,10 +5,9 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface PortHttpEndpoint {
-  dependsOnIds: string[];
-  id: string;
-  ip: string;
+export type HttpEndpointContractAllOf = {
+  containerName: string;
+  /** @nullable */
+  domainName?: string | null;
   port: number;
-  url: string;
-}
+};

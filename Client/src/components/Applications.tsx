@@ -19,10 +19,16 @@ export default function Applications() {
                     <div className={"bg-gray p-2 lg:p-4 rounded-md flex justify-between"} key={item.id}>
                         <div className={"flex gap-3"}>
                         <div className={"h-24 w-24 rounded flex-shrink-0"}>
-                            <img src={`/packages/${item.name}.png`} className={"rounded"}/>
+                            {item.packageName && (
+                                <img 
+                                    alt={item.packageName}
+                                    src={`/packages/${item.packageName}.png`} 
+                                    className={"rounded"}
+                                />
+                            )}
                         </div>
-                        <div>
-                            <div className={"font-bold text-lg"}>
+                            <div>
+                                <div className={"font-bold text-lg"}>
                                 {item.name}
                             </div>
                             <div className={"text-sm"}>

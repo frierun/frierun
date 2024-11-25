@@ -12,12 +12,12 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
     {
         return packageRegistry.Packages;
     }
-    
+
     /// <summary>
     /// Gets package and default parameters
     /// </summary>
-    [HttpGet("{id}/parameters")]
-    public IEnumerable<Contract>? Parameters(string id, PackageRegistry packageRegistry, ExecutionService executionService)
+    [HttpGet("{id}/plan")]
+    public IEnumerable<Contract>? Plan(string id, PackageRegistry packageRegistry, ExecutionService executionService)
     {
         var package = packageRegistry.Find(id);
         if (package == null)
@@ -27,20 +27,19 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
 
         return executionService.Create(package).Contracts.Values;
     }
-    
+
     /// <summary>
     /// Installs the given package
     /// </summary>
-    [HttpPost("{id}")]
+    [HttpPost("{id}/install")]
     public IActionResult Install(
         string id,
+        [FromBody] Package overrides,
         PackageRegistry packageRegistry,
         InstallService installService,
         ExecutionService executionService
     )
     {
-        logger.LogInformation("Installing package {id}", id);
-
         var package = packageRegistry.Find(id);
 
         if (package == null)
@@ -48,8 +47,10 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
             return NotFound();
         }
 
-        var plan = executionService.Create(package);
+        var overriden = (Package)package.With(overrides);
+        var plan = executionService.Create(overriden);
 
+        logger.LogInformation("Installing package {id}", id);
         Task.Run(() => installService.Handle(plan));
         return Accepted();
     }

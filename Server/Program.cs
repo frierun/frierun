@@ -17,30 +17,9 @@ builder.Services.AddSwaggerGen(
 
         options.UseOneOfForPolymorphism();
         options.UseAllOfForInheritance();
+        options.EnableAnnotations(true, true);
 
-        options.CustomSchemaIds(type => type.ToString());
-
-        // TODO: remove when https://github.com/domaindrivendev/Swashbuckle.AspNetCore/pull/2671 gets merged
-        options.SelectSubTypesUsing(
-            type => type
-                .GetCustomAttributes(false)
-                .OfType<JsonDerivedTypeAttribute>()
-                .Select(attr => attr.DerivedType)
-        );
-        options.SelectDiscriminatorNameUsing(
-            type =>
-                type.GetCustomAttributes(false)
-                    .OfType<JsonPolymorphicAttribute>()
-                    .FirstOrDefault()
-                    ?.TypeDiscriminatorPropertyName
-        );
-        options.SelectDiscriminatorValueUsing(
-            type =>
-                type.BaseType?.GetCustomAttributes(false)
-                    .OfType<JsonDerivedTypeAttribute>()
-                    .FirstOrDefault(attr => attr.DerivedType == type)
-                    ?.TypeDiscriminator?.ToString()
-        );
+        //options.CustomSchemaIds(type => type.ToString());
     }
 );
 builder.Services.AddAntiforgery(

@@ -5,4 +5,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export type ContainerContractEnv = { [key: string]: string };
+export type NetworkContractAllOf = {
+  /** @nullable */
+  networkName?: string | null;
+};

@@ -11,8 +11,9 @@ public class ApplicationProvider : Provider<Application, Package>
     /// <inheritdoc />
     protected override Package Initialize(Package contract, ExecutionPlan plan)
     {
-        var count = 0;
         var basePrefix = contract.Prefix ?? contract.Name;
+        
+        var count = 1;
         var prefix = basePrefix;
         while (plan.State.Resources.OfType<Application>().Any(application => application.Name == prefix))
         {

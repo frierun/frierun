@@ -19,7 +19,7 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
     {
         var baseName = contract.ContainerName ?? plan.Prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
         
-        var count = 0;
+        var count = 1;
         var name = baseName;
         while (plan.State.Resources.OfType<Container>().Any(c => c.Name == name))
         {

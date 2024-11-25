@@ -5,10 +5,10 @@
  * OpenAPI spec version: 1.0
  */
 
-export type HttpEndpointType =
-  (typeof HttpEndpointType)[keyof typeof HttpEndpointType];
+export type HttpEndpointContractType =
+  (typeof HttpEndpointContractType)[keyof typeof HttpEndpointContractType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const HttpEndpointType = {
+export const HttpEndpointContractType = {
   HttpEndpoint: "HttpEndpoint",
 } as const;

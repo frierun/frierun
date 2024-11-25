@@ -10,15 +10,15 @@ import type { HttpEndpointContract } from "./httpEndpointContract";
 import type { MountContract } from "./mountContract";
 import type { NetworkContract } from "./networkContract";
 import type { Package } from "./package";
+import type { PortEndpointContract } from "./portEndpointContract";
 import type { VolumeContract } from "./volumeContract";
-import type { Contract } from "./contract";
 
-export type PackageContractsItem =
+export type PackageAllOfContractsItem =
   | ContainerContract
   | FileContract
   | HttpEndpointContract
   | MountContract
   | NetworkContract
   | Package
-  | VolumeContract
-  | Contract;
+  | PortEndpointContract
+  | VolumeContract;

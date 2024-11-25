@@ -1,11 +1,11 @@
 ﻿import {Link, useParams} from "react-router-dom";
 import InstallForm from "../components/InstallForm.tsx";
-import {useGetPackagesIdParameters} from "../api/endpoints/packages.ts";
+import {useGetPackagesIdPlan} from "../api/endpoints/packages.ts";
 
 export default function Package() {
     const {name} = useParams<{name: string}>();
     
-    const {data, isPending, isError} = useGetPackagesIdParameters(name ?? "");
+    const {data, isPending, isError} = useGetPackagesIdPlan(name ?? "");
 
     if (isPending) return <p>Loading...</p>
     if (isError) return <p>Error!</p>

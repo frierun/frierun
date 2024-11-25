@@ -11,6 +11,9 @@
             prettier: true,
             clean: ['src/api/endpoints', 'src/api/schemas'],
             override: {
+                contentType: {
+                    include: ['application/json'],
+                },
                 mutator: {
                     path: './src/custom-fetch.ts',
                     name: 'customFetch',

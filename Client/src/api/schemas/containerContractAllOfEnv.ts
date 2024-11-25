@@ -5,4 +5,4 @@
  * OpenAPI spec version: 1.0
  */
 
-export type MountAllOf = { [key: string]: unknown };
+export type ContainerContractAllOfEnv = { [key: string]: string };

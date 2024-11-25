@@ -5,9 +5,9 @@
  * OpenAPI spec version: 1.0
  */
 
-export type VolumeType = (typeof VolumeType)[keyof typeof VolumeType];
+export type PackageType = (typeof PackageType)[keyof typeof PackageType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const VolumeType = {
-  Volume: "Volume",
+export const PackageType = {
+  Application: "Application",
 } as const;

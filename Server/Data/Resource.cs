@@ -4,15 +4,15 @@ using File = Frierun.Server.Data.File;
 namespace Frierun.Server.Data;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
-[JsonDerivedType(typeof(Application), "Application")]
-[JsonDerivedType(typeof(Container), "Container")]
-[JsonDerivedType(typeof(Network), "Network")]
-[JsonDerivedType(typeof(File), "File")]
-[JsonDerivedType(typeof(HttpEndpoint), "HttpEndpoint")]
-[JsonDerivedType(typeof(Mount), "Mount")]
-[JsonDerivedType(typeof(PortHttpEndpoint), "PortHttpEndpoint")]
-[JsonDerivedType(typeof(TraefikHttpEndpoint), "TraefikHttpEndpoint")]
-[JsonDerivedType(typeof(Volume), "Volume")]
+[JsonDerivedType(typeof(Application), nameof(Application))]
+[JsonDerivedType(typeof(Container), nameof(Container))]
+[JsonDerivedType(typeof(Network), nameof(Network))]
+[JsonDerivedType(typeof(File), nameof(File))]
+[JsonDerivedType(typeof(HttpEndpoint), nameof(HttpEndpoint))]
+[JsonDerivedType(typeof(Mount), nameof(Mount))]
+[JsonDerivedType(typeof(PortEndpoint), nameof(PortEndpoint))]
+[JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
+[JsonDerivedType(typeof(Volume), nameof(Volume))]
 public abstract record Resource
 {
     private readonly List<Resource> _dependsOn = [];
@@ -23,10 +23,13 @@ public abstract record Resource
     public Guid Id { get; init; } = Guid.NewGuid();
     
     /// <summary>
-    /// Enumerates all resources in the hierarchy.
+    /// Enumerates all resources for this application.
     /// </summary>
     [JsonIgnore]
-    public IEnumerable<Resource> AllDependencies => DependsOn.SelectMany(resource => resource.AllDependencies).Prepend(this);
+    public IEnumerable<Resource> AllDependencies => DependsOn
+        .SelectMany(resource => resource.AllDependencies)
+        .Where(resource => resource.GetType() != typeof(Application))
+        .Prepend(this);
     
     /// <summary>
     /// Gets the resources that require this resource.

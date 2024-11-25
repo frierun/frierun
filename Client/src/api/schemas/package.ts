@@ -4,14 +4,11 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { PackageContractsItem } from "./packageContractsItem";
+import type { Contract } from "./contract";
+import type { PackageAllOf } from "./packageAllOf";
+import type { PackageType } from "./packageType";
 
-export interface Package {
-  contracts: PackageContractsItem[];
-  name: string;
-  /** @nullable */
-  readonly providerType?: string | null;
-  readonly type: string;
-  /** @nullable */
-  url?: string | null;
-}
+export type Package = Contract &
+  PackageAllOf & {
+    Type: PackageType;
+  };

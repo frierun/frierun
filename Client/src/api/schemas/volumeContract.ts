@@ -4,10 +4,11 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { Contract } from "./contract";
+import type { VolumeContractAllOf } from "./volumeContractAllOf";
+import type { VolumeContractType } from "./volumeContractType";
 
-export interface VolumeContract {
-  name: string;
-  /** @nullable */
-  readonly providerType?: string | null;
-  readonly type: string;
-}
+export type VolumeContract = Contract &
+  VolumeContractAllOf & {
+    Type: VolumeContractType;
+  };

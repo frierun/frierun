@@ -27,7 +27,7 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
         var subdomain = baseName.Split('.')[0];
         var domain = baseName.Substring(subdomain.Length + 1);
         
-        var count = 0;
+        var count = 1;
         var name = baseName;
         while (plan.State.Resources.OfType<TraefikHttpEndpoint>().Any(c => c.Domain == name))
         {
@@ -51,11 +51,6 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
 
         var containerContract = plan.GetContract<ContainerContract>(contract.ContainerId);
 
-        if (containerContract == null)
-        {
-            throw new Exception("Container not found");
-        }
-
         var network = plan.GetResource<Network>(containerContract.NetworkId);
 
         var traefikContainer = application.AllDependencies.OfType<Container>().FirstOrDefault();
@@ -64,7 +59,7 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
             throw new Exception("Traefik container not found");
         }
 
-        var traefikPort = application.AllDependencies.OfType<PortHttpEndpoint>().FirstOrDefault();
+        var traefikPort = application.AllDependencies.OfType<PortEndpoint>().FirstOrDefault();
         if (traefikPort == null)
         {
             throw new Exception("Traefik port not found");
@@ -74,7 +69,7 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
         {
             DependsOn =
             [
-                traefikContainer,
+                application,
                 network
             ]
         };

@@ -15,6 +15,7 @@ public class ProviderRegistry
         FileProvider fileProvider,
         MountProvider mountProvider,
         NetworkProvider networkProvider,
+        PortEndpointProvider portEndpointProvider,
         PortHttpEndpointProvider portHttpEndpointProvider,
         VolumeProvider volumeProvider,
         DockerService dockerService
@@ -27,9 +28,9 @@ public class ProviderRegistry
         Add(typeof(HttpEndpoint), portHttpEndpointProvider);
         Add(typeof(Mount), mountProvider);
         Add(typeof(Network), networkProvider);
-        Add(typeof(PortHttpEndpoint), portHttpEndpointProvider);
+        Add(typeof(PortEndpoint), portEndpointProvider);
         Add(typeof(Volume), volumeProvider);
-        
+
         var traefik = state.Resources.OfType<Application>().FirstOrDefault(a => a.Package?.Name == "traefik");
         if (traefik != null)
         {

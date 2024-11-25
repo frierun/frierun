@@ -5,6 +5,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export type HttpEndpointAllOf = {
-  url: string;
+export type VolumeContractAllOf = {
+  /** @nullable */
+  volumeName?: string | null;
 };

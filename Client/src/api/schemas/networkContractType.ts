@@ -5,9 +5,10 @@
  * OpenAPI spec version: 1.0
  */
 
-export type MountType = (typeof MountType)[keyof typeof MountType];
+export type NetworkContractType =
+  (typeof NetworkContractType)[keyof typeof NetworkContractType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const MountType = {
-  Mount: "Mount",
+export const NetworkContractType = {
+  Network: "Network",
 } as const;

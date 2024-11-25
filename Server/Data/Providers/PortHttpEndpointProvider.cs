@@ -1,4 +1,4 @@
-﻿using Docker.DotNet.Models;
+﻿using System.Text;
 
 namespace Frierun.Server.Data;
 
@@ -11,41 +11,35 @@ public class PortHttpEndpointProvider : Provider<HttpEndpoint, HttpEndpointContr
             contract,
             new ContainerContract(contract.ContainerName)
         );
+
+        yield return new ContractDependency(
+            new PortEndpointContract(PortType.Tcp, contract.Port, contract.ContainerName, 80),
+            contract
+        );
     }
 
     /// <inheritdoc />
     protected override HttpEndpoint Install(HttpEndpointContract contract, ExecutionPlan plan)
     {
+        var portEndpoint = plan.GetResource<PortEndpoint>(
+            new PortEndpointContract(PortType.Tcp, contract.Port, contract.ContainerName, 80).Id
+        );
         var containerContract = plan.GetContract<ContainerContract>(contract.ContainerId);
 
-        if (containerContract == null)
+        var endpointUrl = new StringBuilder();
+        endpointUrl.Append("http://");
+        endpointUrl.Append(portEndpoint.Ip);
+        if (portEndpoint.Port != 80)
         {
-            throw new Exception("Container not found");
+            endpointUrl.Append(":");
+            endpointUrl.Append(portEndpoint.Port);
         }
-
-        // TODO: fill the correct external port
-        var externalPort = contract.Port;
-        var internalPort = contract.Port;
-
-        // TODO: fill the correct ip of the host
-        var endpoint = new PortHttpEndpoint("127.0.0.1", externalPort);
+        
+        var endpoint = new HttpEndpoint(endpointUrl.ToString());
 
         plan.UpdateContract(
             containerContract with
             {
-                Configure = containerContract.Configure.Append(
-                    parameters =>
-                    {
-                        parameters.HostConfig.PortBindings[$"{internalPort}/tcp"] =
-                            new List<PortBinding>
-                            {
-                                new()
-                                {
-                                    HostPort = externalPort.ToString()
-                                }
-                            };
-                    }
-                ),
                 DependsOn = containerContract.DependsOn.Append(endpoint)
             }
         );

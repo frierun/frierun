@@ -5,6 +5,8 @@
  * OpenAPI spec version: 1.0
  */
 
-export type NetworkAllOf = {
-  name: string;
+export type FileContractAllOf = {
+  path: string;
+  text: string;
+  volumeName: string;
 };

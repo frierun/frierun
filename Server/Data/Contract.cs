@@ -14,6 +14,7 @@ public abstract record Contract<T>(
 [JsonDerivedType(typeof(MountContract), "Mount")]
 [JsonDerivedType(typeof(NetworkContract), "Network")]
 [JsonDerivedType(typeof(Package), "Application")]
+[JsonDerivedType(typeof(PortEndpointContract), "PortEndpoint")]
 [JsonDerivedType(typeof(VolumeContract), "Volume")]
 public abstract record Contract(
     [property:JsonIgnore]Type ResourceType,
@@ -21,9 +22,11 @@ public abstract record Contract(
     [property:JsonIgnore]Provider? Provider = null
 )
 {
-    // for swagger
-    public string Type => ResourceType.Name;
-    
     [JsonIgnore] public ContractId Id => new(ResourceType, Name);
     public string? ProviderType => Provider?.GetType().Name;
+
+    public virtual Contract With(Contract other)
+    {
+        throw new Exception("Not implemented");
+    }
 }

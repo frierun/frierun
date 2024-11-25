@@ -12,7 +12,7 @@
       "RequireDocker": true
     },
     {
-      "Type": "HttpEndpoint",
+      "Type": "PortEndpoint",
       "Port": 80
     }
   ]

@@ -5,9 +5,10 @@
  * OpenAPI spec version: 1.0
  */
 
-export type NetworkType = (typeof NetworkType)[keyof typeof NetworkType];
+export type PortType = (typeof PortType)[keyof typeof PortType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const NetworkType = {
-  Network: "Network",
+export const PortType = {
+  Tcp: "Tcp",
+  Udp: "Udp",
 } as const;

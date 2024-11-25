@@ -4,10 +4,11 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { Contract } from "./contract";
+import type { NetworkContractAllOf } from "./networkContractAllOf";
+import type { NetworkContractType } from "./networkContractType";
 
-export interface NetworkContract {
-  name: string;
-  /** @nullable */
-  readonly providerType?: string | null;
-  readonly type: string;
-}
+export type NetworkContract = Contract &
+  NetworkContractAllOf & {
+    Type: NetworkContractType;
+  };

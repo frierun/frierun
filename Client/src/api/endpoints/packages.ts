@@ -17,8 +17,36 @@ import type {
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
-import type { GetPackagesIdParameters200Item, Package } from "../schemas";
+import type { GetPackagesIdPlan200Item, Package } from "../schemas";
 import { customFetch } from "../../custom-fetch";
+
+// https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
+type IfEquals<X, Y, A = X, B = never> =
+  (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? A : B;
+
+type WritableKeys<T> = {
+  [P in keyof T]-?: IfEquals<
+    { [Q in P]: T[P] },
+    { -readonly [Q in P]: T[P] },
+    P
+  >;
+}[keyof T];
+
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+  k: infer I,
+) => void
+  ? I
+  : never;
+type DistributeReadOnlyOverUnions<T> = T extends any ? NonReadonly<T> : never;
+
+type Writable<T> = Pick<T, WritableKeys<T>>;
+type NonReadonly<T> = [T] extends [UnionToIntersection<T>]
+  ? {
+      [P in keyof Writable<T>]: T[P] extends object
+        ? NonReadonly<NonNullable<T[P]>>
+        : T[P];
+    }
+  : DistributeReadOnlyOverUnions<T>;
 
 type SecondParameter<T extends (...args: any) => any> = Parameters<T>[1];
 
@@ -137,21 +165,21 @@ export function useGetPackages<
   return query;
 }
 
-export type getPackagesIdParametersResponse = {
-  data: GetPackagesIdParameters200Item[];
+export type getPackagesIdPlanResponse = {
+  data: GetPackagesIdPlan200Item[];
   status: number;
 };
 
-export const getGetPackagesIdParametersUrl = (id: string) => {
-  return `/api/v1/packages/${id}/parameters`;
+export const getGetPackagesIdPlanUrl = (id: string) => {
+  return `/api/v1/packages/${id}/plan`;
 };
 
-export const getPackagesIdParameters = async (
+export const getPackagesIdPlan = async (
   id: string,
   options?: RequestInit,
-): Promise<getPackagesIdParametersResponse> => {
-  return customFetch<Promise<getPackagesIdParametersResponse>>(
-    getGetPackagesIdParametersUrl(id),
+): Promise<getPackagesIdPlanResponse> => {
+  return customFetch<Promise<getPackagesIdPlanResponse>>(
+    getGetPackagesIdPlanUrl(id),
     {
       ...options,
       method: "GET",
@@ -159,19 +187,19 @@ export const getPackagesIdParameters = async (
   );
 };
 
-export const getGetPackagesIdParametersQueryKey = (id: string) => {
-  return [`/api/v1/packages/${id}/parameters`] as const;
+export const getGetPackagesIdPlanQueryKey = (id: string) => {
+  return [`/api/v1/packages/${id}/plan`] as const;
 };
 
-export const getGetPackagesIdParametersQueryOptions = <
-  TData = Awaited<ReturnType<typeof getPackagesIdParameters>>,
+export const getGetPackagesIdPlanQueryOptions = <
+  TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
   TError = unknown,
 >(
   id: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getPackagesIdParameters>>,
+        Awaited<ReturnType<typeof getPackagesIdPlan>>,
         TError,
         TData
       >
@@ -181,13 +209,11 @@ export const getGetPackagesIdParametersQueryOptions = <
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getGetPackagesIdParametersQueryKey(id);
+  const queryKey = queryOptions?.queryKey ?? getGetPackagesIdPlanQueryKey(id);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getPackagesIdParameters>>
-  > = ({ signal }) =>
-    getPackagesIdParameters(id, { signal, ...requestOptions });
+    Awaited<ReturnType<typeof getPackagesIdPlan>>
+  > = ({ signal }) => getPackagesIdPlan(id, { signal, ...requestOptions });
 
   return {
     queryKey,
@@ -195,33 +221,33 @@ export const getGetPackagesIdParametersQueryOptions = <
     enabled: !!id,
     ...queryOptions,
   } as UseQueryOptions<
-    Awaited<ReturnType<typeof getPackagesIdParameters>>,
+    Awaited<ReturnType<typeof getPackagesIdPlan>>,
     TError,
     TData
   > & { queryKey: QueryKey };
 };
 
-export type GetPackagesIdParametersQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getPackagesIdParameters>>
+export type GetPackagesIdPlanQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getPackagesIdPlan>>
 >;
-export type GetPackagesIdParametersQueryError = unknown;
+export type GetPackagesIdPlanQueryError = unknown;
 
-export function useGetPackagesIdParameters<
-  TData = Awaited<ReturnType<typeof getPackagesIdParameters>>,
+export function useGetPackagesIdPlan<
+  TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
   TError = unknown,
 >(
   id: string,
   options: {
     query: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getPackagesIdParameters>>,
+        Awaited<ReturnType<typeof getPackagesIdPlan>>,
         TError,
         TData
       >
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPackagesIdParameters>>,
+          Awaited<ReturnType<typeof getPackagesIdPlan>>,
           TError,
           TData
         >,
@@ -230,22 +256,22 @@ export function useGetPackagesIdParameters<
     request?: SecondParameter<typeof customFetch>;
   },
 ): DefinedUseQueryResult<TData, TError> & { queryKey: QueryKey };
-export function useGetPackagesIdParameters<
-  TData = Awaited<ReturnType<typeof getPackagesIdParameters>>,
+export function useGetPackagesIdPlan<
+  TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
   TError = unknown,
 >(
   id: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getPackagesIdParameters>>,
+        Awaited<ReturnType<typeof getPackagesIdPlan>>,
         TError,
         TData
       >
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPackagesIdParameters>>,
+          Awaited<ReturnType<typeof getPackagesIdPlan>>,
           TError,
           TData
         >,
@@ -254,15 +280,15 @@ export function useGetPackagesIdParameters<
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey };
-export function useGetPackagesIdParameters<
-  TData = Awaited<ReturnType<typeof getPackagesIdParameters>>,
+export function useGetPackagesIdPlan<
+  TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
   TError = unknown,
 >(
   id: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getPackagesIdParameters>>,
+        Awaited<ReturnType<typeof getPackagesIdPlan>>,
         TError,
         TData
       >
@@ -271,15 +297,15 @@ export function useGetPackagesIdParameters<
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
-export function useGetPackagesIdParameters<
-  TData = Awaited<ReturnType<typeof getPackagesIdParameters>>,
+export function useGetPackagesIdPlan<
+  TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
   TError = unknown,
 >(
   id: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getPackagesIdParameters>>,
+        Awaited<ReturnType<typeof getPackagesIdPlan>>,
         TError,
         TData
       >
@@ -287,7 +313,7 @@ export function useGetPackagesIdParameters<
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetPackagesIdParametersQueryOptions(id, options);
+  const queryOptions = getGetPackagesIdPlanQueryOptions(id, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
@@ -298,83 +324,86 @@ export function useGetPackagesIdParameters<
   return query;
 }
 
-export type postPackagesIdResponse = {
+export type postPackagesIdInstallResponse = {
   data: void;
   status: number;
 };
 
-export const getPostPackagesIdUrl = (id: string) => {
-  return `/api/v1/packages/${id}`;
+export const getPostPackagesIdInstallUrl = (id: string) => {
+  return `/api/v1/packages/${id}/install`;
 };
 
-export const postPackagesId = async (
+export const postPackagesIdInstall = async (
   id: string,
+  _package: NonReadonly<Package>,
   options?: RequestInit,
-): Promise<postPackagesIdResponse> => {
-  return customFetch<Promise<postPackagesIdResponse>>(
-    getPostPackagesIdUrl(id),
+): Promise<postPackagesIdInstallResponse> => {
+  return customFetch<Promise<postPackagesIdInstallResponse>>(
+    getPostPackagesIdInstallUrl(id),
     {
       ...options,
       method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(_package),
     },
   );
 };
 
-export const getPostPackagesIdMutationOptions = <
+export const getPostPackagesIdInstallMutationOptions = <
   TError = unknown,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postPackagesId>>,
+    Awaited<ReturnType<typeof postPackagesIdInstall>>,
     TError,
-    { id: string },
+    { id: string; data: NonReadonly<Package> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postPackagesId>>,
+  Awaited<ReturnType<typeof postPackagesIdInstall>>,
   TError,
-  { id: string },
+  { id: string; data: NonReadonly<Package> },
   TContext
 > => {
   const { mutation: mutationOptions, request: requestOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postPackagesId>>,
-    { id: string }
+    Awaited<ReturnType<typeof postPackagesIdInstall>>,
+    { id: string; data: NonReadonly<Package> }
   > = (props) => {
-    const { id } = props ?? {};
+    const { id, data } = props ?? {};
 
-    return postPackagesId(id, requestOptions);
+    return postPackagesIdInstall(id, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostPackagesIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postPackagesId>>
+export type PostPackagesIdInstallMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postPackagesIdInstall>>
 >;
+export type PostPackagesIdInstallMutationBody = NonReadonly<Package>;
+export type PostPackagesIdInstallMutationError = unknown;
 
-export type PostPackagesIdMutationError = unknown;
-
-export const usePostPackagesId = <
+export const usePostPackagesIdInstall = <
   TError = unknown,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postPackagesId>>,
+    Awaited<ReturnType<typeof postPackagesIdInstall>>,
     TError,
-    { id: string },
+    { id: string; data: NonReadonly<Package> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
-  Awaited<ReturnType<typeof postPackagesId>>,
+  Awaited<ReturnType<typeof postPackagesIdInstall>>,
   TError,
-  { id: string },
+  { id: string; data: NonReadonly<Package> },
   TContext
 > => {
-  const mutationOptions = getPostPackagesIdMutationOptions(options);
+  const mutationOptions = getPostPackagesIdInstallMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

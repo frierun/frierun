@@ -10,7 +10,7 @@ public class NetworkProvider(DockerService dockerService) : Provider<Network, Ne
     {
         var baseName = contract.NetworkName ?? plan.Prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
         
-        var count = 0;
+        var count = 1;
         var name = baseName;
         while (plan.State.Resources.OfType<Network>().Any(c => c.Name == name))
         {

@@ -4,12 +4,11 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { Contract } from "./contract";
+import type { HttpEndpointContractAllOf } from "./httpEndpointContractAllOf";
+import type { HttpEndpointContractType } from "./httpEndpointContractType";
 
-export interface HttpEndpointContract {
-  containerName: string;
-  name: string;
-  port: number;
-  /** @nullable */
-  readonly providerType?: string | null;
-  readonly type: string;
-}
+export type HttpEndpointContract = Contract &
+  HttpEndpointContractAllOf & {
+    Type: HttpEndpointContractType;
+  };

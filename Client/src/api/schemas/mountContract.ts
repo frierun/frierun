@@ -4,14 +4,11 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { Contract } from "./contract";
+import type { MountContractAllOf } from "./mountContractAllOf";
+import type { MountContractType } from "./mountContractType";
 
-export interface MountContract {
-  containerName: string;
-  name: string;
-  path: string;
-  /** @nullable */
-  readonly providerType?: string | null;
-  readOnly: boolean;
-  readonly type: string;
-  volumeName: string;
-}
+export type MountContract = Contract &
+  MountContractAllOf & {
+    Type: MountContractType;
+  };
