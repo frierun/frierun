@@ -6,8 +6,8 @@ public class InstallService(
     State state,
     StateSerializer stateSerializer,
     StateManager stateManager,
-    ProviderRegistry providerRegistry
-)
+    ProviderRegistry providerRegistry,
+    ILogger<InstallService> logger)
 {
     public void Handle(ExecutionPlan executionPlan)
     {
@@ -25,6 +25,10 @@ public class InstallService(
             {
                 providerRegistry.UseTraefik(application);
             }
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to install");
         }
         finally
         {

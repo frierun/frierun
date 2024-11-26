@@ -2,7 +2,7 @@
 
 namespace Frierun.Server.Data;
 
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(JsonStringEnumConverter<Protocol>))]
 public enum Protocol
 {
     Tcp,

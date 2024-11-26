@@ -130,9 +130,13 @@ public class ExecutionPlan
                 var contract = GetContract(contractId);
                 var resource = contract.Provider!.Install(contract, this);
                 _resources[contract.Id] = resource;
-                State.Resources.Add(resource);
             }
         );
+
+        foreach (var resource in _resources.Values)
+        {
+            State.Resources.Add(resource);
+        }
     }
 
     public Resource GetResource(ContractId contractId)
