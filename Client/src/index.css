@@ -2,19 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+
+* {
+  @apply appearance-none outline-none;
+}
+*:focus {
+  @apply appearance-none outline-none;
+}
+
 :root {
   font-family: Tahoma, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
   color-scheme: light dark;
+  font-size: 15px;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 #header {
   height: 65px;
@@ -22,6 +24,7 @@
 }
 .btn {
   @apply font-bold;
+  font-size: 1rem;
 }
 .btn a {
   @apply font-bold;
@@ -30,32 +33,62 @@
 a {
   font-weight: 500;
   text-decoration: inherit;
+  cursor: pointer;
 }
 a:hover {
 }
-
+input
+{
+  @apply p-1 border-primary rounded border-2 focus:border-secondary;
+}
 body {
   margin: 0;
   display: flex;
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  @apply text-primary;
 }
 
+.frame {
+  @apply mx-2 xl:mx-5;
+}
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  @apply font-bold text-primary;
+  font-size: 1.2rem;
+  line-height: 2.5rem;
 }
-
-
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+h2 {
+  @apply font-bold text-primary;
+  font-size: 1.1rem;
+  line-height: 1.8rem;
 }
-
+.card {
+  @apply p-2 bg-gray rounded;
+}
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
     background-color: #ffffff;
   }
 }
+
+.animated-background {
+  background-size: 200%;
+
+  -webkit-animation: animation 3s ease infinite;
+  -moz-animation: animation 3s ease infinite;
+  animation: animation 3s ease infinite;
+}
+
+@keyframes animation {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+

@@ -9,10 +9,10 @@ export default function Applications() {
     if (isError) return <p>Error!</p>
 
     return (
-        <div className={"mx-2 xl:mx-10 my-6"}>
-            <h2 className="text-xl font-bold mb-4">
+        <div className={"my-6"}>
+            <h1 className="">
                 Installed Applications
-            </h2>
+            </h1>
             {data.data.length === 0 && <div className={"mb-3"}>Select a package you like and install it. You can install severall instances of the same package.</div>}
             <div className={"grid grid-cols-1 lg:grid-cols-2 xxl:grid-cols-3 gap-4"}>
                 {data.data.map((item) => (
@@ -37,7 +37,7 @@ export default function Applications() {
                             {item.serviceUrl && (
                                 <div>
                                     <a href={item.serviceUrl} target="_blank" rel="noreferrer noopener" className={"text-black"}>
-                                        <span className="text-blue-500">{item.serviceUrl}</span>
+                                        <span className="font-bold text-primary text-sm">{item.serviceUrl}</span>
                                     </a>
                                 </div>
                             )}

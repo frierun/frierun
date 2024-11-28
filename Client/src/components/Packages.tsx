@@ -9,10 +9,10 @@ export default function Packages() {
     if (isError) return <p>Error!</p>
 
     return (
-        <div className={"mx-2 xl:mx-10 my-6"}>
-            <h2 className="text-xl font-bold mb-4">
+        <div className={"my-6"}>
+            <h1 className="">
                 Packages
-            </h2>
+            </h1>
             <div className={"grid lg:grid-cols-3 xxl:grid-cols-4 gap-3"}>
                 {data.data.map((item) => (
                     <div key={item.name} className={"bg-gray p-2 lg:p-3 rounded-md flex justify-between items-center"}>
@@ -22,9 +22,11 @@ export default function Packages() {
                             </div>
                         <div className={"text-bold text-md font-bold"}>{item.name}</div>
                         </div>
-                        <Button type={"primary"}>
-                            <Link to={`/packages/${item.name}`}>Install</Link>
-                        </Button>
+                        <Link to={`/packages/${item.name}`}>
+                            <Button type={"primary"}>
+                                Install
+                            </Button>
+                        </Link>
                     </div>
                 ))}
             </div>

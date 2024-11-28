@@ -8,6 +8,7 @@ import {GetPackagesIdPlan200Item, Package} from "../api/schemas";
 import {usePostPackagesIdInstall} from "../api/endpoints/packages.ts";
 import HttpEndpointForm from "./HttpEndpointForm.tsx";
 import PortEndpointForm from "./PortEndpointForm.tsx";
+import Debug from "./Debug";
 
 type Props = {
     contracts: GetPackagesIdPlan200Item[];
@@ -47,15 +48,17 @@ export default function InstallForm({contracts, name}: Props) {
     }
 
     return (
-        <>
-            <div>
-                <label>
+        <div>
+            <h2>Settings</h2>
+            <div className={"grid xl:grid-cols-1 gap-3"}>
+            <div className={"card"}>
+                <label className={"inline-block w-48"}>
                     Application name:
-                    <input value={prefix} onChange={e => setPrefix(e.target.value)}/>
                 </label>
+                <input value={prefix} onChange={e => setPrefix(e.target.value)}/>
             </div>
             {contracts.filter(contract => contract.Type === 'HttpEndpoint').map(contract => (
-                <div key={`${contract.Type} ${contract.name}`}>
+                <div key={`${contract.Type} ${contract.name}`} className={"card"}>
                     <HttpEndpointForm
                         contract={contract}
                         updateContract={updateContract}
@@ -63,24 +66,27 @@ export default function InstallForm({contracts, name}: Props) {
                 </div>
             ))}
             {contracts.filter(contract => contract.Type === 'PortEndpoint').map(contract => (
-                <div key={`${contract.Type} ${contract.name}`}>
+                <div key={`${contract.Type} ${contract.name}`} className={"card"}>
                     <PortEndpointForm
                         contract={contract}
                         updateContract={updateContract}
                     />
                 </div>
             ))}
-            <Button onClick={install} disabled={isPending}>
+            </div>
+            <div className={"mt-4 mb-10"}>
+            <Button onClick={install} disabled={isPending} type={"primary"}>
                 Install
             </Button>
-            <div>
+            </div>
+            <Debug>
                 {contracts.map(contract => (
                     <div key={`${contract.Type} ${contract.name}`}>
                         <p>{contract.Type}</p>
                         <pre>{JSON.stringify(contract, null, 2)}</pre>
                     </div>
                 ))}
-            </div>
-        </>
+            </Debug>
+        </div>
     );
 }

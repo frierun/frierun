@@ -32,17 +32,19 @@ export default function PortEndpointForm({contract, updateContract}: Props) {
     return (
         <>
             <div>
-                <p>
-                    {contract.protocol} endpoint to port {contract.port}
+                <div className={"my-1.5"}>
+                    <label className={"inline-block w-48"}>
+                        {contract.protocol} endpoint to port </label>
+                    {contract.port}
                     {contract.containerName && ` in container ${contract.containerName}`}
-                </p>
-                <label>
+                </div>
+                <label className={"inline-block w-48"}>
                     Destination port:
-                    <input
-                        value={port} 
-                        onChange={e => updatePort(e.target.value)}
-                    />
                 </label>
+                <input
+                    value={port}
+                    onChange={e => updatePort(e.target.value)}
+                />
             </div>
         </>
     );

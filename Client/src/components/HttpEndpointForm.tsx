@@ -28,14 +28,14 @@ export default function HttpEndpointForm({contract, updateContract}: Props) {
     return (
         <>
             <div>
-                <p>
-                    Http endpoint to port {contract.port}
+                <div className={"my-1.5"}>
+                    <label className={"inline-block w-48"}>Http endpoint to port </label>{contract.port}
                     {contract.containerName && ` in container ${contract.containerName}`}
-                </p>
-                <label>
+                </div>
+                <label className={"inline-block w-48"}>
                     Domain:
-                    <input value={domain} onChange={e => updateDomain(e.target.value)}/>
                 </label>
+                <input value={domain} onChange={e => updateDomain(e.target.value)}/>
             </div>
         </>
     );

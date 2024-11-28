@@ -1,6 +1,7 @@
 ﻿import {Link, useParams} from "react-router-dom";
 import InstallForm from "../components/InstallForm.tsx";
 import {useGetPackagesIdPlan} from "../api/endpoints/packages.ts";
+import Layout from "./Layout";
 
 export default function Package() {
     const {name} = useParams<{name: string}>();
@@ -11,12 +12,17 @@ export default function Package() {
     if (isError) return <p>Error!</p>
     
     return (
-        <>
-            <Link to={`/`}>Back</Link>
-            <h2 className="text-3xl font-bold underline">
+        <Layout>
+            <Link to={`/`}>← Back</Link>
+            <div className={"flex gap-2 mb-2 mt-6"}>
+            <div className={"h-12 w-12 rounded flex-shrink-0"}>
+                <img src={`/packages/${name}.png`} className={"rounded"}/>
+            </div>
+            <h1>
                 Install {name}
-            </h2>
+            </h1>
+            </div>
             <InstallForm contracts={data.data} name={name ?? ""} />
-        </>
+        </Layout>
     );
 } 

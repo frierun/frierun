@@ -23,7 +23,9 @@ export default function Button({disabled = false, onClick = ()=>{}, type = 'defa
     return (
         <button
             disabled={disabled}
-            className="btn rounded font-bold border-2 border-primary bg-primary text-secondary-lighter hover:text-secondary px-5 py-1 text-secondary"
+            type={"button"}
+            className="btn btn-primary rounded font-bold border-2 border-primary bg-primary
+            text-secondary-lighter hover:text-secondary-softer px-5 py-1 text-secondary"
             onClick={onClick}
         >
             {children}

@@ -14,6 +14,7 @@ export default {
       secondary: {
         DEFAULT: '#5C96D7',
         lighter: '#7CAFE7',
+        softer: '#89c1ff',
         darker: '#324F86',
       },
       gray: {
@@ -31,7 +32,8 @@ export default {
       'xl': '1280px',
       'xxl': '1820px',
     },
-    extend: {},
+    extend: {
+    },
   },
   plugins: [],
 }
