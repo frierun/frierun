@@ -1,12 +1,12 @@
 ﻿using Frierun.Server.Data;
-using File = Frierun.Server.Data.File;
 
 namespace Frierun.Server.Services;
 
 public class ProviderRegistry
 {
     private readonly DockerService _dockerService;
-    private readonly Dictionary<Type, IList<Provider>> _providers = new();
+    private readonly Dictionary<Type, IList<IInstaller>> _installers = new();
+    private readonly Dictionary<Type, IUninstaller> _uninstallers = new();
 
     public ProviderRegistry(
         State state,
@@ -22,14 +22,14 @@ public class ProviderRegistry
     )
     {
         _dockerService = dockerService;
-        Add(typeof(Application), applicationProvider);
-        Add(typeof(Container), containerProvider);
-        Add(typeof(File), fileProvider);
-        Add(typeof(HttpEndpoint), portHttpEndpointProvider);
-        Add(typeof(Mount), mountProvider);
-        Add(typeof(Network), networkProvider);
-        Add(typeof(PortEndpoint), portEndpointProvider);
-        Add(typeof(Volume), volumeProvider);
+        AddProvider(applicationProvider);
+        AddProvider(containerProvider);
+        AddProvider(fileProvider);
+        AddProvider(portHttpEndpointProvider);
+        AddProvider(mountProvider);
+        AddProvider(networkProvider);
+        AddProvider(portEndpointProvider);
+        AddProvider(volumeProvider);
 
         var traefik = state.Resources.OfType<Application>().FirstOrDefault(a => a.Package?.Name == "traefik");
         if (traefik != null)
@@ -38,26 +38,48 @@ public class ProviderRegistry
         }
     }
 
-    private void Add(Type resourceType, Provider provider)
+    private void AddProvider(object provider)
     {
-        if (!_providers.ContainsKey(resourceType))
+        provider.GetType().GetInterfaces()
+            .Where(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IUninstaller<>))
+            .ToList()
+            .ForEach(type =>
         {
-            _providers[resourceType] = new List<Provider>();
-        }
+            var resourceType = type.GetGenericArguments()[0];
+            _uninstallers[resourceType] = (IUninstaller)provider;
+        });
+
+        provider.GetType().GetInterfaces()
+            .Where(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IInstaller<>))
+            .ToList()
+            .ForEach(type =>
+                {
+                    var contractType = type.GetGenericArguments()[0];
+                    
+                    if (!_installers.ContainsKey(contractType))
+                    {
+                        _installers[contractType] = new List<IInstaller>();
+                    }
         
-        // Add the provider to the beginning of the list so that it is used first
-        _providers[resourceType].Insert(0, provider);
+                    // Add the provider to the beginning of the list so that it is used first
+                    _installers[contractType].Insert(0, (IInstaller)provider);
+                }
+            );
     }
 
     public void UseTraefik(Application application)
     {
         var traefikHttpEndpointProvider = new TraefikHttpEndpointProvider(_dockerService, application);
-        Add(typeof(HttpEndpoint), traefikHttpEndpointProvider);
-        Add(typeof(TraefikHttpEndpoint), traefikHttpEndpointProvider);
+        AddProvider(traefikHttpEndpointProvider);
     }
 
-    public IList<Provider> Get(Type resourceType)
+    public IList<IInstaller> GetInstaller(Type resourceType)
     {
-        return _providers[resourceType];
+        return _installers[resourceType];
+    }
+    
+    public IUninstaller GetUninstaller(Type resourceType)
+    {
+        return _uninstallers[resourceType];
     }
 }

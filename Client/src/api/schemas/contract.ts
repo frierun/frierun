@@ -6,8 +6,8 @@
  */
 
 export interface Contract {
-  name: string;
   /** @nullable */
-  readonly providerType?: string | null;
+  readonly installerType?: string | null;
+  name: string;
   Type: string;
 }

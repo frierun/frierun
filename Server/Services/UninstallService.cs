@@ -6,8 +6,7 @@ public class UninstallService(
     State state,
     StateSerializer stateSerializer,
     StateManager stateManager,
-    ProviderRegistry providerRegistry,
-    ILogger<UninstallService> logger)
+    ProviderRegistry providerRegistry)
 {
     public void Handle(Application application)
     {
@@ -60,21 +59,8 @@ public class UninstallService(
     /// </summary>
     private void UninstallResource(Resource resource)
     {
-        var providers = providerRegistry.Get(resource.GetType());
-        if (providers.Count > 1)
-        {
-            logger.LogError("Multiple providers found for resource type {ResourceType}", resource.GetType().Name);
-            return;
-        }
-        
-        if (providers.Count == 0)
-        {
-            logger.LogError("No providers found for resource type {ResourceType}", resource.GetType().Name);
-            return;
-        }
-
-        var provider = providers[0];
-        provider.Uninstall(resource);
+        var uninstaller = providerRegistry.GetUninstaller(resource.GetType());
+        uninstaller.Uninstall(resource);
         resource.Uninstall();
         state.Resources.Remove(resource);
     }

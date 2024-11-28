@@ -2,10 +2,16 @@
 
 namespace Frierun.Server.Data;
 
-public class VolumeProvider(DockerService dockerService) : Provider<Volume, VolumeContract>
+public class VolumeProvider(DockerService dockerService) : IInstaller<VolumeContract>, IUninstaller<Volume>
 {
     /// <inheritdoc />
-    protected override VolumeContract Initialize(VolumeContract contract, ExecutionPlan plan)
+    public IEnumerable<ContractDependency> Dependencies(VolumeContract contract, ExecutionPlan plan)
+    {
+        yield break;
+    }
+
+    /// <inheritdoc />
+    public Contract Initialize(VolumeContract contract, ExecutionPlan plan)
     {
         var baseName = contract.VolumeName ?? plan.Prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
         
@@ -26,7 +32,7 @@ public class VolumeProvider(DockerService dockerService) : Provider<Volume, Volu
     }    
     
     /// <inheritdoc />
-    protected override Volume Install(VolumeContract contract, ExecutionPlan plan)
+    public Resource Install(VolumeContract contract, ExecutionPlan plan)
     {
         var volumeName = contract.VolumeName!;
         
@@ -35,7 +41,7 @@ public class VolumeProvider(DockerService dockerService) : Provider<Volume, Volu
     }
 
     /// <inheritdoc />
-    protected override void Uninstall(Volume resource)
+    void IUninstaller<Volume>.Uninstall(Volume resource)
     {
         dockerService.RemoveVolume(resource.Name).Wait();
     }

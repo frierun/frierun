@@ -3,10 +3,10 @@ using Frierun.Server.Services;
 
 namespace Frierun.Server.Data;
 
-public class ContainerProvider(DockerService dockerService) : Provider<Container, ContainerContract>
+public class ContainerProvider(DockerService dockerService) : IInstaller<ContainerContract>, IUninstaller<Container>
 {
     /// <inheritdoc />
-    protected override IEnumerable<ContractDependency> Dependencies(ContainerContract contract, ExecutionPlan plan)
+    public IEnumerable<ContractDependency> Dependencies(ContainerContract contract, ExecutionPlan plan)
     {
         yield return new ContractDependency(
             new NetworkContract(contract.NetworkName),
@@ -15,7 +15,7 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
     }
 
     /// <inheritdoc />
-    protected override ContainerContract Initialize(ContainerContract contract, ExecutionPlan plan)
+    public Contract Initialize(ContainerContract contract, ExecutionPlan plan)
     {
         var baseName = contract.ContainerName ?? plan.Prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
         
@@ -36,7 +36,7 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
     }
 
     /// <inheritdoc />
-    protected override Container Install(ContainerContract contract, ExecutionPlan plan)
+    public Resource Install(ContainerContract contract, ExecutionPlan plan)
     {
         var dockerParameters = new CreateContainerParameters
         {
@@ -83,9 +83,9 @@ public class ContainerProvider(DockerService dockerService) : Provider<Container
             DependsOn = contract.DependsOn.ToList()
         };
     }
-    
+
     /// <inheritdoc />
-    protected override void Uninstall(Container resource)
+    void IUninstaller<Container>.Uninstall(Container resource)
     {
         dockerService.StopContainer(resource.Name).Wait();
     }

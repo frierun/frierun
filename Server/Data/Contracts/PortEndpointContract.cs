@@ -7,10 +7,10 @@ public record PortEndpointContract(
     int Port,
     string? ContainerName = null,
     int DestinationPort = 0
-) : Contract<PortEndpoint>($"{ContainerName ?? ""}:{Port}/{Protocol}")
+) : Contract($"{ContainerName ?? ""}:{Port}/{Protocol}")
 {
     public string ContainerName { get; init; } = ContainerName ?? "";
-    [JsonIgnore] public ContractId ContainerId => new (typeof(Container), ContainerName);
+    [JsonIgnore] public ContractId<ContainerContract> ContainerId => new (ContainerName);
 
     /// <inheritdoc />
     public override Contract With(Contract other)

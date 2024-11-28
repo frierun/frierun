@@ -3,10 +3,10 @@
 namespace Frierun.Server.Data;
 
 public class TraefikHttpEndpointProvider(DockerService dockerService, Application application)
-    : Provider<HttpEndpoint, HttpEndpointContract>
+    : IInstaller<HttpEndpointContract>, IUninstaller<TraefikHttpEndpoint>
 {
     /// <inheritdoc />
-    protected override IEnumerable<ContractDependency> Dependencies(HttpEndpointContract contract, ExecutionPlan plan)
+    public IEnumerable<ContractDependency> Dependencies(HttpEndpointContract contract, ExecutionPlan plan)
     {
         yield return new ContractDependency(
             contract,
@@ -21,7 +21,7 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
     }
     
     /// <inheritdoc />
-    protected override HttpEndpointContract Initialize(HttpEndpointContract contract, ExecutionPlan plan)
+    public Contract Initialize(HttpEndpointContract contract, ExecutionPlan plan)
     {
         var baseName = contract.DomainName ?? $"{plan.Prefix}.localhost";
         var subdomain = baseName.Split('.')[0];
@@ -44,7 +44,7 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
     }    
     
     /// <inheritdoc />
-    protected override HttpEndpoint Install(HttpEndpointContract contract, ExecutionPlan plan)
+    public Resource Install(HttpEndpointContract contract, ExecutionPlan plan)
     {
         var domain = contract.DomainName!;
         var subdomain = domain.Split('.')[0];
@@ -93,9 +93,9 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
         dockerService.AttachNetwork(network.Name, traefikContainer.Name).Wait();
         return resource;
     }
-    
+
     /// <inheritdoc />
-    protected override void Uninstall(HttpEndpoint resource)
+    public void Uninstall(TraefikHttpEndpoint resource)
     {
         var containerGroup = resource.DependsOn.OfType<Network>().FirstOrDefault();
         if (containerGroup == null)

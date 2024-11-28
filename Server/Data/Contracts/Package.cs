@@ -5,7 +5,7 @@ public record Package(
     string? Prefix = null,
     string? Url = null,
     IEnumerable<Contract>? Contracts = null
-) : Contract<Application>(Name)
+) : Contract(Name)
 {
     public IEnumerable<Contract> Contracts { get; init; } = Contracts ?? Array.Empty<Contract>();
 

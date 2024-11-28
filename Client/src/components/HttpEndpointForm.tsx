@@ -13,7 +13,7 @@ export default function HttpEndpointForm({contract, updateContract}: Props) {
         setDomain(contract.domainName ?? '');
     }, [contract]);
     
-    if (contract.providerType !== 'TraefikHttpEndpointProvider') {
+    if (contract.installerType !== 'TraefikHttpEndpointProvider') {
         return <></>;
     }
     

@@ -3,4 +3,4 @@
 public record VolumeContract(
     string Name,
     string? VolumeName = null
-) : Contract<Volume>(Name);
+) : Contract(Name);

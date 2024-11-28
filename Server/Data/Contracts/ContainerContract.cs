@@ -13,7 +13,7 @@ public record ContainerContract(
     IReadOnlyDictionary<string, string>? Env = null,
     IEnumerable<Action<CreateContainerParameters>>? Configure = null,
     IEnumerable<Resource>? DependsOn = null
-) : Contract<Container>(Name ?? "")
+) : Contract(Name ?? "")
 {
     public IReadOnlyList<string> Command { get; init; } = Command ?? Array.Empty<string>();
     public IReadOnlyDictionary<string, string> Env { get; init; } = Env ?? new Dictionary<string, string>();
@@ -27,5 +27,5 @@ public record ContainerContract(
     
     public string NetworkName { get; init; } = NetworkName ?? "";
     [JsonIgnore]
-    public ContractId NetworkId => new(typeof(Network), NetworkName);
+    public ContractId<NetworkContract> NetworkId => new(NetworkName);
 }

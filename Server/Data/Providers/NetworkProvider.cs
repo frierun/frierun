@@ -3,10 +3,16 @@ using Frierun.Server.Services;
 
 namespace Frierun.Server.Data;
 
-public class NetworkProvider(DockerService dockerService) : Provider<Network, NetworkContract>
+public class NetworkProvider(DockerService dockerService) : IInstaller<NetworkContract>, IUninstaller<Network>
 {
     /// <inheritdoc />
-    protected override NetworkContract Initialize(NetworkContract contract, ExecutionPlan plan)
+    public IEnumerable<ContractDependency> Dependencies(NetworkContract contract, ExecutionPlan plan)
+    {
+        yield break;
+    }
+
+    /// <inheritdoc />
+    public Contract Initialize(NetworkContract contract, ExecutionPlan plan)
     {
         var baseName = contract.NetworkName ?? plan.Prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
         
@@ -27,7 +33,7 @@ public class NetworkProvider(DockerService dockerService) : Provider<Network, Ne
     }
     
     /// <inheritdoc />
-    protected override Network Install(NetworkContract contract, ExecutionPlan plan)
+    public Resource? Install(NetworkContract contract, ExecutionPlan plan)
     {
         var networkName = contract.NetworkName!;
 
@@ -65,7 +71,7 @@ public class NetworkProvider(DockerService dockerService) : Provider<Network, Ne
     }
 
     /// <inheritdoc />
-    protected override void Uninstall(Network resource)
+    void IUninstaller<Network>.Uninstall(Network resource)
     {
         dockerService.RemoveNetwork(resource.Name).Wait();
     }

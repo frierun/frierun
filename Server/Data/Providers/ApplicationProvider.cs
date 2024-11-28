@@ -1,15 +1,15 @@
 ﻿namespace Frierun.Server.Data;
 
-public class ApplicationProvider : Provider<Application, Package>
+public class ApplicationProvider : IInstaller<Package>, IUninstaller<Application>
 {
     /// <inheritdoc />
-    protected override IEnumerable<ContractDependency> Dependencies(Package package, ExecutionPlan plan)
+    public IEnumerable<ContractDependency> Dependencies(Package package, ExecutionPlan plan)
     {
         return package.Contracts.Select(contract => new ContractDependency(contract, package));
     }
 
     /// <inheritdoc />
-    protected override Package Initialize(Package contract, ExecutionPlan plan)
+    public Contract Initialize(Package contract, ExecutionPlan plan)
     {
         var basePrefix = contract.Prefix ?? contract.Name;
         
@@ -30,16 +30,19 @@ public class ApplicationProvider : Provider<Application, Package>
     }
 
     /// <inheritdoc />
-    protected override Application Install(Package package, ExecutionPlan plan)
+    public Resource Install(Package package, ExecutionPlan plan)
     {
         return new Application(package.Prefix!, package)
         {
-            DependsOn = package.Contracts.Select(contract => plan.GetResource(contract.Id)).ToList()
+            DependsOn = package.Contracts
+                .Select(contract => plan.GetResource(contract.Id))
+                .OfType<Resource>()
+                .ToList()
         };
     }
 
     /// <inheritdoc />
-    protected override void Uninstall(Application resource)
+    public void Uninstall(Application resource)
     {
     }
 }

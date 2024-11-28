@@ -12,6 +12,5 @@ public sealed class ContainerDefinitionFactor: Faker<ContainerContract>
         this.SkipConstructor();
         RuleFor(p => p.ImageName, f => f.Internet.Url());
         RuleFor(p => p.RequireDocker, f => f.Random.Bool());
-        RuleFor(p => p.ResourceType, typeof(Container));
     }
 }

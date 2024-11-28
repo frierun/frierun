@@ -3,4 +3,4 @@
 public record NetworkContract(
     string Name,
     string? NetworkName = null
-) : Contract<Network>(Name);
+) : Contract(Name);

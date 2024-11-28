@@ -6,11 +6,11 @@ public class ExecutionPlan
 {
     private readonly ProviderRegistry _providerRegistry;
     private readonly Dictionary<ContractId, Contract> _contracts = new();
-    private readonly Dictionary<ContractId, Resource> _resources = new();
+    private readonly Dictionary<ContractId, Resource?> _resources = new();
     private readonly DirectedAcyclicGraph<ContractId> _graph = new();
 
-    public ContractId RootContractId { get; }
-    private Package Package => GetContract<Package>(RootContractId);
+    public ContractId<Package> RootContractId { get; }
+    private Package Package => GetContract(RootContractId);
     public string Prefix => Package.Prefix ?? Package.Name;
     
     public State State { get; }
@@ -19,7 +19,7 @@ public class ExecutionPlan
 
     public ExecutionPlan(Package package, State state, ProviderRegistry providerRegistry)
     {
-        RootContractId = package.Id;
+        RootContractId = new ContractId<Package>(package.Name);
         State = state;
         _providerRegistry = providerRegistry;
         var queue = new Queue<Contract>();
@@ -29,7 +29,7 @@ public class ExecutionPlan
         {
             var contract = queue.Dequeue();
 
-            foreach (var dependency in contract.Provider!.Dependencies(contract, this))
+            foreach (var dependency in contract.Installer!.Dependencies(contract, this))
             {
                 AddContract(dependency.Preceding, queue);
                 AddContract(dependency.Following, queue);
@@ -53,17 +53,18 @@ public class ExecutionPlan
 
         _graph.AddVertex(contract.Id);
 
-        if (contract.Provider == null)
+        if (contract.Installer == null)
         {
-            var provider = _providerRegistry.Get(contract.ResourceType).FirstOrDefault();
-            if (provider == null)
+            var contractType = contract.GetType();
+            var installer = _providerRegistry.GetInstaller(contractType).FirstOrDefault();
+            if (installer == null)
             {
-                throw new Exception($"Can't find provider for resource {contract.ResourceType}");
+                throw new Exception($"Can't find provider for resource {contractType}");
             }
 
             contract = contract with
             {
-                Provider = provider
+                Installer = installer
             };
         }
 
@@ -80,14 +81,13 @@ public class ExecutionPlan
 
         return _contracts[contractId];
     }
-
-    public T GetContract<T>(ContractId contractId)
+    
+    public T GetContract<T>(ContractId<T> contractId)
         where T : Contract
     {
-        // TODO: check if contractId is of type T
-        return (T)GetContract(contractId);
+        return (T)GetContract((ContractId)contractId);
     }
-
+    
     public void UpdateContract(Contract contract)
     {
         if (_resources.ContainsKey(contract.Id))
@@ -113,7 +113,7 @@ public class ExecutionPlan
             contractId =>
             {
                 var contract = GetContract(contractId);
-                UpdateContract(contract.Provider!.Initialize(contract, this));
+                UpdateContract(contract.Installer!.Initialize(contract, this));
             }
         );
     }
@@ -128,18 +128,23 @@ public class ExecutionPlan
             contractId =>
             {
                 var contract = GetContract(contractId);
-                var resource = contract.Provider!.Install(contract, this);
+                var resource = contract.Installer!.Install(contract, this);
                 _resources[contract.Id] = resource;
             }
         );
 
         foreach (var resource in _resources.Values)
         {
+            if (resource == null)
+            {
+                continue;
+            }
+            
             State.Resources.Add(resource);
         }
     }
 
-    public Resource GetResource(ContractId contractId)
+    public Resource? GetResource(ContractId contractId)
     {
         if (!_resources.TryGetValue(contractId, out var resource))
         {
@@ -153,6 +158,11 @@ public class ExecutionPlan
         where T : Resource
     {
         // TODO: check if contractId is of type T
-        return (T)GetResource(contractId);
+        var resource = GetResource(contractId);
+        if (resource == null)
+        {
+            throw new Exception($"Contract {contractId} didn't install resource");
+        }
+        return (T)resource;
     }
 }

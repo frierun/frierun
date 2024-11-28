@@ -2,10 +2,10 @@
 
 namespace Frierun.Server.Data;
 
-public class PortEndpointProvider : Provider<PortEndpoint, PortEndpointContract>
+public class PortEndpointProvider : IInstaller<PortEndpointContract>, IUninstaller<PortEndpoint>
 {
     /// <inheritdoc />
-    protected override IEnumerable<ContractDependency> Dependencies(PortEndpointContract contract, ExecutionPlan plan)
+    public IEnumerable<ContractDependency> Dependencies(PortEndpointContract contract, ExecutionPlan plan)
     {
         yield return new ContractDependency(
             contract,
@@ -14,7 +14,7 @@ public class PortEndpointProvider : Provider<PortEndpoint, PortEndpointContract>
     }
 
     /// <inheritdoc />
-    protected override PortEndpointContract Initialize(PortEndpointContract contract, ExecutionPlan plan)
+    public Contract Initialize(PortEndpointContract contract, ExecutionPlan plan)
     {
         int port = contract.DestinationPort == 0 ? contract.Port : contract.DestinationPort;
 
@@ -37,9 +37,9 @@ public class PortEndpointProvider : Provider<PortEndpoint, PortEndpointContract>
     }
 
     /// <inheritdoc />
-    protected override PortEndpoint Install(PortEndpointContract contract, ExecutionPlan plan)
+    public Resource Install(PortEndpointContract contract, ExecutionPlan plan)
     {
-        var containerContract = plan.GetContract<ContainerContract>(contract.ContainerId);
+        var containerContract = plan.GetContract(contract.ContainerId);
 
         if (containerContract == null)
         {
@@ -73,5 +73,10 @@ public class PortEndpointProvider : Provider<PortEndpoint, PortEndpointContract>
         );
 
         return endpoint;
+    }
+
+    /// <inheritdoc />
+    public void Uninstall(PortEndpoint resource)
+    {
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using File = Frierun.Server.Data.File;
 
 namespace Frierun.Server.Data;
 
@@ -7,9 +6,7 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(Application), nameof(Application))]
 [JsonDerivedType(typeof(Container), nameof(Container))]
 [JsonDerivedType(typeof(Network), nameof(Network))]
-[JsonDerivedType(typeof(File), nameof(File))]
 [JsonDerivedType(typeof(HttpEndpoint), nameof(HttpEndpoint))]
-[JsonDerivedType(typeof(Mount), nameof(Mount))]
 [JsonDerivedType(typeof(PortEndpoint), nameof(PortEndpoint))]
 [JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
 [JsonDerivedType(typeof(Volume), nameof(Volume))]

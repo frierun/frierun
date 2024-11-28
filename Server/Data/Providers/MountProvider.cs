@@ -2,10 +2,10 @@
 
 namespace Frierun.Server.Data;
 
-public class MountProvider : Provider<Mount, MountContract>
+public class MountProvider : IInstaller<MountContract>
 {
     /// <inheritdoc />
-    protected override IEnumerable<ContractDependency> Dependencies(MountContract contract, ExecutionPlan plan)
+    public IEnumerable<ContractDependency> Dependencies(MountContract contract, ExecutionPlan plan)
     {
         yield return new ContractDependency(
             contract,
@@ -16,9 +16,15 @@ public class MountProvider : Provider<Mount, MountContract>
             contract
         );
     }
-    
+
     /// <inheritdoc />
-    protected override Mount Install(MountContract contract, ExecutionPlan plan)
+    public Contract Initialize(MountContract contract, ExecutionPlan plan)
+    {
+        return contract;
+    }
+
+    /// <inheritdoc />
+    public Resource? Install(MountContract contract, ExecutionPlan plan)
     {
         var containerContract = plan.GetContract<ContainerContract>(contract.ContainerId);
 
@@ -28,10 +34,6 @@ public class MountProvider : Provider<Mount, MountContract>
         }
 
         var volume = plan.GetResource<Volume>(contract.VolumeId);
-        var mount = new Mount()
-        {
-            DependsOn = [volume]
-        };
 
         plan.UpdateContract(
             containerContract with
@@ -50,9 +52,10 @@ public class MountProvider : Provider<Mount, MountContract>
                         );
                     }
                 ),
-                DependsOn = containerContract.DependsOn.Append(mount)
+                DependsOn = containerContract.DependsOn.Append(volume)
             }
         );
-        return mount;
+        
+        return null;
     }
 }
