@@ -11,8 +11,7 @@ public record ContainerContract(
     string? NetworkName = null,
     IReadOnlyList<string>? Command = null,
     IReadOnlyDictionary<string, string>? Env = null,
-    IEnumerable<Action<CreateContainerParameters>>? Configure = null,
-    IEnumerable<Resource>? DependsOn = null
+    IEnumerable<Action<CreateContainerParameters>>? Configure = null
 ) : Contract(Name ?? "")
 {
     public IReadOnlyList<string> Command { get; init; } = Command ?? Array.Empty<string>();
@@ -22,8 +21,6 @@ public record ContainerContract(
     public IEnumerable<Action<CreateContainerParameters>> Configure { get; init; } =
         Configure ?? Array.Empty<Action<CreateContainerParameters>>();
 
-    [JsonIgnore]
-    public IEnumerable<Resource> DependsOn { get; init; } = DependsOn ?? Array.Empty<Resource>();
     
     public string NetworkName { get; init; } = NetworkName ?? "";
     [JsonIgnore]

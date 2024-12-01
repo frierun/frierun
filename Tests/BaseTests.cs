@@ -1,4 +1,6 @@
 ﻿using System.Reflection;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Bogus;
 using Frierun.Server;
 using Frierun.Tests.Factories;
@@ -8,8 +10,8 @@ namespace Frierun.Tests;
 
 public abstract class BaseTests
 {
-    private ServiceProvider? Provider { get; set; }
-    private IServiceCollection? Services { get; set; }
+    private IContainer? Provider { get; set; }
+    private ContainerBuilder? ContainerBuilder { get; set; }
     
     /// <summary>
     /// Resolves object from the provider.
@@ -17,20 +19,25 @@ public abstract class BaseTests
     protected T Resolve<T>()
         where T : notnull
     {
-        Provider ??= GetServices().BuildServiceProvider();
-        return Provider.GetRequiredService<T>();
+        Provider ??= GetServices().Build();
+        return Provider.Resolve<T>();
     }
     
-    private IServiceCollection GetServices()
+    private ContainerBuilder GetServices()
     {
-        if (Services != null)
+        if (ContainerBuilder != null)
         {
-            return Services;
+            return ContainerBuilder;
         }
 
-        Services = new ServiceCollection();
-        Services.AddLogging();
-        Services.RegisterServices();
+        
+        ContainerBuilder = new ContainerBuilder();
+        
+        var services = new ServiceCollection();
+        services.AddLogging();
+        ContainerBuilder.Populate(services);
+
+        ContainerBuilder.RegisterModule(new AutofacModule());
 
         // find all factories
         foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
@@ -40,7 +47,7 @@ public abstract class BaseTests
             {
                 if (iterator.IsGenericType && iterator.GetGenericTypeDefinition() == typeof(Faker<>))
                 {
-                    Services.AddSingleton(iterator, type);
+                    ContainerBuilder.RegisterType(type).As(iterator).SingleInstance();
                     break;
                 }
                 
@@ -48,17 +55,7 @@ public abstract class BaseTests
             }
         }
         
-        return Services;
-    }
-
-    protected void RegisterServices(Action<IServiceCollection> action)
-    {
-        if (Provider != null)
-        {
-            throw new InvalidOperationException("Cannot register services after provider has been built.");
-        }
-        
-        action(GetServices());
+        return ContainerBuilder;
     }
     
     /// <summary>

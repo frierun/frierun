@@ -1,4 +1,5 @@
-using System.Text.Json.Serialization;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Frierun.Server;
 using Frierun.Server.Services;
 using Microsoft.AspNetCore.Antiforgery;
@@ -6,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory())
+    .ConfigureContainer<ContainerBuilder>(autofacBuilder => autofacBuilder.RegisterModule(new AutofacModule()));
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -18,8 +22,6 @@ builder.Services.AddSwaggerGen(
         options.UseOneOfForPolymorphism();
         options.UseAllOfForInheritance();
         options.EnableAnnotations(true, true);
-
-        //options.CustomSchemaIds(type => type.ToString());
     }
 );
 builder.Services.AddAntiforgery(
@@ -38,7 +40,7 @@ builder.Services.AddControllersWithViews(
     }
 );
 
-builder.Services.RegisterServices();
+//builder.Services.RegisterServices();
 
 var app = builder.Build();
 
