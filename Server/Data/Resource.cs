@@ -4,12 +4,12 @@ namespace Frierun.Server.Data;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
 [JsonDerivedType(typeof(Application), nameof(Application))]
-[JsonDerivedType(typeof(Container), nameof(Container))]
-[JsonDerivedType(typeof(Network), nameof(Network))]
-[JsonDerivedType(typeof(HttpEndpoint), nameof(HttpEndpoint))]
-[JsonDerivedType(typeof(PortEndpoint), nameof(PortEndpoint))]
+[JsonDerivedType(typeof(DockerContainer), nameof(DockerContainer))]
+[JsonDerivedType(typeof(DockerNetwork), nameof(DockerNetwork))]
+[JsonDerivedType(typeof(GenericHttpEndpoint), nameof(GenericHttpEndpoint))]
+[JsonDerivedType(typeof(DockerPortEndpoint), nameof(DockerPortEndpoint))]
 [JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
-[JsonDerivedType(typeof(Volume), nameof(Volume))]
+[JsonDerivedType(typeof(DockerVolume), nameof(DockerVolume))]
 public abstract record Resource
 {
     private readonly List<Resource> _dependsOn = [];

@@ -2,23 +2,23 @@
 
 namespace Frierun.Server.Data;
 
-public class PortEndpointProvider : IInstaller<PortEndpointContract>, IUninstaller<PortEndpoint>
+public class PortEndpointProvider : IInstaller<PortEndpoint>, IUninstaller<DockerPortEndpoint>
 {
     /// <inheritdoc />
-    public IEnumerable<ContractDependency> Dependencies(PortEndpointContract contract, ExecutionPlan plan)
+    public IEnumerable<ContractDependency> Dependencies(PortEndpoint contract, ExecutionPlan plan)
     {
         yield return new ContractDependency(
             contract,
-            new ContainerContract(contract.ContainerName)
+            new Container(contract.ContainerName)
         );
     }
 
     /// <inheritdoc />
-    public Contract Initialize(PortEndpointContract contract, ExecutionPlan plan)
+    public Contract Initialize(PortEndpoint contract, ExecutionPlan plan)
     {
         int port = contract.DestinationPort == 0 ? contract.Port : contract.DestinationPort;
 
-        while (plan.State.Resources.OfType<PortEndpoint>()
+        while (plan.State.Resources.OfType<DockerPortEndpoint>()
                .Any(endpoint => endpoint.Port == port && endpoint.Protocol == contract.Protocol))
         {
             port += 1000;
@@ -37,7 +37,7 @@ public class PortEndpointProvider : IInstaller<PortEndpointContract>, IUninstall
     }
 
     /// <inheritdoc />
-    public Resource Install(PortEndpointContract contract, ExecutionPlan plan)
+    public Resource Install(PortEndpoint contract, ExecutionPlan plan)
     {
         var containerContract = plan.GetContract(contract.ContainerId);
 
@@ -50,7 +50,7 @@ public class PortEndpointProvider : IInstaller<PortEndpointContract>, IUninstall
         var internalPort = contract.Port;
 
         // TODO: fill the correct ip of the host
-        var endpoint = new PortEndpoint("127.0.0.1", externalPort, contract.Protocol);
+        var endpoint = new DockerPortEndpoint("127.0.0.1", externalPort, contract.Protocol);
 
         plan.UpdateContract(
             containerContract with
@@ -76,7 +76,7 @@ public class PortEndpointProvider : IInstaller<PortEndpointContract>, IUninstall
     }
 
     /// <inheritdoc />
-    public void Uninstall(PortEndpoint resource)
+    public void Uninstall(DockerPortEndpoint resource)
     {
     }
 }

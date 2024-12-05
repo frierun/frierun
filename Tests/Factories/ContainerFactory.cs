@@ -3,10 +3,10 @@ using Frierun.Server.Data;
 
 namespace Frierun.Tests.Factories;
 
-public sealed class ContainerFactory : Faker<Container>
+public sealed class ContainerFactory : Faker<DockerContainer>
 {
     /// <inheritdoc />
-    public ContainerFactory(Faker<Volume> volumeFactory)
+    public ContainerFactory(Faker<DockerVolume> volumeFactory)
     {
         StrictMode(true);
         this.SkipConstructor();

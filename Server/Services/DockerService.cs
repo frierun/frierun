@@ -18,6 +18,7 @@ public class DockerService(ILogger<DockerService> logger)
         logger.LogInformation("Starting container {ContainerName}", dockerParameters.Name);
 
         logger.LogInformation("Loading image {ImageName}", dockerParameters.Image);
+
         await _client.Images.CreateImageAsync(
             new ImagesCreateParameters
             {
@@ -63,8 +64,7 @@ public class DockerService(ILogger<DockerService> logger)
             null,
             new Progress<JSONMessage>()
         );
-
-
+        
         logger.LogInformation("Creating temporary container");
         var result = await _client.Containers.CreateContainerAsync(
             new CreateContainerParameters()

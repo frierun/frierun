@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Services;
+﻿using System.Text.RegularExpressions;
+using Frierun.Server.Services;
 
 namespace Frierun.Server.Data;
 
@@ -70,9 +71,35 @@ public class ExecutionPlan
 
         _contracts[contract.Id] = contract;
         queue.Enqueue(contract);
-    }
+        
+        if (contract is IHasStrings hasStrings)
+        {
+            var matches = new Dictionary<string, MatchCollection>();
 
-    private Contract GetContract(ContractId contractId)
+            hasStrings.ApplyStringDecorator(
+                s =>
+                {
+                    var matchCollection = Substitute.InsertionRegex.Matches(s);
+                    if (matchCollection.Count > 0)
+                    {
+                        matches[s] = matchCollection;
+                    }
+                    
+                    return s;
+                }
+            );
+
+            if (matches.Count > 0)
+            {
+                AddContract(new Substitute(contract.Id, matches), queue);
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Gets contract by id.
+    /// </summary>
+    public Contract GetContract(ContractId contractId)
     {
         if (_resources.ContainsKey(contractId))
         {

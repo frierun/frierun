@@ -5,9 +5,20 @@ namespace Frierun.Server.Data;
 public interface IInstaller<in TContract>: IInstaller
     where TContract : Contract
 {
-    public IEnumerable<ContractDependency> Dependencies(TContract contract, ExecutionPlan plan);
-    public Contract Initialize(TContract contract, ExecutionPlan plan);
-    public Resource? Install(TContract contract, ExecutionPlan plan);
+    public IEnumerable<ContractDependency> Dependencies(TContract contract, ExecutionPlan plan)
+    {
+        yield break;
+    }
+    
+    public Contract Initialize(TContract contract, ExecutionPlan plan)
+    {
+        return contract;
+    }
+    
+    public Resource? Install(TContract contract, ExecutionPlan plan)
+    {
+        return null;
+    }
 
     /// <inheritdoc />
     [DebuggerStepThrough]

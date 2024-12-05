@@ -8,7 +8,7 @@ public sealed class PackageFactory : Faker<Package>
 {
     private readonly HashSet<string?> _uniqueNames = [];
     
-    public PackageFactory(PackageRegistry packageRegistry, Faker<ContainerContract> containerDefinitionFactory)
+    public PackageFactory(PackageRegistry packageRegistry, Faker<Container> containerDefinitionFactory)
     {
         StrictMode(true);
         this.SkipConstructor();

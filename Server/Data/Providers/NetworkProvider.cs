@@ -3,22 +3,16 @@ using Frierun.Server.Services;
 
 namespace Frierun.Server.Data;
 
-public class NetworkProvider(DockerService dockerService) : IInstaller<NetworkContract>, IUninstaller<Network>
+public class NetworkProvider(DockerService dockerService) : IInstaller<Network>, IUninstaller<DockerNetwork>
 {
     /// <inheritdoc />
-    public IEnumerable<ContractDependency> Dependencies(NetworkContract contract, ExecutionPlan plan)
-    {
-        yield break;
-    }
-
-    /// <inheritdoc />
-    public Contract Initialize(NetworkContract contract, ExecutionPlan plan)
+    public Contract Initialize(Network contract, ExecutionPlan plan)
     {
         var baseName = contract.NetworkName ?? plan.Prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
         
         var count = 1;
         var name = baseName;
-        while (plan.State.Resources.OfType<Network>().Any(c => c.Name == name))
+        while (plan.State.Resources.OfType<DockerNetwork>().Any(c => c.Name == name))
         {
             count++;
             name = $"{baseName}{count}";
@@ -33,14 +27,14 @@ public class NetworkProvider(DockerService dockerService) : IInstaller<NetworkCo
     }
     
     /// <inheritdoc />
-    public Resource? Install(NetworkContract contract, ExecutionPlan plan)
+    public Resource? Install(Network contract, ExecutionPlan plan)
     {
         var networkName = contract.NetworkName!;
 
         dockerService.CreateNetwork(networkName).Wait();
 
-        var containerGroup = new Network(networkName);
-        foreach (var containerContract in plan.GetResourcesOfType<ContainerContract>())
+        var containerGroup = new DockerNetwork(networkName);
+        foreach (var containerContract in plan.GetResourcesOfType<Container>())
         {
             plan.UpdateContract(
                 containerContract with
@@ -71,7 +65,7 @@ public class NetworkProvider(DockerService dockerService) : IInstaller<NetworkCo
     }
 
     /// <inheritdoc />
-    void IUninstaller<Network>.Uninstall(Network resource)
+    void IUninstaller<DockerNetwork>.Uninstall(DockerNetwork resource)
     {
         dockerService.RemoveNetwork(resource.Name).Wait();
     }

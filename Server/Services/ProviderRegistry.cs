@@ -10,26 +10,16 @@ public class ProviderRegistry
 
     public ProviderRegistry(
         State state,
-        ApplicationProvider applicationProvider,
-        ContainerProvider containerProvider,
-        FileProvider fileProvider,
-        MountProvider mountProvider,
-        NetworkProvider networkProvider,
-        PortEndpointProvider portEndpointProvider,
-        PortHttpEndpointProvider portHttpEndpointProvider,
-        VolumeProvider volumeProvider,
+        IEnumerable<IInstaller> installers,
         DockerService dockerService
     )
     {
         _dockerService = dockerService;
-        AddProvider(applicationProvider);
-        AddProvider(containerProvider);
-        AddProvider(fileProvider);
-        AddProvider(portHttpEndpointProvider);
-        AddProvider(mountProvider);
-        AddProvider(networkProvider);
-        AddProvider(portEndpointProvider);
-        AddProvider(volumeProvider);
+
+        foreach (var installer in installers)
+        {
+            AddProvider(installer);
+        }
 
         var traefik = state.Resources.OfType<Application>().FirstOrDefault(a => a.Package?.Name == "traefik");
         if (traefik != null)

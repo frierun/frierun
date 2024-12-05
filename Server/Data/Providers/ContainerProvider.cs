@@ -3,25 +3,25 @@ using Frierun.Server.Services;
 
 namespace Frierun.Server.Data;
 
-public class ContainerProvider(DockerService dockerService) : IInstaller<ContainerContract>, IUninstaller<Container>
+public class ContainerProvider(DockerService dockerService) : IInstaller<Container>, IUninstaller<DockerContainer>
 {
     /// <inheritdoc />
-    public IEnumerable<ContractDependency> Dependencies(ContainerContract contract, ExecutionPlan plan)
+    public IEnumerable<ContractDependency> Dependencies(Container contract, ExecutionPlan plan)
     {
         yield return new ContractDependency(
-            new NetworkContract(contract.NetworkName),
+            new Network(contract.NetworkName),
             contract
         );
     }
 
     /// <inheritdoc />
-    public Contract Initialize(ContainerContract contract, ExecutionPlan plan)
+    public Contract Initialize(Container contract, ExecutionPlan plan)
     {
         var baseName = contract.ContainerName ?? plan.Prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
         
         var count = 1;
         var name = baseName;
-        while (plan.State.Resources.OfType<Container>().Any(c => c.Name == name))
+        while (plan.State.Resources.OfType<DockerContainer>().Any(c => c.Name == name))
         {
             count++;
             name = $"{baseName}{count}";
@@ -36,7 +36,7 @@ public class ContainerProvider(DockerService dockerService) : IInstaller<Contain
     }
 
     /// <inheritdoc />
-    public Resource Install(ContainerContract contract, ExecutionPlan plan)
+    public Resource Install(Container contract, ExecutionPlan plan)
     {
         var dockerParameters = new CreateContainerParameters
         {
@@ -78,14 +78,14 @@ public class ContainerProvider(DockerService dockerService) : IInstaller<Contain
             throw new Exception("Failed to start container");
         }
 
-        return new Container(contract.ContainerName!)
+        return new DockerContainer(contract.ContainerName!)
         {
             DependsOn = contract.DependsOn.ToList()
         };
     }
 
     /// <inheritdoc />
-    void IUninstaller<Container>.Uninstall(Container resource)
+    void IUninstaller<DockerContainer>.Uninstall(DockerContainer resource)
     {
         dockerService.StopContainer(resource.Name).Wait();
     }

@@ -6,7 +6,7 @@ namespace Frierun.Tests.Factories;
 public sealed class ApplicationFactory : Faker<Application>
 {
     /// <inheritdoc />
-    public ApplicationFactory(Faker<Package> packageFactory, Faker<Container> containerFactory)
+    public ApplicationFactory(Faker<Package> packageFactory, Faker<DockerContainer> containerFactory)
     {
         StrictMode(true);
         this.SkipConstructor();

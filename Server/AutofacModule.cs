@@ -10,16 +10,19 @@ public class AutofacModule : Module
     protected override void Load(ContainerBuilder builder)
     {
         // Providers
-        builder.RegisterType<ApplicationProvider>().SingleInstance();
-        builder.RegisterType<ContainerProvider>().SingleInstance();
-        builder.RegisterType<FileProvider>().SingleInstance();
-        builder.RegisterType<MountProvider>().SingleInstance();
-        builder.RegisterType<NetworkProvider>().SingleInstance();
-        builder.RegisterType<PortEndpointProvider>().SingleInstance();
-        builder.RegisterType<PortHttpEndpointProvider>().SingleInstance();
-        builder.RegisterType<VolumeProvider>().SingleInstance();
+        builder.RegisterType<ApplicationProvider>().As<IInstaller>().SingleInstance();
+        builder.RegisterType<ContainerProvider>().As<IInstaller>().SingleInstance();
+        builder.RegisterType<FileProvider>().As<IInstaller>().SingleInstance();
+        builder.RegisterType<MountProvider>().As<IInstaller>().SingleInstance();
+        builder.RegisterType<NetworkProvider>().As<IInstaller>().SingleInstance();
+        builder.RegisterType<ParameterProvider>().As<IInstaller>().SingleInstance();
+        builder.RegisterType<PortEndpointProvider>().As<IInstaller>().SingleInstance();
+        builder.RegisterType<PortHttpEndpointProvider>().As<IInstaller>().SingleInstance();
+        builder.RegisterType<SubstituteProvider>().As<IInstaller>().SingleInstance();
+        builder.RegisterType<VolumeProvider>().As<IInstaller>().SingleInstance();
         
         // Services
+        builder.RegisterType<ContractRegistry>().AsSelf().SingleInstance();
         builder.RegisterType<DockerService>().AsSelf().SingleInstance();
         builder.RegisterType<ExecutionService>().AsSelf().SingleInstance();
         builder.RegisterType<InstallService>().AsSelf().SingleInstance();

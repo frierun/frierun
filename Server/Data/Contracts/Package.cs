@@ -12,14 +12,9 @@ public record Package(
     /// <inheritdoc />
     public override Contract With(Contract other)
     {
-        if (other.Id != Id)
+        if (other is not Package package || other.Id != Id)
         {
-            throw new Exception("Invalid contract id");
-        }
-        
-        if (other is not Package package)
-        {
-            throw new Exception("Invalid contract type");
+            throw new Exception("Invalid contract");
         }
         
         return this with

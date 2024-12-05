@@ -2,38 +2,32 @@
 
 namespace Frierun.Server.Data;
 
-public class MountProvider : IInstaller<MountContract>
+public class MountProvider : IInstaller<Mount>
 {
     /// <inheritdoc />
-    public IEnumerable<ContractDependency> Dependencies(MountContract contract, ExecutionPlan plan)
+    public IEnumerable<ContractDependency> Dependencies(Mount contract, ExecutionPlan plan)
     {
         yield return new ContractDependency(
             contract,
-            new ContainerContract(contract.ContainerName)
+            new Container(contract.ContainerName)
         );
         yield return new ContractDependency(
-            new VolumeContract(contract.VolumeName),
+            new Volume(contract.VolumeName),
             contract
         );
     }
 
     /// <inheritdoc />
-    public Contract Initialize(MountContract contract, ExecutionPlan plan)
+    public Resource? Install(Mount contract, ExecutionPlan plan)
     {
-        return contract;
-    }
-
-    /// <inheritdoc />
-    public Resource? Install(MountContract contract, ExecutionPlan plan)
-    {
-        var containerContract = plan.GetContract<ContainerContract>(contract.ContainerId);
+        var containerContract = plan.GetContract<Container>(contract.ContainerId);
 
         if (containerContract == null)
         {
             throw new Exception("Container not found");
         }
 
-        var volume = plan.GetResource<Volume>(contract.VolumeId);
+        var volume = plan.GetResource<DockerVolume>(contract.VolumeId);
 
         plan.UpdateContract(
             containerContract with

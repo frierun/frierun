@@ -3,14 +3,16 @@
 namespace Frierun.Server.Data;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
-[JsonDerivedType(typeof(ContainerContract), "Container")]
-[JsonDerivedType(typeof(FileContract), "File")]
-[JsonDerivedType(typeof(HttpEndpointContract), "HttpEndpoint")]
-[JsonDerivedType(typeof(MountContract), "Mount")]
-[JsonDerivedType(typeof(NetworkContract), "Network")]
-[JsonDerivedType(typeof(Package), "Application")]
-[JsonDerivedType(typeof(PortEndpointContract), "PortEndpoint")]
-[JsonDerivedType(typeof(VolumeContract), "Volume")]
+[JsonDerivedType(typeof(Container), nameof(Container))]
+[JsonDerivedType(typeof(File), nameof(File))]
+[JsonDerivedType(typeof(HttpEndpoint), nameof(HttpEndpoint))]
+[JsonDerivedType(typeof(Mount), nameof(Mount))]
+[JsonDerivedType(typeof(Network), nameof(Network))]
+[JsonDerivedType(typeof(Package), nameof(Package))]
+[JsonDerivedType(typeof(Parameter), nameof(Parameter))]
+[JsonDerivedType(typeof(PortEndpoint), nameof(PortEndpoint))]
+[JsonDerivedType(typeof(Substitute), nameof(Substitute))]
+[JsonDerivedType(typeof(Volume), nameof(Volume))]
 public abstract record Contract(
     string Name,
     IInstaller? Installer = null,
@@ -23,7 +25,6 @@ public abstract record Contract(
     
     [JsonIgnore]
     public IEnumerable<Resource> DependsOn { get; init; } = DependsOn ?? Array.Empty<Resource>();
-
 
     public virtual Contract With(Contract other)
     {

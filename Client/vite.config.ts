@@ -1,5 +1,6 @@
 import {defineConfig, loadEnv, ConfigEnv} from 'vite'
 import react from '@vitejs/plugin-react-swc'
+import * as path from "node:path";
 
 // https://vitejs.dev/config/
 export default ({mode}: ConfigEnv) => {
@@ -10,6 +11,11 @@ export default ({mode}: ConfigEnv) => {
 
     return defineConfig({
         plugins: [react()],
+        resolve: {
+            alias: {
+                "@": path.resolve(__dirname, "./src"),
+            }
+        },
         server: {
             port: 5001,
             strictPort: true,

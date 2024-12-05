@@ -9,5 +9,5 @@ export type PackageType = (typeof PackageType)[keyof typeof PackageType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const PackageType = {
-  Application: "Application",
+  Package: "Package",
 } as const;

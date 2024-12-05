@@ -33,4 +33,10 @@ public record ContractId(
     {
         return HashCode.Combine(Type, Name);
     }
+
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return $"{Type.Name}:{Name}";
+    }
 }

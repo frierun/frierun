@@ -22,10 +22,10 @@ public class ApplicationsController : ControllerBase
             application =>
             {
                 var dependencies = application.AllDependencies.ToList();
-                var url = dependencies.OfType<HttpEndpoint>().FirstOrDefault()?.Url;
+                var url = dependencies.OfType<GenericHttpEndpoint>().FirstOrDefault()?.Url;
                 if (url == null)
                 {
-                    var portEndpoint = dependencies.OfType<PortEndpoint>().FirstOrDefault();
+                    var portEndpoint = dependencies.OfType<DockerPortEndpoint>().FirstOrDefault();
                     if (portEndpoint != null)
                     {
                         url = $"{portEndpoint.Protocol.ToString().ToLower()}://{portEndpoint.Ip}:{portEndpoint.Port}";

@@ -2,35 +2,29 @@
 
 namespace Frierun.Server.Data;
 
-public class PortHttpEndpointProvider : IInstaller<HttpEndpointContract>, IUninstaller<HttpEndpoint>
+public class PortHttpEndpointProvider : IInstaller<HttpEndpoint>, IUninstaller<GenericHttpEndpoint>
 {
     /// <inheritdoc />
-    public IEnumerable<ContractDependency> Dependencies(HttpEndpointContract contract, ExecutionPlan plan)
+    public IEnumerable<ContractDependency> Dependencies(HttpEndpoint contract, ExecutionPlan plan)
     {
         yield return new ContractDependency(
             contract,
-            new ContainerContract(contract.ContainerName)
+            new Container(contract.ContainerName)
         );
 
         yield return new ContractDependency(
-            new PortEndpointContract(Protocol.Tcp, contract.Port, contract.ContainerName, 80),
+            new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80),
             contract
         );
     }
 
     /// <inheritdoc />
-    public Contract Initialize(HttpEndpointContract contract, ExecutionPlan plan)
+    public Resource? Install(HttpEndpoint contract, ExecutionPlan plan)
     {
-        return contract;
-    }
-
-    /// <inheritdoc />
-    public Resource? Install(HttpEndpointContract contract, ExecutionPlan plan)
-    {
-        var portEndpoint = plan.GetResource<PortEndpoint>(
-            new PortEndpointContract(Protocol.Tcp, contract.Port, contract.ContainerName, 80).Id
+        var portEndpoint = plan.GetResource<DockerPortEndpoint>(
+            new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80).Id
         );
-        var containerContract = plan.GetContract<ContainerContract>(contract.ContainerId);
+        var containerContract = plan.GetContract<Container>(contract.ContainerId);
 
         var endpointUrl = new StringBuilder();
         endpointUrl.Append("http://");
@@ -41,7 +35,7 @@ public class PortHttpEndpointProvider : IInstaller<HttpEndpointContract>, IUnins
             endpointUrl.Append(portEndpoint.Port);
         }
         
-        var endpoint = new HttpEndpoint(endpointUrl.ToString());
+        var endpoint = new GenericHttpEndpoint(endpointUrl.ToString());
 
         plan.UpdateContract(
             containerContract with
@@ -54,7 +48,7 @@ public class PortHttpEndpointProvider : IInstaller<HttpEndpointContract>, IUnins
     }
 
     /// <inheritdoc />
-    public void Uninstall(HttpEndpoint resource)
+    public void Uninstall(GenericHttpEndpoint resource)
     {
     }
 }

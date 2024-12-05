@@ -2,27 +2,21 @@
 
 namespace Frierun.Server.Data;
 
-public class FileProvider(DockerService dockerService) : IInstaller<FileContract>
+public class FileProvider(DockerService dockerService) : IInstaller<File>
 {
     /// <inheritdoc />
-    public IEnumerable<ContractDependency> Dependencies(FileContract contract, ExecutionPlan plan)
+    public IEnumerable<ContractDependency> Dependencies(File contract, ExecutionPlan plan)
     {
         yield return new ContractDependency(
-            new VolumeContract(contract.VolumeName),
+            new Volume(contract.VolumeName),
             contract
         );
     }
 
     /// <inheritdoc />
-    public Contract Initialize(FileContract contract, ExecutionPlan plan)
+    public Resource? Install(File contract, ExecutionPlan plan)
     {
-        return contract;
-    }
-
-    /// <inheritdoc />
-    public Resource? Install(FileContract contract, ExecutionPlan plan)
-    {
-        var volume = plan.GetResource<Volume>(contract.VolumeId);
+        var volume = plan.GetResource<DockerVolume>(contract.VolumeId);
         
         dockerService.PutFile(volume.Name, contract.Path, contract.Text).Wait();
         return null;

@@ -4,9 +4,9 @@ using Frierun.Server.Services;
 
 namespace Frierun.Tests.Factories;
 
-public sealed class ContainerDefinitionFactor: Faker<ContainerContract>
+public sealed class ContainerDefinitionFactor: Faker<Container>
 {
-    public ContainerDefinitionFactor(Faker<Volume> volumeFactory)
+    public ContainerDefinitionFactor(Faker<DockerVolume> volumeFactory)
     {
         StrictMode(true);
         this.SkipConstructor();

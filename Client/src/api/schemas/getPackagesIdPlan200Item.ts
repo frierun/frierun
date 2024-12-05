@@ -4,21 +4,25 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { ContainerContract } from "./containerContract";
-import type { FileContract } from "./fileContract";
-import type { HttpEndpointContract } from "./httpEndpointContract";
-import type { MountContract } from "./mountContract";
-import type { NetworkContract } from "./networkContract";
+import type { Container } from "./container";
+import type { File } from "./file";
+import type { HttpEndpoint } from "./httpEndpoint";
+import type { Mount } from "./mount";
+import type { Network } from "./network";
 import type { Package } from "./package";
-import type { PortEndpointContract } from "./portEndpointContract";
-import type { VolumeContract } from "./volumeContract";
+import type { Parameter } from "./parameter";
+import type { PortEndpoint } from "./portEndpoint";
+import type { Substitute } from "./substitute";
+import type { Volume } from "./volume";
 
 export type GetPackagesIdPlan200Item =
-  | ContainerContract
-  | FileContract
-  | HttpEndpointContract
-  | MountContract
-  | NetworkContract
+  | Container
+  | File
+  | HttpEndpoint
+  | Mount
+  | Network
   | Package
-  | PortEndpointContract
-  | VolumeContract;
+  | Parameter
+  | PortEndpoint
+  | Substitute
+  | Volume;

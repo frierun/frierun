@@ -4,7 +4,7 @@ using Frierun.Server.Services;
 
 namespace Frierun.Tests.Factories;
 
-public sealed class VolumeFactory : Faker<Volume>
+public sealed class VolumeFactory : Faker<DockerVolume>
 {
     private readonly HashSet<string> _uniqueNames = [];
     

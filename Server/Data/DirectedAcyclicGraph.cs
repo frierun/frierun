@@ -4,8 +4,8 @@ public class DirectedAcyclicGraph<TKey>
     where TKey : notnull
 {
     private readonly HashSet<TKey> _vertices = new();
-    private readonly Dictionary<TKey, List<TKey>> _incomingEdges = new();
-    private readonly Dictionary<TKey, List<TKey>> _outgoingEdges = new();
+    private readonly Dictionary<TKey, HashSet<TKey>> _incomingEdges = new();
+    private readonly Dictionary<TKey, HashSet<TKey>> _outgoingEdges = new();
     
     /// <summary>
     /// Adds vertex to DAG.

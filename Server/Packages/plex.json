@@ -4,7 +4,10 @@
   "Contracts": [
     {
       "Type": "Container",
-      "ImageName": "plexinc/pms-docker"
+      "ImageName": "plexinc/pms-docker:latest",
+      "Env": {
+        "PLEX_CLAIM": "{{Parameter:PlexClaim:Value}}"
+      }
     },
     {
       "Type": "HttpEndpoint",
