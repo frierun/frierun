@@ -1,0 +1,19 @@
+﻿{
+  "Name": "nextcloud",
+  "Url": "https://github.com/nextcloud/docker/",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "nextcloud:latest"
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 80
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "data",
+      "Path": "/var/www/html"
+    }
+  ]
+}

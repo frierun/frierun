@@ -1,0 +1,38 @@
+﻿{
+  "Name": "adguard",
+  "Url": "https://hub.docker.com/r/adguard/adguardhome",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "adguard/adguardhome:latest",
+      "Command": [
+        "--web-addr",
+        "0.0.0.0:80"
+      ]
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 80
+    },
+    {
+      "Type": "PortEndpoint",
+      "Port": 53,
+      "Protocol": "tcp"
+    },
+    {
+      "Type": "PortEndpoint",
+      "Port": 53,
+      "Protocol": "udp"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "data",
+      "Path": "/opt/adguardhome/work"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "config",
+      "Path": "/opt/adguardhome/conf"
+    }
+  ]
+}
