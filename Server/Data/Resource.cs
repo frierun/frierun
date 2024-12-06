@@ -6,10 +6,11 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(Application), nameof(Application))]
 [JsonDerivedType(typeof(DockerContainer), nameof(DockerContainer))]
 [JsonDerivedType(typeof(DockerNetwork), nameof(DockerNetwork))]
-[JsonDerivedType(typeof(GenericHttpEndpoint), nameof(GenericHttpEndpoint))]
 [JsonDerivedType(typeof(DockerPortEndpoint), nameof(DockerPortEndpoint))]
-[JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
 [JsonDerivedType(typeof(DockerVolume), nameof(DockerVolume))]
+[JsonDerivedType(typeof(GenericHttpEndpoint), nameof(GenericHttpEndpoint))]
+[JsonDerivedType(typeof(ResolvedParameter), nameof(ResolvedParameter))]
+[JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
 public abstract record Resource
 {
     private readonly List<Resource> _dependsOn = [];

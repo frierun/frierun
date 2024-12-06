@@ -1,3 +1,3 @@
 ﻿namespace Frierun.Server.Data;
 
-public record GenericHttpEndpoint(string Url) : Resource;
+public record GenericHttpEndpoint(Uri Url) : Resource;

@@ -26,16 +26,9 @@ public class PortHttpEndpointProvider : IInstaller<HttpEndpoint>, IUninstaller<G
         );
         var containerContract = plan.GetContract<Container>(contract.ContainerId);
 
-        var endpointUrl = new StringBuilder();
-        endpointUrl.Append("http://");
-        endpointUrl.Append(portEndpoint.Ip);
-        if (portEndpoint.Port != 80)
-        {
-            endpointUrl.Append(":");
-            endpointUrl.Append(portEndpoint.Port);
-        }
+        var url = new Uri($"http://{portEndpoint.Ip}:{portEndpoint.Port}");
         
-        var endpoint = new GenericHttpEndpoint(endpointUrl.ToString());
+        var endpoint = new GenericHttpEndpoint(url);
 
         plan.UpdateContract(
             containerContract with

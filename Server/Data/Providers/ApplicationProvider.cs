@@ -12,7 +12,7 @@ public class ApplicationProvider : IInstaller<Package>, IUninstaller<Application
     public Contract Initialize(Package contract, ExecutionPlan plan)
     {
         var basePrefix = contract.Prefix ?? contract.Name;
-        
+
         var count = 1;
         var prefix = basePrefix;
         while (plan.State.Resources.OfType<Application>().Any(application => application.Name == prefix))
@@ -32,12 +32,34 @@ public class ApplicationProvider : IInstaller<Package>, IUninstaller<Application
     /// <inheritdoc />
     public Resource Install(Package package, ExecutionPlan plan)
     {
-        return new Application(package.Prefix!, package)
+        var dependencies = package.Contracts
+            .Select(contract => plan.GetResource(contract.Id))
+            .OfType<Resource>()
+            .ToList();
+        
+        var url = package.ApplicationUrl;
+        if (url == null)
         {
-            DependsOn = package.Contracts
-                .Select(contract => plan.GetResource(contract.Id))
-                .OfType<Resource>()
-                .ToList()
+            url = dependencies.OfType<GenericHttpEndpoint>().FirstOrDefault()?.Url.ToString();
+        }
+        if (url == null)
+        {
+            var portEndpoint = dependencies.OfType<DockerPortEndpoint>().FirstOrDefault();
+            if (portEndpoint != null)
+            {
+                url = $"{portEndpoint.Protocol.ToString().ToLower()}://{portEndpoint.Ip}:{portEndpoint.Port}";
+            }
+        }
+        
+        
+        return new Application(
+            Name: package.Prefix!,
+            Package: package,
+            Url: url,
+            Description: package.ApplicationDescription
+        )
+        {
+            DependsOn = dependencies
         };
     }
 

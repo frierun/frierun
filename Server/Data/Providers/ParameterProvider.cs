@@ -1,6 +1,6 @@
 ﻿namespace Frierun.Server.Data;
 
-public class ParameterProvider : IInstaller<Parameter>
+public class ParameterProvider : IInstaller<Parameter>, IUninstaller<ResolvedParameter>
 {
     /// <inheritdoc />
     public Contract Initialize(Parameter contract, ExecutionPlan plan)
@@ -9,5 +9,17 @@ public class ParameterProvider : IInstaller<Parameter>
         return (value == contract.Value) 
             ? contract
             : contract with { Value = value };
+    }
+
+    /// <inheritdoc />
+    public Resource? Install(Parameter contract, ExecutionPlan plan)
+    {
+        return new ResolvedParameter(contract.Name, contract.Value);
+    }
+
+    /// <inheritdoc />
+    public void Uninstall(ResolvedParameter resource)
+    {
+        
     }
 }

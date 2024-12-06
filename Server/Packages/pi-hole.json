@@ -1,0 +1,39 @@
+﻿{
+  "Name": "pi-hole",
+  "Url": "https://github.com/pi-hole/docker-pi-hole",
+  "ApplicationUrl": "{{HttpEndpoint:80:Url}}admin",
+  "ApplicationDescription": "Password: admin",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "pihole/pihole:latest",
+      "Env": {
+        "WEBPASSWORD": "admin"
+      }
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 80
+    },
+    {
+      "Type": "PortEndpoint",
+      "Port": 53,
+      "Protocol": "tcp"
+    },
+    {
+      "Type": "PortEndpoint",
+      "Port": 53,
+      "Protocol": "udp"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "etc-pihole",
+      "Path": "/etc/pihole"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "etc-dnsmasq",
+      "Path": "/etc/dnsmasq.d"
+    }
+  ]
+}

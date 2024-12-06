@@ -1,5 +1,5 @@
 import Uninstall from "./Uninstall.tsx";
-import {useGetApplications} from "../api/endpoints/applications.ts";
+import {useGetApplications} from "@/api/endpoints/applications.ts";
 
 
 export default function Applications() {
@@ -29,19 +29,22 @@ export default function Applications() {
                         </div>
                             <div>
                                 <div className={"font-bold text-lg"}>
-                                {item.name}
-                            </div>
-                            <div className={"text-sm"}>
-                                {item.id}
-                            </div>
-                            {item.serviceUrl && (
-                                <div>
-                                    <a href={item.serviceUrl} target="_blank" rel="noreferrer noopener" className={"text-black"}>
-                                        <span className="font-bold text-primary text-sm">{item.serviceUrl}</span>
-                                    </a>
+                                    {item.name}
                                 </div>
-                            )}
-                        </div>
+                                {item.url && (
+                                    <div>
+                                        <a href={item.url} target="_blank" rel="noreferrer noopener"
+                                           className={"text-black"}>
+                                            <span className="font-bold text-primary text-sm">{item.url}</span>
+                                        </a>
+                                    </div>
+                                )}
+                                {item.description && (
+                                    <div className={"text-sm"}>
+                                        {item.description}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <div>
                             <Uninstall applicationId={item.id}/>

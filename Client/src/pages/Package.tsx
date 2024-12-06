@@ -1,7 +1,7 @@
 ﻿import {Link, useParams} from "react-router-dom";
 import InstallForm from "../components/InstallForm.tsx";
-import {useGetPackagesIdPlan} from "@/api/endpoints/packages.ts";
 import Layout from "@/pages/Layout";
+import {useGetPackagesIdPlan} from "@/api/endpoints/packages.ts";
 
 export default function Package() {
     const {name} = useParams<{ name: string }>();

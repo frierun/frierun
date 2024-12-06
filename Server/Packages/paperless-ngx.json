@@ -1,0 +1,45 @@
+﻿{
+  "Name": "paperless-ngx",
+  "Url": "https://docs.paperless-ngx.com/setup/",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "Name": "redis",
+      "ImageName": "docker.io/library/redis:7"
+    },
+    {
+      "Type": "Mount",
+      "ContainerName": "redis",
+      "VolumeName": "redisdata",
+      "Path": "/data"
+    },
+    {
+      "Type": "Container",
+      "Name": "webserver",
+      "ImageName": "ghcr.io/paperless-ngx/paperless-ngx:latest",
+      "Env": {
+        "PAPERLESS_REDIS": "redis://redis:6379",
+        "PAPERLESS_AUTO_LOGIN_USERNAME": "admin",
+        "PAPERLESS_ADMIN_USER": "admin",
+        "PAPERLESS_ADMIN_PASSWORD": "admin"
+      }
+    },
+    {
+      "Type": "HttpEndpoint",
+      "ContainerName": "webserver",
+      "Port": 8000
+    },
+    {
+      "Type": "Mount",
+      "ContainerName": "webserver",
+      "VolumeName": "data",
+      "Path": "/usr/src/paperless/data"
+    },
+    {
+      "Type": "Mount",
+      "ContainerName": "webserver",
+      "VolumeName": "media",
+      "Path": "/usr/src/paperless/media"
+    }
+  ]
+}

@@ -25,7 +25,7 @@ public class SubstituteProvider(ContractRegistry contractRegistry) : IInstaller<
             var contractName = match.Groups[2].Value;
 
             var dependency = contractRegistry.CreateContract(contractTypeName, contractName);
-            yield return new ContractDependency(contract, dependency);
+            yield return new ContractDependency(dependency, contract);
         }
     }
 
@@ -48,29 +48,8 @@ public class SubstituteProvider(ContractRegistry contractRegistry) : IInstaller<
 
                 foreach (Match match in matchCollection)
                 {
-                    var insertion = match.Groups[1].Value;
-                    var variableMatch = Substitute.VariableRegex.Match(insertion);
-                    if (!variableMatch.Success)
-                    {
-                        throw new Exception($"Invalid insertion format: {insertion}");
-                    }
-
-                    var contractTypeName = variableMatch.Groups[1].Value;
-                    var contractName = variableMatch.Groups[2].Value;
-                    var propertyName = variableMatch.Groups[3].Value;
-
-                    var dependencyType = contractRegistry.GetContractType(contractTypeName);
-                    var dependencyId = new ContractId(dependencyType, contractName);
-                    var dependency = plan.GetContract(dependencyId);
-
-                    var propertyInfo = dependencyType.GetProperty(propertyName);
-                    if (propertyInfo == null)
-                    {
-                        throw new Exception($"Property not found: {propertyName} in {dependencyType}");
-                    }
-
-                    var propertyValue = propertyInfo.GetValue(dependency)?.ToString() ?? "";
-                    s = s.Replace($"{{{{{insertion}}}}}", propertyValue);
+                    var propertyValue = ResolveInsertion(match.Groups[1].Value, plan);
+                    s = s.Replace($"{{{{{match.Groups[1].Value}}}}}", propertyValue);
                 }
 
                 return s;
@@ -79,5 +58,37 @@ public class SubstituteProvider(ContractRegistry contractRegistry) : IInstaller<
         plan.UpdateContract(changedContract);
 
         return null;
+    }
+    
+    /// <summary>
+    /// Resolves insertion value.
+    /// </summary>
+    private string ResolveInsertion(string insertion, ExecutionPlan plan)
+    {
+        var match = Substitute.VariableRegex.Match(insertion);
+        if (!match.Success)
+        {
+            throw new Exception($"Invalid insertion format: {insertion}");
+        }
+
+        var contractTypeName = match.Groups[1].Value;
+        var contractName = match.Groups[2].Value;
+        var propertyName = match.Groups[3].Value;
+
+        var contractType = contractRegistry.GetContractType(contractTypeName);
+        var contractId = new ContractId(contractType, contractName);
+        var resource = plan.GetResource(contractId);
+        if (resource == null)
+        {
+            throw new Exception($"Resource not found: {contractId}");
+        }
+
+        var propertyInfo = resource.GetType().GetProperty(propertyName);
+        if (propertyInfo == null)
+        {
+            throw new Exception($"Property not found: {propertyName} in {contractType}");
+        }
+
+        return propertyInfo.GetValue(resource)?.ToString() ?? "";
     }
 }

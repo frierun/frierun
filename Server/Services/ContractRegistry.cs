@@ -24,8 +24,10 @@ public class ContractRegistry
     {
         return typeName switch
         {
-            "Container" => new Container(name),
-            "Parameter" => new Parameter(name),
+            nameof(Container) => new Container(name),
+            nameof(HttpEndpoint) => new HttpEndpoint(name),
+            nameof(Package) => new Package(name),
+            nameof(Parameter) => new Parameter(name),
             _ => throw new Exception("Can't create contract type: " + typeName)
         };
     }

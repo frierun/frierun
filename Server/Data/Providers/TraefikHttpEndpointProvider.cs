@@ -12,21 +12,21 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
             contract,
             new Container(contract.ContainerName)
         );
-        
+
         var container = plan.GetContract<Container>(contract.ContainerId);
         yield return new ContractDependency(
             new Network(container.NetworkName),
             contract
         );
     }
-    
+
     /// <inheritdoc />
     public Contract Initialize(HttpEndpoint contract, ExecutionPlan plan)
     {
         var baseName = contract.DomainName ?? $"{plan.Prefix}.localhost";
         var subdomain = baseName.Split('.')[0];
         var domain = baseName.Substring(subdomain.Length + 1);
-        
+
         var count = 1;
         var name = baseName;
         while (plan.State.Resources.OfType<TraefikHttpEndpoint>().Any(c => c.Domain == name))
@@ -41,8 +41,8 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
             {
                 DomainName = name
             };
-    }    
-    
+    }
+
     /// <inheritdoc />
     public Resource Install(HttpEndpoint contract, ExecutionPlan plan)
     {
@@ -81,8 +81,8 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
                     parameters =>
                     {
                         parameters.Labels["traefik.enable"] = "true";
-                        parameters.Labels["traefik.http.routers." + subdomain + ".rule"] = "Host(`" + domain + "`)";
-                        parameters.Labels["traefik.http.services." + subdomain + ".loadbalancer.server.port"] =
+                        parameters.Labels[$"traefik.http.routers.{subdomain}.rule"] = $"Host(`{domain}`)";
+                        parameters.Labels[$"traefik.http.services.{subdomain}.loadbalancer.server.port"] =
                             contract.Port.ToString();
                     }
                 ),

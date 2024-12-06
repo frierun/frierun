@@ -7,6 +7,10 @@
 import type { PackageAllOfContractsItem } from "./packageAllOfContractsItem";
 
 export type PackageAllOf = {
+  /** @nullable */
+  applicationDescription?: string | null;
+  /** @nullable */
+  applicationUrl?: string | null;
   contracts: PackageAllOfContractsItem[];
   /** @nullable */
   prefix?: string | null;

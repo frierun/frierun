@@ -11,7 +11,8 @@ public class ApplicationsController : ControllerBase
         Guid Id,
         string Name,
         string? PackageName,
-        string? ServiceUrl
+        string? Url,
+        string? Description
     );
 
     [HttpGet]
@@ -19,26 +20,13 @@ public class ApplicationsController : ControllerBase
     {
         
         return state.Resources.OfType<Application>().Select(
-            application =>
-            {
-                var dependencies = application.AllDependencies.ToList();
-                var url = dependencies.OfType<GenericHttpEndpoint>().FirstOrDefault()?.Url;
-                if (url == null)
-                {
-                    var portEndpoint = dependencies.OfType<DockerPortEndpoint>().FirstOrDefault();
-                    if (portEndpoint != null)
-                    {
-                        url = $"{portEndpoint.Protocol.ToString().ToLower()}://{portEndpoint.Ip}:{portEndpoint.Port}";
-                    }
-                }
-                
-                return new ApplicationResponse(
-                    application.Id,
-                    application.Name,
-                    application.Package?.Name,
-                    url
-                );
-            }
+            application => new ApplicationResponse(
+                application.Id,
+                application.Name,
+                application.Package?.Name,
+                application.Url,
+                application.Description
+            )
         );
     }
 

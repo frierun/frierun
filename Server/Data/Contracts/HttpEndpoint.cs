@@ -3,10 +3,10 @@
 namespace Frierun.Server.Data;
 
 public record HttpEndpoint(
-    int Port,
+    string? Name = null,
+    int Port = 0,
     string? ContainerName = null,
-    string? DomainName = null
-) : Contract($"{ContainerName ?? ""}:{Port}")
+    string? DomainName = null) : Contract(Name ?? $"{Port}{(ContainerName != null ? $" at {ContainerName}" : "")}")
 {
     public string ContainerName { get; init; } = ContainerName ?? "";
     [JsonIgnore] public ContractId<Container> ContainerId => new(ContainerName);

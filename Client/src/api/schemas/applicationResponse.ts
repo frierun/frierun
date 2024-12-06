@@ -6,10 +6,12 @@
  */
 
 export interface ApplicationResponse {
+  /** @nullable */
+  description?: string | null;
   id: string;
   name: string;
   /** @nullable */
   packageName?: string | null;
   /** @nullable */
-  serviceUrl?: string | null;
+  url?: string | null;
 }
