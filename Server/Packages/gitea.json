@@ -1,0 +1,29 @@
+﻿{
+  "Name": "gitea",
+  "Url": "https://docs.gitea.com/installation/install-with-docker",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "gitea/gitea:1",
+      "Env": {
+        "USER_UID": "1000",
+        "USER_GID": "1000"
+      }
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 3000
+    },
+    {
+      "Type": "PortEndpoint",
+      "Port": 22,
+      "DestinationPort": 2222,
+      "Protocol": "tcp"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "data",
+      "Path": "/data"
+    }
+  ]
+}
