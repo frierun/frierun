@@ -3,6 +3,7 @@ using Autofac.Extensions.DependencyInjection;
 using Frierun.Server;
 using Frierun.Server.Services;
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 
@@ -31,7 +32,6 @@ builder.Services.AddAntiforgery(
         options.SuppressXFrameOptionsHeader = false;
     }
 );
-
 builder.Services.AddControllersWithViews(
     options =>
     {
@@ -39,8 +39,8 @@ builder.Services.AddControllersWithViews(
         options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
     }
 );
-
-//builder.Services.RegisterServices();
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(Storage.DirectoryName, "keys")));
 
 var app = builder.Build();
 
@@ -67,19 +67,20 @@ if (app.Environment.IsDevelopment())
 }
 
 var antiForgery = app.Services.GetRequiredService<IAntiforgery>();
-
 app.Use(
-    (context, next) =>
+    async (context, next) =>
     {
         if (!context.Request.Cookies.ContainsKey("XSRF-TOKEN"))
         {
             var tokenSet = antiForgery.GetAndStoreTokens(context);
             context.Response.Cookies.Append(
-                "XSRF-TOKEN", tokenSet.RequestToken!, new CookieOptions { HttpOnly = false }
+                "XSRF-TOKEN",
+                tokenSet.RequestToken!,
+                new CookieOptions { HttpOnly = false }
             );
         }
 
-        return next(context);
+        await next(context);
     }
 );
 

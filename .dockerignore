@@ -1,0 +1,8 @@
+﻿Client/node_modules
+Client/dist
+.git
+.gitignore
+Server/bin/
+Server/obj/
+Tests/bin/
+Tests/obj/

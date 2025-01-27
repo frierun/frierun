@@ -7,34 +7,16 @@ using File = System.IO.File;
 
 namespace Frierun.Server.Services;
 
-public class StateSerializer
+public class StateSerializer(PackageRegistry packageRegistry)
 {
-    public string Path { get; }
-    private readonly JsonSerializerOptions _serializerOptions;
+    public string Path { get; } = System.IO.Path.Combine(Storage.DirectoryName, "state.json");
 
-    public StateSerializer(PackageRegistry packageRegistry)
+    private readonly JsonSerializerOptions _serializerOptions = new()
     {
-        _serializerOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            Converters = { new PackageConverter(packageRegistry) },
-        };
-        
-        var localData = Environment.GetEnvironmentVariable(
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? "LocalAppData"
-                : "Home"
-        );
+        WriteIndented = true,
+        Converters = { new PackageConverter(packageRegistry) },
+    };
 
-        var directory = System.IO.Path.Combine(localData ?? "", "Frierun");
-        if (!Directory.Exists(directory))
-        {
-            Directory.CreateDirectory(directory);
-        }
-
-        Path = System.IO.Path.Combine(directory, "state.json");
-    }
-    
     /// <summary>
     /// Loads state from disk
     /// </summary>

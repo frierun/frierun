@@ -11,6 +11,7 @@ export const customFetch = async <T>(
             'X-XSRF-TOKEN': Cookies.get('XSRF-TOKEN') ?? '',
         }
     });
+    console.log(Cookies.get('XSRF-TOKEN'));
     const contentType = res.headers.get('content-type');
     
     const data = (contentType && contentType.includes('application/json')) ? await res.json() : await res.text();
