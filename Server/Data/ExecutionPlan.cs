@@ -30,7 +30,7 @@ public class ExecutionPlan
         {
             var contract = queue.Dequeue();
 
-            foreach (var dependency in contract.Installer!.Dependencies(contract, this))
+            foreach (var dependency in GetInstaller(contract).Dependencies(contract, this))
             {
                 AddContract(dependency.Preceding, queue);
                 AddContract(dependency.Following, queue);
@@ -40,6 +40,23 @@ public class ExecutionPlan
         }
 
         Initialize();
+    }
+    
+    /// <summary>
+    /// Gets installer for the contract.
+    /// </summary>
+    private IInstaller GetInstaller(Contract contract)
+    {
+        var installer = _providerRegistry.GetInstaller(contract.GetType(), contract.Installer);
+        if (installer == null)
+        {
+            throw contract.Installer == null
+                ? new Exception($"Can't find default installer for resource {contract.GetType()}")
+                : new Exception($"Can't find installer '{contract.Installer}' for resource {contract.GetType()}");
+        }
+
+        return installer;
+
     }
 
     /// <summary>
@@ -54,18 +71,13 @@ public class ExecutionPlan
 
         _graph.AddVertex(contract.Id);
 
-        if (contract.Installer == null)
+        // check installer and fill it if not set 
+        var installer = GetInstaller(contract);
+        if (contract.Installer != installer.GetType().Name)
         {
-            var contractType = contract.GetType();
-            var installer = _providerRegistry.GetInstaller(contractType).FirstOrDefault();
-            if (installer == null)
-            {
-                throw new Exception($"Can't find provider for resource {contractType}");
-            }
-
             contract = contract with
             {
-                Installer = installer
+                Installer = installer.GetType().Name
             };
         }
 
@@ -140,7 +152,7 @@ public class ExecutionPlan
             contractId =>
             {
                 var contract = GetContract(contractId);
-                UpdateContract(contract.Installer!.Initialize(contract, this));
+                UpdateContract(GetInstaller(contract).Initialize(contract, this));
             }
         );
     }
@@ -155,7 +167,7 @@ public class ExecutionPlan
             contractId =>
             {
                 var contract = GetContract(contractId);
-                var resource = contract.Installer!.Install(contract, this);
+                var resource = GetInstaller(contract).Install(contract, this);
                 _resources[contract.Id] = resource;
             }
         );

@@ -24,7 +24,7 @@ public class PortHttpEndpointProvider : IInstaller<HttpEndpoint>, IUninstaller<G
         var portEndpoint = plan.GetResource<DockerPortEndpoint>(
             new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80).Id
         );
-        var containerContract = plan.GetContract<Container>(contract.ContainerId);
+        var containerContract = plan.GetContract(contract.ContainerId);
 
         var url = new Uri($"http://{portEndpoint.Ip}:{portEndpoint.Port}");
         

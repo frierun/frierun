@@ -15,13 +15,11 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
 public abstract record Contract(
     string Name,
-    IInstaller? Installer = null,
+    string? Installer = null,
     IEnumerable<Resource>? DependsOn = null
 )
 {
     [JsonIgnore] public ContractId Id => new(GetType(), Name);
-    [JsonIgnore] public IInstaller? Installer { get; init; } = Installer;
-    public string? InstallerType => Installer?.GetType().Name;
     
     [JsonIgnore]
     public IEnumerable<Resource> DependsOn { get; init; } = DependsOn ?? Array.Empty<Resource>();

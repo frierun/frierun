@@ -63,9 +63,19 @@ public class ProviderRegistry
         AddProvider(traefikHttpEndpointProvider);
     }
 
-    public IList<IInstaller> GetInstaller(Type resourceType)
+    public IInstaller? GetInstaller(Type resourceType, string? name = null)
     {
-        return _installers[resourceType];
+        if (!_installers.TryGetValue(resourceType, out var installers))
+        {
+            return null;
+        }
+
+        if (name == null)
+        {
+            return installers.FirstOrDefault();
+        }
+        
+        return installers.FirstOrDefault(installer => installer.GetType().Name == name);
     }
     
     public IUninstaller GetUninstaller(Type resourceType)

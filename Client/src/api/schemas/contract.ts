@@ -7,7 +7,7 @@
 
 export interface Contract {
   /** @nullable */
-  readonly installerType?: string | null;
+  installer?: string | null;
   name: string;
   Type: string;
 }

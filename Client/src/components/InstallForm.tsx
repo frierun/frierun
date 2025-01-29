@@ -1,19 +1,23 @@
 ﻿import {useContext, useState} from "react";
-import StateContext from "../providers/StateContext.tsx";
-import {getGetApplicationsQueryKey} from "../api/endpoints/applications.ts";
+import StateContext from "@/providers/StateContext.tsx";
+import {getGetApplicationsQueryKey} from "@/api/endpoints/applications.ts";
 import {useQueryClient} from "@tanstack/react-query";
 import {useNavigate} from "react-router-dom";
-import Button from "./Button.tsx";
-import {GetPackagesIdPlan200Item, Package} from "../api/schemas";
-import {usePostPackagesIdInstall} from "../api/endpoints/packages.ts";
-import HttpEndpointForm from "./contracts/HttpEndpointForm.tsx";
-import PortEndpointForm from "./contracts/PortEndpointForm.tsx";
-import Debug from "./Debug";
+import Button from "@/components/Button.tsx";
+import {usePostPackagesIdInstall} from "@/api/endpoints/packages.ts";
+import HttpEndpointForm from "@/components/contracts/HttpEndpointForm.tsx";
+import PortEndpointForm from "@/components/contracts/PortEndpointForm.tsx";
+import Debug from "@/components/Debug";
 import ParameterForm from "@/components/contracts/ParameterForm.tsx";
+import {GetPackagesIdPlan200Item, Package} from "@/api/schemas";
 
 type Props = {
     contracts: GetPackagesIdPlan200Item[];
     name: string;
+}
+
+type Overrides = {
+    [key: string]: Package['contracts']
 }
 
 export default function InstallForm({contracts, name}: Props) {
@@ -24,7 +28,7 @@ export default function InstallForm({contracts, name}: Props) {
 
     const pkg = contracts.find(contract => contract.Type === 'Package');
     const [prefix, setPrefix] = useState(pkg?.prefix ?? '');
-    const [overrides, setOverrides] = useState<Package['contracts']>([]);
+    const [overrides, setOverrides] = useState<Overrides>({});
 
     const install = () => {
         mutateAsync({
@@ -32,7 +36,7 @@ export default function InstallForm({contracts, name}: Props) {
                 Type: 'Package',
                 name,
                 prefix,
-                contracts: overrides,
+                contracts: Object.entries(overrides).flatMap(([_, value]) => value),
             }
         })
             .then(waitForReady)
@@ -40,13 +44,17 @@ export default function InstallForm({contracts, name}: Props) {
             .then(() => navigate('/'));
     };
 
-    const updateContract = (contract: Package['contracts'][0]) => {
-        setOverrides(
-            overrides => overrides
-                .filter(override => override.Type !== contract.Type || override.name !== contract.name)
-                .concat(contract)
+    const updateContracts = (contracts: Package['contracts']) => {
+        const contract = contracts[0];
+        const key = `${contract.Type} ${contract.name}`;
+        setOverrides({
+                ...overrides,
+                [key]: contracts
+            }
         )
     }
+    
+    const updateContract = (contract: Package['contracts'][0]) => updateContracts([contract]);
 
     return (
         <div>
@@ -74,12 +82,18 @@ export default function InstallForm({contracts, name}: Props) {
                         <div key={`${contract.Type} ${contract.name}`} className={"card"}>
                             <HttpEndpointForm
                                 contract={contract}
-                                updateContract={updateContract}
+                                contracts={contracts}
+                                updateContracts={updateContracts}
                             />
                         </div>
                     ))}
                 {contracts
                     .filter(contract => contract.Type === 'PortEndpoint')
+                    .filter(contract => contracts.find(httpContract =>
+                        httpContract.Type === 'HttpEndpoint'
+                        && httpContract.port === contract.port
+                        && httpContract.containerName === contract.containerName
+                    ) === undefined)
                     .map(contract => (
                         <div key={`${contract.Type} ${contract.name}`} className={"card"}>
                             <PortEndpointForm

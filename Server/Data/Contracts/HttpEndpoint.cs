@@ -21,7 +21,8 @@ public record HttpEndpoint(
 
         return this with
         {
-            DomainName = endpoint.DomainName ?? DomainName
+            DomainName = endpoint.DomainName ?? DomainName,
+            Installer = endpoint.Installer ?? Installer,
         };
     }
 }
