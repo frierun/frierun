@@ -22,4 +22,14 @@ public record State : IJsonOnDeserialized
     {
         return Resources.FirstOrDefault(resource => resource.Id == id);
     }
+    
+    public void AddResource(Resource resource)
+    {
+        if (FindResource(resource.Id) != null)
+        {
+            return;
+        }
+        
+        Resources.Add(resource);
+    }
 }

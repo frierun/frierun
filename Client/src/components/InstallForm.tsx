@@ -10,6 +10,7 @@ import PortEndpointForm from "@/components/contracts/PortEndpointForm.tsx";
 import Debug from "@/components/Debug";
 import ParameterForm from "@/components/contracts/ParameterForm.tsx";
 import {GetPackagesIdPlan200Item, Package} from "@/api/schemas";
+import VolumeForm from "@/components/contracts/VolumeForm.tsx";
 
 type Props = {
     contracts: GetPackagesIdPlan200Item[];
@@ -53,7 +54,7 @@ export default function InstallForm({contracts, name}: Props) {
             }
         )
     }
-    
+
     const updateContract = (contract: Package['contracts'][0]) => updateContracts([contract]);
 
     return (
@@ -75,7 +76,8 @@ export default function InstallForm({contracts, name}: Props) {
                                 updateContract={updateContract}
                             />
                         </div>
-                    ))}
+                    ))
+                }
                 {contracts
                     .filter(contract => contract.Type === 'HttpEndpoint')
                     .map(contract => (
@@ -86,7 +88,8 @@ export default function InstallForm({contracts, name}: Props) {
                                 updateContracts={updateContracts}
                             />
                         </div>
-                    ))}
+                    ))
+                }
                 {contracts
                     .filter(contract => contract.Type === 'PortEndpoint')
                     .filter(contract => contracts.find(httpContract =>
@@ -101,7 +104,20 @@ export default function InstallForm({contracts, name}: Props) {
                                 updateContract={updateContract}
                             />
                         </div>
-                    ))}
+                    ))
+                }
+                {contracts
+                    .filter(contract => contract.Type === 'Volume')
+                    .map(contract => (
+                        <div key={`${contract.Type} ${contract.name}`} className={"card"}>
+                            <VolumeForm
+                                contract={contract}
+                                updateContract={updateContract}
+                            />
+                        </div>
+                    ))
+                }
+
             </div>
             <div className={"mt-4 mb-10"}>
                 <Button onClick={install} disabled={isPending} type={"primary"}>

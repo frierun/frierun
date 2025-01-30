@@ -7,7 +7,12 @@ public class VolumeProvider(DockerService dockerService) : IInstaller<Volume>, I
     /// <inheritdoc />
     public Contract Initialize(Volume contract, ExecutionPlan plan)
     {
-        var baseName = contract.VolumeName ?? plan.Prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
+        if (contract.VolumeName != null)
+        {
+            return contract;
+        }
+        
+        var baseName = plan.Prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
         
         var count = 0;
         var name = baseName;
@@ -17,9 +22,7 @@ public class VolumeProvider(DockerService dockerService) : IInstaller<Volume>, I
             name = $"{baseName}{count}";
         }
 
-        return contract.VolumeName == name
-            ? contract
-            : contract with
+        return contract with
             {
                 VolumeName = name
             };
@@ -29,6 +32,15 @@ public class VolumeProvider(DockerService dockerService) : IInstaller<Volume>, I
     public Resource Install(Volume contract, ExecutionPlan plan)
     {
         var volumeName = contract.VolumeName!;
+        var existingVolume = plan.State
+            .Resources
+            .OfType<DockerVolume>()
+            .FirstOrDefault(dockerVolume => dockerVolume.Name == volumeName);
+
+        if (existingVolume != null)
+        {
+            return existingVolume;
+        }
         
         dockerService.CreateVolume(volumeName).Wait();
         return new DockerVolume(volumeName);

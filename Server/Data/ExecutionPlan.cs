@@ -179,7 +179,7 @@ public class ExecutionPlan
                 continue;
             }
             
-            State.Resources.Add(resource);
+            State.AddResource(resource);
         }
     }
 
