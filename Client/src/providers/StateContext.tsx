@@ -35,7 +35,6 @@ export function StateContextProvider({children}: { children: React.ReactNode }) 
 
     return (
         <StateContext.Provider value={{ready: data.data.ready, waitForReady: waitForReady}}>
-            {!data.data.ready && <p>Waiting for server to be ready...</p>}
             {children}
         </StateContext.Provider>
     );

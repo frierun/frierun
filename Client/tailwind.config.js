@@ -19,6 +19,8 @@ export default {
       },
       gray: {
         DEFAULT: '#F7F7F7',
+        disabled: '#ccc',
+        darker: '#999',
       },
       black: {
         DEFAULT: '#000',

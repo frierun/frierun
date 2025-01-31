@@ -74,28 +74,32 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
                     {contract.containerName && ` in container ${contract.containerName}`}
                 </div>
                 {hasTraefik && (
-                    <div>
-                        <label>
+                    <fieldset className={"flex gap-4"}>
+                        <div>
                             <input
                                 type="radio"
+                                id={"TraefikHttpEndpointProviderRadio"}
                                 value="TraefikHttpEndpointProvider"
                                 checked={installerType === "TraefikHttpEndpointProvider"}
                                 onChange={e => updateInstallerType(e.target.value)}
-                                className="mr-2"
-                            />
-                            Traefik
-                        </label>
-                        <label>
+                            >
+                            </input>
+                            <label for={"TraefikHttpEndpointProviderRadio"}>Traefik
+                            </label>
+                        </div>
+                        <div>
                             <input
-                                type="radio"
-                                value="PortHttpEndpointProvider"
-                                checked={installerType === "PortHttpEndpointProvider"}
-                                onChange={e => updateInstallerType(e.target.value)}
-                                className="mr-2"
-                            />
-                            Port
-                        </label>
-                    </div>
+                                    type="radio"
+                                    id={"PortHttpEndpointProviderRadio"}
+                                    value="PortHttpEndpointProvider"
+                                    checked={installerType === "PortHttpEndpointProvider"}
+                                    onChange={e => updateInstallerType(e.target.value)}
+                                />
+                            <label for={"PortHttpEndpointProviderRadio"}>
+                                Port
+                            </label>
+                        </div>
+                    </fieldset>
                 )}
                 {installerType === 'TraefikHttpEndpointProvider' && (
                     <div>

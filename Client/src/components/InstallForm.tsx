@@ -58,7 +58,7 @@ export default function InstallForm({contracts, name}: Props) {
     const updateContract = (contract: Package['contracts'][0]) => updateContracts([contract]);
 
     return (
-        <div>
+        <div className={"lg:w-1/2"}>
             <h2>Settings</h2>
             <div className={"grid xl:grid-cols-1 gap-3"}>
                 <div className={"card"}>

@@ -34,32 +34,36 @@ export default function VolumeForm({contract, updateContract}: Props) {
                     {contract.name}
                 </div>
                 {!!getVolumesResponse?.data?.length && (
-                    <div>
-                        <label>
+                    <fieldset className={"flex gap-4"}>
+                        <div>
                             <input
+                                id={"NewVolume" + volumeName}
                                 type="radio"
                                 checked={createNew}
                                 onChange={() => {
                                     setCreateNew(true);
                                     updateVolumeName(contract.volumeName ?? '');
                                 }}
-                                className="mr-2"
                             />
-                            New
-                        </label>
-                        <label>
+                            <label for={"NewVolume" + volumeName}>
+                                New
+                            </label>
+                        </div>
+                        <div>
                             <input
+                                id={"OldVolume" + volumeName}
                                 type="radio"
                                 checked={!createNew}
                                 onChange={() => {
                                     setCreateNew(false);
                                     updateVolumeName(getVolumesResponse?.data[0].name ?? '');
                                 }}
-                                className="mr-2"
                             />
-                            Existing
-                        </label>
-                    </div>
+                            <label for={"OldVolume" + volumeName}>
+                                Existing
+                            </label>
+                        </div>
+                    </fieldset>
                 )}
                 {createNew
                     ? (
@@ -77,6 +81,7 @@ export default function VolumeForm({contract, updateContract}: Props) {
                             <label className={"inline-block w-48"}>
                                 Existing volume name:
                             </label>
+
                             <select
                                 value={volumeName}
                                 onChange={e => updateVolumeName(e.target.value)}
@@ -85,6 +90,7 @@ export default function VolumeForm({contract, updateContract}: Props) {
                                     <option key={volume.name} value={volume.name}>{volume.name}</option>
                                 ))}
                             </select>
+
                         </div>
                     )
                 }

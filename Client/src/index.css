@@ -26,6 +26,9 @@
   @apply font-bold;
   font-size: 1rem;
 }
+.btn:disabled {
+  @apply bg-gray-disabled border-gray-darker text-gray-darker hover:text-gray-darker;
+}
 .btn a {
   @apply font-bold;
   font-size: 15px;
@@ -91,4 +94,24 @@ h2 {
     background-position: 100% 50%;
   }
 }
-
+input[type="radio"]{
+  @apply h-4 w-4 border-primary cursor-pointer inline-block;
+  padding: 2px;
+}
+fieldset label {
+  @apply cursor-pointer inline-block pl-2;
+}
+input[type="radio"]:checked:before{
+  @apply bg-secondary border-primary absolute rounded-sm;
+  height: 7px;
+  width: 7px;
+  content: "";
+}
+select {
+  @apply p-1 border-primary rounded border-2 focus:border-secondary pr-12;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: url(/public/svg/downicon.svg) no-repeat right white;
+  background-size: 30px 20px;
+}
