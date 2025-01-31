@@ -58,80 +58,97 @@ export default function InstallForm({contracts, name}: Props) {
     const updateContract = (contract: Package['contracts'][0]) => updateContracts([contract]);
 
     return (
-        <div className={"lg:w-1/2"}>
-            <h2>Settings</h2>
-            <div className={"grid xl:grid-cols-1 gap-3"}>
-                <div className={"card"}>
-                    <label className={"inline-block w-48"}>
-                        Application name:
-                    </label>
-                    <input value={prefix} onChange={e => setPrefix(e.target.value)}/>
-                </div>
-                {contracts
-                    .filter(contract => contract.Type === 'Parameter')
-                    .map(contract => (
-                        <div key={`${contract.Type} ${contract.name}`} className={"card"}>
-                            <ParameterForm
-                                contract={contract}
-                                updateContract={updateContract}
-                            />
-                        </div>
-                    ))
-                }
-                {contracts
-                    .filter(contract => contract.Type === 'HttpEndpoint')
-                    .map(contract => (
-                        <div key={`${contract.Type} ${contract.name}`} className={"card"}>
-                            <HttpEndpointForm
-                                contract={contract}
-                                contracts={contracts}
-                                updateContracts={updateContracts}
-                            />
-                        </div>
-                    ))
-                }
-                {contracts
-                    .filter(contract => contract.Type === 'PortEndpoint')
-                    .filter(contract => contracts.find(httpContract =>
-                        httpContract.Type === 'HttpEndpoint'
-                        && httpContract.port === contract.port
-                        && httpContract.containerName === contract.containerName
-                    ) === undefined)
-                    .map(contract => (
-                        <div key={`${contract.Type} ${contract.name}`} className={"card"}>
-                            <PortEndpointForm
-                                contract={contract}
-                                updateContract={updateContract}
-                            />
-                        </div>
-                    ))
-                }
-                {contracts
-                    .filter(contract => contract.Type === 'Volume')
-                    .map(contract => (
-                        <div key={`${contract.Type} ${contract.name}`} className={"card"}>
-                            <VolumeForm
-                                contract={contract}
-                                updateContract={updateContract}
-                            />
-                        </div>
-                    ))
-                }
-
-            </div>
-            <div className={"mt-4 mb-10"}>
-                <Button onClick={install} disabled={isPending} type={"primary"}>
-                    Install
-                </Button>
-            </div>
-            <Debug>
-                {contracts.map(contract => (
-                    <div key={`${contract.Type} ${contract.name}`}>
-                        <p>{contract.Type}</p>
-                        <pre>{JSON.stringify(contract, null, 2)}</pre>
+        <>
+            <div className={"flex lg:w-1/2 justify-between items-center my-6 border-primary border-b-2 px-1"}>
+                <div className={"flex gap-2 mb-2"}>
+                    <div className={"h-12 w-12 rounded flex-shrink-0"}>
+                        <img src={`/packages/${name}.png`} className={"rounded"} alt={name}/>
                     </div>
-                ))}
-            </Debug>
-        </div>
+                    <h1>
+                        {name}
+                    </h1>
+                </div>
+                <div>
+                    <Button onClick={install} disabled={isPending} type={"primary"}>
+                        Install
+                    </Button>
+                </div>
+            </div>
+            <div className={"lg:w-1/2"}>
+                <h2>Settings</h2>
+                <div className={"grid xl:grid-cols-1 gap-3"}>
+                    <div className={"card"}>
+                        <label className={"inline-block w-48"}>
+                            Application name:
+                        </label>
+                        <input value={prefix} onChange={e => setPrefix(e.target.value)}/>
+                    </div>
+                    {contracts
+                        .filter(contract => contract.Type === 'Parameter')
+                        .map(contract => (
+                            <div key={`${contract.Type} ${contract.name}`} className={"card"}>
+                                <ParameterForm
+                                    contract={contract}
+                                    updateContract={updateContract}
+                                />
+                            </div>
+                        ))
+                    }
+                    {contracts
+                        .filter(contract => contract.Type === 'HttpEndpoint')
+                        .map(contract => (
+                            <div key={`${contract.Type} ${contract.name}`} className={"card"}>
+                                <HttpEndpointForm
+                                    contract={contract}
+                                    contracts={contracts}
+                                    updateContracts={updateContracts}
+                                />
+                            </div>
+                        ))
+                    }
+                    {contracts
+                        .filter(contract => contract.Type === 'PortEndpoint')
+                        .filter(contract => contracts.find(httpContract =>
+                            httpContract.Type === 'HttpEndpoint'
+                            && httpContract.port === contract.port
+                            && httpContract.containerName === contract.containerName
+                        ) === undefined)
+                        .map(contract => (
+                            <div key={`${contract.Type} ${contract.name}`} className={"card"}>
+                                <PortEndpointForm
+                                    contract={contract}
+                                    updateContract={updateContract}
+                                />
+                            </div>
+                        ))
+                    }
+                    {contracts
+                        .filter(contract => contract.Type === 'Volume')
+                        .map(contract => (
+                            <div key={`${contract.Type} ${contract.name}`} className={"card"}>
+                                <VolumeForm
+                                    contract={contract}
+                                    updateContract={updateContract}
+                                />
+                            </div>
+                        ))
+                    }
+
+                </div>
+                <div className={"mt-4 mb-10"}>
+                    <Button onClick={install} disabled={isPending} type={"primary"}>
+                        Install
+                    </Button>
+                </div>
+                <Debug>
+                    {contracts.map(contract => (
+                        <div key={`${contract.Type} ${contract.name}`}>
+                            <p>{contract.Type}</p>
+                            <pre>{JSON.stringify(contract, null, 2)}</pre>
+                        </div>
+                    ))}
+                </Debug>
+            </div>
+        </>
     );
 }
