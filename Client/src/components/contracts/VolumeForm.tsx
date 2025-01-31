@@ -45,7 +45,7 @@ export default function VolumeForm({contract, updateContract}: Props) {
                                     updateVolumeName(contract.volumeName ?? '');
                                 }}
                             />
-                            <label for={"NewVolume" + volumeName}>
+                            <label htmlFor={"NewVolume" + volumeName}>
                                 New
                             </label>
                         </div>
@@ -59,7 +59,7 @@ export default function VolumeForm({contract, updateContract}: Props) {
                                     updateVolumeName(getVolumesResponse?.data[0].name ?? '');
                                 }}
                             />
-                            <label for={"OldVolume" + volumeName}>
+                            <label htmlFor={"OldVolume" + volumeName}>
                                 Existing
                             </label>
                         </div>

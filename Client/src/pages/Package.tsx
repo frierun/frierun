@@ -25,7 +25,7 @@ export default function Package() {
                     </h1>
                 </div>
                 <div>
-                    <Button disabled={isPending} type={"primary"} disabled>
+                    <Button disabled={isPending || true} type={"primary"}>
                         Install now
                     </Button>
                 </div>

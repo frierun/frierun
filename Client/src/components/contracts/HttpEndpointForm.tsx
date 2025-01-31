@@ -84,7 +84,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
                                 onChange={e => updateInstallerType(e.target.value)}
                             >
                             </input>
-                            <label for={"TraefikHttpEndpointProviderRadio"}>Traefik
+                            <label htmlFor={"TraefikHttpEndpointProviderRadio"}>Traefik
                             </label>
                         </div>
                         <div>
@@ -95,7 +95,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
                                     checked={installerType === "PortHttpEndpointProvider"}
                                     onChange={e => updateInstallerType(e.target.value)}
                                 />
-                            <label for={"PortHttpEndpointProviderRadio"}>
+                            <label htmlFor={"PortHttpEndpointProviderRadio"}>
                                 Port
                             </label>
                         </div>

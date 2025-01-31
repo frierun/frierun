@@ -109,9 +109,6 @@ input[type="radio"]:checked:before{
 }
 select {
   @apply p-1 border-primary rounded border-2 focus:border-secondary pr-12;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
   background: url(/public/svg/downicon.svg) no-repeat right white;
   background-size: 30px 20px;
 }
