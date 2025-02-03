@@ -1,16 +1,16 @@
 ﻿## About the Project
 
-Frierun is open source Infrastructure as Code (IaC) tool.
-It allows simple one-click installing and uninstalling, yet it is highly configurable via Dependency Injection.
+Frierun is an open source Infrastructure as Code (IaC) tool.
+It allows easy one-click installation and uninstallation, yet it is highly configurable via Dependency Injection.
 
-It introduces abstract package format for defining applications and their dependencies. 
+It introduces the abstract package format for defining applications and their dependencies. 
 These definitions can be written once and reused everywhere by everyone: 
 packages can be deployed on different clouds and infrastructures without any changes.
 
 ## Current state of the project
 
 This project is in the early stages of development. It is not recommended to use it in production. 
-It is more like proof of concept right now.
+It is more like a proof of concept right now.
 
 ## Installing
 
