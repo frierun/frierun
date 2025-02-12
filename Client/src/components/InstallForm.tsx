@@ -37,6 +37,7 @@ export default function InstallForm({contracts, name}: Props) {
                 Type: 'Package',
                 name,
                 prefix,
+                tags: [],
                 contracts: Object.entries(overrides).flatMap(([_, value]) => value),
             }
         })
