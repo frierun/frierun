@@ -13,7 +13,12 @@ export type PackageAllOf = {
   applicationUrl?: string | null;
   contracts: PackageAllOfContractsItem[];
   /** @nullable */
+  fullDescription?: string | null;
+  /** @nullable */
   prefix?: string | null;
+  /** @nullable */
+  shortDescription?: string | null;
+  tags: string[];
   /** @nullable */
   url?: string | null;
 };
