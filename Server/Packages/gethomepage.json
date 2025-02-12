@@ -1,0 +1,20 @@
+﻿{
+  "Name": "gethomepage",
+  "Url": "https://github.com/gethomepage/homepage/",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "ghcr.io/gethomepage/homepage:latest",
+      "RequireDocker": true
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 3000
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "config",
+      "Path": "/app/config"
+    }
+  ]
+}
