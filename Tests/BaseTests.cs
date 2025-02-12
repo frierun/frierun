@@ -37,6 +37,7 @@ public abstract class BaseTests
         ContainerBuilder.Populate(services);
 
         ContainerBuilder.RegisterModule(new AutofacModule());
+        ContainerBuilder.RegisterType<Faker>().SingleInstance();
 
         // find all factories
         foreach (var type in Assembly.GetExecutingAssembly().GetTypes())

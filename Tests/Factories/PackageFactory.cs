@@ -8,7 +8,7 @@ public sealed class PackageFactory : Faker<Package>
 {
     private readonly HashSet<string?> _uniqueNames = [];
     
-    public PackageFactory(PackageRegistry packageRegistry, Faker<Container> containerDefinitionFactory)
+    public PackageFactory(PackageRegistry packageRegistry)
     {
         StrictMode(true);
         CustomInstantiator(_ => new Package(""));
