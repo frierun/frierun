@@ -29,7 +29,6 @@ public abstract class BaseTests
         {
             return ContainerBuilder;
         }
-
         
         ContainerBuilder = new ContainerBuilder();
         

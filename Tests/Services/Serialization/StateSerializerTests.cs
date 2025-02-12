@@ -1,5 +1,6 @@
 using Frierun.Server.Data;
 using Frierun.Server.Services;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using File = System.IO.File;
 
 namespace Frierun.Tests.Services;
@@ -29,7 +30,7 @@ public class StateSerializerTests : BaseTests
         var loadedState = stateManager.Load();
 
         Assert.Single(loadedState.Resources);
-        //Assert.Equal(application.Id, loadedState.Resources[0].Id);
+        Assert.Equal(application.Id, loadedState.Resources[0].Id);
         Assert.NotSame(application, loadedState.Resources[0]);
     }    
 
@@ -44,7 +45,8 @@ public class StateSerializerTests : BaseTests
         
         var loadedState = stateManager.Load();
 
-        Assert.Same(application.Package, ((Application)loadedState.Resources[0]).Package); // Package should be deserialized by reference
+        // Package must be deserialized by reference
+        Assert.Same(application.Package, ((Application)loadedState.Resources[0]).Package); 
     }
 
     [Fact]
