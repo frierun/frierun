@@ -6,9 +6,13 @@ public record Package(
     string? Prefix = null,
     string? ApplicationUrl = null,
     string? ApplicationDescription = null,
+    string? ShortDescription = null,
+    string? FullDescription = null,
+    IReadOnlyList<string>? Tags = null,
     IEnumerable<Contract>? Contracts = null
 ) : Contract(Name), IHasStrings
 {
+    public IReadOnlyList<string> Tags { get; init; } = Tags ?? Array.Empty<string>();
     public IEnumerable<Contract> Contracts { get; init; } = Contracts ?? Array.Empty<Contract>();
 
     /// <inheritdoc />
