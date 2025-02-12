@@ -9,7 +9,7 @@ public class InstallService(
     ProviderRegistry providerRegistry,
     ILogger<InstallService> logger)
 {
-    public void Handle(ExecutionPlan executionPlan)
+    public void Handle(IExecutionPlan executionPlan)
     {
         if (!stateManager.StartTask("install"))
         {
@@ -18,8 +18,7 @@ public class InstallService(
 
         try
         {
-            executionPlan.Install();
-            var application = executionPlan.GetResource<Application>(executionPlan.RootContractId);
+            var application = executionPlan.Install();
             stateSerializer.Save(state);
             if (application.Package?.Name == "traefik")
             {

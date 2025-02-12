@@ -12,7 +12,6 @@ public class ExecutionService(
     /// </summary>
     public ExecutionPlan Create(Package package)
     {
-        var plan = new ExecutionPlan(package, state, providerRegistry);
-        return plan;
+        return new ExecutionPlan(package, state, providerRegistry);
     }
 }
