@@ -1,4 +1,4 @@
-﻿name: publish
+﻿name: Publish Docker image
 
 on:
   pull_request:
@@ -12,7 +12,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}    
 
 jobs:
-  publish-image:
+  publish:
     runs-on: ubuntu-latest
     permissions:
       contents: read
