@@ -18,8 +18,12 @@ jobs:
           dotnet-version: 9.x
           
       - name: Install dependencies
-        run: dotnet restore
+        run: dotnet restore --locked-mode
         
+      - name: Create node_modules
+        run: |
+          mkdir -p Client/node_modules
+          
       - name: Build
         run: dotnet build
         
