@@ -1,6 +1,6 @@
 ﻿{
-  "Name": "sonarr",
-  "Url": "https://docs.linuxserver.io/images/docker-sonarr/",
+  "Name": "syncthing",
+  "Url": "https://github.com/linuxserver/docker-syncthing",
   "Contracts": [
     {
       "Type": "File",
@@ -10,26 +10,41 @@
     },
     {
       "Type": "Container",
-      "ImageName": "lscr.io/linuxserver/sonarr:latest",
+      "ImageName": "lscr.io/linuxserver/syncthing:latest",
       "Env": {
         "PUID": "1000",
         "PGID": "1000",
         "TZ": "Etc/UTC"
-      }
+      }      
     },
     {
       "Type": "HttpEndpoint",
-      "Port": 8989
+      "Port": 8384
     },
     {
-      "Type": "Mount",
-      "VolumeName": "config",
-      "Path": "/config"
+      "Type": "PortEndpoint",
+      "Port": 22000,
+      "Protocol": "tcp"
+    },
+    {
+      "Type": "PortEndpoint",
+      "Port": 22000,
+      "Protocol": "udp"
+    },
+    {
+      "Type": "PortEndpoint",
+      "Port": 21027,
+      "Protocol": "udp"
     },
     {
       "Type": "Mount",
       "VolumeName": "data",
       "Path": "/data"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "config",
+      "Path": "/config"
     },
     {
       "Type": "Mount",

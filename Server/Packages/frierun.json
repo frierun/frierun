@@ -1,0 +1,20 @@
+﻿{
+  "Name": "frierun",
+  "Url": "https://github.com/frierun/frierun",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "ghcr.io/frierun/frierun:main",
+      "RequireDocker": true
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 8080
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "config",
+      "Path": "/App/Frierun"
+    }
+  ]
+}

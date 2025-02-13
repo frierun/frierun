@@ -1,0 +1,24 @@
+﻿{
+  "Name": "navidrome",
+  "Url": "https://www.navidrome.org/docs/installation/docker/",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "deluan/navidrome:latest"
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 4533
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "data",
+      "Path": "/data"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "music",
+      "Path": "/music"
+    }
+  ]
+}
