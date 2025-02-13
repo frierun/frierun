@@ -8,10 +8,21 @@ namespace Frierun.Tests.Services;
 public class StateSerializerTests : BaseTests
 {
     [Fact]
-    public void Load_EmptyFile_ReturnsEmptyState()
+    public void Load_NonExistingFile_ReturnsEmptyState()
     {
         var stateManager = Resolve<StateSerializer>();
         File.Delete(stateManager.Path);
+
+        var state = stateManager.Load();
+
+        Assert.Empty(state.Resources);
+    }
+
+    [Fact]
+    public void Load_Empty_ReturnsEmptyState()
+    {
+        var stateManager = Resolve<StateSerializer>();
+        File.WriteAllText(stateManager.Path, "");
 
         var state = stateManager.Load();
 
