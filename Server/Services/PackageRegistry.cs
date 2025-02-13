@@ -12,7 +12,7 @@ public class PackageRegistry(PackageSerializer packageSerializer)
     /// </summary>
     public void Load()
     {
-        foreach (var package in packageSerializer.Load())
+        foreach (var package in packageSerializer.Load().OrderBy(package => package.Name))
         {
             Packages.Add(package);
         }
