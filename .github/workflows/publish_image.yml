@@ -1,17 +1,18 @@
-﻿name: publish
+﻿name: Publish Docker image
 
 on:
+  pull_request:
+  workflow_dispatch:
   push:
     branches:
       - main
-  workflow_dispatch:
     
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}    
 
 jobs:
-  publish-image:
+  publish:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -40,11 +41,12 @@ jobs:
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
           context: .
-          push: true
+          push: ${{ github.ref == 'refs/heads/main' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           
       - name: Generate artifact attestation
+        if: github.ref == 'refs/heads/main'
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}

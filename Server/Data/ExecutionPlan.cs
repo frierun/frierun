@@ -3,7 +3,7 @@ using Frierun.Server.Services;
 
 namespace Frierun.Server.Data;
 
-public class ExecutionPlan
+public class ExecutionPlan : IExecutionPlan
 {
     private readonly ProviderRegistry _providerRegistry;
     private readonly Dictionary<ContractId, Contract> _contracts = new();
@@ -13,7 +13,7 @@ public class ExecutionPlan
     public ContractId<Package> RootContractId { get; }
     private Package Package => GetContract(RootContractId);
     public string Prefix => Package.Prefix ?? Package.Name;
-    
+
     public State State { get; }
 
     public IReadOnlyDictionary<ContractId, Contract> Contracts => _contracts;
@@ -41,7 +41,7 @@ public class ExecutionPlan
 
         Initialize();
     }
-    
+
     /// <summary>
     /// Gets installer for the contract.
     /// </summary>
@@ -56,7 +56,6 @@ public class ExecutionPlan
         }
 
         return installer;
-
     }
 
     /// <summary>
@@ -83,7 +82,7 @@ public class ExecutionPlan
 
         _contracts[contract.Id] = contract;
         queue.Enqueue(contract);
-        
+
         if (contract is IHasStrings hasStrings)
         {
             var matches = new Dictionary<string, MatchCollection>();
@@ -96,7 +95,7 @@ public class ExecutionPlan
                     {
                         matches[s] = matchCollection;
                     }
-                    
+
                     return s;
                 }
             );
@@ -107,7 +106,7 @@ public class ExecutionPlan
             }
         }
     }
-    
+
     /// <summary>
     /// Gets contract by id.
     /// </summary>
@@ -120,13 +119,13 @@ public class ExecutionPlan
 
         return _contracts[contractId];
     }
-    
+
     public T GetContract<T>(ContractId<T> contractId)
         where T : Contract
     {
         return (T)GetContract((ContractId)contractId);
     }
-    
+
     public void UpdateContract(Contract contract)
     {
         if (_resources.ContainsKey(contract.Id))
@@ -142,7 +141,7 @@ public class ExecutionPlan
     {
         return _contracts.Values.OfType<T>();
     }
-    
+
     /// <summary>
     /// Initializes all contracts in the execution plan.
     /// </summary>
@@ -161,7 +160,7 @@ public class ExecutionPlan
     /// <summary>
     /// Installs all contracts in the execution plan.
     /// </summary>
-    public void Install()
+    public Application Install()
     {
         _graph.RunDfs(
             contractId =>
@@ -172,15 +171,12 @@ public class ExecutionPlan
             }
         );
 
-        foreach (var resource in _resources.Values)
+        foreach (var resource in _resources.Values.OfType<Resource>())
         {
-            if (resource == null)
-            {
-                continue;
-            }
-            
             State.AddResource(resource);
         }
+        
+        return GetResource<Application>(RootContractId);
     }
 
     public Resource? GetResource(ContractId contractId)
@@ -202,6 +198,7 @@ public class ExecutionPlan
         {
             throw new Exception($"Contract {contractId} didn't install resource");
         }
+
         return (T)resource;
     }
 }

@@ -51,7 +51,7 @@ public abstract record Resource
         }
         init
         {
-            if (_dependsOnIds.Count > 0)
+            if (_dependsOnIds is { Count: > 0 })
             {
                 throw new InvalidOperationException("Only one of DependsOn and DependsOnIds can be set.");
             }
@@ -73,7 +73,7 @@ public abstract record Resource
         get => _dependsOnIds;
         init
         {
-            if (_dependsOn.Count > 0)
+            if (_dependsOn is { Count: > 0 })
             {
                 throw new InvalidOperationException("Only one of DependsOn and DependsOnIds can be set.");
             }

@@ -17,7 +17,7 @@ WORKDIR /App
 
 COPY . ./
 COPY --from=build_js /App/dist ./Client/dist
-RUN dotnet restore
+RUN dotnet restore --locked-mode
 RUN dotnet publish Server/Server.csproj -o out
 
 # Build runtime image

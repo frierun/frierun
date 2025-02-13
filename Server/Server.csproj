@@ -13,6 +13,7 @@
         <SpaProxyLaunchCommand Condition="$([MSBuild]::IsOsPlatform('Windows'))">cmd.exe /s /c $(SpaProxyLaunchCommand)</SpaProxyLaunchCommand>
         <SpaProxyLaunchCommand Condition="$([MSBuild]::IsOSUnixLike())">sh -c '$(SpaProxyLaunchCommand)'</SpaProxyLaunchCommand>
         <LangVersion>13</LangVersion>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
 
     <ItemGroup>

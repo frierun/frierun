@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Frierun.Server.Data;
 using Frierun.Server.Services;
+using ResolvedParameter = Autofac.Core.ResolvedParameter;
 
 namespace Frierun.Server;
 
@@ -32,8 +33,15 @@ public class AutofacModule : Module
         builder.RegisterType<UninstallService>().AsSelf().SingleInstance();
 
         // Services/Serialization
-        builder.RegisterType<StateSerializer>().SingleInstance();
+        builder.Register<string>(_ => Path.Combine(Storage.DirectoryName, "state.json"))
+            .Named<string>("stateFilePath")
+            .SingleInstance();
+        
+        builder.RegisterType<StateSerializer>()
+            .SingleInstance()
+            .WithParameter(ResolvedParameter.ForNamed<string>("stateFilePath"));
         builder.RegisterType<PackageSerializer>().SingleInstance();
+        
         
         builder.Register<State>(context => context.Resolve<StateSerializer>().Load()).AsSelf().SingleInstance();        
     }
