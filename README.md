@@ -38,3 +38,7 @@ Homepage with some packages installed:
 
 Installing a new package:
 ![Install](/Docs/Screenshot2.jpg?raw=true "Install")
+
+## Contributing
+
+All contributions are welcome! You can create an [issue](https://github.com/frierun/frierun/issues) or a [pull request](https://github.com/frierun/frierun/pulls).
