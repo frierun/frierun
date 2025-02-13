@@ -10,6 +10,7 @@
         <AssemblyName>Frierun.Tests</AssemblyName>
         <RootNamespace>Frierun.Tests</RootNamespace>
         <LangVersion>13</LangVersion>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
 
     <ItemGroup>
