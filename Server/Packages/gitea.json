@@ -1,6 +1,9 @@
 ﻿{
   "Name": "gitea",
   "Url": "https://docs.gitea.com/installation/install-with-docker",
+  "ShortDescription": "Git server",
+  "FullDescription": "Gitea is a painless self-hosted all-in-one software development service, including Git hosting, code review, team collaboration, package registry and CI/CD. It's open source under MIT license. It is designed to be lightweight, easy to use, and highly customizable, making it an ideal choice for both small teams and large organizations.",
+  "Tags": ["dev"],
   "Contracts": [
     {
       "Type": "Container",

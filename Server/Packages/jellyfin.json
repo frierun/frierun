@@ -1,6 +1,9 @@
 ﻿{
   "Name": "jellyfin",
   "Url": "https://jellyfin.org/docs/general/installation/container",
+  "ShortDescription": "Free software media system",
+  "FullDescription": "Jellyfin enables you to collect, manage, and stream your media. Run the Jellyfin server on your system and gain access to the leading free-software entertainment system, bells and whistles included.",
+  "Tags": ["storage"],
   "Contracts": [
     {
       "Type": "Container",

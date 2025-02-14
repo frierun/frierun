@@ -1,0 +1,27 @@
+﻿{
+  "Name": "freshrss",
+  "Url": "https://github.com/FreshRSS/FreshRSS/tree/edge/Docker",
+  "ShortDescription": "RSS and Atom feed aggregator",
+  "FullDescription": "FreshRSS is a self-hosted RSS and Atom feed aggregator.\nIt is lightweight, easy to work with, powerful, and customizable.",
+  "Tags": ["internet"],
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "freshrss/freshrss:1"
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 80
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "data",
+      "Path": "/var/www/FreshRSS/data"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "extensions",
+      "Path": "/var/www/FreshRSS/extensions"
+    }
+  ]
+}
