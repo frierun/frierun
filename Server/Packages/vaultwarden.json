@@ -1,6 +1,9 @@
 ﻿{
   "Name": "vaultwarden",
   "Url": "https://github.com/dani-garcia/vaultwarden/",
+  "ShortDescription": "Password manager",
+  "FullDescription": "Vaultwarden gives you power to create and manage unique passwords, so you can strengthen privacy and boost productivity online from any device or location.",
+  "Tags": ["security"],
   "Contracts": [
     {
       "Type": "Container",

@@ -14,7 +14,10 @@ export default function Package() {
     return (
         <Layout>
             <Link to={`/`}>← Back</Link>
-            <InstallForm contracts={data.data} name={name ?? ""}/>
+            <InstallForm 
+                contracts={data.data}
+                name={name ?? ""}
+            />
         </Layout>
     );
 } 

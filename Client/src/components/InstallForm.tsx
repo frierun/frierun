@@ -31,6 +31,8 @@ export default function InstallForm({contracts, name}: Props) {
     const [prefix, setPrefix] = useState(pkg?.prefix ?? '');
     const [overrides, setOverrides] = useState<Overrides>({});
 
+    const packageContract = contracts.find(contract => contract.Type === 'Package');
+    
     const install = () => {
         mutateAsync({
             id: name, data: {
@@ -60,19 +62,24 @@ export default function InstallForm({contracts, name}: Props) {
 
     return (
         <>
-            <div className={"flex lg:w-1/2 justify-between items-center my-6 border-primary border-b-2 px-1"}>
-                <div className={"flex gap-2 mb-2"}>
-                    <div className={"h-12 w-12 rounded flex-shrink-0"}>
-                        <img src={`/packages/${name}.png`} className={"rounded"} alt={name}/>
+            <div className={"lg:w-1/2 my-6 border-primary border-b-2 px-1"}>
+                <div className={"flex justify-between items-center px-1"}>
+                    <div className={"flex gap-2 mb-2"}>
+                        <div className={"h-12 w-12 rounded flex-shrink-0"}>
+                            <img src={`/packages/${name}.png`} className={"rounded"} alt={name}/>
+                        </div>
+                        <h1>
+                            {name}
+                        </h1>
                     </div>
-                    <h1>
-                        {name}
-                    </h1>
+                    <div>
+                        <Button onClick={install} disabled={isPending} type={"primary"}>
+                            Install
+                        </Button>
+                    </div>
                 </div>
-                <div>
-                    <Button onClick={install} disabled={isPending} type={"primary"}>
-                        Install
-                    </Button>
+                <div className={"my-3"}>
+                    {packageContract?.fullDescription ?? ''}
                 </div>
             </div>
             <div className={"lg:w-1/2"}>

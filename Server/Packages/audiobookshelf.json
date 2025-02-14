@@ -1,6 +1,9 @@
 ﻿{
   "Name": "audiobookshelf",
   "Url": "https://www.audiobookshelf.org/docs",
+  "ShortDescription": "Audiobook and podcast server",
+  "FullDescription": "Audiobookshelf is an open-source self-hosted media server for your audiobooks and podcasts.",
+  "Tags": ["storage"],
   "Contracts": [
     {
       "Type": "Container",

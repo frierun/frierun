@@ -1,6 +1,9 @@
 ﻿{
   "Name": "plex",
   "Url": "https://github.com/plexinc/pms-docker/",
+  "ShortDescription": "Personal media server",
+  "FullDescription": "Plex gives you one place to find and access all the media that matters to you. From personal media on your own server, to free and on-demand Movies & Shows or live TV, to streaming music, you can enjoy it all in one app, on any device.",
+  "Tags": ["storage"],
   "Contracts": [
     {
       "Type": "Container",

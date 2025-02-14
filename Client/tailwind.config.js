@@ -24,7 +24,7 @@ export default {
       },
       black: {
         DEFAULT: '#000',
-      }
+      },
     },
     screens: {
       'xs': '410px',

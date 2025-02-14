@@ -1,6 +1,9 @@
 ﻿{
   "Name": "traefik",
   "Url": "https://doc.traefik.io/traefik/getting-started/install-traefik/",
+  "ShortDescription": "Application proxy",
+  "FullDescription": "Traefik is an open-source Application Proxy that makes publishing your services a fun and easy experience. It receives requests on behalf of your system and identifies which components are responsible for handling them, and routes them securely.",
+  "Tags": ["network", "dev"],
   "Contracts": [
     {
       "Type": "Container",

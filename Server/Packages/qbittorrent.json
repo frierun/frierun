@@ -2,6 +2,9 @@
   "Name": "qbittorrent",
   "Url": "https://github.com/linuxserver/docker-qbittorrent/",
   "ApplicationDescription": "Login: admin\nPassword: adminadmin",
+  "ShortDescription": "BitTorrent client",
+  "FullDescription": "qBittorrent is a cross-platform free and open-source BitTorrent client.",
+  "Tags": ["network"],
   "Contracts": [
     {
       "Type": "File",

@@ -1,0 +1,28 @@
+﻿{
+  "Name": "mealie",
+  "Url": "https://github.com/FreshRSS/FreshRSS/tree/edge/Docker",
+  "ShortDescription": "Recipe management",
+  "FullDescription": "Mealie is an intuitive and easy to use recipe management app. It's designed to make your life easier by being the best recipes management experience on the web and providing you with an easy to use interface to manage your growing collection of recipes.",
+  "Tags": ["storage"],
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "ghcr.io/mealie-recipes/mealie:latest",
+      "Env": {
+        "ALLOW_SIGNUP": "false",
+        "PUID": "1000",
+        "PGID": "1000",
+        "TZ": "Etc/UTC"
+      }
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 9000
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "data",
+      "Path": "/app/data"
+    }
+  ]
+}

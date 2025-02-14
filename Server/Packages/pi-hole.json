@@ -1,6 +1,9 @@
 ﻿{
   "Name": "pi-hole",
   "Url": "https://github.com/pi-hole/docker-pi-hole",
+  "ShortDescription": "Adblock",
+  "FullDescription": "The Pi-hole is a DNS sinkhole that protects your devices from unwanted content",
+  "Tags": ["network"],
   "ApplicationUrl": "{{HttpEndpoint:80:Url}}admin",
   "ApplicationDescription": "Password: admin",
   "Contracts": [
