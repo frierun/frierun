@@ -15,14 +15,13 @@ import VolumeForm from "@/components/contracts/VolumeForm.tsx";
 type Props = {
     contracts: GetPackagesIdPlan200Item[];
     name: string;
-    fullDescription: string;
 }
 
 type Overrides = {
     [key: string]: Package['contracts']
 }
 
-export default function InstallForm({contracts, name, fullDescription}: Props) {
+export default function InstallForm({contracts, name}: Props) {
     const {waitForReady} = useContext(StateContext);
     const {mutateAsync, isPending} = usePostPackagesIdInstall();
     const queryClient = useQueryClient()
@@ -32,6 +31,8 @@ export default function InstallForm({contracts, name, fullDescription}: Props) {
     const [prefix, setPrefix] = useState(pkg?.prefix ?? '');
     const [overrides, setOverrides] = useState<Overrides>({});
 
+    const packageContract = contracts.find(contract => contract.Type === 'Package');
+    
     const install = () => {
         mutateAsync({
             id: name, data: {
@@ -78,7 +79,7 @@ export default function InstallForm({contracts, name, fullDescription}: Props) {
                     </div>
                 </div>
                 <div className={"my-3"}>
-                    {fullDescription ?? ''}
+                    {packageContract?.fullDescription ?? ''}
                 </div>
             </div>
             <div className={"lg:w-1/2"}>
