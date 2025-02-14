@@ -1,6 +1,9 @@
 ﻿{
   "Name": "immich",
   "Url": "https://immich.app/docs/install/docker-compose",
+  "ShortDescription": "Photo and video management",
+  "FullDescription": "Easily back up, organize, and manage your photos on your own server. Immich helps you\nbrowse, search and organize your photos and videos with ease, without sacrificing your privacy.",
+  "Tags": ["storage"],
   "Contracts": [
     {
       "Type": "Container",

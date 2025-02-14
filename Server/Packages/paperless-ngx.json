@@ -1,6 +1,9 @@
 ﻿{
   "Name": "paperless-ngx",
   "Url": "https://docs.paperless-ngx.com/setup/",
+  "ShortDescription": "Document management system",
+  "FullDescription": "Paperless-ngx is a community-supported open-source document management system that transforms your physical documents into a searchable online archive so you can keep, well, less paper.",
+  "Tags": ["storage"],
   "Contracts": [
     {
       "Type": "Container",

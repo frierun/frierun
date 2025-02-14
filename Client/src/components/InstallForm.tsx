@@ -15,13 +15,14 @@ import VolumeForm from "@/components/contracts/VolumeForm.tsx";
 type Props = {
     contracts: GetPackagesIdPlan200Item[];
     name: string;
+    fullDescription: string;
 }
 
 type Overrides = {
     [key: string]: Package['contracts']
 }
 
-export default function InstallForm({contracts, name}: Props) {
+export default function InstallForm({contracts, name, fullDescription}: Props) {
     const {waitForReady} = useContext(StateContext);
     const {mutateAsync, isPending} = usePostPackagesIdInstall();
     const queryClient = useQueryClient()
@@ -60,19 +61,24 @@ export default function InstallForm({contracts, name}: Props) {
 
     return (
         <>
-            <div className={"flex lg:w-1/2 justify-between items-center my-6 border-primary border-b-2 px-1"}>
-                <div className={"flex gap-2 mb-2"}>
-                    <div className={"h-12 w-12 rounded flex-shrink-0"}>
-                        <img src={`/packages/${name}.png`} className={"rounded"} alt={name}/>
+            <div className={"lg:w-1/2 my-6 border-primary border-b-2 px-1"}>
+                <div className={"flex justify-between items-center px-1"}>
+                    <div className={"flex gap-2 mb-2"}>
+                        <div className={"h-12 w-12 rounded flex-shrink-0"}>
+                            <img src={`/packages/${name}.png`} className={"rounded"} alt={name}/>
+                        </div>
+                        <h1>
+                            {name}
+                        </h1>
                     </div>
-                    <h1>
-                        {name}
-                    </h1>
+                    <div>
+                        <Button onClick={install} disabled={isPending} type={"primary"}>
+                            Install
+                        </Button>
+                    </div>
                 </div>
-                <div>
-                    <Button onClick={install} disabled={isPending} type={"primary"}>
-                        Install
-                    </Button>
+                <div className={"my-3"}>
+                    {fullDescription ?? ''}
                 </div>
             </div>
             <div className={"lg:w-1/2"}>

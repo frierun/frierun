@@ -1,6 +1,9 @@
 ﻿{
   "Name": "dashy",
   "Url": "https://dashy.to/docs/quick-start",
+  "ShortDescription": "Homepage for your Homelab",
+  "FullDescription": "Dashy helps you organize your self-hosted services by making them accessible from a single place.",
+  "Tags": ["dashboard"],
   "Contracts": [
     {
       "Type": "Container",
