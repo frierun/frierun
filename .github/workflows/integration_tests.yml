@@ -1,4 +1,4 @@
-﻿name: Tests
+﻿name: Unit tests
 on:
   pull_request:
   workflow_dispatch:
@@ -28,4 +28,4 @@ jobs:
         run: dotnet build
         
       - name: Test with the dotnet CLI
-        run: dotnet test
+        run: dotnet test Tests.Integration

@@ -9,11 +9,11 @@ public class InstallService(
     ProviderRegistry providerRegistry,
     ILogger<InstallService> logger)
 {
-    public void Handle(IExecutionPlan executionPlan)
+    public Application? Handle(IExecutionPlan executionPlan)
     {
         if (!stateManager.StartTask("install"))
         {
-            return;
+            return null;
         }
 
         try
@@ -24,10 +24,13 @@ public class InstallService(
             {
                 providerRegistry.UseTraefik(application);
             }
+
+            return application;
         }
         catch (Exception e)
         {
             logger.LogError(e, "Failed to install");
+            return null;
         }
         finally
         {

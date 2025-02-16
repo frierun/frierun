@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Reflection;
+using System.Text.Json;
 using Frierun.Server.Data;
 using File = System.IO.File;
 
@@ -13,11 +14,10 @@ public class PackageSerializer(ILogger<PackageSerializer> logger)
     /// </summary>
     public IEnumerable<Package> Load()
     {
-        var assemblyLocation = System.Reflection.Assembly.GetEntryAssembly()?.Location ??
-                               throw new InvalidOperationException();
-        var assemblyDirectory = System.IO.Path.GetDirectoryName(assemblyLocation) ??
-                                throw new InvalidOperationException();
-        var packagesDirectory = System.IO.Path.Combine(assemblyDirectory, "Packages");
+        
+        var assemblyLocation = Assembly.GetExecutingAssembly().Location;
+        var assemblyDirectory = Path.GetDirectoryName(assemblyLocation) ?? throw new InvalidOperationException();
+        var packagesDirectory = Path.Combine(assemblyDirectory, "Packages");
      
         if (!Directory.Exists(packagesDirectory))
         {

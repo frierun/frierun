@@ -24,6 +24,7 @@
         <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="9.0.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="7.1.0" />
         <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.1.0" />
+        <InternalsVisibleTo Include="Tests.Integration" />
     </ItemGroup>
 
     <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
