@@ -9,26 +9,28 @@ public class InstallService(
     ProviderRegistry providerRegistry,
     ILogger<InstallService> logger)
 {
-    public void Handle(ExecutionPlan executionPlan)
+    public Application? Handle(IExecutionPlan executionPlan)
     {
         if (!stateManager.StartTask("install"))
         {
-            return;
+            return null;
         }
 
         try
         {
-            executionPlan.Install();
-            var application = executionPlan.GetResource<Application>(executionPlan.RootContractId);
+            var application = executionPlan.Install();
             stateSerializer.Save(state);
             if (application.Package?.Name == "traefik")
             {
                 providerRegistry.UseTraefik(application);
             }
+
+            return application;
         }
         catch (Exception e)
         {
             logger.LogError(e, "Failed to install");
+            return null;
         }
         finally
         {

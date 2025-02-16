@@ -1,5 +1,6 @@
 using Frierun.Server.Data;
 using Frierun.Server.Services;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using File = System.IO.File;
 
 namespace Frierun.Tests.Services;
@@ -7,10 +8,21 @@ namespace Frierun.Tests.Services;
 public class StateSerializerTests : BaseTests
 {
     [Fact]
-    public void Load_EmptyFile_ReturnsEmptyState()
+    public void Load_NonExistingFile_ReturnsEmptyState()
     {
         var stateManager = Resolve<StateSerializer>();
         File.Delete(stateManager.Path);
+
+        var state = stateManager.Load();
+
+        Assert.Empty(state.Resources);
+    }
+
+    [Fact]
+    public void Load_Empty_ReturnsEmptyState()
+    {
+        var stateManager = Resolve<StateSerializer>();
+        File.WriteAllText(stateManager.Path, "");
 
         var state = stateManager.Load();
 
@@ -29,7 +41,7 @@ public class StateSerializerTests : BaseTests
         var loadedState = stateManager.Load();
 
         Assert.Single(loadedState.Resources);
-        //Assert.Equal(application.Id, loadedState.Resources[0].Id);
+        Assert.Equal(application.Id, loadedState.Resources[0].Id);
         Assert.NotSame(application, loadedState.Resources[0]);
     }    
 
@@ -44,7 +56,8 @@ public class StateSerializerTests : BaseTests
         
         var loadedState = stateManager.Load();
 
-        Assert.Same(application.Package, ((Application)loadedState.Resources[0]).Package); // Package should be deserialized by reference
+        // Package must be deserialized by reference
+        Assert.Same(application.Package, ((Application)loadedState.Resources[0]).Package); 
     }
 
     [Fact]

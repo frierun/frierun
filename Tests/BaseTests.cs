@@ -1,8 +1,10 @@
 ﻿using System.Reflection;
 using Autofac;
+using Autofac.Core;
 using Autofac.Extensions.DependencyInjection;
 using Bogus;
 using Frierun.Server;
+using Frierun.Server.Services;
 using Frierun.Tests.Factories;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -29,7 +31,6 @@ public abstract class BaseTests
         {
             return ContainerBuilder;
         }
-
         
         ContainerBuilder = new ContainerBuilder();
         
@@ -38,7 +39,14 @@ public abstract class BaseTests
         ContainerBuilder.Populate(services);
 
         ContainerBuilder.RegisterModule(new AutofacModule());
+        
+        ContainerBuilder.RegisterType<Faker>().SingleInstance();
+        ContainerBuilder.RegisterType<TemporaryFile>().SingleInstance();
 
+        ContainerBuilder.Register<string>(context => context.Resolve<TemporaryFile>())
+            .Named<string>("stateFilePath")
+            .SingleInstance();
+        
         // find all factories
         foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
         {

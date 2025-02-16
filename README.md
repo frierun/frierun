@@ -17,8 +17,10 @@ It is more like a proof of concept right now.
 Run it through the docker container
 
 ```bash
-docker run --name frierun \
+docker run \
+  --name frierun \
   -p 8080:8080 \
+  -v frierun-config:/App/Frierun \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/frierun/frierun:main
 ```
@@ -36,3 +38,7 @@ Homepage with some packages installed:
 
 Installing a new package:
 ![Install](/Docs/Screenshot2.jpg?raw=true "Install")
+
+## Contributing
+
+All contributions are welcome! You can create an [issue](https://github.com/frierun/frierun/issues) or a [pull request](https://github.com/frierun/frierun/pulls).
