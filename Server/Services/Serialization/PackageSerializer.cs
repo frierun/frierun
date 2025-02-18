@@ -14,7 +14,6 @@ public class PackageSerializer(ILogger<PackageSerializer> logger)
     /// </summary>
     public IEnumerable<Package> Load()
     {
-        
         var assemblyLocation = Assembly.GetExecutingAssembly().Location;
         var assemblyDirectory = Path.GetDirectoryName(assemblyLocation) ?? throw new InvalidOperationException();
         var packagesDirectory = Path.Combine(assemblyDirectory, "Packages");

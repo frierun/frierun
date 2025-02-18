@@ -49,7 +49,7 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
         var domain = contract.DomainName!;
         var subdomain = domain.Split('.')[0];
 
-        var containerContract = plan.GetContract<Container>(contract.ContainerId);
+        var containerContract = plan.GetContract(contract.ContainerId);
 
         var network = plan.GetResource<DockerNetwork>(containerContract.NetworkId);
 

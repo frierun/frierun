@@ -3,4 +3,7 @@
 public record Network(
     string Name,
     string? NetworkName = null
-) : Contract(Name);
+) : Contract(Name)
+{
+    public string? NetworkName { get; init; } = NetworkName ?? "";
+}

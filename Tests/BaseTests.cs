@@ -1,12 +1,15 @@
 ﻿using System.Reflection;
 using Autofac;
-using Autofac.Core;
 using Autofac.Extensions.DependencyInjection;
 using Bogus;
+using Docker.DotNet;
+using Docker.DotNet.Models;
 using Frierun.Server;
+using Frierun.Server.Data;
 using Frierun.Server.Services;
-using Frierun.Tests.Factories;
 using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
+using Substitute = NSubstitute.Substitute;
 
 namespace Frierun.Tests;
 
@@ -21,12 +24,17 @@ public abstract class BaseTests
     protected T Resolve<T>()
         where T : notnull
     {
-        Provider ??= GetServices().Build();
+        Provider ??= GetContainerBuilder().Build();
         return Provider.Resolve<T>();
     }
     
-    private ContainerBuilder GetServices()
+    protected ContainerBuilder GetContainerBuilder()
     {
+        if (Provider != null)
+        {
+            throw new Exception("Can't configure container after it was built.");
+        }
+        
         if (ContainerBuilder != null)
         {
             return ContainerBuilder;
@@ -63,6 +71,16 @@ public abstract class BaseTests
             }
         }
         
+        // mock docker client
+        var dockerClient = Mock<IDockerClient>();
+        dockerClient.Containers
+            .CreateContainerAsync(default)
+            .ReturnsForAnyArgs(Task.FromResult(new CreateContainerResponse()));
+        dockerClient.Containers
+            .StartContainerAsync(default, default)
+            .ReturnsForAnyArgs(Task.FromResult(true));
+        
+        
         return ContainerBuilder;
     }
     
@@ -73,5 +91,27 @@ public abstract class BaseTests
         where T : class
     {
         return Resolve<Faker<T>>().Clone();
+    }
+
+    /// <summary>
+    /// Creates mock service and registers it in the container.
+    /// </summary>
+    protected T Mock<T>()
+        where T : class
+    {
+        var mock = Substitute.For<T>();
+        GetContainerBuilder().RegisterInstance(mock).As<T>().SingleInstance();
+        return mock;
+    }
+
+    /// <summary>
+    /// Installs package and returns application.
+    /// </summary>
+    protected Application? InstallPackage(Package package)
+    {
+        var executionService = Resolve<ExecutionService>();
+        var installService = Resolve<InstallService>();
+        var plan = executionService.Create(package);
+        return installService.Handle(plan);
     }
 }

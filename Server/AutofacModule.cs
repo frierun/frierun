@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Docker.DotNet;
 using Frierun.Server.Data;
 using Frierun.Server.Services;
 using ResolvedParameter = Autofac.Core.ResolvedParameter;
@@ -31,6 +32,8 @@ public class AutofacModule : Module
         builder.RegisterType<ProviderRegistry>().AsSelf().SingleInstance();
         builder.RegisterType<StateManager>().AsSelf().SingleInstance();
         builder.RegisterType<UninstallService>().AsSelf().SingleInstance();
+        
+        builder.Register<IDockerClient>(_ => new DockerClientConfiguration().CreateClient()).SingleInstance();
 
         // Services/Serialization
         builder.Register<string>(_ => Path.Combine(Storage.DirectoryName, "state.json"))
