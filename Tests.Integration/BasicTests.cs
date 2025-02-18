@@ -66,7 +66,7 @@ public class BasicTests
         };
         var containers = await dockerClient.Containers.ListContainersAsync(parameters);
         Assert.NotNull(containers);
-        Assert.Equal(1, containers.Count);
+        Assert.Single(containers);
         Assert.Equal("running", containers[0].State);
         
         // uninstall frierun package

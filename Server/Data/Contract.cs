@@ -15,15 +15,11 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
 public abstract record Contract(
     string Name,
-    string? Installer = null,
-    IEnumerable<Resource>? DependsOn = null
+    string? Installer = null
 )
 {
     [JsonIgnore] public ContractId Id => new(GetType(), Name);
     
-    [JsonIgnore]
-    public IEnumerable<Resource> DependsOn { get; init; } = DependsOn ?? Array.Empty<Resource>();
-
     public virtual Contract With(Contract other)
     {
         throw new Exception("Not implemented");

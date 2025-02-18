@@ -15,6 +15,12 @@ public class MountProvider : IInstaller<Mount>
             new Volume(contract.VolumeName),
             contract
         );
+        
+        // add dependency to volume so it would be added to dependencies
+        yield return new ContractDependency(
+            new Volume(contract.VolumeName),
+            new Container(contract.ContainerName)
+        );
     }
 
     /// <inheritdoc />
@@ -46,7 +52,6 @@ public class MountProvider : IInstaller<Mount>
                         );
                     }
                 ),
-                DependsOn = containerContract.DependsOn.Append(volume)
             }
         );
         

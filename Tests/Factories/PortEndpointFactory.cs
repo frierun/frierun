@@ -15,6 +15,5 @@ public sealed class PortEndpointFactory : Faker<PortEndpoint>
         Ignore(p => p.Name);
         Ignore(p => p.DestinationPort);
         Ignore(p => p.Installer);
-        Ignore(p => p.DependsOn);
     }
 }

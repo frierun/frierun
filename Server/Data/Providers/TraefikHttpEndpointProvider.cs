@@ -86,7 +86,6 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
                             contract.Port.ToString();
                     }
                 ),
-                DependsOn = containerContract.DependsOn.Append(resource)
             }
         );
 

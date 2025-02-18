@@ -201,4 +201,12 @@ public class ExecutionPlan : IExecutionPlan
 
         return (T)resource;
     }
+    
+    /// <summary>
+    /// Gets all contracts that are prerequisites for the given contract.
+    /// </summary>
+    public IEnumerable<ContractId> GetPrerequisites(ContractId contractId)
+    {
+        return _graph.GetPrerequisites(contractId);
+    }
 }

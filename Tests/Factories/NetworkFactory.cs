@@ -12,6 +12,5 @@ public sealed class NetworkFactory: Faker<Network>
         RuleFor(p => p.Name, f => f.Lorem.Word());
         RuleFor(p => p.NetworkName, f => f.Lorem.Word());
         Ignore(p => p.Installer);
-        Ignore(p => p.DependsOn);
     }
 }

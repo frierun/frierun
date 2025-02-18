@@ -56,7 +56,6 @@ public class NetworkProvider(DockerService dockerService) : IInstaller<Network>,
                             };
                         }
                     ),
-                    DependsOn = containerContract.DependsOn.Append(network)
                 }
             );
         }

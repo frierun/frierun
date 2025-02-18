@@ -80,7 +80,7 @@ public class ContainerProvider(DockerService dockerService) : IInstaller<Contain
 
         return new DockerContainer(contract.ContainerName!)
         {
-            DependsOn = contract.DependsOn.ToList()
+            DependsOn = plan.GetPrerequisites(contract.Id).Select(plan.GetResource).OfType<Resource>().ToList()
         };
     }
 
