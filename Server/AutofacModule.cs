@@ -14,6 +14,7 @@ public class AutofacModule : Module
         // Providers
         builder.RegisterType<ApplicationProvider>().As<IInstaller>().SingleInstance();
         builder.RegisterType<ContainerProvider>().As<IInstaller>().SingleInstance();
+        builder.RegisterType<DependencyProvider>().As<IInstaller>().SingleInstance();
         builder.RegisterType<FileProvider>().As<IInstaller>().SingleInstance();
         builder.RegisterType<MountProvider>().As<IInstaller>().SingleInstance();
         builder.RegisterType<NetworkProvider>().As<IInstaller>().SingleInstance();

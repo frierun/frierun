@@ -13,7 +13,7 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
             new Container(contract.ContainerName)
         );
 
-        var container = plan.GetContract<Container>(contract.ContainerId);
+        var container = plan.GetContract(contract.ContainerId);
         yield return new ContractDependency(
             new Network(container.NetworkName),
             contract
