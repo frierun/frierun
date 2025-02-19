@@ -20,9 +20,15 @@
     },
     {
       "Type": "File",
+      "Name": "configuration.yaml",
       "VolumeName": "config",
       "Path": "configuration.yaml",
       "Text": "http:\n  use_x_forwarded_for: true\n  trusted_proxies:\n    - 172.16.0.0/12\n"
+    },
+    {
+      "Type": "Dependency",
+      "Preceding": "File:configuration.yaml",
+      "Following": "Container"
     }
   ]
 }

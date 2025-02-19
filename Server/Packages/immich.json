@@ -3,8 +3,42 @@
   "Url": "https://immich.app/docs/install/docker-compose",
   "ShortDescription": "Photo and video management",
   "FullDescription": "Easily back up, organize, and manage your photos on your own server. Immich helps you\nbrowse, search and organize your photos and videos with ease, without sacrificing your privacy.",
-  "Tags": ["storage"],
+  "Tags": [
+    "storage"
+  ],
   "Contracts": [
+    {
+      "Type": "Container",
+      "Name": "server",
+      "ImageName": "ghcr.io/immich-app/immich-server:release",
+      "Env": {
+        "DB_USERNAME": "postgres",
+        "DB_PASSWORD": "postgres",
+        "DB_DATABASE_NAME": "immich"
+      }
+    },
+    {
+      "Type": "HttpEndpoint",
+      "ContainerName": "server",
+      "Port": 2283
+    },
+    {
+      "Type": "Mount",
+      "ContainerName": "server",
+      "VolumeName": "upload",
+      "Path": "/usr/src/app/upload"
+    },
+    {
+      "Type": "Container",
+      "Name": "machine-learning",
+      "ImageName": "ghcr.io/immich-app/immich-machine-learning:release"
+    },
+    {
+      "Type": "Mount",
+      "ContainerName": "machine-learning",
+      "VolumeName": "model-cache",
+      "Path": "/cache"
+    },
     {
       "Type": "Container",
       "Name": "database",
@@ -43,35 +77,14 @@
       "ImageName": "docker.io/redis:6.2-alpine@sha256:2ba50e1ac3a0ea17b736ce9db2b0a9f6f8b85d4c27d5f5accc6a416d8f42c6d5"
     },
     {
-      "Type": "Container",
-      "Name": "server",
-      "ImageName": "ghcr.io/immich-app/immich-server:release",
-      "Env": {
-        "DB_USERNAME": "postgres",
-        "DB_PASSWORD": "postgres",
-        "DB_DATABASE_NAME": "immich"
-      }
+      "Type": "Dependency",
+      "Preceding": "Container:database",
+      "Following": "Container:server"
     },
     {
-      "Type": "HttpEndpoint",
-      "Port": 2283
-    },
-    {
-      "Type": "Mount",
-      "ContainerName": "server",
-      "VolumeName": "upload",
-      "Path": "/usr/src/app/upload"
-    },
-    {
-      "Type": "Container",
-      "Name": "machine-learning",
-      "ImageName": "ghcr.io/immich-app/immich-machine-learning:release"
-    },
-    {
-      "Type": "Mount",
-      "ContainerName": "machine-learning",
-      "VolumeName": "model-cache",
-      "Path": "/cache"
+      "Type": "Dependency",
+      "Preceding": "Container:redis",
+      "Following": "Container:server"
     }
   ]
 }

@@ -5,9 +5,13 @@ using File = System.IO.File;
 
 namespace Frierun.Server.Services;
 
-public class PackageSerializer(ILogger<PackageSerializer> logger)
+public class PackageSerializer(ILogger<PackageSerializer> logger, ContractRegistry contractRegistry)
 {
-    private readonly JsonSerializerOptions _serializerOptions = new();
+    private readonly JsonSerializerOptions _serializerOptions = new()
+    {
+        Converters = { new ContractIdConverter(contractRegistry) }
+
+    };
 
     /// <summary>
     /// Loads packages from the "Packages" directory.

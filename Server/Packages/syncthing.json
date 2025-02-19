@@ -6,12 +6,6 @@
   "Tags": ["storage"],
   "Contracts": [
     {
-      "Type": "File",
-      "VolumeName": "custom-init",
-      "Path": "chown.sh",
-      "Text": "#!/bin/bash\n\necho \"**** chowning /data ****\"\nchown $PUID:$PGID /data\n"
-    },
-    {
       "Type": "Container",
       "ImageName": "lscr.io/linuxserver/syncthing:latest",
       "Env": {
@@ -54,6 +48,18 @@
       "VolumeName": "custom-init",
       "Path": "/custom-cont-init.d",
       "ReadOnly": true
+    },
+    {
+      "Type": "File",
+      "Name": "chown data",
+      "VolumeName": "custom-init",
+      "Path": "chown.sh",
+      "Text": "#!/bin/bash\n\necho \"**** chowning /data ****\"\nchown $PUID:$PGID /data\n"
+    },
+    {
+      "Type": "Dependency",
+      "Preceding": "File:chown data",
+      "Following": "Container"
     }
   ]
 }

@@ -11,7 +11,7 @@ public class ExecutionPlan : IExecutionPlan
     private readonly DirectedAcyclicGraph<ContractId> _graph = new();
 
     public ContractId<Package> RootContractId { get; }
-    private Package Package => GetContract(RootContractId);
+    private Package Package => (Package)_contracts[RootContractId];
     public string Prefix => Package.Prefix ?? Package.Name;
 
     public State State { get; }

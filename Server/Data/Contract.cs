@@ -4,6 +4,7 @@ namespace Frierun.Server.Data;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
 [JsonDerivedType(typeof(Container), nameof(Container))]
+[JsonDerivedType(typeof(Dependency), nameof(Dependency))]
 [JsonDerivedType(typeof(File), nameof(File))]
 [JsonDerivedType(typeof(HttpEndpoint), nameof(HttpEndpoint))]
 [JsonDerivedType(typeof(Mount), nameof(Mount))]

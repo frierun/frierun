@@ -1,4 +1,5 @@
 ﻿using Frierun.Server.Data;
+using File = Frierun.Server.Data.File;
 
 namespace Frierun.Server.Services;
 
@@ -25,6 +26,7 @@ public class ContractRegistry
         return typeName switch
         {
             nameof(Container) => new Container(name),
+            nameof(File) => new File(name),
             nameof(HttpEndpoint) => new HttpEndpoint(name),
             nameof(Package) => new Package(name),
             nameof(Parameter) => new Parameter(name),

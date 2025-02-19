@@ -1,6 +1,7 @@
 ﻿using Bogus;
 using Frierun.Server.Data;
 using Frierun.Server.Services;
+using File = Frierun.Server.Data.File;
 
 namespace Frierun.Tests.Services;
 
@@ -29,6 +30,7 @@ public class ContractRegistryTests : BaseTests
     
     [Theory]
     [InlineData(typeof(Container))]
+    [InlineData(typeof(File))]
     [InlineData(typeof(HttpEndpoint))]
     [InlineData(typeof(Package))]
     [InlineData(typeof(Parameter))]
