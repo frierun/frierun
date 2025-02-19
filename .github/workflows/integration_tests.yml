@@ -28,4 +28,4 @@ jobs:
         run: dotnet build
         
       - name: Test with the dotnet CLI
-        run: dotnet test Tests.Integration -- xUnit.StopOnFail=true
+        run: dotnet test Tests.Integration --logger "console;verbosity=normal" -- xUnit.StopOnFail=true
