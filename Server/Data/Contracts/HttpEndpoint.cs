@@ -6,7 +6,8 @@ public record HttpEndpoint(
     string? Name = null,
     int Port = 0,
     string? ContainerName = null,
-    string? DomainName = null) : Contract(Name ?? $"{Port}{(ContainerName != null ? $" at {ContainerName}" : "")}")
+    string? DomainName = null
+) : Contract(Name ?? $"{Port}{(ContainerName != null ? $" at {ContainerName}" : "")}")
 {
     public string ContainerName { get; init; } = ContainerName ?? "";
     [JsonIgnore] public ContractId<Container> ContainerId => new(ContainerName);

@@ -7,12 +7,6 @@
   "Tags": ["network"],
   "Contracts": [
     {
-      "Type": "File",
-      "VolumeName": "config",
-      "Path": "qBittorrent/qBittorrent.conf",
-      "Text": "[Preferences]\nWebUI\\Password_PBKDF2=\"@ByteArray(OoaYkBQyA7MDk/P0abXiIA==:Yfx3IsX+S7SU8YGfd9/RjXmicHE0p1WwyWC9lolagkGzZu3G7ucrTIxdzgHh8KMswVJeCtzMj60clUg9l/bwJQ==)\""
-    },
-    {
       "Type": "Container",
       "ImageName": "lscr.io/linuxserver/qbittorrent:latest",
       "Env": {
@@ -35,6 +29,18 @@
       "Type": "Mount",
       "VolumeName": "downloads",
       "Path": "/downloads"
+    },
+    {
+      "Type": "File",
+      "Name": "qBittorrent configuration",
+      "VolumeName": "config",
+      "Path": "qBittorrent/qBittorrent.conf",
+      "Text": "[Preferences]\nWebUI\\Password_PBKDF2=\"@ByteArray(OoaYkBQyA7MDk/P0abXiIA==:Yfx3IsX+S7SU8YGfd9/RjXmicHE0p1WwyWC9lolagkGzZu3G7ucrTIxdzgHh8KMswVJeCtzMj60clUg9l/bwJQ==)\""
+    },
+    {
+      "Type": "Dependency",
+      "Preceding": "File:qBittorrent configuration",
+      "Following": "Container"
     }
   ]
 }

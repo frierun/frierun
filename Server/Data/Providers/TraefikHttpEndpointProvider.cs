@@ -13,7 +13,7 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
             new Container(contract.ContainerName)
         );
 
-        var container = plan.GetContract<Container>(contract.ContainerId);
+        var container = plan.GetContract(contract.ContainerId);
         yield return new ContractDependency(
             new Network(container.NetworkName),
             contract
@@ -49,7 +49,7 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
         var domain = contract.DomainName!;
         var subdomain = domain.Split('.')[0];
 
-        var containerContract = plan.GetContract<Container>(contract.ContainerId);
+        var containerContract = plan.GetContract(contract.ContainerId);
 
         var network = plan.GetResource<DockerNetwork>(containerContract.NetworkId);
 
@@ -86,7 +86,6 @@ public class TraefikHttpEndpointProvider(DockerService dockerService, Applicatio
                             contract.Port.ToString();
                     }
                 ),
-                DependsOn = containerContract.DependsOn.Append(resource)
             }
         );
 

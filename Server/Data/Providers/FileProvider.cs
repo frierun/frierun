@@ -17,6 +17,11 @@ public class FileProvider(DockerService dockerService) : IInstaller<File>
     public Resource? Install(File contract, ExecutionPlan plan)
     {
         var volume = plan.GetResource<DockerVolume>(contract.VolumeId);
+
+        if (contract.Path == null)
+        {
+            throw new Exception("File path is not set.");
+        }
         
         dockerService.PutFile(volume.Name, contract.Path, contract.Text).Wait();
         return null;

@@ -4,6 +4,7 @@ namespace Frierun.Server.Data;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
 [JsonDerivedType(typeof(Container), nameof(Container))]
+[JsonDerivedType(typeof(Dependency), nameof(Dependency))]
 [JsonDerivedType(typeof(File), nameof(File))]
 [JsonDerivedType(typeof(HttpEndpoint), nameof(HttpEndpoint))]
 [JsonDerivedType(typeof(Mount), nameof(Mount))]
@@ -15,15 +16,11 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
 public abstract record Contract(
     string Name,
-    string? Installer = null,
-    IEnumerable<Resource>? DependsOn = null
+    string? Installer = null
 )
 {
     [JsonIgnore] public ContractId Id => new(GetType(), Name);
     
-    [JsonIgnore]
-    public IEnumerable<Resource> DependsOn { get; init; } = DependsOn ?? Array.Empty<Resource>();
-
     public virtual Contract With(Contract other)
     {
         throw new Exception("Not implemented");

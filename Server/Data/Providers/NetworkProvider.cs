@@ -33,7 +33,7 @@ public class NetworkProvider(DockerService dockerService) : IInstaller<Network>,
 
         dockerService.CreateNetwork(networkName).Wait();
 
-        var containerGroup = new DockerNetwork(networkName);
+        var network = new DockerNetwork(networkName);
         foreach (var containerContract in plan.GetResourcesOfType<Container>())
         {
             plan.UpdateContract(
@@ -48,7 +48,7 @@ public class NetworkProvider(DockerService dockerService) : IInstaller<Network>,
                             parameters.NetworkingConfig.EndpointsConfig = new Dictionary<string, EndpointSettings>
                             {
                                 {
-                                    networkName, new EndpointSettings()
+                                    networkName, new EndpointSettings
                                     {
                                         Aliases = new List<string> { containerContract.Name }
                                     }
@@ -56,12 +56,11 @@ public class NetworkProvider(DockerService dockerService) : IInstaller<Network>,
                             };
                         }
                     ),
-                    DependsOn = containerContract.DependsOn.Append(containerGroup)
                 }
             );
         }
 
-        return containerGroup;
+        return network;
     }
 
     /// <inheritdoc />

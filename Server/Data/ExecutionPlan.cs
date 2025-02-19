@@ -11,7 +11,7 @@ public class ExecutionPlan : IExecutionPlan
     private readonly DirectedAcyclicGraph<ContractId> _graph = new();
 
     public ContractId<Package> RootContractId { get; }
-    private Package Package => GetContract(RootContractId);
+    private Package Package => (Package)_contracts[RootContractId];
     public string Prefix => Package.Prefix ?? Package.Name;
 
     public State State { get; }
@@ -200,5 +200,13 @@ public class ExecutionPlan : IExecutionPlan
         }
 
         return (T)resource;
+    }
+    
+    /// <summary>
+    /// Gets all contracts that are prerequisites for the given contract.
+    /// </summary>
+    public IEnumerable<ContractId> GetPrerequisites(ContractId contractId)
+    {
+        return _graph.GetPrerequisites(contractId);
     }
 }

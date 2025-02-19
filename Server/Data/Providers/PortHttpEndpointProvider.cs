@@ -30,13 +30,6 @@ public class PortHttpEndpointProvider : IInstaller<HttpEndpoint>, IUninstaller<G
         
         var endpoint = new GenericHttpEndpoint(url);
 
-        plan.UpdateContract(
-            containerContract with
-            {
-                DependsOn = containerContract.DependsOn.Append(endpoint)
-            }
-        );
-
         return endpoint;
     }
 

@@ -6,10 +6,8 @@ using Docker.DotNet.Models;
 
 namespace Frierun.Server.Services;
 
-public class DockerService(ILogger<DockerService> logger)
+public class DockerService(ILogger<DockerService> logger, IDockerClient client)
 {
-    private readonly DockerClient _client = new DockerClientConfiguration().CreateClient();
-
     /// <summary>
     /// Starts container with specified name, image and port
     /// </summary>
@@ -19,7 +17,7 @@ public class DockerService(ILogger<DockerService> logger)
 
         logger.LogInformation("Loading image {ImageName}", dockerParameters.Image);
 
-        await _client.Images.CreateImageAsync(
+        await client.Images.CreateImageAsync(
             new ImagesCreateParameters
             {
                 FromImage = dockerParameters.Image
@@ -28,11 +26,11 @@ public class DockerService(ILogger<DockerService> logger)
             new Progress<JSONMessage>()
         );
 
-        var result = await _client.Containers.CreateContainerAsync(dockerParameters);
+        var result = await client.Containers.CreateContainerAsync(dockerParameters);
 
         logger.LogInformation("Starting container {ContainerId}", result.ID);
 
-        var started = await _client.Containers.StartContainerAsync(
+        var started = await client.Containers.StartContainerAsync(
             result.ID,
             new ContainerStartParameters()
         );
@@ -56,7 +54,7 @@ public class DockerService(ILogger<DockerService> logger)
         var imageName = "alpine:latest";
         logger.LogInformation("Loading image {ImageName}", imageName);
 
-        await _client.Images.CreateImageAsync(
+        await client.Images.CreateImageAsync(
             new ImagesCreateParameters
             {
                 FromImage = imageName
@@ -66,7 +64,7 @@ public class DockerService(ILogger<DockerService> logger)
         );
         
         logger.LogInformation("Creating temporary container");
-        var result = await _client.Containers.CreateContainerAsync(
+        var result = await client.Containers.CreateContainerAsync(
             new CreateContainerParameters()
             {
                 Image = imageName,
@@ -89,7 +87,7 @@ public class DockerService(ILogger<DockerService> logger)
 
         logger.LogInformation("Starting container {ContainerId}", containerId);
 
-        var started = await _client.Containers.StartContainerAsync(
+        var started = await client.Containers.StartContainerAsync(
             containerId,
             new ContainerStartParameters()
         );
@@ -112,7 +110,7 @@ public class DockerService(ILogger<DockerService> logger)
         }
 
         logger.LogInformation("Putting file {path} to container {ContainerId}", path, containerId);
-        await _client.Containers.ExtractArchiveToContainerAsync(
+        await client.Containers.ExtractArchiveToContainerAsync(
             result.ID,
             new ContainerPathStatParameters
             {
@@ -123,7 +121,7 @@ public class DockerService(ILogger<DockerService> logger)
 
         logger.LogInformation("Deleting temporary container {ContainerId}", containerId);
 
-        await _client.Containers.RemoveContainerAsync(
+        await client.Containers.RemoveContainerAsync(
             containerId,
             new ContainerRemoveParameters { RemoveVolumes = false }
         );
@@ -138,7 +136,7 @@ public class DockerService(ILogger<DockerService> logger)
     {
         logger.LogInformation("Stopping container {ContainerName}", containerName);
 
-        var response = await _client.Containers.ListContainersAsync(
+        var response = await client.Containers.ListContainersAsync(
             new ContainersListParameters
             {
                 All = true
@@ -155,14 +153,14 @@ public class DockerService(ILogger<DockerService> logger)
         if (container.State == "running")
         {
             logger.LogInformation("Stopping container {ContainerName}", containerName);
-            if (!await _client.Containers.StopContainerAsync(container.ID, new ContainerStopParameters()))
+            if (!await client.Containers.StopContainerAsync(container.ID, new ContainerStopParameters()))
             {
                 logger.LogError("Failed to stop container {ContainerName}", containerName);
                 return false;
             }
         }
 
-        await _client.Containers.RemoveContainerAsync(
+        await client.Containers.RemoveContainerAsync(
             container.ID,
             new ContainerRemoveParameters { RemoveVolumes = true }
         );
@@ -177,7 +175,7 @@ public class DockerService(ILogger<DockerService> logger)
     {
         try
         {
-            await _client.Volumes.CreateAsync(
+            await client.Volumes.CreateAsync(
                 new VolumesCreateParameters()
                 {
                     Name = volumeName
@@ -201,7 +199,7 @@ public class DockerService(ILogger<DockerService> logger)
     {
         try
         {
-            await _client.Volumes.RemoveAsync(volumeName, true);
+            await client.Volumes.RemoveAsync(volumeName, true);
         }
         catch (Exception e)
         {
@@ -220,7 +218,7 @@ public class DockerService(ILogger<DockerService> logger)
         logger.LogInformation("Creating network {NetworkName}", networkName);
         try
         {
-            await _client.Networks.CreateNetworkAsync(
+            await client.Networks.CreateNetworkAsync(
                 new NetworksCreateParameters
                 {
                     Name = networkName
@@ -244,7 +242,7 @@ public class DockerService(ILogger<DockerService> logger)
         logger.LogInformation("Removing network {NetworkName}", networkName);
         try
         {
-            await _client.Networks.DeleteNetworkAsync(networkName);
+            await client.Networks.DeleteNetworkAsync(networkName);
         }
         catch (Exception e)
         {
@@ -265,7 +263,7 @@ public class DockerService(ILogger<DockerService> logger)
         );
         try
         {
-            await _client.Networks.ConnectNetworkAsync(
+            await client.Networks.ConnectNetworkAsync(
                 networkName, new NetworkConnectParameters
                 {
                     Container = containerName
@@ -293,7 +291,7 @@ public class DockerService(ILogger<DockerService> logger)
         );
         try
         {
-            await _client.Networks.DisconnectNetworkAsync(
+            await client.Networks.DisconnectNetworkAsync(
                 networkName, new NetworkDisconnectParameters()
                 {
                     Container = containerName

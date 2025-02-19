@@ -68,7 +68,6 @@ public class PortEndpointProvider : IInstaller<PortEndpoint>, IUninstaller<Docke
                             };
                     }
                 ),
-                DependsOn = containerContract.DependsOn.Append(endpoint)
             }
         );
 
