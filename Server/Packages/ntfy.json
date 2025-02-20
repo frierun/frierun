@@ -1,0 +1,17 @@
+﻿{
+  "Name": "ntfy",
+  "Url": "https://docs.ntfy.sh/install/#docker",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "binwiederhier/ntfy:latest",
+      "Command": [
+        "serve"
+      ]
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 80
+    }
+  ]
+}

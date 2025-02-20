@@ -1,0 +1,19 @@
+﻿{
+  "Name": "uptime-kuma",
+  "Url": "https://github.com/louislam/uptime-kuma/",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "louislam/uptime-kuma:1"
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 3001
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "data",
+      "Path": "/app/data"
+    }
+  ]
+}

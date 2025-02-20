@@ -1,0 +1,29 @@
+﻿{
+  "Name": "forgejo",
+  "Url": "https://forgejo.org/docs/latest/admin/installation-docker/",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "codeberg.org/forgejo/forgejo:10",
+      "Env": {
+        "USER_UID": "1000",
+        "USER_GID": "1000"
+      }
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 3000
+    },
+    {
+      "Type": "PortEndpoint",
+      "Port": 22,
+      "DestinationPort": 2222,
+      "Protocol": "tcp"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "data",
+      "Path": "/data"
+    }
+  ]
+}

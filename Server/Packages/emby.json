@@ -1,0 +1,24 @@
+﻿{
+  "Name": "emby",
+  "Url": "https://hub.docker.com/r/emby/embyserver",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "emby/embyserver:latest"
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 8096
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "media",
+      "Path": "/mnt/media"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "config",
+      "Path": "/config"
+    }
+  ]
+}
