@@ -1,0 +1,28 @@
+﻿{
+  "Name": "photoprism",
+  "Url": "https://docs.photoprism.app/getting-started/docker/",
+  "ApplicationDescription": "Login: admin\nPassword: admin",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "photoprism/photoprism:latest",
+      "Env": {
+        "PHOTOPRISM_UPLOAD_NSFW": "true",
+        "PHOTOPRISM_ADMIN_PASSWORD": "admin"
+      }
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 2342
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "originals",
+      "Path": "/photoprism/originals"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "storage",
+      "Path": "/photoprism/storage"
+    }]
+}

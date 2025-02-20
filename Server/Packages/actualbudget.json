@@ -1,0 +1,19 @@
+﻿{
+  "Name": "actualbudget",
+  "Url": "https://actualbudget.org/docs/install/docker/",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "docker.io/actualbudget/actual-server:latest"
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 5006
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "data",
+      "Path": "/data"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+﻿{
+  "Name": "jellyseerr",
+  "Url": "https://docs.jellyseerr.dev/getting-started/docker?docker-methods=docker-cli",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "fallenbagel/jellyseerr:latest",
+      "Env": {
+        "LOG_LEVEL": "debug",
+        "TZ": "Etc/UTC"
+      }
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 5055
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "config",
+      "Path": "/app/config"
+    }
+  ]
+}
