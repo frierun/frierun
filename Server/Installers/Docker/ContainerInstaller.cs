@@ -1,9 +1,11 @@
 ﻿using Docker.DotNet.Models;
+using Frierun.Server.Data;
 using Frierun.Server.Services;
+using Network = Frierun.Server.Data.Network;
 
-namespace Frierun.Server.Data;
+namespace Frierun.Server.Installers.Docker;
 
-public class ContainerProvider(DockerService dockerService) : IInstaller<Container>, IUninstaller<DockerContainer>
+public class ContainerInstaller(DockerService dockerService) : IInstaller<Container>, IUninstaller<DockerContainer>
 {
     /// <inheritdoc />
     public IEnumerable<ContractDependency> Dependencies(Container contract, ExecutionPlan plan)
@@ -45,7 +47,7 @@ public class ContainerProvider(DockerService dockerService) : IInstaller<Contain
             Image = contract.ImageName,
             HostConfig = new HostConfig
             {
-                Mounts = new List<Docker.DotNet.Models.Mount>(),
+                Mounts = new List<global::Docker.DotNet.Models.Mount>(),
                 PortBindings = new Dictionary<string, IList<PortBinding>>()
             },
             Labels = new Dictionary<string, string>(),
@@ -58,7 +60,7 @@ public class ContainerProvider(DockerService dockerService) : IInstaller<Contain
 
         if (contract.RequireDocker)
         {
-            dockerParameters.HostConfig.Mounts.Add(new Docker.DotNet.Models.Mount
+            dockerParameters.HostConfig.Mounts.Add(new global::Docker.DotNet.Models.Mount
             {
                 Source = "/var/run/docker.sock",
                 Target = "/var/run/docker.sock",

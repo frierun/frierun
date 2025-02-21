@@ -1,18 +1,12 @@
 ﻿using Frierun.Server.Data;
-using Frierun.Server.Services;
 
-namespace Frierun.Tests.Data;
+namespace Frierun.Tests.Installers.Base;
 
-public class TraefikHttpEndpointProvider : BaseTests
+public class PortHttpEndpointInstallerTests : BaseTests
 {
     [Fact]
-    public void Install_ContainerWithHttpEndpoint_ContainerDependsOnTraefik()
+    public void Install_ContainerWithHttpEndpoint_ContainerDependsOnPortEndpoint()
     {
-        Resolve<PackageRegistry>().Load();
-        var traefikPackage = Resolve<PackageRegistry>().Find("traefik");
-        Assert.NotNull(traefikPackage);
-        var traefikApplication = InstallPackage(traefikPackage);
-        Assert.NotNull(traefikApplication);
         var container = GetFactory<Container>().Generate();
         var package = GetFactory<Package>().Generate() with
         {
@@ -27,6 +21,6 @@ public class TraefikHttpEndpointProvider : BaseTests
 
         Assert.NotNull(application);
         var dockerContainer = application.DependsOn.OfType<DockerContainer>().First();
-        Assert.Contains(dockerContainer.DependsOn, r => r is TraefikHttpEndpoint);
+        Assert.Contains(dockerContainer.DependsOn, r => r is DockerPortEndpoint);
     }
 }

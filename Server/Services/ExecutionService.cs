@@ -3,7 +3,7 @@
 namespace Frierun.Server.Services;
 
 public class ExecutionService(
-    ProviderRegistry providerRegistry,
+    InstallerRegistry installerRegistry,
     State state
 )
 {
@@ -12,6 +12,6 @@ public class ExecutionService(
     /// </summary>
     public ExecutionPlan Create(Package package)
     {
-        return new ExecutionPlan(package, state, providerRegistry);
+        return new ExecutionPlan(package, state, installerRegistry);
     }
 }

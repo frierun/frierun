@@ -6,6 +6,7 @@
  */
 import type { ContractId } from "./contractId";
 
-export type SubstituteAllOf = {
-  originalId: ContractId;
+export type DependencyAllOf = {
+  preceding: ContractId;
+  following: ContractId;
 };

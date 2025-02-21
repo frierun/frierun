@@ -1,8 +1,9 @@
-﻿using Frierun.Server.Services;
+﻿using Frierun.Server.Data;
+using Frierun.Server.Services;
 
-namespace Frierun.Server.Data;
+namespace Frierun.Server.Installers.Traefik;
 
-public class TraefikHttpEndpointProvider(DockerService dockerService, Application application)
+public class TraefikHttpEndpointInstaller(DockerService dockerService, Application application)
     : IInstaller<HttpEndpoint>, IUninstaller<TraefikHttpEndpoint>
 {
     /// <inheritdoc />

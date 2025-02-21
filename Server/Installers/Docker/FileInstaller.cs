@@ -1,8 +1,10 @@
-﻿using Frierun.Server.Services;
+﻿using Frierun.Server.Data;
+using Frierun.Server.Services;
+using File = Frierun.Server.Data.File;
 
-namespace Frierun.Server.Data;
+namespace Frierun.Server.Installers.Docker;
 
-public class FileProvider(DockerService dockerService) : IInstaller<File>
+public class FileInstaller(DockerService dockerService) : IInstaller<File>
 {
     /// <inheritdoc />
     public IEnumerable<ContractDependency> Dependencies(File contract, ExecutionPlan plan)

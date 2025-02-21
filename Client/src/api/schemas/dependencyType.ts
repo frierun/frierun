@@ -5,10 +5,10 @@
  * OpenAPI spec version: 1.0
  */
 
-export type PortEndpointType =
-  (typeof PortEndpointType)[keyof typeof PortEndpointType];
+export type DependencyType =
+  (typeof DependencyType)[keyof typeof DependencyType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PortEndpointType = {
-  PortEndpoint: "PortEndpoint",
+export const DependencyType = {
+  Dependency: "Dependency",
 } as const;

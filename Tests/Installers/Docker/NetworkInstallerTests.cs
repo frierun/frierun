@@ -1,8 +1,8 @@
 ﻿using Frierun.Server.Data;
 
-namespace Frierun.Tests.Data;
+namespace Frierun.Tests.Installers.Docker;
 
-public class NetworkProviderTests : BaseTests
+public class NetworkInstallerTests : BaseTests
 {
     [Fact]
     public void Install_ContainerWithNetwork_ContainerDependsOnNetwork()

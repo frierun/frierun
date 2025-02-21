@@ -1,8 +1,9 @@
-﻿using Frierun.Server.Services;
+﻿using Frierun.Server.Data;
+using Frierun.Server.Services;
 
-namespace Frierun.Server.Data;
+namespace Frierun.Server.Installers.Docker;
 
-public class VolumeProvider(DockerService dockerService) : IInstaller<Volume>, IUninstaller<DockerVolume>
+public class VolumeInstaller(DockerService dockerService) : IInstaller<Volume>, IUninstaller<DockerVolume>
 {
     /// <inheritdoc />
     public Contract Initialize(Volume contract, ExecutionPlan plan)

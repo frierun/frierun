@@ -1,8 +1,9 @@
-﻿using Docker.DotNet.Models;
+﻿using Frierun.Server.Data;
+using Mount = Frierun.Server.Data.Mount;
 
-namespace Frierun.Server.Data;
+namespace Frierun.Server.Installers.Docker;
 
-public class MountProvider : IInstaller<Mount>
+public class MountInstaller : IInstaller<Mount>
 {
     /// <inheritdoc />
     public IEnumerable<ContractDependency> Dependencies(Mount contract, ExecutionPlan plan)
@@ -42,7 +43,7 @@ public class MountProvider : IInstaller<Mount>
                     parameters =>
                     {
                         parameters.HostConfig.Mounts.Add(
-                            new Docker.DotNet.Models.Mount
+                            new global::Docker.DotNet.Models.Mount
                             {
                                 Source = volume.Name,
                                 Target = contract.Path,

@@ -2,7 +2,7 @@
 
 namespace Frierun.Tests.Data;
 
-public class DependencyProviderTests : BaseTests
+public class DependencyInstallerTests : BaseTests
 {
     [Theory]
     [InlineData(false)]

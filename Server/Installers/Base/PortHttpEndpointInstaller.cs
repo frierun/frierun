@@ -1,8 +1,8 @@
-﻿using System.Text;
+﻿using Frierun.Server.Data;
 
-namespace Frierun.Server.Data;
+namespace Frierun.Server.Installers.Base;
 
-public class PortHttpEndpointProvider : IInstaller<HttpEndpoint>, IUninstaller<GenericHttpEndpoint>
+public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>, IUninstaller<GenericHttpEndpoint>
 {
     /// <inheritdoc />
     public IEnumerable<ContractDependency> Dependencies(HttpEndpoint contract, ExecutionPlan plan)
@@ -24,7 +24,6 @@ public class PortHttpEndpointProvider : IInstaller<HttpEndpoint>, IUninstaller<G
         var portEndpoint = plan.GetResource<DockerPortEndpoint>(
             new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80).Id
         );
-        var containerContract = plan.GetContract(contract.ContainerId);
 
         var url = new Uri($"http://{portEndpoint.Ip}:{portEndpoint.Port}");
         

@@ -1,14 +1,15 @@
 ﻿using Frierun.Server.Data;
+using Frierun.Server.Installers.Traefik;
 
 namespace Frierun.Server.Services;
 
-public class ProviderRegistry
+public class InstallerRegistry
 {
     private readonly DockerService _dockerService;
     private readonly Dictionary<Type, IList<IInstaller>> _installers = new();
     private readonly Dictionary<Type, IUninstaller> _uninstallers = new();
 
-    public ProviderRegistry(
+    public InstallerRegistry(
         State state,
         IEnumerable<IInstaller> installers,
         DockerService dockerService
@@ -18,7 +19,7 @@ public class ProviderRegistry
 
         foreach (var installer in installers)
         {
-            AddProvider(installer);
+            Add(installer);
         }
 
         var traefik = state.Resources.OfType<Application>().FirstOrDefault(a => a.Package?.Name == "traefik");
@@ -28,18 +29,18 @@ public class ProviderRegistry
         }
     }
 
-    private void AddProvider(object provider)
+    private void Add(object installer)
     {
-        provider.GetType().GetInterfaces()
+        installer.GetType().GetInterfaces()
             .Where(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IUninstaller<>))
             .ToList()
             .ForEach(type =>
         {
             var resourceType = type.GetGenericArguments()[0];
-            _uninstallers[resourceType] = (IUninstaller)provider;
+            _uninstallers[resourceType] = (IUninstaller)installer;
         });
 
-        provider.GetType().GetInterfaces()
+        installer.GetType().GetInterfaces()
             .Where(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IInstaller<>))
             .ToList()
             .ForEach(type =>
@@ -51,16 +52,15 @@ public class ProviderRegistry
                         _installers[contractType] = new List<IInstaller>();
                     }
         
-                    // Add the provider to the beginning of the list so that it is used first
-                    _installers[contractType].Insert(0, (IInstaller)provider);
+                    // Add the installer to the beginning of the list so that it is used first
+                    _installers[contractType].Insert(0, (IInstaller)installer);
                 }
             );
     }
 
     public void UseTraefik(Application application)
     {
-        var traefikHttpEndpointProvider = new TraefikHttpEndpointProvider(_dockerService, application);
-        AddProvider(traefikHttpEndpointProvider);
+        Add(new TraefikHttpEndpointInstaller(_dockerService, application));
     }
 
     public IInstaller? GetInstaller(Type resourceType, string? name = null)

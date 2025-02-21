@@ -5,7 +5,7 @@ namespace Frierun.Server.Data;
 
 public class ExecutionPlan : IExecutionPlan
 {
-    private readonly ProviderRegistry _providerRegistry;
+    private readonly InstallerRegistry _installerRegistry;
     private readonly Dictionary<ContractId, Contract> _contracts = new();
     private readonly Dictionary<ContractId, Resource?> _resources = new();
     private readonly DirectedAcyclicGraph<ContractId> _graph = new();
@@ -18,11 +18,11 @@ public class ExecutionPlan : IExecutionPlan
 
     public IReadOnlyDictionary<ContractId, Contract> Contracts => _contracts;
 
-    public ExecutionPlan(Package package, State state, ProviderRegistry providerRegistry)
+    public ExecutionPlan(Package package, State state, InstallerRegistry installerRegistry)
     {
         RootContractId = new ContractId<Package>(package.Name);
         State = state;
-        _providerRegistry = providerRegistry;
+        _installerRegistry = installerRegistry;
         var queue = new Queue<Contract>();
         AddContract(package, queue);
 
@@ -47,7 +47,7 @@ public class ExecutionPlan : IExecutionPlan
     /// </summary>
     private IInstaller GetInstaller(Contract contract)
     {
-        var installer = _providerRegistry.GetInstaller(contract.GetType(), contract.Installer);
+        var installer = _installerRegistry.GetInstaller(contract.GetType(), contract.Installer);
         if (installer == null)
         {
             throw contract.Installer == null
@@ -59,7 +59,7 @@ public class ExecutionPlan : IExecutionPlan
     }
 
     /// <summary>
-    /// Adds contract and resolves the provider if needed.
+    /// Adds contract and resolves the installers if needed.
     /// </summary>
     private void AddContract(Contract contract, Queue<Contract> queue)
     {
