@@ -30,6 +30,7 @@ public class ContractRegistry
             nameof(HttpEndpoint) => new HttpEndpoint(name),
             nameof(Package) => new Package(name),
             nameof(Parameter) => new Parameter(name),
+            nameof(Password) => new Password(name),
             _ => throw new Exception("Can't create contract type: " + typeName)
         };
     }

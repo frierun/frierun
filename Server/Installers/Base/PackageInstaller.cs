@@ -64,9 +64,4 @@ public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
             DependsOn = dependencies
         };
     }
-
-    /// <inheritdoc />
-    public void Uninstall(Application resource)
-    {
-    }
 }

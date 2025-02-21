@@ -1,6 +1,6 @@
 ﻿using Frierun.Server.Data;
 
-namespace Frierun.Tests.Data;
+namespace Frierun.Tests.Installers.Base;
 
 public class DependencyInstallerTests : BaseTests
 {

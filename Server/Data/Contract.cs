@@ -11,6 +11,7 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(Network), nameof(Network))]
 [JsonDerivedType(typeof(Package), nameof(Package))]
 [JsonDerivedType(typeof(Parameter), nameof(Parameter))]
+[JsonDerivedType(typeof(Password), nameof(Password))]
 [JsonDerivedType(typeof(PortEndpoint), nameof(PortEndpoint))]
 [JsonDerivedType(typeof(Substitute), nameof(Substitute))]
 [JsonDerivedType(typeof(Volume), nameof(Volume))]

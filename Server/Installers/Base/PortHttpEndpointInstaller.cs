@@ -31,9 +31,4 @@ public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>, IUninstaller<
 
         return endpoint;
     }
-
-    /// <inheritdoc />
-    public void Uninstall(GenericHttpEndpoint resource)
-    {
-    }
 }
