@@ -60,8 +60,12 @@ public class UninstallService(
     private void UninstallResource(Resource resource)
     {
         var uninstaller = installerRegistry.GetUninstaller(resource.GetType());
+        if (uninstaller == null)
+        {
+            throw new Exception($"Uninstaller not found for resource type {resource.GetType()}");
+        }
         uninstaller.Uninstall(resource);
         resource.Uninstall();
-        state.Resources.Remove(resource);
+        state.RemoveResource(resource);
     }
 }

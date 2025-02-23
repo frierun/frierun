@@ -40,7 +40,10 @@ public class PackageTests
         var installService = _factory.Services.GetRequiredService<InstallService>();
         var uninstallService = _factory.Services.GetRequiredService<UninstallService>();
         var state = _factory.Services.GetRequiredService<State>();
-        state.Resources.Clear();
+        foreach (var resource in state.Resources)
+        {
+            state.RemoveResource(resource);
+        }
         var dockerClient = new DockerClientConfiguration().CreateClient();
 
         // install frierun package

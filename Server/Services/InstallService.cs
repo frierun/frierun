@@ -20,11 +20,6 @@ public class InstallService(
         {
             var application = executionPlan.Install();
             stateSerializer.Save(state);
-            if (application.Package?.Name == "traefik")
-            {
-                installerRegistry.UseTraefik(application);
-            }
-
             return application;
         }
         catch (Exception e)

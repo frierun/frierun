@@ -1,9 +1,10 @@
-﻿using Autofac;
+﻿using System.Reflection;
+using Autofac;
 using Docker.DotNet;
 using Frierun.Server.Data;
-using Frierun.Server.Installers.Base;
-using Frierun.Server.Installers.Docker;
+using Frierun.Server.Installers.Traefik;
 using Frierun.Server.Services;
+using Module = Autofac.Module;
 using ResolvedParameter = Autofac.Core.ResolvedParameter;
 
 namespace Frierun.Server;
@@ -13,22 +14,21 @@ public class AutofacModule : Module
     /// <inheritdoc />
     protected override void Load(ContainerBuilder builder)
     {
-        // Installers
-        // Base
-        builder.RegisterType<DependencyInstaller>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<PackageInstaller>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<ParameterInstaller>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<PasswordInstaller>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<PortHttpEndpointInstaller>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<SubstituteInstaller>().As<IInstaller>().SingleInstance();
+        var assembly = Assembly.GetExecutingAssembly();
         
-        // Docker
-        builder.RegisterType<ContainerInstaller>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<FileInstaller>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<MountInstaller>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<NetworkInstaller>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<PortEndpointInstaller>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<VolumeInstaller>().As<IInstaller>().SingleInstance();
+        // Installers
+        builder.RegisterAssemblyTypes(assembly)
+            .Where(type => type.Namespace?.StartsWith("Frierun.Server.Installers.Base") == true)
+            .AsImplementedInterfaces()
+            .SingleInstance();
+        builder.RegisterAssemblyTypes(assembly)
+            .Where(type => type.Namespace?.StartsWith("Frierun.Server.Installers.Docker") == true)
+            .AsImplementedInterfaces()
+            .SingleInstance();
+
+        builder.RegisterType<TraefikHttpEndpointInstaller>()
+            .Named<IInstaller>("traefik")
+            .InstancePerDependency();
         
         // Services
         builder.RegisterType<ContractRegistry>().AsSelf().SingleInstance();

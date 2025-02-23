@@ -34,15 +34,15 @@ public class StateSerializerTests : BaseTests
     {
         var application = GetFactory<Application>().Generate();
         var state = new State();
-        state.Resources.Add(application);
+        state.AddResource(application);
         var stateManager = Resolve<StateSerializer>();
         stateManager.Save(state);
         
         var loadedState = stateManager.Load();
 
         Assert.Single(loadedState.Resources);
-        Assert.Equal(application.Id, loadedState.Resources[0].Id);
-        Assert.NotSame(application, loadedState.Resources[0]);
+        Assert.Equal(application.Id, loadedState.Resources.First().Id);
+        Assert.NotSame(application, loadedState.Resources.First());
     }    
 
     [Fact]
@@ -50,14 +50,14 @@ public class StateSerializerTests : BaseTests
     {
         var application = GetFactory<Application>().Generate();
         var state = new State();
-        state.Resources.Add(application);
+        state.AddResource(application);
         var stateManager = Resolve<StateSerializer>();
         stateManager.Save(state);
         
         var loadedState = stateManager.Load();
 
         // Package must be deserialized by reference
-        Assert.Same(application.Package, ((Application)loadedState.Resources[0]).Package); 
+        Assert.Same(application.Package, ((Application)loadedState.Resources.First()).Package); 
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public class StateSerializerTests : BaseTests
     {
         var application = GetFactory<Application>().Generate();
         var state = new State();
-        state.Resources.Add(application);
+        state.AddResource(application);
         var stateManager = Resolve<StateSerializer>();
 
         stateManager.Save(state);

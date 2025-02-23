@@ -2,10 +2,18 @@
 
 namespace Frierun.Server.Data;
 
-public record State : IJsonOnDeserialized
+public class State : IJsonOnDeserialized
 {
-    public IList<Resource> Resources { get; init; } = new List<Resource>();
+    private readonly IList<Resource> _resources = [];
+    public event Action<Resource> ResourceAdded = _ => { }; 
+    public event Action<Resource> ResourceRemoved = _ => { }; 
 
+    public IEnumerable<Resource> Resources
+    {
+        get => _resources;
+        init => _resources = new List<Resource>(value);
+    }
+    
     /// <inheritdoc />
     public void OnDeserialized()
     {
@@ -23,6 +31,9 @@ public record State : IJsonOnDeserialized
         return Resources.FirstOrDefault(resource => resource.Id == id);
     }
     
+    /// <summary>
+    /// Adds a resource to the state if it does not already exist.
+    /// </summary>
     public void AddResource(Resource resource)
     {
         if (FindResource(resource.Id) != null)
@@ -30,6 +41,16 @@ public record State : IJsonOnDeserialized
             return;
         }
         
-        Resources.Add(resource);
+        _resources.Add(resource);
+        ResourceAdded(resource);
+    }
+
+    /// <summary>
+    /// Removes a resource from the state.
+    /// </summary>
+    public void RemoveResource(Resource resource)
+    {
+        _resources.Remove(resource);
+        ResourceRemoved(resource);
     }
 }
