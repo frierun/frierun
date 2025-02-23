@@ -40,7 +40,7 @@ public class PackageTests
         var installService = _factory.Services.GetRequiredService<InstallService>();
         var uninstallService = _factory.Services.GetRequiredService<UninstallService>();
         var state = _factory.Services.GetRequiredService<State>();
-        foreach (var resource in state.Resources)
+        foreach (var resource in state.Resources.ToList())
         {
             state.RemoveResource(resource);
         }
