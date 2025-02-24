@@ -8,10 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Tests.Integration;
 
-public class PackageTests
+public class PackageTests : BaseTests
 {
-    private readonly WebApplicationFactory<Program> _factory = new();
-
     public static IEnumerable<object[]> Packages()
     {
         var assemblyLocation = Assembly.GetExecutingAssembly().Location;
@@ -21,7 +19,7 @@ public class PackageTests
         foreach (var fileName in Directory.EnumerateFiles(packagesDirectory, "*.json"))
         {
             var packageName = Path.GetFileNameWithoutExtension(fileName);
-            if (packageName == "adguard" || packageName == "pi-hole")
+            if (packageName is "adguard" or "pi-hole")
             {
                 // skip due to 53 port already in use
                 continue;
@@ -34,21 +32,13 @@ public class PackageTests
     [MemberData(nameof(Packages))]
     public async Task InstallingUninstalling_Package_ShouldCreateDockerContainer(string packageName)
     {
-        var package = _factory.Services.GetRequiredService<PackageRegistry>().Find(packageName);
+        var package = Services.GetRequiredService<PackageRegistry>().Find(packageName);
         Assert.NotNull(package);
-        var executionService = _factory.Services.GetRequiredService<ExecutionService>();
-        var installService = _factory.Services.GetRequiredService<InstallService>();
-        var uninstallService = _factory.Services.GetRequiredService<UninstallService>();
-        var state = _factory.Services.GetRequiredService<State>();
-        foreach (var resource in state.Resources.ToList())
-        {
-            state.RemoveResource(resource);
-        }
+        var state = Services.GetRequiredService<State>();        
         var dockerClient = new DockerClientConfiguration().CreateClient();
 
-        // install frierun package
-        var plan = executionService.Create(package);
-        var application = installService.Handle(plan);
+        // install package
+        var application = InstallPackage(package);
 
         Assert.NotNull(application);
         Assert.NotNull(state.Resources.OfType<Application>().FirstOrDefault(app => app.Name == package.Name));
@@ -63,7 +53,7 @@ public class PackageTests
         );
 
         // uninstall package
-        uninstallService.Handle(application);
+        UninstallApplication(application);
 
         Assert.Null(state.Resources.OfType<Application>().FirstOrDefault(app => app.Name == package.Name));
         containers = await dockerClient.Containers.ListContainersAsync(new ContainersListParameters());

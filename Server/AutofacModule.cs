@@ -2,7 +2,7 @@
 using Autofac;
 using Docker.DotNet;
 using Frierun.Server.Data;
-using Frierun.Server.Installers.Traefik;
+using Frierun.Server.Installers;
 using Frierun.Server.Services;
 using Module = Autofac.Module;
 using ResolvedParameter = Autofac.Core.ResolvedParameter;
@@ -28,6 +28,9 @@ public class AutofacModule : Module
 
         builder.RegisterType<TraefikHttpEndpointInstaller>()
             .Named<IInstaller>("traefik")
+            .InstancePerDependency();
+        builder.RegisterType<MysqlInstaller>()
+            .Named<IInstaller>("mysql")
             .InstancePerDependency();
         
         // Services

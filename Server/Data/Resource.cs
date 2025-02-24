@@ -12,6 +12,7 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(GeneratedPassword), nameof(GeneratedPassword))]
 [JsonDerivedType(typeof(ResolvedParameter), nameof(ResolvedParameter))]
 [JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
+[JsonDerivedType(typeof(MysqlDatabase), nameof(MysqlDatabase))]
 public abstract record Resource
 {
     private readonly List<Resource> _dependsOn = [];

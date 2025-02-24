@@ -1,0 +1,21 @@
+﻿{
+  "Name": "mysql",
+  "Url": "https://hub.docker.com/_/mysql",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "mysql:8",
+      "Env": {
+        "MYSQL_ROOT_PASSWORD": "{{Password::Value}}"
+      }
+    },
+    {
+      "Type": "Password"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "data",
+      "Path": "/var/lib/mysql"
+    }
+  ]
+}

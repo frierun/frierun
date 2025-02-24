@@ -8,6 +8,7 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(File), nameof(File))]
 [JsonDerivedType(typeof(HttpEndpoint), nameof(HttpEndpoint))]
 [JsonDerivedType(typeof(Mount), nameof(Mount))]
+[JsonDerivedType(typeof(Mysql), nameof(Mysql))]
 [JsonDerivedType(typeof(Network), nameof(Network))]
 [JsonDerivedType(typeof(Package), nameof(Package))]
 [JsonDerivedType(typeof(Parameter), nameof(Parameter))]

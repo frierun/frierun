@@ -1,7 +1,7 @@
 ﻿using Frierun.Server.Data;
 using Frierun.Server.Services;
 
-namespace Frierun.Server.Installers.Traefik;
+namespace Frierun.Server.Installers;
 
 public class TraefikHttpEndpointInstaller(DockerService dockerService, Application application)
     : IInstaller<HttpEndpoint>, IUninstaller<TraefikHttpEndpoint>
@@ -97,18 +97,13 @@ public class TraefikHttpEndpointInstaller(DockerService dockerService, Applicati
     /// <inheritdoc />
     public void Uninstall(TraefikHttpEndpoint resource)
     {
-        var containerGroup = resource.DependsOn.OfType<DockerNetwork>().FirstOrDefault();
-        if (containerGroup == null)
+        var network = resource.DependsOn.OfType<DockerNetwork>().FirstOrDefault();
+        if (network == null)
         {
             return;
         }
 
-        var traefikContainer = application.AllDependencies.OfType<DockerContainer>().FirstOrDefault();
-        if (traefikContainer == null)
-        {
-            throw new Exception("Traefik container not found");
-        }
-
-        dockerService.DetachNetwork(containerGroup.Name, traefikContainer.Name).Wait();
+        var container = application.AllDependencies.OfType<DockerContainer>().First();
+        dockerService.DetachNetwork(network.Name, container.Name).Wait();
     }
 }
