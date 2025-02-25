@@ -21,7 +21,7 @@ public class PackageTests
         foreach (var fileName in Directory.EnumerateFiles(packagesDirectory, "*.json"))
         {
             var packageName = Path.GetFileNameWithoutExtension(fileName);
-            if (packageName == "adguard")
+            if (packageName is "adguard" or "pi-hole")
             {
                 // skip due to 53 port already in use
                 continue;
