@@ -1,6 +1,9 @@
 ﻿{
   "Name": "uptime-kuma",
   "Url": "https://github.com/louislam/uptime-kuma/",
+  "ShortDescription": "Uptime monitoring",
+  "FullDescription": "Monitoring uptime for HTTP(s) / TCP / HTTP(s) Keyword / HTTP(s) Json Query / Ping / DNS Record / Push / Steam Game Server / Docker Containers",
+  "Tags": ["dashboard", "network"],
   "Contracts": [
     {
       "Type": "Container",

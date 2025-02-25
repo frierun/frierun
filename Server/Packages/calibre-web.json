@@ -2,6 +2,9 @@
   "Name": "calibre-web",
   "Url": "https://github.com/linuxserver/docker-calibre-web",
   "ApplicationDescription": "Login: admin\nPassword: admin123\nOn the initial setup screen, enter \"/books\" as your calibre library location.",
+  "ShortDescription": "Browsing/downloading eBooks",
+  "FullDescription": "Web app providing a clean interface for browsing, reading and downloading eBooks using an existing Calibre database.",
+  "Tags": ["storage"],
   "Contracts": [
     {
       "Type": "Container",

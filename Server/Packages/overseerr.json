@@ -1,6 +1,9 @@
 ﻿{
   "Name": "overseerr",
   "Url": "https://docs.linuxserver.io/images/docker-overseerr/",
+  "ShortDescription": "Request management for Plex",
+  "FullDescription": "Overseerr is a request management and media discovery tool built to work with your existing Plex ecosystem.",
+  "Tags": ["network"],
   "Contracts": [
     {
       "Type": "Container",
