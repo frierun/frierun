@@ -1,8 +1,8 @@
 ﻿using Frierun.Server.Data;
 
-namespace Frierun.Tests.Data;
+namespace Frierun.Tests.Installers.Base;
 
-public class DependencyProviderTests : BaseTests
+public class DependencyInstallerTests : BaseTests
 {
     [Theory]
     [InlineData(false)]

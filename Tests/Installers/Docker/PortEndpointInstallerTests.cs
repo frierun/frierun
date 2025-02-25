@@ -1,11 +1,11 @@
 ﻿using Frierun.Server.Data;
 
-namespace Frierun.Tests.Data;
+namespace Frierun.Tests.Installers.Docker;
 
-public class PortHttpEndpointProvider : BaseTests
+public class PortEndpointInstallerTests : BaseTests
 {
     [Fact]
-    public void Install_ContainerWithHttpEndpoint_ContainerDependsOnPortEndpoint()
+    public void Install_ContainerWithPortEndpoint_ContainerDependsOnPortEndpoint()
     {
         var container = GetFactory<Container>().Generate();
         var package = GetFactory<Package>().Generate() with
@@ -13,7 +13,7 @@ public class PortHttpEndpointProvider : BaseTests
             Contracts =
             [
                 container,
-                GetFactory<HttpEndpoint>().Generate() with {ContainerName = container.Name}
+                GetFactory<PortEndpoint>().Generate() with {ContainerName = container.Name}
             ]
         };
 

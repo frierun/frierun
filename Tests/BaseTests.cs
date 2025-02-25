@@ -27,8 +27,8 @@ public abstract class BaseTests
         Provider ??= GetContainerBuilder().Build();
         return Provider.Resolve<T>();
     }
-    
-    protected ContainerBuilder GetContainerBuilder()
+
+    private ContainerBuilder GetContainerBuilder()
     {
         if (Provider != null)
         {
@@ -79,7 +79,16 @@ public abstract class BaseTests
         dockerClient.Containers
             .StartContainerAsync(default, default)
             .ReturnsForAnyArgs(Task.FromResult(true));
-        
+        dockerClient.Exec
+            .ExecCreateContainerAsync(default, default)
+            .ReturnsForAnyArgs(Task.FromResult(new ContainerExecCreateResponse()
+            {
+                ID = "execId"
+            }));
+
+        dockerClient.Exec
+            .StartAndAttachContainerExecAsync(default, default)
+            .ReturnsForAnyArgs(Task.FromResult(new MultiplexedStream(new MemoryStream(), false)));
         
         return ContainerBuilder;
     }

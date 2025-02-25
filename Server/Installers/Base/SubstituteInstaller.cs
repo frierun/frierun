@@ -1,9 +1,10 @@
 ﻿using System.Text.RegularExpressions;
+using Frierun.Server.Data;
 using Frierun.Server.Services;
 
-namespace Frierun.Server.Data;
+namespace Frierun.Server.Installers.Base;
 
-public class SubstituteProvider(ContractRegistry contractRegistry) : IInstaller<Substitute>
+public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller<Substitute>
 {
     /// <inheritdoc />
     public IEnumerable<ContractDependency> Dependencies(Substitute contract, ExecutionPlan plan)

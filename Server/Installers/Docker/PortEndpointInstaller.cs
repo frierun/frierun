@@ -1,8 +1,9 @@
 ﻿using Docker.DotNet.Models;
+using Frierun.Server.Data;
 
-namespace Frierun.Server.Data;
+namespace Frierun.Server.Installers.Docker;
 
-public class PortEndpointProvider : IInstaller<PortEndpoint>, IUninstaller<DockerPortEndpoint>
+public class PortEndpointInstaller : IInstaller<PortEndpoint>, IUninstaller<DockerPortEndpoint>
 {
     /// <inheritdoc />
     public IEnumerable<ContractDependency> Dependencies(PortEndpoint contract, ExecutionPlan plan)

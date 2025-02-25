@@ -45,6 +45,29 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
     }
 
     /// <summary>
+    /// Execute command in the container
+    /// </summary>
+    public async Task<(string stdout, string stderr)> ExecInContainer(string containerName, IList<string> command)
+    {
+        var execCreateParams = new ContainerExecCreateParameters
+        {
+            AttachStderr = true,
+            AttachStdin = true,
+            AttachStdout = true,
+            Cmd = command,
+            Tty = true
+        };
+        var result = await client.Exec.ExecCreateContainerAsync(containerName, execCreateParams);
+        var execId = result.ID;
+        if (execId == null)
+        {
+            throw new Exception("Exec is not created");
+        }
+        var stream = await client.Exec.StartAndAttachContainerExecAsync(execId, true);
+        return await stream.ReadOutputToEndAsync(default);
+    }
+
+    /// <summary>
     /// Starts a fake container with specified volume, puts a file in it and stops it
     /// </summary>
     public async Task<bool> PutFile(string volumeName, string path, string content)

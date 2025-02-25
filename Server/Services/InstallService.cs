@@ -6,7 +6,7 @@ public class InstallService(
     State state,
     StateSerializer stateSerializer,
     StateManager stateManager,
-    ProviderRegistry providerRegistry,
+    InstallerRegistry installerRegistry,
     ILogger<InstallService> logger)
 {
     public Application? Handle(IExecutionPlan executionPlan)
@@ -20,11 +20,6 @@ public class InstallService(
         {
             var application = executionPlan.Install();
             stateSerializer.Save(state);
-            if (application.Package?.Name == "traefik")
-            {
-                providerRegistry.UseTraefik(application);
-            }
-
             return application;
         }
         catch (Exception e)

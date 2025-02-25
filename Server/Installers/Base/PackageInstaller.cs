@@ -1,6 +1,8 @@
-﻿namespace Frierun.Server.Data;
+﻿using Frierun.Server.Data;
 
-public class ApplicationProvider : IInstaller<Package>, IUninstaller<Application>
+namespace Frierun.Server.Installers.Base;
+
+public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
 {
     /// <inheritdoc />
     public IEnumerable<ContractDependency> Dependencies(Package package, ExecutionPlan plan)
@@ -61,10 +63,5 @@ public class ApplicationProvider : IInstaller<Package>, IUninstaller<Application
         {
             DependsOn = dependencies
         };
-    }
-
-    /// <inheritdoc />
-    public void Uninstall(Application resource)
-    {
     }
 }

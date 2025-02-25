@@ -1,6 +1,8 @@
-﻿namespace Frierun.Server.Data;
+﻿using Frierun.Server.Data;
 
-public class ParameterProvider : IInstaller<Parameter>, IUninstaller<ResolvedParameter>
+namespace Frierun.Server.Installers.Base;
+
+public class ParameterInstaller : IInstaller<Parameter>, IUninstaller<ResolvedParameter>
 {
     /// <inheritdoc />
     public Contract Initialize(Parameter contract, ExecutionPlan plan)

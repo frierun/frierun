@@ -1,9 +1,11 @@
 ﻿using Docker.DotNet.Models;
+using Frierun.Server.Data;
 using Frierun.Server.Services;
+using Network = Frierun.Server.Data.Network;
 
-namespace Frierun.Server.Data;
+namespace Frierun.Server.Installers.Docker;
 
-public class NetworkProvider(DockerService dockerService) : IInstaller<Network>, IUninstaller<DockerNetwork>
+public class NetworkInstaller(DockerService dockerService) : IInstaller<Network>, IUninstaller<DockerNetwork>
 {
     /// <inheritdoc />
     public Contract Initialize(Network contract, ExecutionPlan plan)

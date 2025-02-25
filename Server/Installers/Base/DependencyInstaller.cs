@@ -1,8 +1,9 @@
-﻿using Frierun.Server.Services;
+﻿using Frierun.Server.Data;
+using Frierun.Server.Services;
 
-namespace Frierun.Server.Data;
+namespace Frierun.Server.Installers.Base;
 
-public class DependencyProvider(ContractRegistry contractRegistry) : IInstaller<Dependency>
+public class DependencyInstaller(ContractRegistry contractRegistry) : IInstaller<Dependency>
 {
     /// <inheritdoc />
     public IEnumerable<ContractDependency> Dependencies(Dependency contract, ExecutionPlan plan)
