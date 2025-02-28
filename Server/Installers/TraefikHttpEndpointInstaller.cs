@@ -7,45 +7,36 @@ public class TraefikHttpEndpointInstaller(DockerService dockerService, Applicati
     : IInstaller<HttpEndpoint>, IUninstaller<TraefikHttpEndpoint>
 {
     /// <inheritdoc />
-    public IEnumerable<ContractDependency> Dependencies(HttpEndpoint contract, ExecutionPlan plan)
+    InstallerInitializeResult IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix, State state)
     {
-        yield return new ContractDependency(
-            contract,
-            new Container(contract.ContainerName)
-        );
-
-        var container = plan.GetContract(contract.ContainerId);
-        yield return new ContractDependency(
-            new Network(container.NetworkName),
-            contract
-        );
-    }
-
-    /// <inheritdoc />
-    public Contract Initialize(HttpEndpoint contract, ExecutionPlan plan)
-    {
-        var baseName = contract.DomainName ?? $"{plan.Prefix}.localhost";
+        var baseName = contract.DomainName ?? $"{prefix}.localhost";
         var subdomain = baseName.Split('.')[0];
         var domain = baseName.Substring(subdomain.Length + 1);
 
         var count = 1;
         var name = baseName;
-        while (plan.State.Resources.OfType<TraefikHttpEndpoint>().Any(c => c.Domain == name))
+        while (state.Resources.OfType<TraefikHttpEndpoint>().Any(c => c.Domain == name))
         {
             count++;
             name = $"{subdomain}{count}.{domain}";
         }
 
-        return contract.DomainName == name
-            ? contract
-            : contract with
-            {
-                DomainName = name
-            };
+        return new InstallerInitializeResult(
+            contract with { DomainName = name },
+            [contract.ContainerId]
+        );
     }
 
     /// <inheritdoc />
-    public Resource Install(HttpEndpoint contract, ExecutionPlan plan)
+    IEnumerable<ContractDependency> IInstaller<HttpEndpoint>.GetDependencies(HttpEndpoint contract, ExecutionPlan plan)
+    {
+        var containerContract = plan.GetContract(contract.ContainerId);
+        yield return new ContractDependency(contract.Id, contract.ContainerId);
+        yield return new ContractDependency(containerContract.NetworkId, containerContract.Id);
+    }
+
+    /// <inheritdoc />
+    Resource IInstaller<HttpEndpoint>.Install(HttpEndpoint contract, ExecutionPlan plan)
     {
         var domain = contract.DomainName!;
         var subdomain = domain.Split('.')[0];
@@ -95,7 +86,7 @@ public class TraefikHttpEndpointInstaller(DockerService dockerService, Applicati
     }
 
     /// <inheritdoc />
-    public void Uninstall(TraefikHttpEndpoint resource)
+    void IUninstaller<TraefikHttpEndpoint>.Uninstall(TraefikHttpEndpoint resource)
     {
         var network = resource.DependsOn.OfType<DockerNetwork>().FirstOrDefault();
         if (network == null)

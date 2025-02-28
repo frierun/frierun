@@ -1,5 +1,6 @@
 ﻿using Autofac.Features.Indexed;
 using Frierun.Server.Data;
+using Frierun.Server.Installers;
 
 namespace Frierun.Server.Services;
 

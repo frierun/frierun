@@ -6,31 +6,33 @@ namespace Frierun.Server.Installers.Docker;
 public class VolumeInstaller(DockerService dockerService) : IInstaller<Volume>, IUninstaller<DockerVolume>
 {
     /// <inheritdoc />
-    public Contract Initialize(Volume contract, ExecutionPlan plan)
+    InstallerInitializeResult IInstaller<Volume>.Initialize(Volume contract, string prefix, State state)
     {
         if (contract.VolumeName != null)
         {
-            return contract;
+            return new InstallerInitializeResult(contract);
         }
-        
-        var baseName = plan.Prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
-        
+
+        var baseName = prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
+
         var count = 0;
         var name = baseName;
-        while (plan.State.Resources.OfType<DockerVolume>().Any(c => c.Name == name))
+        while (state.Resources.OfType<DockerVolume>().Any(c => c.Name == name))
         {
             count++;
             name = $"{baseName}{count}";
         }
 
-        return contract with
+        return new InstallerInitializeResult(
+            contract with
             {
                 VolumeName = name
-            };
-    }    
-    
+            }
+        );
+    }
+
     /// <inheritdoc />
-    public Resource Install(Volume contract, ExecutionPlan plan)
+    Resource IInstaller<Volume>.Install(Volume contract, ExecutionPlan plan)
     {
         var volumeName = contract.VolumeName!;
         var existingVolume = plan.State
@@ -42,7 +44,7 @@ public class VolumeInstaller(DockerService dockerService) : IInstaller<Volume>, 
         {
             return existingVolume;
         }
-        
+
         dockerService.CreateVolume(volumeName).Wait();
         return new DockerVolume(volumeName);
     }

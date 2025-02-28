@@ -6,20 +6,11 @@ namespace Frierun.Server.Installers.Docker;
 public class PortEndpointInstaller : IInstaller<PortEndpoint>, IUninstaller<DockerPortEndpoint>
 {
     /// <inheritdoc />
-    public IEnumerable<ContractDependency> Dependencies(PortEndpoint contract, ExecutionPlan plan)
-    {
-        yield return new ContractDependency(
-            contract,
-            new Container(contract.ContainerName)
-        );
-    }
-
-    /// <inheritdoc />
-    public Contract Initialize(PortEndpoint contract, ExecutionPlan plan)
+    InstallerInitializeResult IInstaller<PortEndpoint>.Initialize(PortEndpoint contract, string prefix, State state)
     {
         int port = contract.DestinationPort == 0 ? contract.Port : contract.DestinationPort;
 
-        while (plan.State.Resources.OfType<DockerPortEndpoint>()
+        while (state.Resources.OfType<DockerPortEndpoint>()
                .Any(endpoint => endpoint.Port == port && endpoint.Protocol == contract.Protocol))
         {
             port += 1000;
@@ -29,16 +20,20 @@ public class PortEndpointInstaller : IInstaller<PortEndpoint>, IUninstaller<Dock
             }
         }
 
-        return contract.DestinationPort == port
-            ? contract
-            : contract with
-            {
-                DestinationPort = port
-            };
+        return new InstallerInitializeResult(
+            contract with { DestinationPort = port },
+            [contract.ContainerId]
+        );
     }
 
     /// <inheritdoc />
-    public Resource Install(PortEndpoint contract, ExecutionPlan plan)
+    IEnumerable<ContractDependency> IInstaller<PortEndpoint>.GetDependencies(PortEndpoint contract, ExecutionPlan plan)
+    {
+        yield return new ContractDependency(contract.Id, contract.ContainerId);
+    }
+
+    /// <inheritdoc />
+    Resource IInstaller<PortEndpoint>.Install(PortEndpoint contract, ExecutionPlan plan)
     {
         var containerContract = plan.GetContract(contract.ContainerId);
 
@@ -73,10 +68,5 @@ public class PortEndpointInstaller : IInstaller<PortEndpoint>, IUninstaller<Dock
         );
 
         return endpoint;
-    }
-
-    /// <inheritdoc />
-    public void Uninstall(DockerPortEndpoint resource)
-    {
     }
 }

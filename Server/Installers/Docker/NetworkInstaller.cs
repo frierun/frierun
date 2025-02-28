@@ -8,35 +8,34 @@ namespace Frierun.Server.Installers.Docker;
 public class NetworkInstaller(DockerService dockerService) : IInstaller<Network>, IUninstaller<DockerNetwork>
 {
     /// <inheritdoc />
-    public Contract Initialize(Network contract, ExecutionPlan plan)
+    InstallerInitializeResult IInstaller<Network>.Initialize(Network contract, string prefix, State state)
     {
-        var baseName = contract.NetworkName ?? plan.Prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
+        var baseName = contract.NetworkName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
         
         var count = 1;
         var name = baseName;
-        while (plan.State.Resources.OfType<DockerNetwork>().Any(c => c.Name == name))
+        while (state.Resources.OfType<DockerNetwork>().Any(c => c.Name == name))
         {
             count++;
             name = $"{baseName}{count}";
         }
-
-        return contract.NetworkName == name
-            ? contract
-            : contract with
+        
+        return new InstallerInitializeResult(
+            contract with
             {
                 NetworkName = name
-            };
+            }
+        );
     }
-    
+
     /// <inheritdoc />
-    public Resource? Install(Network contract, ExecutionPlan plan)
+    Resource IInstaller<Network>.Install(Network contract, ExecutionPlan plan)
     {
         var networkName = contract.NetworkName!;
 
         dockerService.CreateNetwork(networkName).Wait();
 
-        var network = new DockerNetwork(networkName);
-        foreach (var containerContract in plan.GetResourcesOfType<Container>())
+        foreach (var containerContract in plan.GetContractsOfType<Container>())
         {
             plan.UpdateContract(
                 containerContract with
@@ -62,7 +61,7 @@ public class NetworkInstaller(DockerService dockerService) : IInstaller<Network>
             );
         }
 
-        return network;
+        return new DockerNetwork(networkName);
     }
 
     /// <inheritdoc />

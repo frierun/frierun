@@ -5,34 +5,36 @@ namespace Frierun.Server.Installers.Base;
 public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
 {
     /// <inheritdoc />
-    public IEnumerable<ContractDependency> Dependencies(Package package, ExecutionPlan plan)
+    InstallerInitializeResult IInstaller<Package>.Initialize(Package package, string _, State state)
     {
-        return package.Contracts.Select(contract => new ContractDependency(contract, package));
-    }
-
-    /// <inheritdoc />
-    public Contract Initialize(Package contract, ExecutionPlan plan)
-    {
-        var basePrefix = contract.Prefix ?? contract.Name;
+        var basePrefix = package.Prefix ?? package.Name;
 
         var count = 1;
         var prefix = basePrefix;
-        while (plan.State.Resources.OfType<Application>().Any(application => application.Name == prefix))
+        while (state.Resources.OfType<Application>().Any(application => application.Name == prefix))
         {
             count++;
             prefix = $"{basePrefix}{count}";
         }
 
-        return prefix == contract.Prefix
-            ? contract
-            : contract with
+        return new InstallerInitializeResult(
+            package with
             {
                 Prefix = prefix
-            };
+            },
+            null,
+            package.Contracts
+        );
     }
 
     /// <inheritdoc />
-    public Resource Install(Package package, ExecutionPlan plan)
+    IEnumerable<ContractDependency> IInstaller<Package>.GetDependencies(Package package, ExecutionPlan plan)
+    {
+        return package.Contracts.Select(contract => new ContractDependency(contract.Id, package.Id));
+    }
+
+    /// <inheritdoc />
+    Resource IInstaller<Package>.Install(Package package, ExecutionPlan plan)
     {
         var dependencies = package.Contracts
             .Select(contract => plan.GetResource(contract.Id))

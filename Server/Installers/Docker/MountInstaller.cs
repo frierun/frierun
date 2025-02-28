@@ -6,28 +6,30 @@ namespace Frierun.Server.Installers.Docker;
 public class MountInstaller : IInstaller<Mount>
 {
     /// <inheritdoc />
-    public IEnumerable<ContractDependency> Dependencies(Mount contract, ExecutionPlan plan)
+    InstallerInitializeResult IInstaller<Mount>.Initialize(Mount contract, string prefix, State state)
     {
-        yield return new ContractDependency(
+        return new InstallerInitializeResult(
             contract,
-            new Container(contract.ContainerName)
-        );
-        yield return new ContractDependency(
-            new Volume(contract.VolumeName),
-            contract
-        );
-        
-        // add dependency to volume so it would be added to dependencies
-        yield return new ContractDependency(
-            new Volume(contract.VolumeName),
-            new Container(contract.ContainerName)
+            [
+                contract.ContainerId,
+                contract.VolumeId
+            ]
         );
     }
 
     /// <inheritdoc />
-    public Resource? Install(Mount contract, ExecutionPlan plan)
+    IEnumerable<ContractDependency> IInstaller<Mount>.GetDependencies(Mount contract, ExecutionPlan plan)
     {
-        var containerContract = plan.GetContract<Container>(contract.ContainerId);
+        yield return new ContractDependency(contract.Id, contract.ContainerId);
+        yield return new ContractDependency(contract.VolumeId, contract.Id);
+        // add dependency to volume so it would be added to resource dependencies
+        yield return new ContractDependency(contract.VolumeId, contract.ContainerId);
+    }
+
+    /// <inheritdoc />
+    Resource? IInstaller<Mount>.Install(Mount contract, ExecutionPlan plan)
+    {
+        var containerContract = plan.GetContract(contract.ContainerId);
 
         if (containerContract == null)
         {
@@ -55,7 +57,7 @@ public class MountInstaller : IInstaller<Mount>
                 ),
             }
         );
-        
+
         return null;
     }
 }

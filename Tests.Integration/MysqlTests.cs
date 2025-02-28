@@ -7,7 +7,7 @@ namespace Tests.Integration;
 public class MysqlTests : BasicTests
 {
     [Fact]
-    public void Install_MysqlContract_CredentialsAreCorrect()
+    public async Task Install_MysqlContract_CredentialsAreCorrect()
     {
         var mysqlPackage = Services.GetRequiredService<PackageRegistry>().Find("mysql");
         Assert.NotNull(mysqlPackage);
@@ -36,7 +36,7 @@ public class MysqlTests : BasicTests
         // try to connect to mysql from client
         var dockerService = Services.GetRequiredService<DockerService>();
         var sql = "CREATE TABLE Test (ID int);INSERT INTO Test VALUES (123);UPDATE Test SET ID = 2*ID;SELECT * FROM Test;";
-        var result = dockerService.ExecInContainer(
+        var result = await dockerService.ExecInContainer(
             container.Name,
             [
                 "mysql",
@@ -46,7 +46,7 @@ public class MysqlTests : BasicTests
                 "-e", sql,
                 mysqlDatabase.Database
             ]
-        ).Result;
+        );
         
         Assert.Contains("246", result.stdout);
 

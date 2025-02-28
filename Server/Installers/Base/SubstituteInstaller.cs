@@ -7,31 +7,61 @@ namespace Frierun.Server.Installers.Base;
 public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller<Substitute>
 {
     /// <inheritdoc />
-    public IEnumerable<ContractDependency> Dependencies(Substitute contract, ExecutionPlan plan)
+    InstallerInitializeResult IInstaller<Substitute>.Initialize(Substitute contract, string prefix, State state)
     {
-        yield return new ContractDependency(contract, contractRegistry.CreateContract(contract.OriginalId));
+        return new InstallerInitializeResult(
+            contract,
+            contract.Matches
+                .SelectMany(pair => pair.Value)
+                .Select(match => match.Groups[1].Value)
+                .Select(
+                    insertion =>
+                    {
+                        var match = Substitute.VariableRegex.Match(insertion);
+                        if (!match.Success)
+                        {
+                            throw new Exception($"Invalid insertion format: {insertion}");
+                        }
 
-        var insertions = contract.Matches
-            .SelectMany(pair => pair.Value)
-            .Select(match => match.Groups[1].Value);
-        foreach (var insertion in insertions)
-        {
-            var match = Substitute.VariableRegex.Match(insertion);
-            if (!match.Success)
-            {
-                throw new Exception($"Invalid insertion format: {insertion}");
-            }
+                        var contractTypeName = match.Groups[1].Value;
+                        var contractType = contractRegistry.GetContractType(contractTypeName);
+                        var contractName = match.Groups[2].Value;
 
-            var contractTypeName = match.Groups[1].Value;
-            var contractName = match.Groups[2].Value;
-
-            var dependency = contractRegistry.CreateContract(contractTypeName, contractName);
-            yield return new ContractDependency(dependency, contract);
-        }
+                        return ContractId.Create(contractType, contractName);
+                    }
+                )
+        );
     }
 
     /// <inheritdoc />
-    public Resource? Install(Substitute contract, ExecutionPlan plan)
+    IEnumerable<ContractDependency> IInstaller<Substitute>.GetDependencies(Substitute contract, ExecutionPlan plan)
+    {
+        return contract.Matches
+            .SelectMany(pair => pair.Value)
+            .Select(match => match.Groups[1].Value)
+            .Select(
+                insertion =>
+                {
+                    var match = Substitute.VariableRegex.Match(insertion);
+                    if (!match.Success)
+                    {
+                        throw new Exception($"Invalid insertion format: {insertion}");
+                    }
+
+                    var contractTypeName = match.Groups[1].Value;
+                    var contractType = contractRegistry.GetContractType(contractTypeName);
+                    var contractName = match.Groups[2].Value;
+
+                    return new ContractDependency(
+                        ContractId.Create(contractType, contractName),
+                        contract.Id
+                    );
+                }
+            ).Append(new ContractDependency(contract.Id, contract.OriginalId));
+    }
+
+    /// <inheritdoc />
+    Resource? IInstaller<Substitute>.Install(Substitute contract, ExecutionPlan plan)
     {
         var original = plan.GetContract(contract.OriginalId);
         if (original is not IHasStrings hasStrings)
@@ -60,7 +90,7 @@ public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller
 
         return null;
     }
-    
+
     /// <summary>
     /// Resolves insertion value.
     /// </summary>
@@ -77,7 +107,7 @@ public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller
         var propertyName = match.Groups[3].Value;
 
         var contractType = contractRegistry.GetContractType(contractTypeName);
-        var contractId = new ContractId(contractType, contractName);
+        var contractId = ContractId.Create(contractType, contractName);
         var resource = plan.GetResource(contractId);
         if (resource == null)
         {

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Microsoft.VisualBasic.CompilerServices;
 
 namespace Frierun.Server.Data;
 
@@ -21,7 +22,7 @@ public abstract record Contract(
     string? Installer = null
 )
 {
-    [JsonIgnore] public ContractId Id => new(GetType(), Name);
+    [JsonIgnore] public ContractId Id => ContractId.Create(GetType(), Name);
     
     public virtual Contract With(Contract other)
     {

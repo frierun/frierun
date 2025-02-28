@@ -6,7 +6,6 @@ public class InstallService(
     State state,
     StateSerializer stateSerializer,
     StateManager stateManager,
-    InstallerRegistry installerRegistry,
     ILogger<InstallService> logger)
 {
     public Application? Handle(IExecutionPlan executionPlan)

@@ -1,44 +1,41 @@
 ﻿using Docker.DotNet.Models;
 using Frierun.Server.Data;
 using Frierun.Server.Services;
-using Network = Frierun.Server.Data.Network;
 
 namespace Frierun.Server.Installers.Docker;
 
 public class ContainerInstaller(DockerService dockerService) : IInstaller<Container>, IUninstaller<DockerContainer>
 {
     /// <inheritdoc />
-    public IEnumerable<ContractDependency> Dependencies(Container contract, ExecutionPlan plan)
+    InstallerInitializeResult IInstaller<Container>.Initialize(Container contract, string prefix, State state)
     {
-        yield return new ContractDependency(
-            new Network(contract.NetworkName),
-            contract
-        );
-    }
+        var baseName = contract.ContainerName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
 
-    /// <inheritdoc />
-    public Contract Initialize(Container contract, ExecutionPlan plan)
-    {
-        var baseName = contract.ContainerName ?? plan.Prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
-        
         var count = 1;
         var name = baseName;
-        while (plan.State.Resources.OfType<DockerContainer>().Any(c => c.Name == name))
+        while (state.Resources.OfType<DockerContainer>().Any(c => c.Name == name))
         {
             count++;
             name = $"{baseName}{count}";
         }
 
-        return contract.ContainerName == name
-            ? contract
-            : contract with
+        return new InstallerInitializeResult(
+            contract with
             {
                 ContainerName = name
-            };
+            },
+            [contract.NetworkId]
+        );
     }
 
     /// <inheritdoc />
-    public Resource Install(Container contract, ExecutionPlan plan)
+    IEnumerable<ContractDependency> IInstaller<Container>.GetDependencies(Container contract, ExecutionPlan plan)
+    {
+        yield return new ContractDependency(contract.NetworkId, contract.Id);
+    }
+
+    /// <inheritdoc />
+    Resource IInstaller<Container>.Install(Container contract, ExecutionPlan plan)
     {
         var dockerParameters = new CreateContainerParameters
         {
@@ -60,19 +57,21 @@ public class ContainerInstaller(DockerService dockerService) : IInstaller<Contai
 
         if (contract.RequireDocker)
         {
-            dockerParameters.HostConfig.Mounts.Add(new global::Docker.DotNet.Models.Mount
-            {
-                Source = "/var/run/docker.sock",
-                Target = "/var/run/docker.sock",
-                Type = "bind"
-            });
+            dockerParameters.HostConfig.Mounts.Add(
+                new global::Docker.DotNet.Models.Mount
+                {
+                    Source = "/var/run/docker.sock",
+                    Target = "/var/run/docker.sock",
+                    Type = "bind"
+                }
+            );
         }
 
         foreach (var action in contract.Configure)
         {
             action(dockerParameters);
         }
-        
+
         var result = dockerService.StartContainer(dockerParameters).Result;
 
         if (!result)

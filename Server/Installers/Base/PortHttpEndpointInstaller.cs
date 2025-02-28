@@ -5,21 +5,27 @@ namespace Frierun.Server.Installers.Base;
 public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>, IUninstaller<GenericHttpEndpoint>
 {
     /// <inheritdoc />
-    public IEnumerable<ContractDependency> Dependencies(HttpEndpoint contract, ExecutionPlan plan)
+    InstallerInitializeResult IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix, State state)
     {
-        yield return new ContractDependency(
+        var portEndpoint = new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80);
+        return new InstallerInitializeResult(
             contract,
-            new Container(contract.ContainerName)
-        );
-
-        yield return new ContractDependency(
-            new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80),
-            contract
+            [contract.ContainerId],
+            [portEndpoint]
         );
     }
 
     /// <inheritdoc />
-    public Resource? Install(HttpEndpoint contract, ExecutionPlan plan)
+    IEnumerable<ContractDependency> IInstaller<HttpEndpoint>.GetDependencies(HttpEndpoint contract, ExecutionPlan plan)
+    {
+        var portEndpoint = new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80);
+
+        yield return new ContractDependency(contract.Id, contract.ContainerId);
+        yield return new ContractDependency(portEndpoint.Id, contract.Id);
+    }
+
+    /// <inheritdoc />
+    Resource IInstaller<HttpEndpoint>.Install(HttpEndpoint contract, ExecutionPlan plan)
     {
         var portEndpoint = plan.GetResource<DockerPortEndpoint>(
             new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80).Id
