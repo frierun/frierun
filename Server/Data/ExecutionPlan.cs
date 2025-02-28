@@ -1,12 +1,12 @@
-﻿using System.Text.RegularExpressions;
+﻿using Frierun.Server.Installers;
 using Frierun.Server.Services;
 
 namespace Frierun.Server.Data;
 
 public class ExecutionPlan : IExecutionPlan
 {
-    private readonly ProviderRegistry _providerRegistry;
-    private readonly Dictionary<ContractId, Contract> _contracts = new();
+    private readonly InstallerRegistry _installerRegistry;
+    private readonly Dictionary<ContractId, Contract> _contracts;
     private readonly Dictionary<ContractId, Resource?> _resources = new();
     private readonly DirectedAcyclicGraph<ContractId> _graph = new();
 
@@ -18,28 +18,38 @@ public class ExecutionPlan : IExecutionPlan
 
     public IReadOnlyDictionary<ContractId, Contract> Contracts => _contracts;
 
-    public ExecutionPlan(Package package, State state, ProviderRegistry providerRegistry)
+    public ExecutionPlan(
+        Package package,
+        Dictionary<ContractId, Contract> contracts,
+        State state,
+        InstallerRegistry installerRegistry
+    )
     {
+        _contracts = contracts;
         RootContractId = new ContractId<Package>(package.Name);
         State = state;
-        _providerRegistry = providerRegistry;
-        var queue = new Queue<Contract>();
-        AddContract(package, queue);
+        _installerRegistry = installerRegistry;
 
-        while (queue.Count > 0)
+        BuildGraph();
+    }
+    
+    /// <summary>
+    /// Builds the graph of contracts.
+    /// </summary>
+    private void BuildGraph()
+    {
+        foreach (var contract in _contracts.Values)
         {
-            var contract = queue.Dequeue();
-
-            foreach (var dependency in GetInstaller(contract).Dependencies(contract, this))
-            {
-                AddContract(dependency.Preceding, queue);
-                AddContract(dependency.Following, queue);
-
-                _graph.AddEdge(dependency.Preceding.Id, dependency.Following.Id);
-            }
+            _graph.AddVertex(contract.Id);
         }
 
-        Initialize();
+        foreach (var contract in _contracts.Values)
+        {
+            foreach (var dependency in GetInstaller(contract).GetDependencies(contract, this))
+            {
+                _graph.AddEdge(dependency.Preceding, dependency.Following);
+            }
+        }
     }
 
     /// <summary>
@@ -47,7 +57,7 @@ public class ExecutionPlan : IExecutionPlan
     /// </summary>
     private IInstaller GetInstaller(Contract contract)
     {
-        var installer = _providerRegistry.GetInstaller(contract.GetType(), contract.Installer);
+        var installer = _installerRegistry.GetInstaller(contract.GetType(), contract.Installer);
         if (installer == null)
         {
             throw contract.Installer == null
@@ -56,55 +66,6 @@ public class ExecutionPlan : IExecutionPlan
         }
 
         return installer;
-    }
-
-    /// <summary>
-    /// Adds contract and resolves the provider if needed.
-    /// </summary>
-    private void AddContract(Contract contract, Queue<Contract> queue)
-    {
-        if (_contracts.ContainsKey(contract.Id))
-        {
-            return;
-        }
-
-        _graph.AddVertex(contract.Id);
-
-        // check installer and fill it if not set 
-        var installer = GetInstaller(contract);
-        if (contract.Installer != installer.GetType().Name)
-        {
-            contract = contract with
-            {
-                Installer = installer.GetType().Name
-            };
-        }
-
-        _contracts[contract.Id] = contract;
-        queue.Enqueue(contract);
-
-        if (contract is IHasStrings hasStrings)
-        {
-            var matches = new Dictionary<string, MatchCollection>();
-
-            hasStrings.ApplyStringDecorator(
-                s =>
-                {
-                    var matchCollection = Substitute.InsertionRegex.Matches(s);
-                    if (matchCollection.Count > 0)
-                    {
-                        matches[s] = matchCollection;
-                    }
-
-                    return s;
-                }
-            );
-
-            if (matches.Count > 0)
-            {
-                AddContract(new Substitute(contract.Id, matches), queue);
-            }
-        }
     }
 
     /// <summary>
@@ -136,26 +97,11 @@ public class ExecutionPlan : IExecutionPlan
         _contracts[contract.Id] = contract;
     }
 
-    public IEnumerable<T> GetResourcesOfType<T>()
+    public IEnumerable<T> GetContractsOfType<T>()
         where T : Contract
     {
         return _contracts.Values.OfType<T>();
     }
-
-    /// <summary>
-    /// Initializes all contracts in the execution plan.
-    /// </summary>
-    private void Initialize()
-    {
-        _graph.RunDfs(
-            contractId =>
-            {
-                var contract = GetContract(contractId);
-                UpdateContract(GetInstaller(contract).Initialize(contract, this));
-            }
-        );
-    }
-
 
     /// <summary>
     /// Installs all contracts in the execution plan.
@@ -166,6 +112,10 @@ public class ExecutionPlan : IExecutionPlan
             contractId =>
             {
                 var contract = GetContract(contractId);
+                if (_resources.ContainsKey(contractId))
+                {
+                    throw new Exception($"Resource {contractId} already installed");
+                }
                 var resource = GetInstaller(contract).Install(contract, this);
                 _resources[contract.Id] = resource;
             }
@@ -175,7 +125,7 @@ public class ExecutionPlan : IExecutionPlan
         {
             State.AddResource(resource);
         }
-        
+
         return GetResource<Application>(RootContractId);
     }
 
@@ -192,7 +142,6 @@ public class ExecutionPlan : IExecutionPlan
     public T GetResource<T>(ContractId contractId)
         where T : Resource
     {
-        // TODO: check if contractId is of type T
         var resource = GetResource(contractId);
         if (resource == null)
         {
@@ -201,7 +150,7 @@ public class ExecutionPlan : IExecutionPlan
 
         return (T)resource;
     }
-    
+
     /// <summary>
     /// Gets all contracts that are prerequisites for the given contract.
     /// </summary>

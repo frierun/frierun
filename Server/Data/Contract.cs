@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Microsoft.VisualBasic.CompilerServices;
 
 namespace Frierun.Server.Data;
 
@@ -8,9 +9,11 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(File), nameof(File))]
 [JsonDerivedType(typeof(HttpEndpoint), nameof(HttpEndpoint))]
 [JsonDerivedType(typeof(Mount), nameof(Mount))]
+[JsonDerivedType(typeof(Mysql), nameof(Mysql))]
 [JsonDerivedType(typeof(Network), nameof(Network))]
 [JsonDerivedType(typeof(Package), nameof(Package))]
 [JsonDerivedType(typeof(Parameter), nameof(Parameter))]
+[JsonDerivedType(typeof(Password), nameof(Password))]
 [JsonDerivedType(typeof(PortEndpoint), nameof(PortEndpoint))]
 [JsonDerivedType(typeof(Substitute), nameof(Substitute))]
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
@@ -19,7 +22,7 @@ public abstract record Contract(
     string? Installer = null
 )
 {
-    [JsonIgnore] public ContractId Id => new(GetType(), Name);
+    [JsonIgnore] public ContractId Id => ContractId.Create(GetType(), Name);
     
     public virtual Contract With(Contract other)
     {

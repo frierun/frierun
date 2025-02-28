@@ -13,7 +13,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
 
     const [domain, setDomain] = useState('');
     const [port, setPort] = useState(0);
-    const hasTraefik = contract.installer === 'TraefikHttpEndpointProvider';
+    const hasTraefik = contract.installer === 'TraefikHttpEndpointInstaller';
     const [installerType, setInstallerType] = useState('');
 
     useEffect(() => {
@@ -22,12 +22,12 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
             .filter(contract => contract.Type === 'PortEndpoint')
             .find(port => port.containerName === contract.containerName && port.port === contract.port)
             ?.destinationPort ?? defaultPort)
-        setInstallerType(contract.installer ?? 'PortHttpEndpointProvider');
+        setInstallerType(contract.installer ?? 'PortHttpEndpointInstaller');
     }, [contract, contracts]);
 
     const updateInstallerType = (installerType: string) => {
         setInstallerType(installerType);
-        if (installerType === 'TraefikHttpEndpointProvider') {
+        if (installerType === 'TraefikHttpEndpointInstaller') {
             updateDomain(domain);
         } else {
             updatePort(port.toString());
@@ -38,7 +38,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
         setDomain(domainName);
         updateContracts([{
             ...contract,
-            installer: 'TraefikHttpEndpointProvider',
+            installer: 'TraefikHttpEndpointInstaller',
             domainName
         }]);
     }
@@ -52,7 +52,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
         updateContracts([
             {
                 ...contract,
-                installer: 'PortHttpEndpointProvider',
+                installer: 'PortHttpEndpointInstaller',
                 domainName: null
             },
             {
@@ -78,30 +78,30 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
                         <div>
                             <input
                                 type="radio"
-                                id={"TraefikHttpEndpointProviderRadio"}
-                                value="TraefikHttpEndpointProvider"
-                                checked={installerType === "TraefikHttpEndpointProvider"}
+                                id={"TraefikHttpEndpointInstallerRadio"}
+                                value="TraefikHttpEndpointInstaller"
+                                checked={installerType === "TraefikHttpEndpointInstaller"}
                                 onChange={e => updateInstallerType(e.target.value)}
                             >
                             </input>
-                            <label htmlFor={"TraefikHttpEndpointProviderRadio"}>Traefik
+                            <label htmlFor={"TraefikHttpEndpointInstallerRadio"}>Traefik
                             </label>
                         </div>
                         <div>
                             <input
                                     type="radio"
-                                    id={"PortHttpEndpointProviderRadio"}
-                                    value="PortHttpEndpointProvider"
-                                    checked={installerType === "PortHttpEndpointProvider"}
+                                    id={"PortHttpEndpointInstallerRadio"}
+                                    value="PortHttpEndpointInstaller"
+                                    checked={installerType === "PortHttpEndpointInstaller"}
                                     onChange={e => updateInstallerType(e.target.value)}
                                 />
-                            <label htmlFor={"PortHttpEndpointProviderRadio"}>
+                            <label htmlFor={"PortHttpEndpointInstallerRadio"}>
                                 Port
                             </label>
                         </div>
                     </fieldset>
                 )}
-                {installerType === 'TraefikHttpEndpointProvider' && (
+                {installerType === 'TraefikHttpEndpointInstaller' && (
                     <div>
                         <label className={"inline-block w-48"}>
                             Domain:
@@ -109,7 +109,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
                         <input value={domain} onChange={e => updateDomain(e.target.value)}/>
                     </div>
                 )}
-                {installerType === 'PortHttpEndpointProvider' && (
+                {installerType === 'PortHttpEndpointInstaller' && (
                     <div>
                         <label className={"inline-block w-48"}>
                             Port:
