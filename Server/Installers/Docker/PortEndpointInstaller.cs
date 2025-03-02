@@ -6,7 +6,7 @@ namespace Frierun.Server.Installers.Docker;
 public class PortEndpointInstaller : IInstaller<PortEndpoint>, IUninstaller<DockerPortEndpoint>
 {
     /// <inheritdoc />
-    InstallerInitializeResult IInstaller<PortEndpoint>.Initialize(PortEndpoint contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<PortEndpoint>.Initialize(PortEndpoint contract, string prefix, State state)
     {
         int port = contract.DestinationPort == 0 ? contract.Port : contract.DestinationPort;
 
@@ -20,7 +20,7 @@ public class PortEndpointInstaller : IInstaller<PortEndpoint>, IUninstaller<Dock
             }
         }
 
-        return new InstallerInitializeResult(
+        yield return new InstallerInitializeResult(
             contract with { DestinationPort = port },
             [contract.ContainerId]
         );

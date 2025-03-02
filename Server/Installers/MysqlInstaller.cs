@@ -8,7 +8,7 @@ public class MysqlInstaller(DockerService dockerService, Application application
     : IInstaller<Mysql>, IUninstaller<MysqlDatabase>
 {
     /// <inheritdoc />
-    InstallerInitializeResult IInstaller<Mysql>.Initialize(Mysql contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<Mysql>.Initialize(Mysql contract, string prefix, State state)
     {
         var baseName = contract.DatabaseName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
 
@@ -20,7 +20,7 @@ public class MysqlInstaller(DockerService dockerService, Application application
             name = $"{baseName}{count}";
         }
 
-        return new InstallerInitializeResult(
+        yield return new InstallerInitializeResult(
             contract with { DatabaseName = name },
             [contract.NetworkId]
         );

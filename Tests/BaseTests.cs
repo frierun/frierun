@@ -28,7 +28,7 @@ public abstract class BaseTests
         return Provider.Resolve<T>();
     }
 
-    private ContainerBuilder GetContainerBuilder()
+    protected ContainerBuilder GetContainerBuilder()
     {
         if (Provider != null)
         {

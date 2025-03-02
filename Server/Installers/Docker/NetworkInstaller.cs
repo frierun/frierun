@@ -8,7 +8,7 @@ namespace Frierun.Server.Installers.Docker;
 public class NetworkInstaller(DockerService dockerService) : IInstaller<Network>, IUninstaller<DockerNetwork>
 {
     /// <inheritdoc />
-    InstallerInitializeResult IInstaller<Network>.Initialize(Network contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<Network>.Initialize(Network contract, string prefix, State state)
     {
         var baseName = contract.NetworkName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
         
@@ -20,7 +20,7 @@ public class NetworkInstaller(DockerService dockerService) : IInstaller<Network>
             name = $"{baseName}{count}";
         }
         
-        return new InstallerInitializeResult(
+        yield return new InstallerInitializeResult(
             contract with
             {
                 NetworkName = name

@@ -7,7 +7,7 @@ public class TraefikHttpEndpointInstaller(DockerService dockerService, Applicati
     : IInstaller<HttpEndpoint>, IUninstaller<TraefikHttpEndpoint>
 {
     /// <inheritdoc />
-    InstallerInitializeResult IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix, State state)
     {
         var baseName = contract.DomainName ?? $"{prefix}.localhost";
         var subdomain = baseName.Split('.')[0];
@@ -21,7 +21,7 @@ public class TraefikHttpEndpointInstaller(DockerService dockerService, Applicati
             name = $"{subdomain}{count}.{domain}";
         }
 
-        return new InstallerInitializeResult(
+        yield return new InstallerInitializeResult(
             contract with { DomainName = name },
             [contract.ContainerId]
         );

@@ -7,9 +7,9 @@ namespace Frierun.Server.Installers.Base;
 public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller<Substitute>
 {
     /// <inheritdoc />
-    InstallerInitializeResult IInstaller<Substitute>.Initialize(Substitute contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<Substitute>.Initialize(Substitute contract, string prefix, State state)
     {
-        return new InstallerInitializeResult(
+        yield return new InstallerInitializeResult(
             contract,
             contract.Matches
                 .SelectMany(pair => pair.Value)

@@ -32,9 +32,9 @@ public class ExecutionService(
         var discoveryGraph = new DiscoveryGraph();
 
         discoveryGraph.Apply(DiscoverContract(package).First());
-        var initializedPackage = (Package) discoveryGraph.Contracts[package.Id];
+        var initializedPackage = (Package)discoveryGraph.Contracts[package.Id];
         var prefix = initializedPackage.Prefix ?? initializedPackage.Name;
-        
+
         var (nextId, nextContract) = discoveryGraph.Next();
         while (nextId != null)
         {
@@ -48,16 +48,17 @@ public class ExecutionService(
                 {
                     throw new Exception($"No possible branches found");
                 }
+
                 (discoveryGraph, branches) = branchesStack.Pop();
             }
 
             var branch = branches.Dequeue();
-            
+
             if (branches.Count > 0)
             {
                 branchesStack.Push((new DiscoveryGraph(discoveryGraph), branches));
             }
-            
+
             discoveryGraph.Apply(branch);
             (nextId, nextContract) = discoveryGraph.Next();
         }
@@ -70,9 +71,8 @@ public class ExecutionService(
     /// </summary>
     private IEnumerable<InstallerInitializeResult> DiscoverContract(Contract contract, string? prefix = null)
     {
-        foreach (var installer in installerRegistry.GetInstallers(contract.GetType(), contract.Installer))
-        {
-            yield return installer.Initialize(contract, prefix ?? "", state);
-        }
+        return installerRegistry
+            .GetInstallers(contract.GetType(), contract.Installer)
+            .SelectMany(installer => installer.Initialize(contract, prefix ?? "", state));
     }
 }

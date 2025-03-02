@@ -5,10 +5,10 @@ namespace Frierun.Server.Installers.Base;
 public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>, IUninstaller<GenericHttpEndpoint>
 {
     /// <inheritdoc />
-    InstallerInitializeResult IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix, State state)
     {
         var portEndpoint = new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80);
-        return new InstallerInitializeResult(
+        yield return new InstallerInitializeResult(
             contract,
             [contract.ContainerId],
             [portEndpoint]

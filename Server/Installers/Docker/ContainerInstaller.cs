@@ -7,7 +7,7 @@ namespace Frierun.Server.Installers.Docker;
 public class ContainerInstaller(DockerService dockerService) : IInstaller<Container>, IUninstaller<DockerContainer>
 {
     /// <inheritdoc />
-    InstallerInitializeResult IInstaller<Container>.Initialize(Container contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<Container>.Initialize(Container contract, string prefix, State state)
     {
         var baseName = contract.ContainerName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
 
@@ -19,7 +19,7 @@ public class ContainerInstaller(DockerService dockerService) : IInstaller<Contai
             name = $"{baseName}{count}";
         }
 
-        return new InstallerInitializeResult(
+        yield return new InstallerInitializeResult(
             contract with
             {
                 ContainerName = name

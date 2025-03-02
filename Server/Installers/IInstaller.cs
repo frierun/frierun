@@ -7,9 +7,9 @@ namespace Frierun.Server.Installers;
 public interface IInstaller<in TContract> : IInstaller
     where TContract : Contract
 {
-    public InstallerInitializeResult Initialize(TContract contract, string prefix, State state)
+    public IEnumerable<InstallerInitializeResult> Initialize(TContract contract, string prefix, State state)
     {
-        return new InstallerInitializeResult(contract);
+        yield return new InstallerInitializeResult(contract);
     }
 
     public IEnumerable<ContractDependency> GetDependencies(TContract contract, ExecutionPlan plan)
@@ -23,42 +23,43 @@ public interface IInstaller<in TContract> : IInstaller
     }
 
     /// <inheritdoc />
-    InstallerInitializeResult IInstaller.Initialize(Contract contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller.Initialize(Contract contract, string prefix, State state)
     {
-        var result = Initialize((TContract)contract, prefix, state);
-        if (contract is IHasStrings hasStrings)
+        foreach (var result in Initialize((TContract)contract, prefix, state))
         {
-            var matches = new Dictionary<string, MatchCollection>();
+            if (result.Contract is IHasStrings hasStrings)
+            {
+                var matches = new Dictionary<string, MatchCollection>();
 
-            hasStrings.ApplyStringDecorator(
-                s =>
-                {
-                    var matchCollection = Substitute.InsertionRegex.Matches(s);
-                    if (matchCollection.Count > 0)
+                hasStrings.ApplyStringDecorator(
+                    s =>
                     {
-                        matches[s] = matchCollection;
+                        var matchCollection = Substitute.InsertionRegex.Matches(s);
+                        if (matchCollection.Count > 0)
+                        {
+                            matches[s] = matchCollection;
+                        }
+
+                        return s;
                     }
+                );
 
-                    return s;
-                }
-            );
-
-            if (matches.Count > 0)
-            {
-                result = result with
+                if (matches.Count > 0)
                 {
-                    AdditionalContracts = result.AdditionalContracts.Append(new Substitute(contract.Id, matches))
-                };
+                    yield return result with
+                    {
+                        Contract = result.Contract with { Installer = GetType().Name },
+                        AdditionalContracts = result.AdditionalContracts.Append(new Substitute(contract.Id, matches))
+                    };
+                    continue;
+                }
             }
-        }
 
-        return result with
-        {
-            Contract = result.Contract with
+            yield return result with
             {
-                Installer = GetType().Name
-            }
-        };
+                Contract = result.Contract with { Installer = GetType().Name }
+            };
+        }
     }
 
     /// <inheritdoc />
@@ -79,9 +80,9 @@ public interface IInstaller<in TContract> : IInstaller
 public interface IInstaller
 {
     /// <summary>
-    /// Initializes contract
+    /// Returns all possible ways to initializes contract
     /// </summary>
-    public InstallerInitializeResult Initialize(Contract contract, string prefix, State state);
+    public IEnumerable<InstallerInitializeResult> Initialize(Contract contract, string prefix, State state);
 
     /// <summary>
     /// Returns all contract edges derived from the contract
