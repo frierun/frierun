@@ -7,9 +7,9 @@ public class ContainerInstallerTests : BaseTests
     [Fact]
     public void Install_Container_CreatesNetwork()
     {
-        var package = GetFactory<Package>().Generate() with
+        var package = Factory<Package>().Generate() with
         {
-            Contracts = [GetFactory<Container>().Generate()]
+            Contracts = [Factory<Container>().Generate()]
         };
         
         var application = InstallPackage(package);

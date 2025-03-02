@@ -8,12 +8,12 @@ public class MountInstallerTests : BaseTests
     [Fact]
     public void Install_ContainerWithMount_CreatesVolume()
     {
-        var container = GetFactory<Container>().Generate();
-        var package = GetFactory<Package>().Generate() with
+        var container = Factory<Container>().Generate();
+        var package = Factory<Package>().Generate() with
         {
             Contracts = [
                 container,
-                GetFactory<Mount>().Generate() with { ContainerName = container.Name }
+                Factory<Mount>().Generate() with { ContainerName = container.Name }
             ]
         };
         

@@ -18,10 +18,10 @@ public class InstallerRegistryTests : BaseTests
     {
         var registry = Resolve<InstallerRegistry>();
 
-        var result = registry.GetInstaller(contractType);
+        var result = registry.GetInstallers(contractType).ToList();
 
-        Assert.NotNull(result);
-        Assert.IsType(installerType, result);
+        Assert.Single(result);
+        Assert.IsType(installerType, result[0]);
     }
     
     [Fact]
@@ -29,9 +29,9 @@ public class InstallerRegistryTests : BaseTests
     {
         var registry = Resolve<InstallerRegistry>();
 
-        var result = registry.GetInstaller(typeof(Application));
+        var result = registry.GetInstallers(typeof(Application));
 
-        Assert.Null(result);
+        Assert.Empty(result);
     }
     
     [Fact]
@@ -43,10 +43,11 @@ public class InstallerRegistryTests : BaseTests
         state.AddResource(application);
         var registry = Resolve<InstallerRegistry>();
 
-        var result = registry.GetInstaller(typeof(HttpEndpoint));
+        var result = registry.GetInstallers(typeof(HttpEndpoint)).ToList();
 
-        Assert.NotNull(result);
-        Assert.IsType<TraefikHttpEndpointInstaller>(result);
+        Assert.Equal(2, result.Count);
+        Assert.IsType<TraefikHttpEndpointInstaller>(result[0]);
+        Assert.IsType<PortHttpEndpointInstaller>(result[1]);
     }
     
     [Fact]
@@ -58,10 +59,11 @@ public class InstallerRegistryTests : BaseTests
         var state = Resolve<State>();
         state.AddResource(application);
 
-        var result = registry.GetInstaller(typeof(HttpEndpoint));
+        var result = registry.GetInstallers(typeof(HttpEndpoint)).ToList();
 
-        Assert.NotNull(result);
-        Assert.IsType<TraefikHttpEndpointInstaller>(result);
+        Assert.Equal(2, result.Count);
+        Assert.IsType<TraefikHttpEndpointInstaller>(result[0]);
+        Assert.IsType<PortHttpEndpointInstaller>(result[1]);
     }    
     
     [Fact]
@@ -74,10 +76,10 @@ public class InstallerRegistryTests : BaseTests
         var registry = Resolve<InstallerRegistry>();
         state.RemoveResource(application);
 
-        var result = registry.GetInstaller(typeof(HttpEndpoint));
+        var result = registry.GetInstallers(typeof(HttpEndpoint)).ToList();
 
-        Assert.NotNull(result);
-        Assert.IsType<PortHttpEndpointInstaller>(result);
+        Assert.Single(result);
+        Assert.IsType<PortHttpEndpointInstaller>(result[0]);
     }
     
     [Theory]

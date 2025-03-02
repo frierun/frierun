@@ -43,7 +43,7 @@ public class NetworkInstaller(DockerService dockerService) : IInstaller<Network>
                     Configure = containerContract.Configure.Append(
                         parameters =>
                         {
-                            parameters.Labels["com.docker.compose.project"] = plan.Prefix;
+                            parameters.Labels["com.docker.compose.project"] = networkName;
                             parameters.Labels["com.docker.compose.service"] = containerContract.Name;
 
                             parameters.NetworkingConfig.EndpointsConfig = new Dictionary<string, EndpointSettings>

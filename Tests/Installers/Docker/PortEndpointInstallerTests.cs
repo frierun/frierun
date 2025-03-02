@@ -7,13 +7,13 @@ public class PortEndpointInstallerTests : BaseTests
     [Fact]
     public void Install_ContainerWithPortEndpoint_ContainerDependsOnPortEndpoint()
     {
-        var container = GetFactory<Container>().Generate();
-        var package = GetFactory<Package>().Generate() with
+        var container = Factory<Container>().Generate();
+        var package = Factory<Package>().Generate() with
         {
             Contracts =
             [
                 container,
-                GetFactory<PortEndpoint>().Generate() with {ContainerName = container.Name}
+                Factory<PortEndpoint>().Generate() with {ContainerName = container.Name}
             ]
         };
 

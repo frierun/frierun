@@ -7,13 +7,13 @@ public class NetworkInstallerTests : BaseTests
     [Fact]
     public void Install_ContainerWithNetwork_ContainerDependsOnNetwork()
     {
-        var network = GetFactory<Network>().Generate();
-        var package = GetFactory<Package>().Generate() with
+        var network = Factory<Network>().Generate();
+        var package = Factory<Package>().Generate() with
         {
             Contracts =
             [
                 network,
-                GetFactory<Container>().Generate() with { NetworkName = network.NetworkName! },
+                Factory<Container>().Generate() with { NetworkName = network.NetworkName! },
             ]
         };
 

@@ -10,9 +10,7 @@ public class ExecutionPlan : IExecutionPlan
     private readonly Dictionary<ContractId, Resource?> _resources = new();
     private readonly DirectedAcyclicGraph<ContractId> _graph = new();
 
-    public ContractId<Package> RootContractId { get; }
-    private Package Package => (Package)_contracts[RootContractId];
-    public string Prefix => Package.Prefix ?? Package.Name;
+    private ContractId<Package> RootContractId { get; }
 
     public State State { get; }
 
@@ -57,15 +55,7 @@ public class ExecutionPlan : IExecutionPlan
     /// </summary>
     private IInstaller GetInstaller(Contract contract)
     {
-        var installer = _installerRegistry.GetInstaller(contract.GetType(), contract.Installer);
-        if (installer == null)
-        {
-            throw contract.Installer == null
-                ? new Exception($"Can't find default installer for resource {contract.GetType()}")
-                : new Exception($"Can't find installer '{contract.Installer}' for resource {contract.GetType()}");
-        }
-
-        return installer;
+        return _installerRegistry.GetInstallers(contract.GetType(), contract.Installer).First();
     }
 
     /// <summary>

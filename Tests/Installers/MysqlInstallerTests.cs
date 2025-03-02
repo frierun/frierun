@@ -16,7 +16,7 @@ public class MysqlInstallerTests : BaseTests
                       ?? throw new Exception("Mysql package not found");
 
         _installerRegistry = Resolve<InstallerRegistry>();
-        Assert.Null(_installerRegistry.GetInstaller(typeof(Mysql), "MysqlInstaller"));
+        Assert.Empty(_installerRegistry.GetInstallers(typeof(Mysql), "MysqlInstaller"));
 
         _application = InstallPackage(package)
                        ?? throw new Exception("Mysql application not installed");
@@ -25,7 +25,7 @@ public class MysqlInstallerTests : BaseTests
     [Fact]
     public void Install_MysqlPackage_AddsMysqlInstaller()
     {
-        Assert.NotNull(_installerRegistry.GetInstaller(typeof(Mysql), "MysqlInstaller"));
+        Assert.Single(_installerRegistry.GetInstallers(typeof(Mysql), "MysqlInstaller"));
         Assert.NotNull(_installerRegistry.GetUninstaller(typeof(MysqlDatabase)));
     }
 
@@ -34,14 +34,14 @@ public class MysqlInstallerTests : BaseTests
     {
         Resolve<UninstallService>().Handle(_application);
 
-        Assert.Null(_installerRegistry.GetInstaller(typeof(Mysql), "MysqlInstaller"));
+        Assert.Empty(_installerRegistry.GetInstallers(typeof(Mysql), "MysqlInstaller"));
         Assert.Null(_installerRegistry.GetUninstaller(typeof(MysqlDatabase)));
     }
     
     [Fact]
     public void Install_PackageWithMysql_CreatesMysqlDatabase()
     {
-        var package = GetFactory<Package>().Generate() with
+        var package = Factory<Package>().Generate() with
         {
             Contracts =
             [

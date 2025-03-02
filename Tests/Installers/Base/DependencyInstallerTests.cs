@@ -9,7 +9,7 @@ public class DependencyInstallerTests : BaseTests
     [InlineData(true)]
     public void Install_TwoContainerWithDependency_CreatesDependency(bool reverseOrder)
     {
-        var containers = GetFactory<Container>().Generate(2);
+        var containers = Factory<Container>().Generate(2);
         var contracts = new List<Contract>(
             [
                 containers[0],
@@ -22,7 +22,7 @@ public class DependencyInstallerTests : BaseTests
             contracts.Reverse();
         }
 
-        var package = GetFactory<Package>().Generate() with
+        var package = Factory<Package>().Generate() with
         {
             Contracts = contracts
         };

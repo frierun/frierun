@@ -14,7 +14,7 @@ public class ExecutionService(
     /// </summary>
     public ExecutionPlan Create(Package package)
     {
-        var contracts = CollectContracts(package);
+        var contracts = DiscoverContracts(package);
         return new ExecutionPlan(
             package,
             contracts,
@@ -24,75 +24,55 @@ public class ExecutionService(
     }
 
     /// <summary>
-    /// Collects all contracts in the package.
+    /// Discovers and collects all contracts required to fulfill the package.
     /// </summary>
-    private Dictionary<ContractId, Contract> CollectContracts(Package package)
+    private Dictionary<ContractId, Contract> DiscoverContracts(Package package)
     {
-        var emptyContracts = new HashSet<ContractId>();
-        var queue = new Queue<Contract>();
-        var contracts = new Dictionary<ContractId, Contract>();
-        string prefix = package.Prefix ?? package.Name;
-        queue.Enqueue(package);
+        var branchesStack = new Stack<(DiscoveryGraph graph, Queue<InstallerInitializeResult> queue)>();
+        var discoveryGraph = new DiscoveryGraph();
 
-
-        while (queue.Count > 0 || emptyContracts.Count > 0)
+        discoveryGraph.Apply(DiscoverContract(package).First());
+        var initializedPackage = (Package) discoveryGraph.Contracts[package.Id];
+        var prefix = initializedPackage.Prefix ?? initializedPackage.Name;
+        
+        var (nextId, nextContract) = discoveryGraph.Next();
+        while (nextId != null)
         {
-            if (queue.Count == 0)
+            nextContract ??= contractRegistry.CreateContract(nextId);
+
+            var branches = new Queue<InstallerInitializeResult>(DiscoverContract(nextContract, prefix));
+            if (branches.Count == 0)
             {
-                var contractId = emptyContracts.First();
-                emptyContracts.Remove(contractId);
-                if (contracts.ContainsKey(contractId))
+                // no variants found for that contract, rollback to the previous branching point
+                if (branchesStack.Count == 0)
                 {
-                    continue;
+                    throw new Exception($"No possible branches found");
                 }
-
-                queue.Enqueue(contractRegistry.CreateContract(contractId));
+                (discoveryGraph, branches) = branchesStack.Pop();
             }
 
-            var contract = queue.Dequeue();
-            if (contracts.ContainsKey(contract.Id))
+            var branch = branches.Dequeue();
+            
+            if (branches.Count > 0)
             {
-                continue;
+                branchesStack.Push((new DiscoveryGraph(discoveryGraph), branches));
             }
-
-            var result = GetInstaller(contract).Initialize(contract, prefix, state);
-
-            contracts[contract.Id] = result.Contract;
-            if (contract is Package initializedPackage)
-            {
-                prefix = initializedPackage.Prefix ?? initializedPackage.Name;
-            }
-
-            foreach (var additionalContract in result.AdditionalContracts)
-            {
-                queue.Enqueue(additionalContract);
-            }
-
-            foreach (var contractId in result.RequiredContracts)
-            {
-                if (!contracts.ContainsKey(contractId))
-                {
-                    emptyContracts.Add(contractId);
-                }
-            }
+            
+            discoveryGraph.Apply(branch);
+            (nextId, nextContract) = discoveryGraph.Next();
         }
 
-        return contracts;
+        return discoveryGraph.Contracts;
     }
 
     /// <summary>
-    /// Gets installer for the contract.
+    /// Discovers all possible dependent contracts for the given contract.
     /// </summary>
-    private IInstaller GetInstaller(Contract contract)
+    private IEnumerable<InstallerInitializeResult> DiscoverContract(Contract contract, string? prefix = null)
     {
-        var installer = installerRegistry.GetInstaller(contract.GetType(), contract.Installer);
-        if (installer == null)
+        foreach (var installer in installerRegistry.GetInstallers(contract.GetType(), contract.Installer))
         {
-            throw contract.Installer == null
-                ? new Exception($"Can't find default installer for resource {contract.GetType()}")
-                : new Exception($"Can't find installer '{contract.Installer}' for resource {contract.GetType()}");
+            yield return installer.Initialize(contract, prefix ?? "", state);
         }
-
-        return installer;
     }
 }

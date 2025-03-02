@@ -7,7 +7,7 @@ public class PasswordInstallerTests : BaseTests
     [Fact]
     public void Install_Password_CreatesRandomString()
     {
-        var package = GetFactory<Package>().Generate() with
+        var package = Factory<Package>().Generate() with
         {
             Contracts = [new Password()]
         };
@@ -23,7 +23,7 @@ public class PasswordInstallerTests : BaseTests
     [Fact]
     public void Install_Password_CanBeInserted()
     {
-        var package = GetFactory<Package>().Generate() with
+        var package = Factory<Package>().Generate() with
         {
             ApplicationDescription = "GeneratedPassword: {{Password::Value}}",
             Contracts = [new Password()]

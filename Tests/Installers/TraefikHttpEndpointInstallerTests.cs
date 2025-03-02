@@ -16,7 +16,7 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
                       ?? throw new Exception("Traefik package not found");
 
         _installerRegistry = Resolve<InstallerRegistry>();
-        Assert.Null(_installerRegistry.GetInstaller(typeof(HttpEndpoint), "TraefikHttpEndpointInstaller"));
+        Assert.Empty(_installerRegistry.GetInstallers(typeof(HttpEndpoint), "TraefikHttpEndpointInstaller"));
 
         _application = InstallPackage(package)
                        ?? throw new Exception("Traefik application not installed");
@@ -25,7 +25,7 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
     [Fact]
     public void Install_TraefikPackage_AddsTraefikHttpEndpointInstaller()
     {
-        Assert.NotNull(_installerRegistry.GetInstaller(typeof(HttpEndpoint), "TraefikHttpEndpointInstaller"));
+        Assert.Single(_installerRegistry.GetInstallers(typeof(HttpEndpoint), "TraefikHttpEndpointInstaller"));
         Assert.NotNull(_installerRegistry.GetUninstaller(typeof(TraefikHttpEndpoint)));
     }
 
@@ -34,20 +34,20 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
     {
         Resolve<UninstallService>().Handle(_application);
 
-        Assert.Null(_installerRegistry.GetInstaller(typeof(HttpEndpoint), "TraefikHttpEndpointInstaller"));
+        Assert.Empty(_installerRegistry.GetInstallers(typeof(HttpEndpoint), "TraefikHttpEndpointInstaller"));
         Assert.Null(_installerRegistry.GetUninstaller(typeof(TraefikHttpEndpoint)));
     }
 
     [Fact]
     public void Install_ContainerWithHttpEndpoint_ContainerDependsOnTraefik()
     {
-        var container = GetFactory<Container>().Generate();
-        var package = GetFactory<Package>().Generate() with
+        var container = Factory<Container>().Generate();
+        var package = Factory<Package>().Generate() with
         {
             Contracts =
             [
                 container,
-                GetFactory<HttpEndpoint>().Generate() with { ContainerName = container.Name }
+                Factory<HttpEndpoint>().Generate() with { ContainerName = container.Name }
             ]
         };
 

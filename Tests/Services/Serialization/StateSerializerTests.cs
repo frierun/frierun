@@ -32,7 +32,7 @@ public class StateSerializerTests : BaseTests
     [Fact]
     public void Load_FileWithApplication_ReturnsNewInstanceOfApplication()
     {
-        var application = GetFactory<Application>().Generate();
+        var application = Factory<Application>().Generate();
         var state = new State();
         state.AddResource(application);
         var stateManager = Resolve<StateSerializer>();
@@ -48,7 +48,7 @@ public class StateSerializerTests : BaseTests
     [Fact]
     public void Load_FileWithApplication_ReturnsSameInstanceOfPackage()
     {
-        var application = GetFactory<Application>().Generate();
+        var application = Factory<Application>().Generate();
         var state = new State();
         state.AddResource(application);
         var stateManager = Resolve<StateSerializer>();
@@ -63,7 +63,7 @@ public class StateSerializerTests : BaseTests
     [Fact]
     public void Save_StateWithApplication_DoesntSerializePackageContent()
     {
-        var application = GetFactory<Application>().Generate();
+        var application = Factory<Application>().Generate();
         var state = new State();
         state.AddResource(application);
         var stateManager = Resolve<StateSerializer>();

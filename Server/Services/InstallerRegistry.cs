@@ -134,22 +134,26 @@ public class InstallerRegistry
                 }
             );
     }
-
+    
     /// <summary>
-    /// Gets specific installer for the resource type or default if name is null
+    /// Gets possible installers for the resource type
     /// </summary>
-    public IInstaller? GetInstaller(Type contractType, string? name = null)
+    public IEnumerable<IInstaller> GetInstallers(Type contractType, string? name = null)
     {
         if (!_installers.TryGetValue(contractType, out var installers))
         {
-            return null;
+            yield break;
         }
 
-        return name == null
-            ? installers.FirstOrDefault()
-            : installers.FirstOrDefault(installer => installer.GetType().Name == name);
+        foreach (var installer in installers)
+        {
+            if (name == null || installer.GetType().Name == name)
+            {
+                yield return installer;
+            }
+        }
     }
-
+    
     /// <summary>
     /// Gets uninstaller for the resource type.
     /// </summary>
