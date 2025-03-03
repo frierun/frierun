@@ -32,8 +32,12 @@ public class ContractRegistryTests : BaseTests
     [InlineData(typeof(Container))]
     [InlineData(typeof(File))]
     [InlineData(typeof(HttpEndpoint))]
+    [InlineData(typeof(Mysql))]
+    [InlineData(typeof(Network))]
     [InlineData(typeof(Package))]
     [InlineData(typeof(Parameter))]
+    [InlineData(typeof(Password))]
+    [InlineData(typeof(Volume))]
     public void CreateContract_ExistingType_ReturnsCorrectContract(Type type)
     {
         var contractRegistry = Resolve<ContractRegistry>();

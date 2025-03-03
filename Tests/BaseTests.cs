@@ -27,7 +27,7 @@ public abstract class BaseTests
         Provider ??= GetContainerBuilder().Build();
         return Provider.Resolve<T>();
     }
-    
+
     protected ContainerBuilder GetContainerBuilder()
     {
         if (Provider != null)
@@ -79,7 +79,16 @@ public abstract class BaseTests
         dockerClient.Containers
             .StartContainerAsync(default, default)
             .ReturnsForAnyArgs(Task.FromResult(true));
-        
+        dockerClient.Exec
+            .ExecCreateContainerAsync(default, default)
+            .ReturnsForAnyArgs(Task.FromResult(new ContainerExecCreateResponse()
+            {
+                ID = "execId"
+            }));
+
+        dockerClient.Exec
+            .StartAndAttachContainerExecAsync(default, default)
+            .ReturnsForAnyArgs(Task.FromResult(new MultiplexedStream(new MemoryStream(), false)));
         
         return ContainerBuilder;
     }
@@ -87,7 +96,7 @@ public abstract class BaseTests
     /// <summary>
     /// Gets factory for generating test data.
     /// </summary>
-    protected Faker<T> GetFactory<T>()
+    protected Faker<T> Factory<T>()
         where T : class
     {
         return Resolve<Faker<T>>().Clone();
@@ -99,10 +108,21 @@ public abstract class BaseTests
     protected T Mock<T>()
         where T : class
     {
+        return Mock<T, T>();
+    }
+    
+    /// <summary>
+    /// Creates mock service and registers it in the container.
+    /// </summary>
+    protected T Mock<T, TService>()
+        where T : class, TService
+        where TService : class
+    {
         var mock = Substitute.For<T>();
-        GetContainerBuilder().RegisterInstance(mock).As<T>().SingleInstance();
+        GetContainerBuilder().RegisterInstance(mock).As<TService>().SingleInstance();
         return mock;
     }
+    
 
     /// <summary>
     /// Installs package and returns application.
