@@ -51,9 +51,9 @@ public class MysqlInstaller(DockerService dockerService, Application application
 
         RunSql(
             $"""
-             CREATE DATABASE {name};
+             CREATE DATABASE `{name}`;
              CREATE USER '{name}'@'%' IDENTIFIED BY '{password}';
-             GRANT ALL PRIVILEGES ON {name}.* TO '{name}'@'%';
+             GRANT ALL PRIVILEGES ON `{name}`.* TO '{name}'@'%';
              FLUSH PRIVILEGES;
              """
         );
@@ -75,8 +75,8 @@ public class MysqlInstaller(DockerService dockerService, Application application
     {
         RunSql(
             $"""
-             DROP DATABASE {resource.Database};
-             DROP USER {resource.User};
+             DROP DATABASE `{resource.Database}`;
+             DROP USER '{resource.User}';
              """
         );
 
