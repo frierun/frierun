@@ -28,6 +28,7 @@ public class ContractRegistry
             nameof(Container) => new Container(name),
             nameof(File) => new File(name),
             nameof(HttpEndpoint) => new HttpEndpoint(name),
+            nameof(Mysql) => new Mysql(name),
             nameof(Network) => new Network(name),
             nameof(Package) => new Package(name),
             nameof(Parameter) => new Parameter(name),

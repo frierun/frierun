@@ -81,7 +81,7 @@ public class ContainerInstaller(DockerService dockerService) : IInstaller<Contai
 
         return new DockerContainer(contract.ContainerName!)
         {
-            DependsOn = plan.GetPrerequisites(contract.Id).Select(plan.GetResource).OfType<Resource>().ToList()
+            DependsOn = plan.GetDependentResources(contract.Id).ToList()
         };
     }
 

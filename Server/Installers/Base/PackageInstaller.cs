@@ -36,16 +36,14 @@ public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
     /// <inheritdoc />
     Resource IInstaller<Package>.Install(Package package, ExecutionPlan plan)
     {
-        var dependencies = package.Contracts
-            .Select(contract => plan.GetResource(contract.Id))
-            .OfType<Resource>()
-            .ToList();
-        
+        var dependencies = plan.GetDependentResources(package.Id).ToList();
+
         var url = package.ApplicationUrl;
         if (url == null)
         {
             url = dependencies.OfType<GenericHttpEndpoint>().FirstOrDefault()?.Url.ToString();
         }
+
         if (url == null)
         {
             var portEndpoint = dependencies.OfType<DockerPortEndpoint>().FirstOrDefault();
@@ -54,8 +52,7 @@ public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
                 url = $"{portEndpoint.Protocol.ToString().ToLower()}://{portEndpoint.Ip}:{portEndpoint.Port}";
             }
         }
-        
-        
+
         return new Application(
             Name: package.Prefix!,
             Package: package,

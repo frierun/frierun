@@ -55,7 +55,8 @@ public class PackageTests : BaseTests
         // uninstall package
         UninstallApplication(application);
 
-        Assert.Null(state.Resources.OfType<Application>().FirstOrDefault(app => app.Name == package.Name));
+        //Assert.Null(state.Resources.OfType<Application>().FirstOrDefault(app => app.Name == package.Name));
+        Assert.Empty(state.Resources);
         containers = await dockerClient.Containers.ListContainersAsync(new ContainersListParameters());
         Assert.Empty(containers);
     }

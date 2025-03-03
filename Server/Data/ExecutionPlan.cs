@@ -142,10 +142,36 @@ public class ExecutionPlan : IExecutionPlan
     }
 
     /// <summary>
-    /// Gets all contracts that are prerequisites for the given contract.
+    /// Gets all resources that are prerequisites for the given contract.
+    /// If a required contract doesn't emit resource, get its prerequisites recursively.
     /// </summary>
-    public IEnumerable<ContractId> GetPrerequisites(ContractId contractId)
+    public IEnumerable<Resource> GetDependentResources(ContractId contractId)
     {
-        return _graph.GetPrerequisites(contractId);
+        var visited = new HashSet<ContractId>();
+        var queue = new Queue<ContractId>();
+
+        queue.Enqueue(contractId);
+        while (queue.Count > 0)
+        {
+            var current = queue.Dequeue();
+
+            foreach (var prerequisite in _graph.GetPrerequisites(current))
+            {
+                if (!visited.Add(prerequisite))
+                {
+                    continue;
+                }
+                
+                var resource = GetResource(prerequisite);
+                if (resource != null)
+                {
+                    yield return resource;
+                }
+                else
+                {
+                    queue.Enqueue(prerequisite);
+                }
+            }
+        }
     }
 }
