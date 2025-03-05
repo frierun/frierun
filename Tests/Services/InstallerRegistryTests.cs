@@ -34,9 +34,9 @@ public class InstallerRegistryTests : BaseTests
 
         Assert.Empty(result);
     }
-    
+
     [Fact]
-    public void GetInstaller_HasTraefik_ReturnsTraefikInstaller()
+    public void GetInstaller_HasTraefik_ReturnsBothInstallers()
     {
         var package = new Package("traefik");
         var application = new Application("traefik", package);
@@ -52,7 +52,7 @@ public class InstallerRegistryTests : BaseTests
     }
     
     [Fact]
-    public void GetInstaller_AddTraefik_ReturnsTraefikInstaller()
+    public void GetInstaller_AddTraefik_ReturnsBothInstallers()
     {
         var package = new Package("traefik");
         var registry = Resolve<InstallerRegistry>();
@@ -82,6 +82,40 @@ public class InstallerRegistryTests : BaseTests
         Assert.Single(result);
         Assert.IsType<PortHttpEndpointInstaller>(result[0]);
     }
+
+    public static IEnumerable<object[]> PackagesWithInstallers()
+    {
+        yield return ["traefik", typeof(TraefikHttpEndpointInstaller), typeof(HttpEndpoint)];
+        yield return ["mysql", typeof(MysqlInstaller), typeof(Mysql)];
+        yield return ["mariadb", typeof(MysqlInstaller), typeof(Mysql)];
+        yield return ["postgresql", typeof(PostgresqlInstaller), typeof(Postgresql)];
+    }
+
+    [Theory]
+    [MemberData(nameof(PackagesWithInstallers))]
+    public void GetInstaller_InstallPackage_AddsInstaller(string packageName, Type installerType, Type contractType)
+    {
+        var installerRegistry = Resolve<InstallerRegistry>();
+        Assert.Empty(installerRegistry.GetInstallers(contractType, installerType.Name));
+        
+        var application = InstallPackage(packageName);
+
+        Assert.NotNull(application);
+        Assert.Single(installerRegistry.GetInstallers(contractType, installerType.Name));
+    }
+    
+    [Theory]
+    [MemberData(nameof(PackagesWithInstallers))]
+    public void GetInstaller_UninstallPackage_RemovesInstaller(string packageName, Type installerType, Type contractType)
+    {
+        var installerRegistry = Resolve<InstallerRegistry>();
+        var application = InstallPackage(packageName);
+        Assert.NotNull(application);
+
+        Resolve<UninstallService>().Handle(application);
+        
+        Assert.Empty(installerRegistry.GetInstallers(contractType, installerType.Name));
+    }
     
     [Theory]
     [InlineData(typeof(Application), typeof(PackageInstaller))]
@@ -108,48 +142,37 @@ public class InstallerRegistryTests : BaseTests
         Assert.Null(result);
     }
     
-    [Fact]
-    public void GetUninstaller_HasTraefik_ReturnsTraefikInstaller()
+    public static IEnumerable<object[]> PackagesWithUninstallers()
     {
-        var package = new Package("traefik");
-        var application = new Application("traefik", package);
-        var state = Resolve<State>();
-        state.AddResource(application);
-        var registry = Resolve<InstallerRegistry>();
+        yield return ["traefik", typeof(TraefikHttpEndpoint)];
+        yield return ["mysql", typeof(MysqlDatabase)];
+        yield return ["mariadb", typeof(MysqlDatabase)];
+        yield return ["postgresql", typeof(PostgresqlDatabase)];
+    }
 
-        var result = registry.GetUninstaller(typeof(TraefikHttpEndpoint));
+    [Theory]
+    [MemberData(nameof(PackagesWithUninstallers))]
+    public void GetUninstaller_InstallPackage_AddsInstaller(string packageName, Type resourceType)
+    {
+        var installerRegistry = Resolve<InstallerRegistry>();
+        Assert.Null(installerRegistry.GetUninstaller(resourceType));
+        
+        var application = InstallPackage(packageName);
 
-        Assert.NotNull(result);
-        Assert.IsType<TraefikHttpEndpointInstaller>(result);
+        Assert.NotNull(application);
+        Assert.NotNull(installerRegistry.GetUninstaller(resourceType));
     }
     
-    [Fact]
-    public void GetUninstaller_AddTraefik_ReturnsTraefikInstaller()
+    [Theory]
+    [MemberData(nameof(PackagesWithUninstallers))]
+    public void GetUninstaller_UninstallPackage_RemovesInstaller(string packageName,Type resourceType)
     {
-        var package = new Package("traefik");
-        var registry = Resolve<InstallerRegistry>();
-        var application = new Application("traefik", package);
-        var state = Resolve<State>();
-        state.AddResource(application);
+        var installerRegistry = Resolve<InstallerRegistry>();
+        var application = InstallPackage(packageName);
+        Assert.NotNull(application);
 
-        var result = registry.GetUninstaller(typeof(TraefikHttpEndpoint));
-
-        Assert.NotNull(result);
-        Assert.IsType<TraefikHttpEndpointInstaller>(result);
-    }    
-    
-    [Fact]
-    public void GetUninstaller_RemoveTraefik_ReturnsDefaultInstaller()
-    {
-        var package = new Package("traefik");
-        var application = new Application("traefik", package);
-        var state = Resolve<State>();
-        state.AddResource(application);
-        var registry = Resolve<InstallerRegistry>();
-        state.RemoveResource(application);
-
-        var result = registry.GetUninstaller(typeof(TraefikHttpEndpoint));
-
-        Assert.Null(result);
+        Resolve<UninstallService>().Handle(application);
+        
+        Assert.Null(installerRegistry.GetUninstaller(resourceType));
     }
 }

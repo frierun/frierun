@@ -17,7 +17,7 @@ public abstract class BaseTests
 {
     private IContainer? Provider { get; set; }
     private ContainerBuilder? ContainerBuilder { get; set; }
-    
+
     /// <summary>
     /// Resolves object from the provider.
     /// </summary>
@@ -34,27 +34,27 @@ public abstract class BaseTests
         {
             throw new Exception("Can't configure container after it was built.");
         }
-        
+
         if (ContainerBuilder != null)
         {
             return ContainerBuilder;
         }
-        
+
         ContainerBuilder = new ContainerBuilder();
-        
+
         var services = new ServiceCollection();
         services.AddLogging();
         ContainerBuilder.Populate(services);
 
         ContainerBuilder.RegisterModule(new AutofacModule());
-        
+
         ContainerBuilder.RegisterType<Faker>().SingleInstance();
         ContainerBuilder.RegisterType<TemporaryFile>().SingleInstance();
 
         ContainerBuilder.Register<string>(context => context.Resolve<TemporaryFile>())
             .Named<string>("stateFilePath")
             .SingleInstance();
-        
+
         // find all factories
         foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
         {
@@ -66,11 +66,11 @@ public abstract class BaseTests
                     ContainerBuilder.RegisterType(type).As(iterator).SingleInstance();
                     break;
                 }
-                
+
                 iterator = iterator.BaseType;
             }
         }
-        
+
         // mock docker client
         var dockerClient = Mock<IDockerClient>();
         dockerClient.Containers
@@ -81,18 +81,22 @@ public abstract class BaseTests
             .ReturnsForAnyArgs(Task.FromResult(true));
         dockerClient.Exec
             .ExecCreateContainerAsync(default, default)
-            .ReturnsForAnyArgs(Task.FromResult(new ContainerExecCreateResponse()
-            {
-                ID = "execId"
-            }));
+            .ReturnsForAnyArgs(
+                Task.FromResult(
+                    new ContainerExecCreateResponse()
+                    {
+                        ID = "execId"
+                    }
+                )
+            );
 
         dockerClient.Exec
             .StartAndAttachContainerExecAsync(default, default)
             .ReturnsForAnyArgs(Task.FromResult(new MultiplexedStream(new MemoryStream(), false)));
-        
+
         return ContainerBuilder;
     }
-    
+
     /// <summary>
     /// Gets factory for generating test data.
     /// </summary>
@@ -110,7 +114,7 @@ public abstract class BaseTests
     {
         return Mock<T, T>();
     }
-    
+
     /// <summary>
     /// Creates mock service and registers it in the container.
     /// </summary>
@@ -122,7 +126,18 @@ public abstract class BaseTests
         GetContainerBuilder().RegisterInstance(mock).As<TService>().SingleInstance();
         return mock;
     }
-    
+
+    /// <summary>
+    /// Installs package by name and returns application
+    /// </summary>
+    protected Application? InstallPackage(string name)
+    {
+        Resolve<PackageRegistry>().Load();
+        var package = Resolve<PackageRegistry>().Find(name)
+                      ?? throw new Exception($"Package {name} not found");
+
+        return InstallPackage(package);
+    }
 
     /// <summary>
     /// Installs package and returns application.

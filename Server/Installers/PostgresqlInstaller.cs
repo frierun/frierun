@@ -4,17 +4,17 @@ using Frierun.Server.Services;
 
 namespace Frierun.Server.Installers;
 
-public class MysqlInstaller(DockerService dockerService, Application application)
-    : IInstaller<Mysql>, IUninstaller<MysqlDatabase>
+public class PostgresqlInstaller(DockerService dockerService, Application application)
+    : IInstaller<Postgresql>, IUninstaller<PostgresqlDatabase>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<Mysql>.Initialize(Mysql contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<Postgresql>.Initialize(Postgresql contract, string prefix, State state)
     {
         var baseName = contract.DatabaseName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
 
         var count = 1;
         var name = baseName;
-        while (state.Resources.OfType<MysqlDatabase>().Any(c => c.Database == name))
+        while (state.Resources.OfType<PostgresqlDatabase>().Any(c => c.Database == name))
         {
             count++;
             name = $"{baseName}{count}";
@@ -27,13 +27,13 @@ public class MysqlInstaller(DockerService dockerService, Application application
     }
 
     /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<Mysql>.GetDependencies(Mysql contract, ExecutionPlan plan)
+    IEnumerable<ContractDependency> IInstaller<Postgresql>.GetDependencies(Postgresql contract, ExecutionPlan plan)
     {
         yield return new ContractDependency(contract.NetworkId, contract.Id);
     }
 
     /// <inheritdoc />
-    Resource IInstaller<Mysql>.Install(Mysql contract, ExecutionPlan plan)
+    Resource IInstaller<Postgresql>.Install(Postgresql contract, ExecutionPlan plan)
     {
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
 
@@ -51,16 +51,15 @@ public class MysqlInstaller(DockerService dockerService, Application application
 
         RunSql(
             $"""
-             CREATE DATABASE `{name}`;
-             CREATE USER '{name}'@'%' IDENTIFIED BY '{password}';
-             GRANT ALL PRIVILEGES ON `{name}`.* TO '{name}'@'%';
-             FLUSH PRIVILEGES;
+             CREATE DATABASE "{name}";
+             CREATE USER "{name}" WITH ENCRYPTED PASSWORD '{password}';
+             GRANT ALL PRIVILEGES ON DATABASE "{name}" TO "{name}";
              """
         );
 
         dockerService.AttachNetwork(network.Name, container.Name).Wait();
 
-        return new MysqlDatabase(name, password, name, container.Name)
+        return new PostgresqlDatabase(name, password, name, container.Name)
         {
             DependsOn =
             [
@@ -71,12 +70,12 @@ public class MysqlInstaller(DockerService dockerService, Application application
     }
 
     /// <inheritdoc />
-    void IUninstaller<MysqlDatabase>.Uninstall(MysqlDatabase resource)
+    void IUninstaller<PostgresqlDatabase>.Uninstall(PostgresqlDatabase resource)
     {
         RunSql(
             $"""
-             DROP DATABASE `{resource.Database}`;
-             DROP USER '{resource.User}';
+             DROP DATABASE "{resource.Database}";
+             DROP USER "{resource.User}";
              """
         );
 
@@ -91,16 +90,15 @@ public class MysqlInstaller(DockerService dockerService, Application application
     }
 
     /// <summary>
-    /// Run sql with root privileges on the installed mysql server
+    /// Run sql with admin privileges on the installed postgresql server
     /// </summary>
     private void RunSql(string sql)
     {
         var container = application.DependsOn.OfType<DockerContainer>().First();
-        var rootPassword = application.DependsOn.OfType<GeneratedPassword>().First().Value;
 
         dockerService.ExecInContainer(
             container.Name,
-            ["mysql", "-u", "root", $"-p{rootPassword}", "-e", sql]
+            ["psql", "-U", "postgres", "-c", sql]
         ).Wait();
     }
 }

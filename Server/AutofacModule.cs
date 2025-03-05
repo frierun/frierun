@@ -36,6 +36,9 @@ public class AutofacModule : Module
         builder.RegisterType<MysqlInstaller>()
             .Named<IInstaller>("mariadb")
             .InstancePerDependency();
+        builder.RegisterType<PostgresqlInstaller>()
+            .Named<IInstaller>("postgresql")
+            .InstancePerDependency();
         
         // Services
         builder.RegisterType<ContractRegistry>().AsSelf().SingleInstance();

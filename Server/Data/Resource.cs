@@ -13,6 +13,7 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(ResolvedParameter), nameof(ResolvedParameter))]
 [JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
 [JsonDerivedType(typeof(MysqlDatabase), nameof(MysqlDatabase))]
+[JsonDerivedType(typeof(PostgresqlDatabase), nameof(PostgresqlDatabase))]
 public abstract record Resource
 {
     private readonly List<Resource> _dependsOn = [];
