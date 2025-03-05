@@ -32,7 +32,7 @@ public class ExecutionServiceTests : BaseTests
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
 
-        Assert.Throws<Exception>(() => service.Create(package));
+        Assert.Throws<InstallerNotFoundException>(() => service.Create(package));
     }
 
     [Fact]
@@ -47,7 +47,7 @@ public class ExecutionServiceTests : BaseTests
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>(), Arg.Any<State>())
             .Returns([]);
 
-        Assert.Throws<Exception>(() => service.Create(package));
+        Assert.Throws<InstallerNotFoundException>(() => service.Create(package));
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public class ExecutionServiceTests : BaseTests
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>(), Arg.Any<State>())
             .Returns([new InstallerInitializeResult(contract, null, [unknownContract])]);
 
-        Assert.Throws<Exception>(() => service.Create(package));
+        Assert.Throws<InstallerNotFoundException>(() => service.Create(package));
     }
     
     [Fact]

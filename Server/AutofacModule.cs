@@ -26,11 +26,15 @@ public class AutofacModule : Module
             .AsImplementedInterfaces()
             .SingleInstance();
 
+        // Package specific installers
         builder.RegisterType<TraefikHttpEndpointInstaller>()
             .Named<IInstaller>("traefik")
             .InstancePerDependency();
         builder.RegisterType<MysqlInstaller>()
             .Named<IInstaller>("mysql")
+            .InstancePerDependency();
+        builder.RegisterType<MysqlInstaller>()
+            .Named<IInstaller>("mariadb")
             .InstancePerDependency();
         
         // Services
