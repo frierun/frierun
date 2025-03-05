@@ -12,7 +12,7 @@ public class InstallServiceTests : BaseTests
     [Fact]
     public void Handle_SuccessExecutionPlan_CallsInstall()
     {
-        var application = GetFactory<Application>().Generate(); 
+        var application = Factory<Application>().Generate(); 
         var executionPlan = Substitute.For<IExecutionPlan>();
         executionPlan.Install().Returns(application);
         var service = Resolve<InstallService>();
@@ -26,7 +26,7 @@ public class InstallServiceTests : BaseTests
     public void Handle_SuccessExecutionPlan_ChangesState()
     {
         var stateManager = Resolve<StateManager>();
-        var application = GetFactory<Application>().Generate(); 
+        var application = Factory<Application>().Generate(); 
         var executionPlan = Substitute.For<IExecutionPlan>();
         executionPlan.Install().Returns(application).AndDoes(_ => Assert.False(stateManager.Ready));
         var service = Resolve<InstallService>();

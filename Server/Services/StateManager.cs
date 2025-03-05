@@ -1,4 +1,4 @@
-﻿namespace Frierun.Server.Services;
+﻿namespace Frierun.Server;
 
 public class StateManager
 {

@@ -1,12 +1,13 @@
 ﻿using Frierun.Server.Data;
+using Frierun.Server.Services;
 
-namespace Frierun.Server.Services;
+namespace Frierun.Server;
 
 public class UninstallService(
     State state,
     StateSerializer stateSerializer,
     StateManager stateManager,
-    ProviderRegistry providerRegistry)
+    InstallerRegistry installerRegistry)
 {
     public void Handle(Application application)
     {
@@ -59,9 +60,13 @@ public class UninstallService(
     /// </summary>
     private void UninstallResource(Resource resource)
     {
-        var uninstaller = providerRegistry.GetUninstaller(resource.GetType());
+        var uninstaller = installerRegistry.GetUninstaller(resource.GetType());
+        if (uninstaller == null)
+        {
+            throw new Exception($"Uninstaller not found for resource type {resource.GetType()}");
+        }
         uninstaller.Uninstall(resource);
         resource.Uninstall();
-        state.Resources.Remove(resource);
+        state.RemoveResource(resource);
     }
 }

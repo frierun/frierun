@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using Bogus;
+using Frierun.Server;
 using Frierun.Server.Data;
 using Frierun.Server.Services;
 

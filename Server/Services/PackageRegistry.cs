@@ -1,7 +1,7 @@
 ﻿using Frierun.Server.Data;
-using Newtonsoft.Json;
+using Frierun.Server.Services;
 
-namespace Frierun.Server.Services;
+namespace Frierun.Server;
 
 public class PackageRegistry(PackageSerializer packageSerializer)
 {

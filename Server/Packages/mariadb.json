@@ -1,0 +1,19 @@
+﻿{
+  "Name": "mariadb",
+  "Url": "https://hub.docker.com/_/mariadb",
+  "ApplicationDescription": "Root password: {{Password::Value}}",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "mariadb:10",
+      "Env": {
+        "MARIADB_ROOT_PASSWORD": "{{Password::Value}}"
+      }
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "data",
+      "Path": "/var/lib/mysql"
+    }
+  ]
+}
