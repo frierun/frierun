@@ -60,7 +60,7 @@ export default function InstallForm({contracts, name}: Props) {
         if (result.status === 409)
         {
             const data = result.data as PostPackagesIdInstall409; 
-            setError(`Couldn't install package ${data.Type}. Install the missing dependencies first.`);
+            setError(`Couldn't install contract ${data.Type}. Install the missing dependencies first.`);
             return;
         }
         
