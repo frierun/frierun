@@ -33,6 +33,7 @@ public class ContractRegistry
             nameof(Package) => new Package(name),
             nameof(Parameter) => new Parameter(name),
             nameof(Password) => new Password(name),
+            nameof(Postgresql) => new Postgresql(name),
             nameof(Volume) => new Volume(name),
             _ => throw new Exception("Can't create contract type: " + typeName)
         };

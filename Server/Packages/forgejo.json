@@ -28,6 +28,24 @@
           ]
         },
         {
+          "Name": "PostgreSQL",
+          "Contracts": [
+            {
+              "Type": "Container",
+              "ImageName": "codeberg.org/forgejo/forgejo:10",
+              "Env": {
+                "USER_UID": "1000",
+                "USER_GID": "1000",
+                "FORGEJO__database__DB_TYPE": "postgres",
+                "FORGEJO__database__HOST": "{{Postgresql::Host}}",
+                "FORGEJO__database__NAME": "{{Postgresql::Database}}",
+                "FORGEJO__database__USER": "{{Postgresql::User}}",
+                "FORGEJO__database__PASSWD": "{{Postgresql::Password}}"
+              }
+            }
+          ]
+        },
+        {
           "Name": "SQLite",
           "Contracts": [
             {

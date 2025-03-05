@@ -24,6 +24,19 @@
           ]
         },
         {
+          "Name": "PostgreSQL",
+          "Contracts": [
+            {
+              "Type": "Container",
+              "ImageName": "freshrss/freshrss:1",
+              "Env": {
+                "FRESHRSS_INSTALL": "--db-type pgsql --language en --default-user admin --db-host {{Postgresql::Host}} --db-base {{Postgresql::Database}} --db-user {{Postgresql::User}} --db-password {{Postgresql::Password}}",
+                "FRESHRSS_USER": "--user admin --password {{Password::Value}}"
+              }
+            }
+          ]
+        },
+        {
           "Name": "SQLite",
           "Contracts": [
             {

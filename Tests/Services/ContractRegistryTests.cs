@@ -38,6 +38,7 @@ public class ContractRegistryTests : BaseTests
     [InlineData(typeof(Package))]
     [InlineData(typeof(Parameter))]
     [InlineData(typeof(Password))]
+    [InlineData(typeof(Postgresql))]
     [InlineData(typeof(Volume))]
     public void CreateContract_ExistingType_ReturnsCorrectContract(Type type)
     {

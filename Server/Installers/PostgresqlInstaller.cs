@@ -1,14 +1,20 @@
 ﻿using System.Security.Cryptography;
 using Frierun.Server.Data;
-using Frierun.Server.Services;
 
 namespace Frierun.Server.Installers;
 
-public class PostgresqlInstaller(DockerService dockerService, Application application)
+public class PostgresqlInstaller(
+    DockerService dockerService,
+    Application application,
+    ILogger<PostgresqlInstaller> logger)
     : IInstaller<Postgresql>, IUninstaller<PostgresqlDatabase>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<Postgresql>.Initialize(Postgresql contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<Postgresql>.Initialize(
+        Postgresql contract,
+        string prefix,
+        State state
+    )
     {
         var baseName = contract.DatabaseName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
 
@@ -50,11 +56,11 @@ public class PostgresqlInstaller(DockerService dockerService, Application applic
         }
 
         RunSql(
-            $"""
-             CREATE DATABASE "{name}";
-             CREATE USER "{name}" WITH ENCRYPTED PASSWORD '{password}';
-             GRANT ALL PRIVILEGES ON DATABASE "{name}" TO "{name}";
-             """
+            [
+                $"CREATE DATABASE \"{name}\"",
+                $"CREATE USER \"{name}\" WITH ENCRYPTED PASSWORD '{password}'",
+                $"ALTER DATABASE \"{name}\" OWNER TO \"{name}\""
+            ]
         );
 
         dockerService.AttachNetwork(network.Name, container.Name).Wait();
@@ -73,10 +79,10 @@ public class PostgresqlInstaller(DockerService dockerService, Application applic
     void IUninstaller<PostgresqlDatabase>.Uninstall(PostgresqlDatabase resource)
     {
         RunSql(
-            $"""
-             DROP DATABASE "{resource.Database}";
-             DROP USER "{resource.User}";
-             """
+            [
+                $"DROP DATABASE \"{resource.Database}\"",
+                $"DROP USER \"{resource.User}\""
+            ]
         );
 
         var network = resource.DependsOn.OfType<DockerNetwork>().FirstOrDefault();
@@ -92,13 +98,22 @@ public class PostgresqlInstaller(DockerService dockerService, Application applic
     /// <summary>
     /// Run sql with admin privileges on the installed postgresql server
     /// </summary>
-    private void RunSql(string sql)
+    private void RunSql(IList<string> sqlList)
     {
         var container = application.DependsOn.OfType<DockerContainer>().First();
+        var command = new List<string> { "psql", "-U", "postgres" };
+        command.AddRange(sqlList.SelectMany(sql => new[] { "-c", sql }));
 
-        dockerService.ExecInContainer(
+        var result = dockerService.ExecInContainer(
             container.Name,
-            ["psql", "-U", "postgres", "-c", sql]
-        ).Wait();
+            command
+        ).Result;
+
+        logger.LogDebug(
+            "Executed sql: {Sql}\nStdout: {Stdout}\nStderr: {Stderr}",
+            sqlList,
+            result.stdout,
+            result.stderr
+        );
     }
 }
