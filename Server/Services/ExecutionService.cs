@@ -1,7 +1,8 @@
 ﻿using Frierun.Server.Data;
 using Frierun.Server.Installers;
+using Frierun.Server.Services;
 
-namespace Frierun.Server.Services;
+namespace Frierun.Server;
 
 public class ExecutionService(
     InstallerRegistry installerRegistry,
@@ -12,6 +13,7 @@ public class ExecutionService(
     /// <summary>
     /// Creates an execution plan for the given package.
     /// </summary>
+    /// <exception cref="InstallerNotFoundException"></exception>
     public ExecutionPlan Create(Package package)
     {
         var contracts = DiscoverContracts(package);
@@ -46,7 +48,7 @@ public class ExecutionService(
                 // no variants found for that contract, rollback to the previous branching point
                 if (branchesStack.Count == 0)
                 {
-                    throw new Exception($"No possible branches found");
+                    throw new InstallerNotFoundException(nextContract);
                 }
 
                 (discoveryGraph, branches) = branchesStack.Pop();

@@ -9,10 +9,13 @@ import type { Dependency } from "./dependency";
 import type { File } from "./file";
 import type { HttpEndpoint } from "./httpEndpoint";
 import type { Mount } from "./mount";
+import type { Mysql } from "./mysql";
 import type { Network } from "./network";
 import type { Package } from "./package";
 import type { Parameter } from "./parameter";
+import type { Password } from "./password";
 import type { PortEndpoint } from "./portEndpoint";
+import type { Selector } from "./selector";
 import type { Substitute } from "./substitute";
 import type { Volume } from "./volume";
 
@@ -22,9 +25,12 @@ export type GetPackagesIdPlan200Item =
   | File
   | HttpEndpoint
   | Mount
+  | Mysql
   | Network
   | Package
   | Parameter
+  | Password
   | PortEndpoint
+  | Selector
   | Substitute
   | Volume;

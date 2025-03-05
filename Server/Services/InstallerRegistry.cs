@@ -2,7 +2,7 @@
 using Frierun.Server.Data;
 using Frierun.Server.Installers;
 
-namespace Frierun.Server.Services;
+namespace Frierun.Server;
 
 public class InstallerRegistry
 {

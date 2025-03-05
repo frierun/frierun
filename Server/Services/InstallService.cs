@@ -1,6 +1,7 @@
 ﻿using Frierun.Server.Data;
+using Frierun.Server.Services;
 
-namespace Frierun.Server.Services;
+namespace Frierun.Server;
 
 public class InstallService(
     State state,

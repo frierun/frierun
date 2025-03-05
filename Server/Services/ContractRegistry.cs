@@ -1,7 +1,7 @@
 ﻿using Frierun.Server.Data;
 using File = Frierun.Server.Data.File;
 
-namespace Frierun.Server.Services;
+namespace Frierun.Server;
 
 public class ContractRegistry
 {

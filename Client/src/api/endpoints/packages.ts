@@ -18,7 +18,12 @@ import type {
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
-import type { GetPackagesIdPlan200Item, Package } from "../schemas";
+import type {
+  GetPackagesIdPlan200Item,
+  GetPackagesIdPlan409,
+  Package,
+  PostPackagesIdInstall409,
+} from "../schemas";
 import { customFetch } from "../../custom-fetch";
 
 type SecondParameter<T extends (...args: any) => any> = Parameters<T>[1];
@@ -148,7 +153,7 @@ export function useGetPackages<
 }
 
 export type getPackagesIdPlanResponse = {
-  data: GetPackagesIdPlan200Item[];
+  data: GetPackagesIdPlan200Item[] | void | GetPackagesIdPlan409;
   status: number;
   headers: Headers;
 };
@@ -173,7 +178,7 @@ export const getGetPackagesIdPlanQueryKey = (id: string) => {
 
 export const getGetPackagesIdPlanQueryOptions = <
   TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
-  TError = unknown,
+  TError = void | GetPackagesIdPlan409,
 >(
   id: string,
   options?: {
@@ -210,11 +215,11 @@ export const getGetPackagesIdPlanQueryOptions = <
 export type GetPackagesIdPlanQueryResult = NonNullable<
   Awaited<ReturnType<typeof getPackagesIdPlan>>
 >;
-export type GetPackagesIdPlanQueryError = unknown;
+export type GetPackagesIdPlanQueryError = void | GetPackagesIdPlan409;
 
 export function useGetPackagesIdPlan<
   TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
-  TError = unknown,
+  TError = void | GetPackagesIdPlan409,
 >(
   id: string,
   options: {
@@ -240,7 +245,7 @@ export function useGetPackagesIdPlan<
 };
 export function useGetPackagesIdPlan<
   TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
-  TError = unknown,
+  TError = void | GetPackagesIdPlan409,
 >(
   id: string,
   options?: {
@@ -266,7 +271,7 @@ export function useGetPackagesIdPlan<
 };
 export function useGetPackagesIdPlan<
   TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
-  TError = unknown,
+  TError = void | GetPackagesIdPlan409,
 >(
   id: string,
   options?: {
@@ -285,7 +290,7 @@ export function useGetPackagesIdPlan<
 
 export function useGetPackagesIdPlan<
   TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
-  TError = unknown,
+  TError = void | GetPackagesIdPlan409,
 >(
   id: string,
   options?: {
@@ -313,7 +318,7 @@ export function useGetPackagesIdPlan<
 }
 
 export type postPackagesIdInstallResponse = {
-  data: void;
+  data: void | void | PostPackagesIdInstall409;
   status: number;
   headers: Headers;
 };
@@ -339,7 +344,7 @@ export const postPackagesIdInstall = async (
 };
 
 export const getPostPackagesIdInstallMutationOptions = <
-  TError = unknown,
+  TError = void | PostPackagesIdInstall409,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -380,10 +385,11 @@ export type PostPackagesIdInstallMutationResult = NonNullable<
   Awaited<ReturnType<typeof postPackagesIdInstall>>
 >;
 export type PostPackagesIdInstallMutationBody = Package;
-export type PostPackagesIdInstallMutationError = unknown;
+export type PostPackagesIdInstallMutationError =
+  void | PostPackagesIdInstall409;
 
 export const usePostPackagesIdInstall = <
-  TError = unknown,
+  TError = void | PostPackagesIdInstall409,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<

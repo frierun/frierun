@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Data;
+﻿using Frierun.Server;
+using Frierun.Server.Data;
 using Frierun.Server.Services;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;

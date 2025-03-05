@@ -22,6 +22,9 @@ export default {
         disabled: '#ccc',
         darker: '#999',
       },
+      red: {
+        error: '#d41e40',
+      },
       black: {
         DEFAULT: '#000',
       },

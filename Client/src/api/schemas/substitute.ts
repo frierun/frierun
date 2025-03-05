@@ -17,6 +17,6 @@ export type Substitute = Contract &
         SubstituteAllOf & {
           Type: SubstituteType;
         },
-      "Type" | "originalId"
+      "Type" | "originalId" | "originalId"
     >
   >;

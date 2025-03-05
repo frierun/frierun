@@ -4,7 +4,7 @@ using System.Text;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 
-namespace Frierun.Server.Services;
+namespace Frierun.Server;
 
 public class DockerService(ILogger<DockerService> logger, IDockerClient client)
 {

@@ -19,7 +19,7 @@ import type { Selector } from "./selector";
 import type { Substitute } from "./substitute";
 import type { Volume } from "./volume";
 
-export type PackageAllOfContractsItem =
+export type GetPackagesIdPlan409 =
   | Container
   | Dependency
   | File

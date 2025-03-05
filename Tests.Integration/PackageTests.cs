@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Docker.DotNet;
 using Docker.DotNet.Models;
+using Frierun.Server;
 using Frierun.Server.Data;
 using Frierun.Server.Services;
 using Microsoft.AspNetCore.Mvc.Testing;

@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Services;
+﻿using Frierun.Server;
+using Frierun.Server.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]

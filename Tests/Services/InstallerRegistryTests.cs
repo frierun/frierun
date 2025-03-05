@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Data;
+﻿using Frierun.Server;
+using Frierun.Server.Data;
 using Frierun.Server.Installers;
 using Frierun.Server.Installers.Base;
 using Frierun.Server.Services;
