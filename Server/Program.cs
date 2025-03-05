@@ -42,6 +42,13 @@ builder.Services.AddControllersWithViews(
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(Storage.DirectoryName, "keys")));
 
+// create web root path to remove warnings in dev environment
+var webRootPath = Path.Combine(builder.Environment.ContentRootPath, builder.Environment.WebRootPath ?? "wwwroot");
+if (!Directory.Exists(webRootPath))
+{
+    Directory.CreateDirectory(webRootPath);
+}
+
 var app = builder.Build();
 
 // load packages
@@ -88,7 +95,6 @@ app.UseStaticFiles();
 app.UsePathBase("/api/v1");
 app.UseRouting();
 app.MapControllers();
-
 app.MapFallbackToFile("index.html");
 
 app.Run();
