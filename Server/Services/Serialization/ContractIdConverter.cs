@@ -17,7 +17,7 @@ public class ContractIdConverter(ContractRegistry contractRegistry) : JsonConver
         
         var parts = value.Split(':', 2);
         var type = contractRegistry.GetContractType(parts[0]);
-        return new ContractId(type, parts.Length == 2 ?  parts[1] : "");
+        return ContractId.Create(type, parts.Length == 2 ?  parts[1] : "");
     }
 
     /// <inheritdoc />

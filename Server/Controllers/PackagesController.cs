@@ -1,6 +1,6 @@
 ﻿using Frierun.Server.Data;
-using Frierun.Server.Services;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Frierun.Server.Controllers;
 
@@ -17,21 +17,37 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
     /// Gets package and default parameters
     /// </summary>
     [HttpGet("{id}/plan")]
-    public IEnumerable<Contract>? Plan(string id, PackageRegistry packageRegistry, ExecutionService executionService)
+    [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(IEnumerable<Contract>))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Package not found")]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "No installation options found", typeof(Contract))]
+    public IActionResult Plan(string id, PackageRegistry packageRegistry, ExecutionService executionService)
     {
         var package = packageRegistry.Find(id);
         if (package == null)
         {
-            return null;
+            return NotFound();
         }
 
-        return executionService.Create(package).Contracts.Values;
+        try
+        {
+            return Ok(executionService.Create(package).Contracts.Values);
+        }
+        catch (InstallerNotFoundException e)
+        {
+            return new ConflictObjectResult(e.Contract)
+            {
+                DeclaredType = typeof(Contract)
+            };
+        }
     }
 
     /// <summary>
     /// Installs the given package
     /// </summary>
     [HttpPost("{id}/install")]
+    [SwaggerResponse(StatusCodes.Status202Accepted, "Started installation")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Package not found")]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "No installation options found", typeof(Contract))]
     public IActionResult Install(
         string id,
         [FromBody] Package overrides,
@@ -48,10 +64,20 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
         }
 
         var overriden = (Package)package.With(overrides);
-        var plan = executionService.Create(overriden);
+        try
+        {
+            var plan = executionService.Create(overriden);
+            logger.LogInformation("Installing package {id}", id);
+            Task.Run(() => installService.Handle(plan));
+        }
+        catch (InstallerNotFoundException e)
+        {
+            return new ConflictObjectResult(e.Contract)
+            {
+                DeclaredType = typeof(Contract)
+            };
+        }
 
-        logger.LogInformation("Installing package {id}", id);
-        Task.Run(() => installService.Handle(plan));
         return Accepted();
     }
 }

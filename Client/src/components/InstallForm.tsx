@@ -9,8 +9,13 @@ import HttpEndpointForm from "@/components/contracts/HttpEndpointForm.tsx";
 import PortEndpointForm from "@/components/contracts/PortEndpointForm.tsx";
 import Debug from "@/components/Debug";
 import ParameterForm from "@/components/contracts/ParameterForm.tsx";
-import {GetPackagesIdPlan200Item, Package} from "@/api/schemas";
+import {
+    GetPackagesIdPlan200Item,
+    Package,
+    type PostPackagesIdInstall409,
+} from "@/api/schemas";
 import VolumeForm from "@/components/contracts/VolumeForm.tsx";
+import SelectorForm from "@/components/contracts/SelectorForm.tsx";
 
 type Props = {
     contracts: GetPackagesIdPlan200Item[];
@@ -24,6 +29,7 @@ type Overrides = {
 export default function InstallForm({contracts, name}: Props) {
     const {waitForReady} = useContext(StateContext);
     const {mutateAsync, isPending} = usePostPackagesIdInstall();
+    const [error, setError] = useState<string | null>(null);
     const queryClient = useQueryClient()
     const navigate = useNavigate();
 
@@ -33,8 +39,9 @@ export default function InstallForm({contracts, name}: Props) {
 
     const packageContract = contracts.find(contract => contract.Type === 'Package');
     
-    const install = () => {
-        mutateAsync({
+    const install = async () => {
+        setError(null);
+        const result = await mutateAsync({
             id: name, data: {
                 Type: 'Package',
                 name,
@@ -42,10 +49,29 @@ export default function InstallForm({contracts, name}: Props) {
                 tags: [],
                 contracts: Object.entries(overrides).flatMap(([_, value]) => value),
             }
-        })
-            .then(waitForReady)
-            .then(() => queryClient.invalidateQueries({queryKey: getGetApplicationsQueryKey()}))
-            .then(() => navigate('/'));
+        });
+        
+        if (result.status === 404)
+        {
+            setError("Package not found");
+            return;
+        }
+        
+        if (result.status === 409)
+        {
+            const data = result.data as PostPackagesIdInstall409; 
+            setError(`Couldn't install contract ${data.Type}. Install the missing dependencies first.`);
+            return;
+        }
+        
+        if (result.status !== 202)
+        {
+            return;
+        }
+        
+        await waitForReady();
+        await queryClient.invalidateQueries({queryKey: getGetApplicationsQueryKey()});
+        navigate('/');
     };
 
     const updateContracts = (contracts: Package['contracts']) => {
@@ -62,6 +88,9 @@ export default function InstallForm({contracts, name}: Props) {
 
     return (
         <>
+            <div className={"text-red-error font-bold my-2"}>
+                {error}
+            </div>
             <div className={"lg:w-1/2 my-6 border-primary border-b-2 px-1"}>
                 <div className={"flex justify-between items-center px-1"}>
                     <div className={"flex gap-2 mb-2"}>
@@ -96,6 +125,17 @@ export default function InstallForm({contracts, name}: Props) {
                         .map(contract => (
                             <div key={`${contract.Type} ${contract.name}`} className={"card"}>
                                 <ParameterForm
+                                    contract={contract}
+                                    updateContract={updateContract}
+                                />
+                            </div>
+                        ))
+                    }
+                    {contracts
+                        .filter(contract => contract.Type === 'Selector')
+                        .map(contract => (
+                            <div key={`${contract.Type} ${contract.name}`} className={"card"}>
+                                <SelectorForm
                                     contract={contract}
                                     updateContract={updateContract}
                                 />

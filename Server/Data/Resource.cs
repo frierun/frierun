@@ -9,8 +9,11 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(DockerPortEndpoint), nameof(DockerPortEndpoint))]
 [JsonDerivedType(typeof(DockerVolume), nameof(DockerVolume))]
 [JsonDerivedType(typeof(GenericHttpEndpoint), nameof(GenericHttpEndpoint))]
+[JsonDerivedType(typeof(GeneratedPassword), nameof(GeneratedPassword))]
 [JsonDerivedType(typeof(ResolvedParameter), nameof(ResolvedParameter))]
 [JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
+[JsonDerivedType(typeof(MysqlDatabase), nameof(MysqlDatabase))]
+[JsonDerivedType(typeof(PostgresqlDatabase), nameof(PostgresqlDatabase))]
 public abstract record Resource
 {
     private readonly List<Resource> _dependsOn = [];

@@ -1,0 +1,19 @@
+﻿{
+  "Name": "postgresql",
+  "Url": "https://hub.docker.com/_/postgres",
+  "ApplicationDescription": "Postgres password: {{Password::Value}}",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "postgres:17",
+      "Env": {
+        "POSTGRES_PASSWORD": "{{Password::Value}}"
+      }
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "data",
+      "Path": "/var/lib/postgresql/data"
+    }
+  ]
+}
