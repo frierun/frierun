@@ -331,4 +331,24 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
 
         return true;
     }
+
+    /// <summary>
+    /// Removes all unused resources
+    /// </summary>
+    public async Task Prune()
+    {
+        await client.Images.PruneImagesAsync(new ImagesPruneParameters()
+        {
+            Filters = new Dictionary<string, IDictionary<string, bool>>()
+            {
+                {
+                    "dangling", new Dictionary<string, bool>()
+                    {
+                        { "0", true }
+                    }
+                }
+            }
+        });
+        await client.Volumes.PruneAsync(new VolumesPruneParameters());
+    }
 }

@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Tests.Integration;
 
-public class BaseTests
+public class BaseTests : IDisposable
 {
     private readonly WebApplicationFactory<Program> _factory = new();
     protected IServiceProvider Services => _factory.Services;
@@ -14,6 +14,13 @@ public class BaseTests
     protected BaseTests()
     {
         ClearState();
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        var dockerService = Services.GetRequiredService<DockerService>();
+        dockerService.Prune().Wait();
     }
 
     protected HttpClient CreateClient()
