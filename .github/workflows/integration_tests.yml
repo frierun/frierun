@@ -29,3 +29,22 @@ jobs:
         
       - name: Test with the dotnet CLI
         run: dotnet test Tests.Integration --logger "console;verbosity=normal" -- xUnit.StopOnFail=true
+        
+      - name: Collect logs
+        if: ${{ failure() }}
+        run: |
+          set -x
+          mkdir -p failure-logs
+          docker ps -a >>failure-logs/docker-ps
+          docker inspect $(docker ps -q) >>failure-logs/docker-inspect
+          docker logs $(docker ps -q) >>failure-logs/docker-logs
+          journalctl >>failure-logs/journalctl
+
+      - name: Save logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-logs
+          path: failure-logs
+        
+        

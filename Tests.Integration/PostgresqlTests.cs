@@ -29,9 +29,6 @@ public class PostgresqlTests : BaseTests
         var application = InstallPackage(package);
         Assert.NotNull(application);
         
-        // wait for client to start
-        Thread.Sleep(1000);
-
         var container = application.DependsOn.OfType<DockerContainer>().First();
         var database = application.DependsOn.OfType<PostgresqlDatabase>().First();
         Assert.Equal("db_client", database.User);
