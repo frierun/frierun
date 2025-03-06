@@ -52,10 +52,10 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
         var execCreateParams = new ContainerExecCreateParameters
         {
             AttachStderr = true,
-            AttachStdin = true,
+            AttachStdin = false,
             AttachStdout = true,
             Cmd = command,
-            Tty = true
+            Tty = false
         };
         var result = await client.Exec.ExecCreateContainerAsync(containerName, execCreateParams);
         var execId = result.ID;

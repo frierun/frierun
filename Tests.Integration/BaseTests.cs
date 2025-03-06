@@ -29,6 +29,18 @@ public class BaseTests
             state.RemoveResource(resource);
         }
     }
+    
+    /// <summary>
+    /// Installs package by name and returns application
+    /// </summary>
+    protected Application? InstallPackage(string name)
+    {
+        Services.GetRequiredService<PackageRegistry>().Load();
+        var package = Services.GetRequiredService<PackageRegistry>().Find(name)
+                      ?? throw new Exception($"Package {name} not found");
+
+        return InstallPackage(package);
+    }
 
     protected Application? InstallPackage(Package package)
     {

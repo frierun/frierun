@@ -1,12 +1,9 @@
 ﻿using Frierun.Server;
-using Frierun.Server.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 
 namespace Tests.Integration;
-
-using Microsoft.AspNetCore.Mvc.Testing;
 
 public class BasicTests : BaseTests
 {

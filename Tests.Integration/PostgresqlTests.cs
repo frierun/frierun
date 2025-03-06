@@ -4,17 +4,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Tests.Integration;
 
-public class MysqlTests : BaseTests
+public class PostgresqlTests : BaseTests
 {
-    [Theory]
-    [InlineData("mysql")]
-    [InlineData("mariadb")]
-    public async Task Install_MysqlContract_CredentialsAreCorrect(string packageName)
+    [Fact]
+    public async Task Install_PostgresqlContract_CredentialsAreCorrect()
     {
         var state = Services.GetRequiredService<State>();
         Assert.Empty(state.Resources);
         
-        var dbPackage = Services.GetRequiredService<PackageRegistry>().Find(packageName);
+        var dbPackage = Services.GetRequiredService<PackageRegistry>().Find("postgresql");
         Assert.NotNull(dbPackage);
 
         var dbApplication = InstallPackage(dbPackage);
@@ -26,30 +24,27 @@ public class MysqlTests : BaseTests
         var package = dbPackage with
         {
             Name = "db_client",
-            Contracts = dbPackage.Contracts.Append(new Mysql())
+            Contracts = dbPackage.Contracts.Append(new Postgresql())
         };
         var application = InstallPackage(package);
         Assert.NotNull(application);
 
         var container = application.DependsOn.OfType<DockerContainer>().First();
-        var database = application.DependsOn.OfType<MysqlDatabase>().First();
+        var database = application.DependsOn.OfType<PostgresqlDatabase>().First();
         Assert.Equal("db_client", database.User);
         Assert.Equal("db_client", database.Database);
-        Assert.Equal(packageName, database.Host);
+        Assert.Equal("postgresql", database.Host);
         Assert.NotEmpty(database.Password);
-
+        
         // try to connect to the database from the client
         var dockerService = Services.GetRequiredService<DockerService>();
-        var sql = "CREATE TABLE Test (ID int);INSERT INTO Test VALUES (123);UPDATE Test SET ID = 2*ID;SELECT * FROM Test;";
+        var sql = "CREATE TABLE Test (col int);INSERT INTO Test VALUES (123);UPDATE Test SET col = 2*col;SELECT * FROM Test;";
         var result = await dockerService.ExecInContainer(
             container.Name,
             [
-                "mysql",
-                "-u", database.User,
-                $"-p{database.Password}",
-                "-h", database.Host,
-                "-e", sql,
-                database.Database
+                "psql",
+                $"postgresql://{database.User}:{database.Password}@{database.Host}/{database.Database}",
+                "-c", sql
             ]
         );
         
@@ -60,5 +55,5 @@ public class MysqlTests : BaseTests
         UninstallApplication(dbApplication);
         
         Assert.Empty(state.Resources);
-    }
+    }    
 }
