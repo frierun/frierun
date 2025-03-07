@@ -21,7 +21,7 @@
               "ImageName": "ghcr.io/paperless-ngx/paperless-ngx:latest",
               "Env": {
                 "PAPERLESS_SECRET_KEY": "{{Password:SecretKey:Value}}",
-                "PAPERLESS_REDIS": "redis://redis:6379",
+                "PAPERLESS_REDIS": "redis://{{Redis::Host}}:6379",
                 "PAPERLESS_AUTO_LOGIN_USERNAME": "admin",
                 "PAPERLESS_ADMIN_USER": "admin",
                 "PAPERLESS_ADMIN_PASSWORD": "{{Password::Value}}",
@@ -43,7 +43,7 @@
               "ImageName": "ghcr.io/paperless-ngx/paperless-ngx:latest",
               "Env": {
                 "PAPERLESS_SECRET_KEY": "{{Password:SecretKey:Value}}",
-                "PAPERLESS_REDIS": "redis://redis:6379",
+                "PAPERLESS_REDIS": "redis://{{Redis::Host}}:6379",
                 "PAPERLESS_AUTO_LOGIN_USERNAME": "admin",
                 "PAPERLESS_ADMIN_USER": "admin",
                 "PAPERLESS_ADMIN_PASSWORD": "{{Password::Value}}"
@@ -69,22 +69,6 @@
       "ContainerName": "webserver",
       "VolumeName": "media",
       "Path": "/usr/src/paperless/media"
-    },
-    {
-      "Type": "Container",
-      "Name": "redis",
-      "ImageName": "docker.io/library/redis:7"
-    },
-    {
-      "Type": "Mount",
-      "ContainerName": "redis",
-      "VolumeName": "redisdata",
-      "Path": "/data"
-    },
-    {
-      "Type": "Dependency",
-      "Preceding": "Container:redis",
-      "Following": "Container:webserver"
     }
   ]
 }
