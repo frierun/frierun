@@ -40,7 +40,7 @@ public class MysqlTests : BaseTests
 
         // try to connect to the database from the client
         var dockerService = Services.GetRequiredService<DockerService>();
-        var sql = "CREATE TABLE Test (ID int);INSERT INTO Test VALUES (123);UPDATE Test SET ID = 2*ID;SELECT * FROM Test;";
+        var query = "CREATE TABLE Test (ID int);INSERT INTO Test VALUES (123);UPDATE Test SET ID = 2*ID;SELECT * FROM Test;";
         var result = await dockerService.ExecInContainer(
             container.Name,
             [
@@ -48,7 +48,7 @@ public class MysqlTests : BaseTests
                 "-u", database.User,
                 $"-p{database.Password}",
                 "-h", database.Host,
-                "-e", sql,
+                "-e", query,
                 database.Database
             ]
         );

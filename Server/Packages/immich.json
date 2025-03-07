@@ -14,7 +14,8 @@
       "Env": {
         "DB_USERNAME": "postgres",
         "DB_PASSWORD": "postgres",
-        "DB_DATABASE_NAME": "immich"
+        "DB_DATABASE_NAME": "immich",
+        "REDIS_HOSTNAME": "{{Redis::Host}}"
       }
     },
     {
@@ -72,18 +73,8 @@
       "Path": "/var/lib/postgresql/data"
     },
     {
-      "Type": "Container",
-      "Name": "redis",
-      "ImageName": "docker.io/redis:6.2-alpine@sha256:2ba50e1ac3a0ea17b736ce9db2b0a9f6f8b85d4c27d5f5accc6a416d8f42c6d5"
-    },
-    {
       "Type": "Dependency",
       "Preceding": "Container:database",
-      "Following": "Container:server"
-    },
-    {
-      "Type": "Dependency",
-      "Preceding": "Container:redis",
       "Following": "Container:server"
     }
   ]

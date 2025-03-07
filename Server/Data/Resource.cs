@@ -14,6 +14,7 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
 [JsonDerivedType(typeof(MysqlDatabase), nameof(MysqlDatabase))]
 [JsonDerivedType(typeof(PostgresqlDatabase), nameof(PostgresqlDatabase))]
+[JsonDerivedType(typeof(RedisDatabase), nameof(RedisDatabase))]
 public abstract record Resource
 {
     private readonly List<Resource> _dependsOn = [];

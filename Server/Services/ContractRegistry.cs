@@ -34,6 +34,7 @@ public class ContractRegistry
             nameof(Parameter) => new Parameter(name),
             nameof(Password) => new Password(name),
             nameof(Postgresql) => new Postgresql(name),
+            nameof(Redis) => new Redis(name),
             nameof(Volume) => new Volume(name),
             _ => throw new Exception("Can't create contract type: " + typeName)
         };

@@ -39,6 +39,7 @@ public class ContractRegistryTests : BaseTests
     [InlineData(typeof(Parameter))]
     [InlineData(typeof(Password))]
     [InlineData(typeof(Postgresql))]
+    [InlineData(typeof(Redis))]
     [InlineData(typeof(Volume))]
     public void CreateContract_ExistingType_ReturnsCorrectContract(Type type)
     {
