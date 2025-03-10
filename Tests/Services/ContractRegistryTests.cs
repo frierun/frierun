@@ -31,7 +31,6 @@ public class ContractRegistryTests : BaseTests
     
     [Theory]
     [InlineData(typeof(Container))]
-    [InlineData(typeof(File))]
     [InlineData(typeof(HttpEndpoint))]
     [InlineData(typeof(Mysql))]
     [InlineData(typeof(Network))]

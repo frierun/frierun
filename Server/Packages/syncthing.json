@@ -44,17 +44,12 @@
       "Path": "/config"
     },
     {
-      "Type": "Mount",
-      "VolumeName": "custom-init",
-      "Path": "/custom-cont-init.d",
-      "ReadOnly": true
-    },
-    {
       "Type": "File",
       "Name": "chown data",
-      "VolumeName": "custom-init",
-      "Path": "chown.sh",
-      "Text": "#!/bin/bash\n\necho \"**** chowning /data ****\"\nchown $PUID:$PGID /data\n"
+      "VolumeName": "data",
+      "Path": "",
+      "Owner": 1000,
+      "Group": 1000
     },
     {
       "Type": "Dependency",

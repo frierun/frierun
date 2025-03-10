@@ -26,7 +26,6 @@ public class ContractRegistry
         return typeName switch
         {
             nameof(Container) => new Container(name),
-            nameof(File) => new File(name),
             nameof(HttpEndpoint) => new HttpEndpoint(name),
             nameof(Mysql) => new Mysql(name),
             nameof(Network) => new Network(name),
