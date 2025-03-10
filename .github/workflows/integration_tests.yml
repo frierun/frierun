@@ -42,8 +42,10 @@ jobs:
           set -x
           mkdir -p failure-logs
           docker ps -a >>failure-logs/docker-ps
-          docker inspect $(docker ps -q) >>failure-logs/docker-inspect
-          docker logs $(docker ps -q) >>failure-logs/docker-logs
+          for container in $(docker ps -q); do
+            docker inspect $container >>failure-logs/docker-inspect-$container
+            docker logs $container >>failure-logs/docker-logs-$container
+          done
           journalctl >>failure-logs/journalctl
 
       - name: Save logs

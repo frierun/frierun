@@ -95,7 +95,7 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
     }
 
     /// <summary>
-    /// Stops and deletes container with specified name
+    /// Stops and deletes container with specified name or id
     /// </summary>
     public async Task<bool> RemoveContainer(string containerName)
     {
@@ -108,7 +108,7 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
             }
         );
 
-        var container = response.FirstOrDefault(c => c.Names.Contains($"/{containerName}"));
+        var container = response.FirstOrDefault(c => c.ID == containerName || c.Names.Contains($"/{containerName}"));
         if (container == null)
         {
             logger.LogError("Container {ContainerName} not found", containerName);
