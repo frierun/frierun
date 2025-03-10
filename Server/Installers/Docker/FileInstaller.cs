@@ -1,6 +1,8 @@
-﻿using Frierun.Server.Data;
+﻿using Docker.DotNet.Models;
+using Frierun.Server.Data;
 using Frierun.Server.Services;
 using File = Frierun.Server.Data.File;
+using Mount = Docker.DotNet.Models.Mount;
 
 namespace Frierun.Server.Installers.Docker;
 
@@ -25,13 +27,49 @@ public class FileInstaller(DockerService dockerService) : IInstaller<File>
     Resource? IInstaller<File>.Install(File contract, ExecutionPlan plan)
     {
         var volume = plan.GetResource<DockerVolume>(contract.VolumeId);
-
-        if (contract.Path == null)
+        
+        var containerId = dockerService.StartContainer(new CreateContainerParameters
         {
-            throw new Exception("File path is not set.");
+            Image = "alpine:latest",
+            Cmd = ["tail", "-f", "/dev/null"],
+            HostConfig = new HostConfig()
+            {
+                Mounts = new List<Mount>
+                {
+                    new()
+                    {
+                        Source = volume.Name,
+                        Target = "/mnt",
+                        Type = "volume",
+                    }
+                }
+            }
+        }).Result;
+
+        if (containerId == null)
+        {
+            throw new Exception("Failed to start container");
         }
         
-        dockerService.PutFile(volume.Name, contract.Path, contract.Text).Wait();
+        var path = $"/mnt{contract.Path}";
+
+        if (contract.Text != null)
+        {
+            dockerService.PutFile(volume.Name, path, contract.Text).Wait();
+        }
+
+        if (contract.Owner != null)
+        {
+            dockerService.ExecInContainer(containerId, ["chown", contract.Owner.ToString() ?? "0", path]).Wait();
+        }
+        
+        if (contract.Group != null)
+        {
+            dockerService.ExecInContainer(containerId, ["chgrp", contract.Group.ToString() ?? "0", path]).Wait();
+        }
+        
+        dockerService.RemoveContainer(containerId).Wait();
+        
         return null;
     }
 }

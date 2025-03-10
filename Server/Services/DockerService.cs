@@ -11,10 +11,8 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
     /// <summary>
     /// Starts container with specified name, image and port
     /// </summary>
-    public async Task<bool> StartContainer(CreateContainerParameters dockerParameters)
+    public async Task<string?> StartContainer(CreateContainerParameters dockerParameters)
     {
-        logger.LogDebug("Starting container {ContainerName}", dockerParameters.Name);
-
         logger.LogDebug("Loading image {ImageName}", dockerParameters.Image);
 
         await client.Images.CreateImageAsync(
@@ -38,10 +36,10 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
         if (!started)
         {
             logger.LogError("Failed to start container");
-            return false;
+            return null;
         }
 
-        return true;
+        return result.ID;
     }
 
     /// <summary>
@@ -70,57 +68,8 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
     /// <summary>
     /// Starts a fake container with specified volume, puts a file in it and stops it
     /// </summary>
-    public async Task<bool> PutFile(string volumeName, string path, string content)
+    public async Task<bool> PutFile(string containerId, string path, string content)
     {
-        logger.LogDebug("Putting file {Path} to volume {VolumeName}", path, volumeName);
-
-        var imageName = "alpine:latest";
-        logger.LogDebug("Loading image {ImageName}", imageName);
-
-        await client.Images.CreateImageAsync(
-            new ImagesCreateParameters
-            {
-                FromImage = imageName
-            },
-            null,
-            new Progress<JSONMessage>()
-        );
-        
-        logger.LogDebug("Creating temporary container");
-        var result = await client.Containers.CreateContainerAsync(
-            new CreateContainerParameters()
-            {
-                Image = imageName,
-                HostConfig = new HostConfig()
-                {
-                    Mounts = new List<Mount>
-                    {
-                        new()
-                        {
-                            Source = volumeName,
-                            Target = "/mnt",
-                            Type = "volume",
-                        }
-                    }
-                },
-            }
-        );
-
-        var containerId = result.ID;
-
-        logger.LogDebug("Starting container {ContainerId}", containerId);
-
-        var started = await client.Containers.StartContainerAsync(
-            containerId,
-            new ContainerStartParameters()
-        );
-
-        if (!started)
-        {
-            logger.LogError("Failed to start container");
-            return false;
-        }
-
         var pipe = new Pipe();
         await using (var tarArchive = new TarWriter(pipe.Writer.AsStream()))
         {
@@ -134,19 +83,12 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
 
         logger.LogDebug("Putting file {path} to container {ContainerId}", path, containerId);
         await client.Containers.ExtractArchiveToContainerAsync(
-            result.ID,
+            containerId,
             new ContainerPathStatParameters
             {
-                Path = "/mnt"
+                Path = "/"
             },
             pipe.Reader.AsStream()
-        );
-
-        logger.LogDebug("Deleting temporary container {ContainerId}", containerId);
-
-        await client.Containers.RemoveContainerAsync(
-            containerId,
-            new ContainerRemoveParameters { RemoveVolumes = false }
         );
 
         return true;
@@ -155,7 +97,7 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
     /// <summary>
     /// Stops and deletes container with specified name
     /// </summary>
-    public async Task<bool> StopContainer(string containerName)
+    public async Task<bool> RemoveContainer(string containerName)
     {
         logger.LogDebug("Stopping container {ContainerName}", containerName);
 
