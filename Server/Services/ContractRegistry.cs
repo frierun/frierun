@@ -1,7 +1,7 @@
 ﻿using Frierun.Server.Data;
 using File = Frierun.Server.Data.File;
 
-namespace Frierun.Server.Services;
+namespace Frierun.Server;
 
 public class ContractRegistry
 {
@@ -28,8 +28,14 @@ public class ContractRegistry
             nameof(Container) => new Container(name),
             nameof(File) => new File(name),
             nameof(HttpEndpoint) => new HttpEndpoint(name),
+            nameof(Mysql) => new Mysql(name),
+            nameof(Network) => new Network(name),
             nameof(Package) => new Package(name),
             nameof(Parameter) => new Parameter(name),
+            nameof(Password) => new Password(name),
+            nameof(Postgresql) => new Postgresql(name),
+            nameof(Redis) => new Redis(name),
+            nameof(Volume) => new Volume(name),
             _ => throw new Exception("Can't create contract type: " + typeName)
         };
     }

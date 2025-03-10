@@ -1,0 +1,34 @@
+﻿{
+  "Name": "calibre-web",
+  "Url": "https://github.com/linuxserver/docker-calibre-web",
+  "ApplicationDescription": "Login: admin\nPassword: admin123\nOn the initial setup screen, enter \"/books\" as your calibre library location.",
+  "ShortDescription": "Browsing/downloading eBooks",
+  "FullDescription": "Web app providing a clean interface for browsing, reading and downloading eBooks using an existing Calibre database.",
+  "Tags": ["storage"],
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "lscr.io/linuxserver/calibre-web:latest",
+      "Env": {
+        "PUID": "1000",
+        "PGID": "1000",
+        "TZ": "Etc/UTC",
+        "DOCKER_MODS": "linuxserver/mods:universal-calibre"
+      }
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 8083
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "books",
+      "Path": "/books"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "config",
+      "Path": "/config"
+    }
+  ]
+}

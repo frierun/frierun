@@ -1,7 +1,10 @@
-﻿using Autofac;
+﻿using System.Reflection;
+using Autofac;
 using Docker.DotNet;
 using Frierun.Server.Data;
+using Frierun.Server.Installers;
 using Frierun.Server.Services;
+using Module = Autofac.Module;
 using ResolvedParameter = Autofac.Core.ResolvedParameter;
 
 namespace Frierun.Server;
@@ -11,18 +14,31 @@ public class AutofacModule : Module
     /// <inheritdoc />
     protected override void Load(ContainerBuilder builder)
     {
-        // Providers
-        builder.RegisterType<ApplicationProvider>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<ContainerProvider>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<DependencyProvider>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<FileProvider>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<MountProvider>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<NetworkProvider>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<ParameterProvider>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<PortEndpointProvider>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<PortHttpEndpointProvider>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<SubstituteProvider>().As<IInstaller>().SingleInstance();
-        builder.RegisterType<VolumeProvider>().As<IInstaller>().SingleInstance();
+        var assembly = Assembly.GetExecutingAssembly();
+        
+        // Installers
+        builder.RegisterAssemblyTypes(assembly)
+            .Where(type => type.Namespace?.StartsWith("Frierun.Server.Installers.Base") == true)
+            .AsImplementedInterfaces()
+            .SingleInstance();
+        builder.RegisterAssemblyTypes(assembly)
+            .Where(type => type.Namespace?.StartsWith("Frierun.Server.Installers.Docker") == true)
+            .AsImplementedInterfaces()
+            .SingleInstance();
+
+        // Package specific installers
+        builder.RegisterType<TraefikHttpEndpointInstaller>()
+            .Named<IInstaller>("traefik")
+            .InstancePerDependency();
+        builder.RegisterType<MysqlInstaller>()
+            .Named<IInstaller>("mysql")
+            .InstancePerDependency();
+        builder.RegisterType<MysqlInstaller>()
+            .Named<IInstaller>("mariadb")
+            .InstancePerDependency();
+        builder.RegisterType<PostgresqlInstaller>()
+            .Named<IInstaller>("postgresql")
+            .InstancePerDependency();
         
         // Services
         builder.RegisterType<ContractRegistry>().AsSelf().SingleInstance();
@@ -30,7 +46,7 @@ public class AutofacModule : Module
         builder.RegisterType<ExecutionService>().AsSelf().SingleInstance();
         builder.RegisterType<InstallService>().AsSelf().SingleInstance();
         builder.RegisterType<PackageRegistry>().AsSelf().SingleInstance();
-        builder.RegisterType<ProviderRegistry>().AsSelf().SingleInstance();
+        builder.RegisterType<InstallerRegistry>().AsSelf().SingleInstance();
         builder.RegisterType<StateManager>().AsSelf().SingleInstance();
         builder.RegisterType<UninstallService>().AsSelf().SingleInstance();
         

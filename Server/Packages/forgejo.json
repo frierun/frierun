@@ -1,0 +1,79 @@
+﻿{
+  "Name": "forgejo",
+  "Url": "https://forgejo.org/docs/latest/admin/installation-docker/",
+  "ShortDescription": "Github alternative, project management",
+  "FullDescription": "Take back control of your software development process, self-host your projects and get everyone involved in delivering quality software on the same page.",
+  "Tags": ["dev"],
+  "Contracts": [
+    {
+      "Type": "Selector",
+      "Name": "Database",
+      "Options": [
+        {
+          "Name": "MySQL",
+          "Contracts": [
+            {
+              "Type": "Container",
+              "ImageName": "codeberg.org/forgejo/forgejo:10",
+              "Env": {
+                "USER_UID": "1000",
+                "USER_GID": "1000",
+                "FORGEJO__database__DB_TYPE": "mysql",
+                "FORGEJO__database__HOST": "{{Mysql::Host}}",
+                "FORGEJO__database__NAME": "{{Mysql::Database}}",
+                "FORGEJO__database__USER": "{{Mysql::User}}",
+                "FORGEJO__database__PASSWD": "{{Mysql::Password}}"
+              }
+            }
+          ]
+        },
+        {
+          "Name": "PostgreSQL",
+          "Contracts": [
+            {
+              "Type": "Container",
+              "ImageName": "codeberg.org/forgejo/forgejo:10",
+              "Env": {
+                "USER_UID": "1000",
+                "USER_GID": "1000",
+                "FORGEJO__database__DB_TYPE": "postgres",
+                "FORGEJO__database__HOST": "{{Postgresql::Host}}",
+                "FORGEJO__database__NAME": "{{Postgresql::Database}}",
+                "FORGEJO__database__USER": "{{Postgresql::User}}",
+                "FORGEJO__database__PASSWD": "{{Postgresql::Password}}"
+              }
+            }
+          ]
+        },
+        {
+          "Name": "SQLite",
+          "Contracts": [
+            {
+              "Type": "Container",
+              "ImageName": "codeberg.org/forgejo/forgejo:10",
+              "Env": {
+                "USER_UID": "1000",
+                "USER_GID": "1000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 3000
+    },
+    {
+      "Type": "PortEndpoint",
+      "Port": 22,
+      "DestinationPort": 2222,
+      "Protocol": "tcp"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "data",
+      "Path": "/data"
+    }
+  ]
+}

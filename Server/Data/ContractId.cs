@@ -7,7 +7,7 @@ public record ContractId<TContract>(
 ) : ContractId(typeof(TContract), Name)
     where TContract : Contract;
 
-public record ContractId(
+public abstract record ContractId(
     [property: JsonIgnore] Type Type,
     string Name
 )
@@ -38,5 +38,13 @@ public record ContractId(
     public override string ToString()
     {
         return $"{Type.Name}:{Name}";
+    }
+    
+    public static ContractId Create(Type type, string name)
+    {
+        return (ContractId)Activator.CreateInstance(
+            typeof(ContractId<>).MakeGenericType(type),
+            name
+        )!;
     }
 }

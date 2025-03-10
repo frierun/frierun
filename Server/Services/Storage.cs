@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace Frierun.Server.Services;
+namespace Frierun.Server;
 
 public static class Storage
 {
