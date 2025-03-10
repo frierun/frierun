@@ -1,6 +1,5 @@
 ﻿import InstallForm from "../components/InstallForm.tsx";
 import {useGetPackagesIdPlan} from "@/api/endpoints/packages.ts";
-import type {GetPackagesIdPlan200Item, GetPackagesIdPlan409} from "@/api/schemas";
 
 type Props = {
     name: string;
@@ -17,17 +16,12 @@ export default function PackageInstall({name}: Props) {
     }
     
     if (data.status === 409) {
-        const contract = data.data as GetPackagesIdPlan409;
-        return <p>Error: Couldn't install contract {contract.Type}. Install the missing dependencies first.</p>;
+        return <p>Error: Couldn't install contract {data.data.Type}. Install the missing dependencies first.</p>;
     }
     
-    if (data.status !== 200) {
-        return <p>Error: unknown status code {data.status}</p>
-    }
-
     return (
         <InstallForm
-            contracts={data.data as GetPackagesIdPlan200Item[]}
+            contracts={data.data}
             name={name ?? ""}
         />
     );

@@ -9,11 +9,7 @@ import HttpEndpointForm from "@/components/contracts/HttpEndpointForm.tsx";
 import PortEndpointForm from "@/components/contracts/PortEndpointForm.tsx";
 import Debug from "@/components/Debug";
 import ParameterForm from "@/components/contracts/ParameterForm.tsx";
-import {
-    GetPackagesIdPlan200Item,
-    Package,
-    type PostPackagesIdInstall409,
-} from "@/api/schemas";
+import {GetPackagesIdPlan200Item, Package,} from "@/api/schemas";
 import VolumeForm from "@/components/contracts/VolumeForm.tsx";
 import SelectorForm from "@/components/contracts/SelectorForm.tsx";
 
@@ -59,8 +55,7 @@ export default function InstallForm({contracts, name}: Props) {
         
         if (result.status === 409)
         {
-            const data = result.data as PostPackagesIdInstall409; 
-            setError(`Couldn't install contract ${data.Type}. Install the missing dependencies first.`);
+            setError(`Couldn't install contract ${result.data.Type}. Install the missing dependencies first.`);
             return;
         }
         
