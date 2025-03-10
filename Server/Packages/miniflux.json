@@ -1,0 +1,23 @@
+﻿{
+  "Name": "miniflux",
+  "Url": "https://miniflux.app/docs/docker.html",
+  "ApplicationDescription": "Login: admin\nPassword: {{Password::Value}}",  
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "miniflux/miniflux:latest",
+      "Env": {
+        "DATABASE_URL": "postgres://{{Postgresql::User}}:{{Postgresql::Password}}@{{Postgresql::Host}}/{{Postgresql::Database}}?sslmode=disable",
+        "RUN_MIGRATIONS": "1",
+        "CREATE_ADMIN": "1",
+        "ADMIN_USERNAME": "admin",
+        "ADMIN_PASSWORD": "{{Password::Value}}"
+      }
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Name": "frontend",
+      "Port": 8080
+    }
+  ]
+}
