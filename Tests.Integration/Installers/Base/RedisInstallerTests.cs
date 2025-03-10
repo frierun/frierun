@@ -2,9 +2,9 @@
 using Frierun.Server.Data;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Tests.Integration;
+namespace Tests.Integration.Installers.Base;
 
-public class RedisTests : BaseTests
+public class RedisInstallerTests : BaseTests
 {
     [Fact]
     public async Task Install_RedisContract_CredentialsAreCorrect()

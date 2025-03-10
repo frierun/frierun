@@ -2,9 +2,9 @@
 using Frierun.Server.Data;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Tests.Integration;
+namespace Tests.Integration.Installers;
 
-public class MysqlTests : BaseTests
+public class MysqlInstallerTests : BaseTests
 {
     [Theory]
     [InlineData("mysql")]

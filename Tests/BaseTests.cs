@@ -75,7 +75,7 @@ public abstract class BaseTests
         var dockerClient = Mock<IDockerClient>();
         dockerClient.Containers
             .CreateContainerAsync(default)
-            .ReturnsForAnyArgs(Task.FromResult(new CreateContainerResponse()));
+            .ReturnsForAnyArgs(Task.FromResult(new CreateContainerResponse {ID = "containerId"}));
         dockerClient.Containers
             .StartContainerAsync(default, default)
             .ReturnsForAnyArgs(Task.FromResult(true));

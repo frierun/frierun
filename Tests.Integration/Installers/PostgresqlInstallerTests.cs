@@ -2,9 +2,9 @@
 using Frierun.Server.Data;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Tests.Integration;
+namespace Tests.Integration.Installers;
 
-public class PostgresqlTests : BaseTests
+public class PostgresqlInstallerTests : BaseTests
 {
     [Fact]
     public async Task Install_PostgresqlContract_CredentialsAreCorrect()

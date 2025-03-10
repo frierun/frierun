@@ -1,6 +1,5 @@
 ﻿using System.Security.Cryptography;
 using Frierun.Server.Data;
-using Frierun.Server.Services;
 
 namespace Frierun.Server.Installers;
 

@@ -21,7 +21,7 @@ public class ExecutionServiceTests : BaseTests
         var plan = service.Create(package);
 
         Assert.NotNull(plan);
-        Assert.Equal(1, plan.Contracts.Count);
+        Assert.Single(plan.Contracts);
         Assert.Contains(package.Id, plan.Contracts);
     }
 
