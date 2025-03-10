@@ -74,7 +74,7 @@ public class ContainerInstaller(DockerService dockerService) : IInstaller<Contai
 
         var result = dockerService.StartContainer(dockerParameters).Result;
 
-        if (!result)
+        if (result == null)
         {
             throw new Exception("Failed to start container");
         }
@@ -88,6 +88,6 @@ public class ContainerInstaller(DockerService dockerService) : IInstaller<Contai
     /// <inheritdoc />
     void IUninstaller<DockerContainer>.Uninstall(DockerContainer resource)
     {
-        dockerService.StopContainer(resource.Name).Wait();
+        dockerService.RemoveContainer(resource.Name).Wait();
     }
 }
