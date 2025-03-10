@@ -32,7 +32,7 @@ public class FileInstaller(DockerService dockerService) : IInstaller<File>
         {
             Image = "alpine:latest",
             Cmd = ["tail", "-f", "/dev/null"],
-            HostConfig = new HostConfig()
+            HostConfig = new HostConfig
             {
                 Mounts = new List<Mount>
                 {
@@ -55,7 +55,7 @@ public class FileInstaller(DockerService dockerService) : IInstaller<File>
 
         if (contract.Text != null)
         {
-            dockerService.PutFile(volume.Name, path, contract.Text).Wait();
+            dockerService.PutFile(containerId, path, contract.Text).Wait();
         }
 
         if (contract.Owner != null)
