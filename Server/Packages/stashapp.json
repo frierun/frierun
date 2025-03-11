@@ -1,0 +1,36 @@
+﻿{
+  "Name": "stashapp",
+  "Url": "https://github.com/stashapp/stash/",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "stashapp/stash:latest",
+      "Env": {
+        "STASH_STASH": "/data/",
+        "STASH_GENERATED": "/cache/generated/",
+        "STASH_METADATA": "/cache/metadata/",
+        "STASH_CACHE": "/cache/cache/",
+        "STASH_BLOBS": "/cache/blobs/"
+      }
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 9999
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "data",
+      "Path": "/data"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "cache",
+      "Path": "/cache"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "config",
+      "Path": "/root/.stash"
+    }
+  ]
+}

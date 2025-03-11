@@ -1,0 +1,33 @@
+﻿{
+  "Name": "technitium",
+  "Url": "https://github.com/technitiumsoftware/dnsserver/",
+  "ApplicationDescription": "Login: admin\nPassword: {{Password::Value}}",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "technitium/dns-server:latest",
+      "Env": {
+        "DNS_SERVER_ADMIN_PASSWORD": "{{Password::Value}}"
+      }
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 5380
+    },
+    {
+      "Type": "PortEndpoint",
+      "Port": 53,
+      "Protocol": "tcp"
+    },
+    {
+      "Type": "PortEndpoint",
+      "Port": 53,
+      "Protocol": "udp"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "config",
+      "Path": "/etc/dns"
+    }
+  ]
+}

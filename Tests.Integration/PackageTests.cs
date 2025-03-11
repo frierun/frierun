@@ -19,12 +19,14 @@ public class PackageTests : BaseTests
             // skip due to port 53 already in use
             "adguard",
             "pi-hole",
+            "technitium",
             
             // require mysql
             "bookstack",
             
             // require postgresql
             "authentik",
+            "miniflux",
         ];
         
         foreach (var fileName in Directory.EnumerateFiles(packagesDirectory, "*.json"))

@@ -52,6 +52,19 @@
               "Type": "Mount",
               "VolumeName": "db",
               "Path": "/db"
+            },
+            {
+              "Type": "File",
+              "Name": "chown db",
+              "VolumeName": "db",
+              "Path": "",
+              "Owner": 1000,
+              "Group": 1000
+            },
+            {
+              "Type": "Dependency",
+              "Preceding": "File:chown db",
+              "Following": "Container"
             }
           ]
         }
@@ -65,6 +78,19 @@
       "Type": "Mount",
       "VolumeName": "files",
       "Path": "/app/vikunja/files"
-    }
+    },
+    {
+      "Type": "File",
+      "Name": "chown files",
+      "VolumeName": "files",
+      "Path": "",
+      "Owner": 1000,
+      "Group": 1000
+    },
+    {
+      "Type": "Dependency",
+      "Preceding": "File:chown files",
+      "Following": "Container"
+    }    
   ]
 }
