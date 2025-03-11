@@ -23,7 +23,7 @@ public class PostgresqlInstallerTests : BaseTests
 
         var package = dbPackage with
         {
-            Name = "db_client",
+            Name = "db-client",
             Contracts = dbPackage.Contracts.Append(new Postgresql())
         };
         var application = InstallPackage(package);
@@ -31,8 +31,8 @@ public class PostgresqlInstallerTests : BaseTests
         
         var container = application.DependsOn.OfType<DockerContainer>().First();
         var database = application.DependsOn.OfType<PostgresqlDatabase>().First();
-        Assert.Equal("db_client", database.User);
-        Assert.Equal("db_client", database.Database);
+        Assert.Equal("db-client", database.User);
+        Assert.Equal("db-client", database.Database);
         Assert.Equal("postgresql", database.Host);
         Assert.NotEmpty(database.Password);
         

@@ -22,7 +22,7 @@ public class PackageTests : BaseTests
             "technitium",
             
             // require mysql
-            "bookstack",
+            "phpmyadmin",
             
             // require postgresql
             "authentik",
