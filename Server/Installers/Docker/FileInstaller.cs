@@ -26,11 +26,6 @@ public class FileInstaller(DockerService dockerService) : IInstaller<File>
     /// <inheritdoc />
     Resource? IInstaller<File>.Install(File contract, ExecutionPlan plan)
     {
-        if (!contract.Path.StartsWith("/"))
-        {
-            throw new Exception("Path must start with /");
-        }
-
         var volume = plan.GetResource<DockerVolume>(contract.VolumeId);
 
         var containerId = dockerService.StartContainer(
@@ -58,7 +53,7 @@ public class FileInstaller(DockerService dockerService) : IInstaller<File>
             throw new Exception("Failed to start container");
         }
 
-        var path = $"/mnt{contract.Path}";
+        var path = $"/mnt/{contract.Path}";
 
         if (contract.Text != null)
         {

@@ -33,14 +33,14 @@
       "Type": "File",
       "Name": "servers.json",
       "VolumeName": "config",
-      "Path": "/servers.json",
+      "Path": "servers.json",
       "Text": "{\"Servers\": {\"1\": {\"Name\": \"Server\",\"Group\": \"Servers\",\"Port\": 5432,\"Username\": \"{{Postgresql:Root:User}}\",\"Host\": \"{{Postgresql:Root:Host}}\",\"SSLMode\": \"prefer\",\"MaintenanceDB\": \"postgres\", \"PassFile\": \".pgpass\"}}}"
     },
     {
       "Type": "File",
       "Name": "pgpass",
       "VolumeName": "config",
-      "Path": "/pgpass",
+      "Path": "pgpass",
       "Owner": 5050,
       "Text": "{{Postgresql:Root:Host}}:*:*:{{Postgresql:Root:User}}:{{Postgresql:Root:Password}}\n"
     },
@@ -48,7 +48,7 @@
       "Type": "File",
       "Name": "chown config",
       "VolumeName": "config",
-      "Path": "/",
+      "Path": "",
       "Owner": 5050
     },
     {
