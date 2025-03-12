@@ -27,6 +27,7 @@ public class PackageTests : BaseTests
             // require postgresql
             "authentik",
             "miniflux",
+            "pgadmin",
         ];
         
         foreach (var fileName in Directory.EnumerateFiles(packagesDirectory, "*.json"))
