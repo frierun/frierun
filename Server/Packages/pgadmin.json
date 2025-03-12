@@ -1,0 +1,70 @@
+﻿{
+  "Name": "pgadmin",
+  "Url": "https://www.pgadmin.org/docs/pgadmin4/latest/container_deployment.html",
+  "ApplicationDescription": "Login: admin@localhost\nPassword: {{Password::Value}}",
+  "Contracts": [
+    {
+      "Type": "Container",
+      "ImageName": "dpage/pgadmin4:9",
+      "Env": {
+        "PGADMIN_DEFAULT_EMAIL": "admin@localhost",
+        "PGADMIN_DEFAULT_PASSWORD": "{{Password::Value}}",
+        "PGADMIN_CONFIG_ALLOW_SPECIAL_EMAIL_DOMAINS": "[\"localhost\"]",
+        "PGADMIN_CONFIG_GLOBALLY_DELIVERABLE": "False",
+        "PGADMIN_SERVER_JSON_FILE": "/var/lib/pgadmin/servers.json",
+        "PGPASS_FILE": "/var/lib/pgadmin/pgpass"
+      }
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Port": 80
+    },
+    {
+      "Type": "Postgresql",
+      "Name": "Root",
+      "Admin": true
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "config",
+      "Path": "/var/lib/pgadmin"
+    },
+    {
+      "Type": "File",
+      "Name": "servers.json",
+      "VolumeName": "config",
+      "Path": "/servers.json",
+      "Text": "{\"Servers\": {\"1\": {\"Name\": \"Server\",\"Group\": \"Servers\",\"Port\": 5432,\"Username\": \"{{Postgresql:Root:User}}\",\"Host\": \"{{Postgresql:Root:Host}}\",\"SSLMode\": \"prefer\",\"MaintenanceDB\": \"postgres\", \"PassFile\": \".pgpass\"}}}"
+    },
+    {
+      "Type": "File",
+      "Name": "pgpass",
+      "VolumeName": "config",
+      "Path": "/pgpass",
+      "Owner": 5050,
+      "Text": "{{Postgresql:Root:Host}}:*:*:{{Postgresql:Root:User}}:{{Postgresql:Root:Password}}\n"
+    },
+    {
+      "Type": "File",
+      "Name": "chown config",
+      "VolumeName": "config",
+      "Path": "/",
+      "Owner": 5050
+    },
+    {
+      "Type": "Dependency",
+      "Preceding": "File:servers.json",
+      "Following": "Container"
+    },
+    {
+      "Type": "Dependency",
+      "Preceding": "File:pgpass",
+      "Following": "Container"
+    },
+    {
+      "Type": "Dependency",
+      "Preceding": "File:chown config",
+      "Following": "Container"
+    }
+  ]
+}

@@ -9,8 +9,17 @@ public record File(
     string? VolumeName = null,
     int? Owner = null,
     int? Group = null
-) : Contract(Name ?? $"{Path}{(VolumeName != null ? " in " + VolumeName : "")}")
+) : Contract(Name ?? $"{Path}{(VolumeName != null ? " in " + VolumeName : "")}"), IHasStrings
 {
     public string VolumeName { get; } = VolumeName ?? "";
     [JsonIgnore] public ContractId<Volume> VolumeId => new(VolumeName);
+    
+    /// <inheritdoc />
+    Contract IHasStrings.ApplyStringDecorator(Func<string, string> decorator)
+    {
+        return this with
+        {
+            Text = Text == null ? null : decorator(Text),
+        };
+    }    
 }

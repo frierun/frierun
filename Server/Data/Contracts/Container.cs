@@ -27,7 +27,7 @@ public record Container(
 
 
     /// <inheritdoc />
-    public Contract ApplyStringDecorator(Func<string, string> decorator)
+    Contract IHasStrings.ApplyStringDecorator(Func<string, string> decorator)
     {
         return this with
         {
