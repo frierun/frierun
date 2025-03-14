@@ -18,9 +18,16 @@ public class UninstallService(
 
         try
         {
-            var changedNodes = new Dictionary<Resource, int>();
-            var uninstallQueue = new Queue<Resource>();
+            var requiredByCount = new Dictionary<Resource, int>();
+            foreach (var resource in state.Resources)
+            {
+                foreach (var dependency in resource.DependsOn)
+                {
+                    requiredByCount[dependency] = requiredByCount.GetValueOrDefault(dependency) + 1;
+                }
+            }
             
+            var uninstallQueue = new Queue<Resource>();
             uninstallQueue.Enqueue(application);
             while (uninstallQueue.Count > 0)
             {
@@ -31,17 +38,17 @@ public class UninstallService(
                     {
                         continue;
                     }
-                    
-                    if (!changedNodes.TryGetValue(dependency, out var edgesCount))
-                    {
-                        edgesCount = dependency.RequiredBy.Count;
-                    }
-                    
-                    changedNodes[dependency] = edgesCount - 1;
-                    if (edgesCount == 1)
+
+                    var count = requiredByCount[dependency];
+                    if (count == 1)
                     {
                         uninstallQueue.Enqueue(dependency);
+                        requiredByCount.Remove(dependency);
                     }
+                    else
+                    {
+                        requiredByCount[dependency] = count - 1;
+                    }   
                 }
                 
                 UninstallResource(resource);
@@ -66,7 +73,6 @@ public class UninstallService(
             throw new Exception($"Uninstaller not found for resource type {resource.GetType()}");
         }
         uninstaller.Uninstall(resource);
-        resource.Uninstall();
         state.RemoveResource(resource);
     }
 }
