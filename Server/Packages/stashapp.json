@@ -1,6 +1,9 @@
 ﻿{
   "Name": "stashapp",
   "Url": "https://github.com/stashapp/stash/",
+  "ShortDescription": "Mature content collection",
+  "FullDescription": "Stash is a web application written in Go for serving and organizing your mature content collection.",
+  "Tags": ["storage"],
   "Contracts": [
     {
       "Type": "Container",

@@ -1,6 +1,9 @@
 ﻿{
   "Name": "n8n",
   "Url": "https://docs.n8n.io/hosting/installation/docker/",
+  "ShortDescription": "Building workflows/integrations",
+  "FullDescription": "Stop struggling with your scripts, start creating workflows 10X faster — with n8n",
+  "Tags": ["network"],
   "Contracts": [
     {
       "Type": "Selector",

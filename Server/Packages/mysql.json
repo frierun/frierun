@@ -2,6 +2,9 @@
   "Name": "mysql",
   "Url": "https://hub.docker.com/_/mysql",
   "ApplicationDescription": "Root password: {{Password::Value}}",
+  "ShortDescription": "SQL database",
+  "FullDescription": "The world's most popular open source database",
+  "Tags": ["storage","dev"],
   "Contracts": [
     {
       "Type": "Container",

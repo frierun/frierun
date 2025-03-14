@@ -1,7 +1,10 @@
 ﻿{
   "Name": "authentik",
   "Url": "https://docs.goauthentik.io/docs/install-config/install/docker-compose",
-  "ApplicationUrl": "{{HttpEndpoint:frontend:Url}}if/flow/initial-setup/",  
+  "ApplicationUrl": "{{HttpEndpoint:frontend:Url}}if/flow/initial-setup/",
+  "ShortDescription": "Account management system",
+  "FullDescription": "Provides users/employees with one login for all internal applications and services, simplifying access and improving security.",
+  "Tags": ["network", "security"],
   "Contracts": [
     {
       "Type": "Container",

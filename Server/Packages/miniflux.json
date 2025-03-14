@@ -1,7 +1,10 @@
 ﻿{
   "Name": "miniflux",
   "Url": "https://miniflux.app/docs/docker.html",
-  "ApplicationDescription": "Login: admin\nPassword: {{Password::Value}}",  
+  "ApplicationDescription": "Login: admin\nPassword: {{Password::Value}}",
+  "ShortDescription": "Minimalist feed reader",
+  "FullDescription": "Miniflux is a minimalist software. The purpose of this application is to read feeds. Nothing else.",
+  "Tags": ["internet"],
   "Contracts": [
     {
       "Type": "Container",

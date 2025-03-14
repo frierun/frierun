@@ -1,6 +1,9 @@
 ﻿{
   "Name": "vikunja",
   "Url": "https://vikunja.io/docs/installing/#docker",
+  "ShortDescription": "To-do lists",
+  "FullDescription": "Vikunja, the fluffy, open-source, self-hostable to-do app.",
+  "Tags": ["dashboard"],
   "Contracts": [
     {
       "Type": "Selector",

@@ -2,6 +2,9 @@
   "Name": "pgadmin",
   "Url": "https://www.pgadmin.org/docs/pgadmin4/latest/container_deployment.html",
   "ApplicationDescription": "Login: admin@localhost\nPassword: {{Password::Value}}",
+  "ShortDescription": "PostgreSQL tools/administration",
+  "FullDescription": "PgAdmin is the most popular and feature rich Open Source administration and development platform for PostgreSQL.",
+  "Tags": ["dev"],
   "Contracts": [
     {
       "Type": "Container",
