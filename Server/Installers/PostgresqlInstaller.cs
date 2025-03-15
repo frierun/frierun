@@ -42,8 +42,26 @@ public class PostgresqlInstaller(
     Resource IInstaller<Postgresql>.Install(Postgresql contract, ExecutionPlan plan)
     {
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
-
         var container = application.DependsOn.OfType<DockerContainer>().First();
+        dockerService.AttachNetwork(network.Name, container.Name).Wait();
+
+        if (contract.Admin)
+        {
+            return new PostgresqlDatabase(
+                User: "postgres",
+                Password: application.DependsOn.OfType<GeneratedPassword>().First().Value,
+                Database: "",
+                Host: container.Name
+            )
+            {
+                DependsOn =
+                [
+                    application,
+                    network
+                ]
+            };
+        }
+
         var name = contract.DatabaseName;
         var password = RandomNumberGenerator.GetString(
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
@@ -63,7 +81,6 @@ public class PostgresqlInstaller(
             ]
         );
 
-        dockerService.AttachNetwork(network.Name, container.Name).Wait();
 
         return new PostgresqlDatabase(name, password, name, container.Name)
         {
@@ -78,12 +95,15 @@ public class PostgresqlInstaller(
     /// <inheritdoc />
     void IUninstaller<PostgresqlDatabase>.Uninstall(PostgresqlDatabase resource)
     {
-        RunSql(
-            [
-                $"DROP DATABASE \"{resource.Database}\"",
-                $"DROP USER \"{resource.User}\""
-            ]
-        );
+        if (resource.User != "postgres")
+        {
+            RunSql(
+                [
+                    $"DROP DATABASE \"{resource.Database}\"",
+                    $"DROP USER \"{resource.User}\""
+                ]
+            );
+        }
 
         var network = resource.DependsOn.OfType<DockerNetwork>().FirstOrDefault();
         if (network == null)

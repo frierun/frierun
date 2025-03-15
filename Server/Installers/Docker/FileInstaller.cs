@@ -27,31 +27,33 @@ public class FileInstaller(DockerService dockerService) : IInstaller<File>
     Resource? IInstaller<File>.Install(File contract, ExecutionPlan plan)
     {
         var volume = plan.GetResource<DockerVolume>(contract.VolumeId);
-        
-        var containerId = dockerService.StartContainer(new CreateContainerParameters
-        {
-            Image = "alpine:latest",
-            Cmd = ["tail", "-f", "/dev/null"],
-            HostConfig = new HostConfig
+
+        var containerId = dockerService.StartContainer(
+            new CreateContainerParameters
             {
-                Mounts = new List<Mount>
+                Image = "alpine:latest",
+                Cmd = ["tail", "-f", "/dev/null"],
+                HostConfig = new HostConfig
                 {
-                    new()
+                    Mounts = new List<Mount>
                     {
-                        Source = volume.Name,
-                        Target = "/mnt",
-                        Type = "volume",
+                        new()
+                        {
+                            Source = volume.Name,
+                            Target = "/mnt",
+                            Type = "volume",
+                        }
                     }
                 }
             }
-        }).Result;
+        ).Result;
 
         if (containerId == null)
         {
             throw new Exception("Failed to start container");
         }
-        
-        var path = $"/mnt{contract.Path}";
+
+        var path = $"/mnt/{contract.Path}";
 
         if (contract.Text != null)
         {
@@ -62,14 +64,14 @@ public class FileInstaller(DockerService dockerService) : IInstaller<File>
         {
             dockerService.ExecInContainer(containerId, ["chown", contract.Owner.ToString() ?? "0", path]).Wait();
         }
-        
+
         if (contract.Group != null)
         {
             dockerService.ExecInContainer(containerId, ["chgrp", contract.Group.ToString() ?? "0", path]).Wait();
         }
-        
+
         dockerService.RemoveContainer(containerId).Wait();
-        
+
         return null;
     }
 }

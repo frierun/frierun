@@ -1,0 +1,67 @@
+﻿{
+  "Name": "authentik",
+  "Url": "https://docs.goauthentik.io/docs/install-config/install/docker-compose",
+  "ApplicationUrl": "{{HttpEndpoint:frontend:Url}}if/flow/initial-setup/",
+  "ShortDescription": "Account management system",
+  "FullDescription": "Provides users/employees with one login for all internal applications and services, simplifying access and improving security.",
+  "Tags": ["network", "security"],
+  "Contracts": [
+    {
+      "Type": "Container",
+      "Name": "server",
+      "ImageName": "ghcr.io/goauthentik/server:latest",
+      "Command": [
+        "server"
+      ],
+      "Env": {
+        "AUTHENTIK_REDIS__HOST": "{{Redis::Host}}",
+        "AUTHENTIK_POSTGRESQL__HOST": "{{Postgresql::Host}}",
+        "AUTHENTIK_POSTGRESQL__NAME": "{{Postgresql::Database}}",
+        "AUTHENTIK_POSTGRESQL__USER": "{{Postgresql::User}}",
+        "AUTHENTIK_POSTGRESQL__PASSWORD": "{{Postgresql::Password}}",
+        "AUTHENTIK_SECRET_KEY": "{{Password:SecretKey:Value}}"
+      }
+    },
+    {
+      "Type": "Container",
+      "Name": "worker",
+      "ImageName": "ghcr.io/goauthentik/server:latest",
+      "Command": [
+        "worker"
+      ],
+      "Env": {
+        "AUTHENTIK_REDIS__HOST": "{{Redis::Host}}",
+        "AUTHENTIK_POSTGRESQL__HOST": "{{Postgresql::Host}}",
+        "AUTHENTIK_POSTGRESQL__NAME": "{{Postgresql::Database}}",
+        "AUTHENTIK_POSTGRESQL__USER": "{{Postgresql::User}}",
+        "AUTHENTIK_POSTGRESQL__PASSWORD": "{{Postgresql::Password}}",
+        "AUTHENTIK_SECRET_KEY": "{{Password:SecretKey:Value}}"
+      },
+      "RequireDocker": true
+    },
+    {
+      "Type": "HttpEndpoint",
+      "Name": "frontend",
+      "ContainerName": "server",
+      "Port": 9000
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "media",
+      "ContainerName": "server",
+      "Path": "/media"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "media",
+      "ContainerName": "worker",
+      "Path": "/media"
+    },
+    {
+      "Type": "Mount",
+      "VolumeName": "certs",
+      "ContainerName": "worker",
+      "Path": "/certs"
+    }
+  ]
+}
