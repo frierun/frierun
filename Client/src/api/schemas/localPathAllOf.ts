@@ -5,9 +5,6 @@
  * OpenAPI spec version: 1.0
  */
 
-export type MountAllOf = {
+export type LocalPathAllOf = {
   path: string;
-  readOnly: boolean;
-  volumeName: string;
-  containerName: string;
 };

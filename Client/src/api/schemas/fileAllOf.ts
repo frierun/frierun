@@ -6,8 +6,12 @@
  */
 
 export type FileAllOf = {
+  path: string;
   /** @nullable */
-  path?: string | null;
-  text: string;
+  text?: string | null;
+  /** @nullable */
+  owner?: number | null;
+  /** @nullable */
+  group?: number | null;
   volumeName: string;
 };

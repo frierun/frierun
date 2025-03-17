@@ -8,4 +8,6 @@
 export type VolumeAllOf = {
   /** @nullable */
   volumeName?: string | null;
+  /** @nullable */
+  path?: string | null;
 };

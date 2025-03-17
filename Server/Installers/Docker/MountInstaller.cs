@@ -36,28 +36,58 @@ public class MountInstaller : IInstaller<Mount>
             throw new Exception("Container not found");
         }
 
-        var volume = plan.GetResource<DockerVolume>(contract.VolumeId);
+        var volume = plan.GetResource(contract.VolumeId);
 
-        plan.UpdateContract(
-            containerContract with
-            {
-                Configure = containerContract.Configure.Append(
-                    parameters =>
-                    {
-                        parameters.HostConfig.Mounts.Add(
-                            new global::Docker.DotNet.Models.Mount
-                            {
-                                Source = volume.Name,
-                                Target = contract.Path,
-                                Type = "volume",
-                                ReadOnly = contract.ReadOnly
-                            }
-                        );
-                    }
-                ),
-            }
-        );
+        if (volume is DockerVolume dockerVolume)
+        {
+            plan.UpdateContract(
+                containerContract with
+                {
+                    Configure = containerContract.Configure.Append(
+                        parameters =>
+                        {
+                            parameters.HostConfig.Mounts.Add(
+                                new global::Docker.DotNet.Models.Mount
+                                {
+                                    Source = dockerVolume.Name,
+                                    Target = contract.Path,
+                                    Type = "volume",
+                                    ReadOnly = contract.ReadOnly
+                                }
+                            );
+                        }
+                    ),
+                }
+            );
 
-        return null;
+            return null;
+        }
+
+        if (volume is LocalPath localPath)
+        {
+            plan.UpdateContract(
+                containerContract with
+                {
+                    Configure = containerContract.Configure.Append(
+                        parameters =>
+                        {
+                            parameters.HostConfig.Mounts.Add(
+                                new global::Docker.DotNet.Models.Mount
+                                {
+                                    Source = localPath.Path,
+                                    Target = contract.Path,
+                                    Type = "bind",
+                                    ReadOnly = contract.ReadOnly
+                                }
+                            );
+                        }
+                    ),
+                }
+            );
+
+            return null;
+        }
+        
+        throw new Exception("Unknown volume type: " + volume?.GetType().Name);
     }
 }

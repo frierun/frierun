@@ -8,21 +8,47 @@ type Props = {
 }
 
 export default function VolumeForm({contract, updateContract}: Props) {
-    const [volumeName, setVolumeName] = useState('');
-    const [createNew, setCreateNew] = useState(true);
+    const [value, setValue] = useState('');
+    const [installer, setInstaller] = useState<'NewVolume' | 'ExistingVolume' | 'LocalPath'>('NewVolume');
     const {data: getVolumesResponse} = useGetVolumes();
 
     useEffect(() => {
-        setVolumeName(contract.volumeName ?? '');
-    }, [contract]);
+        switch (installer)
+        {
+            case 'ExistingVolume':
+                setValue(getVolumesResponse?.data[0].name ?? '');
+                break;
+            case 'LocalPath':
+                setValue(contract.path ?? '/data');
+                break;
+        }
+    }, [contract, installer]);
 
-    const updateVolumeName = (volumeName: string) => {
-        setVolumeName(volumeName);
-        updateContract({
-            ...contract,
-            volumeName
-        });
-    }
+    useEffect(() => {
+        switch (installer) {
+            case 'NewVolume':
+                updateContract({
+                    ...contract,
+                    volumeName: null,
+                    path: null,
+                });
+                break;
+            case 'ExistingVolume':
+                updateContract({
+                    ...contract,
+                    volumeName: value,
+                    path: null,
+                });
+                break;
+            case 'LocalPath':
+                updateContract({
+                    ...contract,
+                    path: value,
+                    volumeName: null,
+                });
+                break;
+        }
+    }, [value, installer]);
 
     return (
         <>
@@ -33,64 +59,79 @@ export default function VolumeForm({contract, updateContract}: Props) {
                     </label>
                     {contract.name}
                 </div>
-                {!!getVolumesResponse?.data?.length && (
-                    <fieldset className={"flex gap-4"}>
+                <fieldset className={"flex gap-4"}>
+                    <div>
+                        <input
+                            id={"NewVolume" + value}
+                            type="radio"
+                            checked={installer === 'NewVolume'}
+                            onChange={() => {
+                                setInstaller('NewVolume');
+                            }}
+                        />
+                        <label htmlFor={"NewVolume" + value}>
+                            New volume
+                        </label>
+                    </div>
+                    {!!getVolumesResponse?.data?.length && (
                         <div>
                             <input
-                                id={"NewVolume" + volumeName}
+                                id={"ExistingVolume" + value}
                                 type="radio"
-                                checked={createNew}
+                                checked={installer === 'ExistingVolume'}
                                 onChange={() => {
-                                    setCreateNew(true);
-                                    updateVolumeName(contract.volumeName ?? '');
+                                    setInstaller('ExistingVolume');
                                 }}
                             />
-                            <label htmlFor={"NewVolume" + volumeName}>
-                                New
+                            <label htmlFor={"ExistingVolume" + value}>
+                                Existing volume
                             </label>
                         </div>
-                        <div>
-                            <input
-                                id={"OldVolume" + volumeName}
-                                type="radio"
-                                checked={!createNew}
-                                onChange={() => {
-                                    setCreateNew(false);
-                                    updateVolumeName(getVolumesResponse?.data[0].name ?? '');
-                                }}
-                            />
-                            <label htmlFor={"OldVolume" + volumeName}>
-                                Existing
-                            </label>
-                        </div>
-                    </fieldset>
-                )}
-                {createNew
-                    ? (
-                        <div>
-                            <label className={"inline-block w-48"}>
-                                New volume name:
-                            </label>
-                            <input
-                                value={volumeName}
-                                onChange={e => updateVolumeName(e.target.value)}
-                            />
-                        </div>
-                    ) : (
+                    )}
+                    <div>
+                        <input
+                            id={"LocalPath" + value}
+                            type="radio"
+                            checked={installer === 'LocalPath'}
+                            onChange={() => {
+                                setInstaller('LocalPath');
+                            }}
+                        />
+                        <label htmlFor={"LocalPath" + value}>
+                            Local directory
+                        </label>
+                    </div>
+                </fieldset>
+                {installer == 'ExistingVolume' &&
+                    (
                         <div>
                             <label className={"inline-block w-48"}>
                                 Existing volume name:
                             </label>
 
                             <select
-                                value={volumeName}
-                                onChange={e => updateVolumeName(e.target.value)}
+                                value={value}
+                                onChange={e => setValue(e.target.value)}
                             >
                                 {getVolumesResponse?.data.map(volume => (
                                     <option key={volume.name} value={volume.name}>{volume.name}</option>
                                 ))}
                             </select>
 
+                        </div>
+                    )
+                }
+                {installer == 'LocalPath' &&
+                    (
+                        <div>
+                            <label className={"inline-block w-48"}>
+                                Local directory:
+                            </label>
+                            <input
+                                type="text"
+                                value={value}
+                                onChange={e => setValue(e.target.value)}
+                            />
                         </div>
                     )
                 }
