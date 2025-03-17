@@ -41,7 +41,7 @@ public class FileInstallerTests : BaseTests
     {
         await InstallAndCheck(
             new File(
-                Path: "/test-file",
+                Path: "test-file",
                 Text: "test-text"
             ),
             async containerName =>
@@ -64,7 +64,7 @@ public class FileInstallerTests : BaseTests
     {
         await InstallAndCheck(
             new File(
-                Path: "/test-file",
+                Path: "test-file",
                 Text: "test-text",
                 Owner: 1000
             ),
@@ -84,13 +84,13 @@ public class FileInstallerTests : BaseTests
             }
         );
     }
-    
+
     [Fact]
     public async Task Install_FileGroup_ChgrpFile()
     {
         await InstallAndCheck(
             new File(
-                Path: "/test-file",
+                Path: "test-file",
                 Text: "test-text",
                 Group: 1000
             ),
@@ -110,13 +110,13 @@ public class FileInstallerTests : BaseTests
             }
         );
     }
-    
+
     [Fact]
     public async Task Install_RootPermissions_SetPermissions()
     {
         await InstallAndCheck(
             new File(
-                Path: "/",
+                Path: "",
                 Owner: 1000,
                 Group: 1000
             ),
@@ -135,5 +135,43 @@ public class FileInstallerTests : BaseTests
                 Assert.Equal("1000-1000", stdout.Trim());
             }
         );
-    }   
+    }
+
+    [Fact]
+    public void Install_LocalPath_PutsFile()
+    {
+        var state = Services.GetRequiredService<State>();
+        var directory = Directory.CreateTempSubdirectory();
+        var fileName = "test-file.txt";
+        var filePath = Path.Combine(directory.FullName, fileName);
+        var package = new Package(
+            Name: "test-package",
+            Contracts:
+            [
+                new Container(
+                    ImageName: "alpine:latest",
+                    Command: ["tail", "-f", "/dev/null"]
+                ),
+                new Mount(Path: "/mnt"),
+                new Volume(Name: "", Path: directory.FullName),
+                new File(
+                    Path: fileName,
+                    Text: "test-text"
+                ),
+            ]
+        );
+
+        var application = InstallPackage(package);
+
+        Assert.NotNull(application);
+        
+        
+        Assert.True(System.IO.File.Exists(filePath));
+        Assert.Equal("test-text", System.IO.File.ReadAllText(filePath));
+        
+        UninstallApplication(application);
+        Assert.Empty(state.Resources);
+        
+        directory.Delete(true);
+    }
 }

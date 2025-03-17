@@ -2,7 +2,8 @@
 
 public record Volume(
     string Name,
-    string? VolumeName = null
+    string? VolumeName = null,
+    string? Path = null
 ) : Contract(Name)
 {
     public override Contract With(Contract other) 

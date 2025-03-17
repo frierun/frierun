@@ -10,15 +10,15 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(DockerVolume), nameof(DockerVolume))]
 [JsonDerivedType(typeof(GenericHttpEndpoint), nameof(GenericHttpEndpoint))]
 [JsonDerivedType(typeof(GeneratedPassword), nameof(GeneratedPassword))]
-[JsonDerivedType(typeof(ResolvedParameter), nameof(ResolvedParameter))]
-[JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
+[JsonDerivedType(typeof(LocalPath), nameof(LocalPath))]
 [JsonDerivedType(typeof(MysqlDatabase), nameof(MysqlDatabase))]
 [JsonDerivedType(typeof(PostgresqlDatabase), nameof(PostgresqlDatabase))]
 [JsonDerivedType(typeof(RedisDatabase), nameof(RedisDatabase))]
+[JsonDerivedType(typeof(ResolvedParameter), nameof(ResolvedParameter))]
+[JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
 public abstract record Resource
 {
     private readonly List<Resource> _dependsOn = [];
-    private readonly List<Resource> _requiredBy = [];
     private readonly List<Guid> _dependsOnIds = [];
     private bool _hydrated = true;
     
@@ -33,12 +33,6 @@ public abstract record Resource
         .Where(resource => resource.GetType() != typeof(Application))
         .Prepend(this);
     
-    /// <summary>
-    /// Gets the resources that require this resource.
-    /// </summary>
-    [JsonIgnore]
-    public IReadOnlyList<Resource> RequiredBy => _requiredBy;
-
     /// <summary>
     /// Gets the resources that this resource depends on.
     /// </summary>
@@ -64,7 +58,6 @@ public abstract record Resource
             {
                 _dependsOn.Add(resource);
                 _dependsOnIds.Add(resource.Id);
-                resource._requiredBy.Add(this);
             }
         }
     }
@@ -108,25 +101,8 @@ public abstract record Resource
                 throw new InvalidOperationException($"Resource {guid} not found.");
             }
             _dependsOn.Add(resource);
-            resource._requiredBy.Add(this);
         }
 
         _hydrated = true;
-    }
-
-    /// <summary>
-    /// Uninstalls the resource.
-    /// </summary>
-    public void Uninstall()
-    {
-        if (RequiredBy.Count > 0)
-        {
-            throw new InvalidOperationException("Resource is required by other resources.");
-        }
-
-        foreach (var resource in _dependsOn)
-        {
-            resource._requiredBy.Remove(this);
-        }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Docker.DotNet.Models;
 using Frierun.Server.Data;
-using Frierun.Server.Services;
 using File = Frierun.Server.Data.File;
 using Mount = Docker.DotNet.Models.Mount;
 
@@ -26,7 +25,31 @@ public class FileInstaller(DockerService dockerService) : IInstaller<File>
     /// <inheritdoc />
     Resource? IInstaller<File>.Install(File contract, ExecutionPlan plan)
     {
-        var volume = plan.GetResource<DockerVolume>(contract.VolumeId);
+        var volume = plan.GetResource(contract.VolumeId);
+        Mount? mount = null;
+        if (volume is DockerVolume dockerVolume)
+        {
+            mount = new Mount
+            {
+                Source = dockerVolume.Name,
+                Target = "/mnt",
+                Type = "volume",
+            };
+        }
+        else if (volume is LocalPath localPath)
+        {
+            mount = new Mount
+            {
+                Source = localPath.Path,
+                Target = "/mnt",
+                Type = "bind",
+            };
+        }
+
+        if (mount == null)
+        {
+            throw new Exception("Unknown volume type: " + volume?.GetType().Name);
+        }
 
         var containerId = dockerService.StartContainer(
             new CreateContainerParameters
@@ -35,15 +58,7 @@ public class FileInstaller(DockerService dockerService) : IInstaller<File>
                 Cmd = ["tail", "-f", "/dev/null"],
                 HostConfig = new HostConfig
                 {
-                    Mounts = new List<Mount>
-                    {
-                        new()
-                        {
-                            Source = volume.Name,
-                            Target = "/mnt",
-                            Type = "volume",
-                        }
-                    }
+                    Mounts = new List<Mount> { mount }
                 }
             }
         ).Result;

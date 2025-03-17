@@ -1,5 +1,4 @@
 ﻿using Frierun.Server.Data;
-using Frierun.Server.Services;
 
 namespace Frierun.Server.Installers.Docker;
 
@@ -8,7 +7,7 @@ public class VolumeInstaller(DockerService dockerService) : IInstaller<Volume>, 
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Volume>.Initialize(Volume contract, string prefix, State state)
     {
-        if (contract.VolumeName != null)
+        if (contract.VolumeName != null || contract.Path != null)
         {
             yield return new InstallerInitializeResult(contract);
             yield break;
@@ -35,6 +34,11 @@ public class VolumeInstaller(DockerService dockerService) : IInstaller<Volume>, 
     /// <inheritdoc />
     Resource IInstaller<Volume>.Install(Volume contract, ExecutionPlan plan)
     {
+        if (contract.Path != null)
+        {
+            return new LocalPath(contract.Path);
+        }
+        
         var volumeName = contract.VolumeName!;
         var existingVolume = plan.State
             .Resources
