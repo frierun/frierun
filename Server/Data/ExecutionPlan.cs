@@ -87,12 +87,6 @@ public class ExecutionPlan : IExecutionPlan
         _contracts[contract.Id] = contract;
     }
 
-    public IEnumerable<T> GetContractsOfType<T>()
-        where T : Contract
-    {
-        return _contracts.Values.OfType<T>();
-    }
-
     /// <summary>
     /// Installs all contracts in the execution plan.
     /// </summary>

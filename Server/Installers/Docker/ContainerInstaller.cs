@@ -37,6 +37,7 @@ public class ContainerInstaller(DockerService dockerService) : IInstaller<Contai
     /// <inheritdoc />
     Resource IInstaller<Container>.Install(Container contract, ExecutionPlan plan)
     {
+        var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
         var dockerParameters = new CreateContainerParameters
         {
             Cmd = contract.Command.ToList(),
@@ -47,11 +48,23 @@ public class ContainerInstaller(DockerService dockerService) : IInstaller<Contai
                 Mounts = new List<global::Docker.DotNet.Models.Mount>(),
                 PortBindings = new Dictionary<string, IList<PortBinding>>()
             },
-            Labels = new Dictionary<string, string>(),
+            Labels = new Dictionary<string, string>()
+            {
+                ["com.docker.compose.project"] = network.Name,
+                ["com.docker.compose.service"] = contract.Name
+            },
             Name = contract.ContainerName!,
             NetworkingConfig = new NetworkingConfig()
             {
-                EndpointsConfig = new Dictionary<string, EndpointSettings>()
+                EndpointsConfig  = new Dictionary<string, EndpointSettings>
+                {
+                    {
+                        network.Name, new EndpointSettings
+                        {
+                            Aliases = new List<string> { contract.Name }
+                        }
+                    }
+                }
             }
         };
 

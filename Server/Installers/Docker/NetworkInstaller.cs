@@ -34,33 +34,7 @@ public class NetworkInstaller(DockerService dockerService) : IInstaller<Network>
         var networkName = contract.NetworkName!;
 
         dockerService.CreateNetwork(networkName).Wait();
-
-        foreach (var containerContract in plan.GetContractsOfType<Container>())
-        {
-            plan.UpdateContract(
-                containerContract with
-                {
-                    Configure = containerContract.Configure.Append(
-                        parameters =>
-                        {
-                            parameters.Labels["com.docker.compose.project"] = networkName;
-                            parameters.Labels["com.docker.compose.service"] = containerContract.Name;
-
-                            parameters.NetworkingConfig.EndpointsConfig = new Dictionary<string, EndpointSettings>
-                            {
-                                {
-                                    networkName, new EndpointSettings
-                                    {
-                                        Aliases = new List<string> { containerContract.Name }
-                                    }
-                                }
-                            };
-                        }
-                    ),
-                }
-            );
-        }
-
+        
         return new DockerNetwork(networkName);
     }
 
