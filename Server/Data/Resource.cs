@@ -25,15 +25,6 @@ public abstract record Resource
     public Guid Id { get; init; } = Guid.NewGuid();
     
     /// <summary>
-    /// Enumerates all resources for this application.
-    /// </summary>
-    [JsonIgnore]
-    public IEnumerable<Resource> AllDependencies => DependsOn
-        .SelectMany(resource => resource.AllDependencies)
-        .Where(resource => resource.GetType() != typeof(Application))
-        .Prepend(this);
-    
-    /// <summary>
     /// Gets the resources that this resource depends on.
     /// </summary>
     [JsonIgnore]

@@ -105,7 +105,7 @@ public class MysqlInstaller(DockerService dockerService, Application application
             return;
         }
 
-        var container = application.AllDependencies.OfType<DockerContainer>().First();
+        var container = application.DependsOn.OfType<DockerContainer>().First();
         dockerService.DetachNetwork(network.Name, container.Name).Wait();
     }
 

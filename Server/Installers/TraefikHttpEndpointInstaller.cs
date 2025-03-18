@@ -45,13 +45,13 @@ public class TraefikHttpEndpointInstaller(DockerService dockerService, Applicati
 
         var network = plan.GetResource<DockerNetwork>(containerContract.NetworkId);
 
-        var traefikContainer = application.AllDependencies.OfType<DockerContainer>().FirstOrDefault();
+        var traefikContainer = application.DependsOn.OfType<DockerContainer>().FirstOrDefault();
         if (traefikContainer == null)
         {
             throw new Exception("Traefik container not found");
         }
 
-        var traefikPort = application.AllDependencies.OfType<DockerPortEndpoint>().FirstOrDefault();
+        var traefikPort = application.DependsOn.OfType<DockerPortEndpoint>().FirstOrDefault();
         if (traefikPort == null)
         {
             throw new Exception("Traefik port not found");
@@ -94,7 +94,7 @@ public class TraefikHttpEndpointInstaller(DockerService dockerService, Applicati
             return;
         }
 
-        var container = application.AllDependencies.OfType<DockerContainer>().First();
+        var container = application.DependsOn.OfType<DockerContainer>().First();
         dockerService.DetachNetwork(network.Name, container.Name).Wait();
     }
 }
