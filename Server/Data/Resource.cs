@@ -4,6 +4,7 @@ namespace Frierun.Server.Data;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
 [JsonDerivedType(typeof(Application), nameof(Application))]
+[JsonDerivedType(typeof(DockerAttachedNetwork), nameof(DockerAttachedNetwork))]
 [JsonDerivedType(typeof(DockerContainer), nameof(DockerContainer))]
 [JsonDerivedType(typeof(DockerNetwork), nameof(DockerNetwork))]
 [JsonDerivedType(typeof(DockerPortEndpoint), nameof(DockerPortEndpoint))]

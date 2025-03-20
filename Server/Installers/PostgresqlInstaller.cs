@@ -9,6 +9,8 @@ public class PostgresqlInstaller(
     ILogger<PostgresqlInstaller> logger)
     : IInstaller<Postgresql>, IUninstaller<PostgresqlDatabase>
 {
+    private readonly DockerContainer _container = application.DependsOn.OfType<DockerContainer>().First();
+    
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Postgresql>.Initialize(
         Postgresql contract,
@@ -28,22 +30,23 @@ public class PostgresqlInstaller(
 
         yield return new InstallerInitializeResult(
             contract with { DatabaseName = name },
-            [contract.NetworkId]
+            null,
+            [new ConnectExternalContainer(_container.Name, contract.NetworkName)]
         );
     }
 
     /// <inheritdoc />
     IEnumerable<ContractDependency> IInstaller<Postgresql>.GetDependencies(Postgresql contract, ExecutionPlan plan)
     {
-        yield return new ContractDependency(contract.NetworkId, contract.Id);
+        var attachNetworkContract = new ConnectExternalContainer(_container.Name, contract.NetworkName);
+        yield return new ContractDependency(attachNetworkContract.Id, contract.Id);
     }
 
     /// <inheritdoc />
     Resource IInstaller<Postgresql>.Install(Postgresql contract, ExecutionPlan plan)
     {
-        var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
-        var container = application.DependsOn.OfType<DockerContainer>().First();
-        dockerService.AttachNetwork(network.Name, container.Name).Wait();
+        var attachNetworkContract = new ConnectExternalContainer(_container.Name, contract.NetworkName);
+        var attachedNetwork = plan.GetResource<DockerAttachedNetwork>(attachNetworkContract.Id);
 
         if (contract.Admin)
         {
@@ -51,13 +54,13 @@ public class PostgresqlInstaller(
                 User: "postgres",
                 Password: application.DependsOn.OfType<GeneratedPassword>().First().Value,
                 Database: "",
-                Host: container.Name
+                Host: _container.Name
             )
             {
                 DependsOn =
                 [
                     application,
-                    network
+                    attachedNetwork
                 ]
             };
         }
@@ -82,12 +85,12 @@ public class PostgresqlInstaller(
         );
 
 
-        return new PostgresqlDatabase(name, password, name, container.Name)
+        return new PostgresqlDatabase(name, password, name, _container.Name)
         {
             DependsOn =
             [
                 application,
-                network
+                attachedNetwork
             ]
         };
     }
@@ -104,15 +107,6 @@ public class PostgresqlInstaller(
                 ]
             );
         }
-
-        var network = resource.DependsOn.OfType<DockerNetwork>().FirstOrDefault();
-        if (network == null)
-        {
-            return;
-        }
-
-        var container = application.DependsOn.OfType<DockerContainer>().First();
-        dockerService.DetachNetwork(network.Name, container.Name).Wait();
     }
 
     /// <summary>
@@ -120,12 +114,11 @@ public class PostgresqlInstaller(
     /// </summary>
     private void RunSql(IList<string> sqlList)
     {
-        var container = application.DependsOn.OfType<DockerContainer>().First();
         var command = new List<string> { "psql", "-U", "postgres" };
         command.AddRange(sqlList.SelectMany(sql => new[] { "-c", sql }));
 
         var result = dockerService.ExecInContainer(
-            container.Name,
+            _container.Name,
             command
         ).Result;
 

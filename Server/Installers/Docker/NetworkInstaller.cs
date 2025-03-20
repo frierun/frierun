@@ -1,6 +1,4 @@
-﻿using Docker.DotNet.Models;
-using Frierun.Server.Data;
-using Frierun.Server.Services;
+﻿using Frierun.Server.Data;
 using Network = Frierun.Server.Data.Network;
 
 namespace Frierun.Server.Installers.Docker;

@@ -39,7 +39,13 @@ public class InstallerRegistryTests : BaseTests
     public void GetInstaller_HasTraefik_ReturnsBothInstallers()
     {
         var package = new Package("traefik");
-        var application = new Application("traefik", package);
+        var application = new Application("traefik", package)
+        {
+            DependsOn = [
+                new DockerContainer("traefik", "traefik"),
+                new DockerPortEndpoint("127.0.0.1", 80, Protocol.Tcp)
+            ]
+        };
         var state = Resolve<State>();
         state.AddResource(application);
         var registry = Resolve<InstallerRegistry>();
@@ -56,7 +62,13 @@ public class InstallerRegistryTests : BaseTests
     {
         var package = new Package("traefik");
         var registry = Resolve<InstallerRegistry>();
-        var application = new Application("traefik", package);
+        var application = new Application("traefik", package)
+        {
+            DependsOn = [
+                new DockerContainer("traefik", "traefik"),
+                new DockerPortEndpoint("127.0.0.1", 80, Protocol.Tcp)
+            ]
+        };
         var state = Resolve<State>();
         state.AddResource(application);
 
@@ -71,7 +83,13 @@ public class InstallerRegistryTests : BaseTests
     public void GetInstaller_RemoveTraefik_ReturnsDefaultInstaller()
     {
         var package = new Package("traefik");
-        var application = new Application("traefik", package);
+        var application = new Application("traefik", package)
+        {
+            DependsOn = [
+                new DockerContainer("traefik", "traefik"),
+                new DockerPortEndpoint("127.0.0.1", 80, Protocol.Tcp)
+            ]
+        };
         var state = Resolve<State>();
         state.AddResource(application);
         var registry = Resolve<InstallerRegistry>();

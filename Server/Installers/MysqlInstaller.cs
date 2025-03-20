@@ -6,6 +6,8 @@ namespace Frierun.Server.Installers;
 public class MysqlInstaller(DockerService dockerService, Application application)
     : IInstaller<Mysql>, IUninstaller<MysqlDatabase>
 {
+    private readonly DockerContainer _container = application.DependsOn.OfType<DockerContainer>().First();
+    
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Mysql>.Initialize(Mysql contract, string prefix, State state)
     {
@@ -21,22 +23,23 @@ public class MysqlInstaller(DockerService dockerService, Application application
 
         yield return new InstallerInitializeResult(
             contract with { DatabaseName = name },
-            [contract.NetworkId]
+            null,
+            [new ConnectExternalContainer(_container.Name, contract.NetworkName)]
         );
     }
 
     /// <inheritdoc />
     IEnumerable<ContractDependency> IInstaller<Mysql>.GetDependencies(Mysql contract, ExecutionPlan plan)
     {
-        yield return new ContractDependency(contract.NetworkId, contract.Id);
+        var attachNetworkContract = new ConnectExternalContainer(_container.Name, contract.NetworkName);
+        yield return new ContractDependency(attachNetworkContract.Id, contract.Id);
     }
 
     /// <inheritdoc />
     Resource IInstaller<Mysql>.Install(Mysql contract, ExecutionPlan plan)
     {
-        var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
-        var container = application.DependsOn.OfType<DockerContainer>().First();
-        dockerService.AttachNetwork(network.Name, container.Name).Wait();
+        var attachNetworkContract = new ConnectExternalContainer(_container.Name, contract.NetworkName);
+        var attachedNetwork = plan.GetResource<DockerAttachedNetwork>(attachNetworkContract.Id);
         
         if (contract.Admin)
         {
@@ -44,13 +47,13 @@ public class MysqlInstaller(DockerService dockerService, Application application
                 User: "root",
                 Password: application.DependsOn.OfType<GeneratedPassword>().First().Value, 
                 Database:"", 
-                Host: container.Name
+                Host: _container.Name
                 )
             {
                 DependsOn =
                 [
                     application,
-                    network
+                    attachedNetwork
                 ]
             };
         }
@@ -76,12 +79,12 @@ public class MysqlInstaller(DockerService dockerService, Application application
         );
 
 
-        return new MysqlDatabase(name, password, name, container.Name)
+        return new MysqlDatabase(name, password, name, _container.Name)
         {
             DependsOn =
             [
                 application,
-                network
+                attachedNetwork
             ]
         };
     }
@@ -98,15 +101,6 @@ public class MysqlInstaller(DockerService dockerService, Application application
                  """
             );
         }
-
-        var network = resource.DependsOn.OfType<DockerNetwork>().FirstOrDefault();
-        if (network == null)
-        {
-            return;
-        }
-
-        var container = application.DependsOn.OfType<DockerContainer>().First();
-        dockerService.DetachNetwork(network.Name, container.Name).Wait();
     }
 
     /// <summary>
@@ -114,11 +108,10 @@ public class MysqlInstaller(DockerService dockerService, Application application
     /// </summary>
     private void RunSql(string sql)
     {
-        var container = application.DependsOn.OfType<DockerContainer>().First();
         var rootPassword = application.DependsOn.OfType<GeneratedPassword>().First().Value;
 
         dockerService.ExecInContainer(
-            container.Name,
+            _container.Name,
             ["mysql", "-u", "root", $"-p{rootPassword}", "-e", sql]
         ).Wait();
     }

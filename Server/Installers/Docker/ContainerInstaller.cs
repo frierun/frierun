@@ -92,7 +92,7 @@ public class ContainerInstaller(DockerService dockerService) : IInstaller<Contai
             throw new Exception("Failed to start container");
         }
 
-        return new DockerContainer(contract.ContainerName!)
+        return new DockerContainer(Name: contract.ContainerName!, NetworkName: network.Name)
         {
             DependsOn = plan.GetDependentResources(contract.Id).ToList()
         };

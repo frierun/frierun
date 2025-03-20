@@ -1,11 +1,13 @@
 ﻿using Frierun.Server.Data;
-using Frierun.Server.Services;
 
 namespace Frierun.Server.Installers;
 
-public class TraefikHttpEndpointInstaller(DockerService dockerService, Application application)
+public class TraefikHttpEndpointInstaller(Application application)
     : IInstaller<HttpEndpoint>, IUninstaller<TraefikHttpEndpoint>
 {
+    private readonly DockerContainer _container = application.DependsOn.OfType<DockerContainer>().First();
+    private readonly DockerPortEndpoint _port = application.DependsOn.OfType<DockerPortEndpoint>().First();
+    
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix, State state)
     {
@@ -23,16 +25,16 @@ public class TraefikHttpEndpointInstaller(DockerService dockerService, Applicati
 
         yield return new InstallerInitializeResult(
             contract with { DomainName = name },
-            [contract.ContainerId]
+            [contract.ContainerId],
+            [new ConnectExternalContainer(_container.Name)]
         );
     }
 
     /// <inheritdoc />
     IEnumerable<ContractDependency> IInstaller<HttpEndpoint>.GetDependencies(HttpEndpoint contract, ExecutionPlan plan)
     {
-        var containerContract = plan.GetContract(contract.ContainerId);
         yield return new ContractDependency(contract.Id, contract.ContainerId);
-        yield return new ContractDependency(containerContract.NetworkId, containerContract.Id);
+        yield return new ContractDependency(new ConnectExternalContainer(_container.Name).Id, contract.Id);
     }
 
     /// <inheritdoc />
@@ -43,26 +45,15 @@ public class TraefikHttpEndpointInstaller(DockerService dockerService, Applicati
 
         var containerContract = plan.GetContract(contract.ContainerId);
 
-        var network = plan.GetResource<DockerNetwork>(containerContract.NetworkId);
-
-        var traefikContainer = application.DependsOn.OfType<DockerContainer>().FirstOrDefault();
-        if (traefikContainer == null)
-        {
-            throw new Exception("Traefik container not found");
-        }
-
-        var traefikPort = application.DependsOn.OfType<DockerPortEndpoint>().FirstOrDefault();
-        if (traefikPort == null)
-        {
-            throw new Exception("Traefik port not found");
-        }
-
-        var resource = new TraefikHttpEndpoint(domain, traefikPort.Port)
+        var attachNetworkContract = new ConnectExternalContainer(_container.Name);
+        var attachedNetwork = plan.GetResource<DockerAttachedNetwork>(attachNetworkContract.Id);
+        
+        var resource = new TraefikHttpEndpoint(domain, _port.Port)
         {
             DependsOn =
             [
                 application,
-                network
+                attachedNetwork
             ]
         };
 
@@ -81,20 +72,6 @@ public class TraefikHttpEndpointInstaller(DockerService dockerService, Applicati
             }
         );
 
-        dockerService.AttachNetwork(network.Name, traefikContainer.Name).Wait();
         return resource;
-    }
-
-    /// <inheritdoc />
-    void IUninstaller<TraefikHttpEndpoint>.Uninstall(TraefikHttpEndpoint resource)
-    {
-        var network = resource.DependsOn.OfType<DockerNetwork>().FirstOrDefault();
-        if (network == null)
-        {
-            return;
-        }
-
-        var container = application.DependsOn.OfType<DockerContainer>().First();
-        dockerService.DetachNetwork(network.Name, container.Name).Wait();
     }
 }
