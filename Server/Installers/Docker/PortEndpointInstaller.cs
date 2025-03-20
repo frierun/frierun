@@ -29,7 +29,7 @@ public class PortEndpointInstaller(State state) : IInstaller<PortEndpoint>, IUni
     /// <inheritdoc />
     IEnumerable<ContractDependency> IInstaller<PortEndpoint>.GetDependencies(PortEndpoint contract, ExecutionPlan plan)
     {
-        yield return new ContractDependency(contract.Id, contract.ContainerId);
+        yield return new ContractDependency(contract, contract.ContainerId);
     }
 
     /// <inheritdoc />

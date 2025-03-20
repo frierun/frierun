@@ -35,6 +35,6 @@ public class SelectorInstaller : IInstaller<Selector>
             .Options
             .First(option => option.Name == selector.SelectedOption)
             .Contracts
-            .Select(contract => new ContractDependency(contract.Id, package.Id));
+            .Select(contract => new ContractDependency(contract, package));
     }
 }

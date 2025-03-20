@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using Microsoft.VisualBasic.CompilerServices;
 
 namespace Frierun.Server.Data;
 
@@ -32,4 +31,6 @@ public abstract record Contract(
     {
         throw new Exception("Not implemented");
     }
+    
+    public static implicit operator ContractId(Contract contract) => contract.Id;
 }

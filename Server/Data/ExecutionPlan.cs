@@ -79,12 +79,12 @@ public class ExecutionPlan : IExecutionPlan
 
     public void UpdateContract(Contract contract)
     {
-        if (_resources.ContainsKey(contract.Id))
+        if (_resources.ContainsKey(contract))
         {
             throw new Exception($"Resource {contract.Id} already installed");
         }
 
-        _contracts[contract.Id] = contract;
+        _contracts[contract] = contract;
     }
 
     /// <summary>
@@ -101,7 +101,7 @@ public class ExecutionPlan : IExecutionPlan
                     throw new Exception($"Resource {contractId} already installed");
                 }
                 var resource = GetInstaller(contract).Install(contract, this);
-                _resources[contract.Id] = resource;
+                _resources[contract] = resource;
             }
         );
 

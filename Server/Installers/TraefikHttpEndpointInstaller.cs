@@ -7,7 +7,7 @@ public class TraefikHttpEndpointInstaller(State state, Application application)
 {
     private readonly DockerContainer _container = application.DependsOn.OfType<DockerContainer>().First();
     private readonly DockerPortEndpoint _port = application.DependsOn.OfType<DockerPortEndpoint>().First();
-    
+
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix)
     {
@@ -33,8 +33,8 @@ public class TraefikHttpEndpointInstaller(State state, Application application)
     /// <inheritdoc />
     IEnumerable<ContractDependency> IInstaller<HttpEndpoint>.GetDependencies(HttpEndpoint contract, ExecutionPlan plan)
     {
-        yield return new ContractDependency(contract.Id, contract.ContainerId);
-        yield return new ContractDependency(new ConnectExternalContainer(_container.Name).Id, contract.Id);
+        yield return new ContractDependency(contract, contract.ContainerId);
+        yield return new ContractDependency(new ConnectExternalContainer(_container.Name), contract);
     }
 
     /// <inheritdoc />
@@ -45,9 +45,8 @@ public class TraefikHttpEndpointInstaller(State state, Application application)
 
         var containerContract = plan.GetContract(contract.ContainerId);
 
-        var attachNetworkContract = new ConnectExternalContainer(_container.Name);
-        var attachedNetwork = plan.GetResource<DockerAttachedNetwork>(attachNetworkContract.Id);
-        
+        var attachedNetwork = plan.GetResource<DockerAttachedNetwork>(new ConnectExternalContainer(_container.Name));
+
         var resource = new TraefikHttpEndpoint(domain, _port.Port)
         {
             DependsOn =

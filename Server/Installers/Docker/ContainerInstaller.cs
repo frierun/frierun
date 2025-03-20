@@ -30,7 +30,7 @@ public class ContainerInstaller(DockerService dockerService, State state) : IIns
     /// <inheritdoc />
     IEnumerable<ContractDependency> IInstaller<Container>.GetDependencies(Container contract, ExecutionPlan plan)
     {
-        yield return new ContractDependency(contract.NetworkId, contract.Id);
+        yield return new ContractDependency(contract.NetworkId, contract);
     }
 
     /// <inheritdoc />
@@ -93,7 +93,7 @@ public class ContainerInstaller(DockerService dockerService, State state) : IIns
 
         return new DockerContainer(Name: contract.ContainerName!, NetworkName: network.Name)
         {
-            DependsOn = plan.GetDependentResources(contract.Id).ToList()
+            DependsOn = plan.GetDependentResources(contract).ToList()
         };
     }
 

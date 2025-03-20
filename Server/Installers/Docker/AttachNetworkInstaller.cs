@@ -23,7 +23,7 @@ public class AttachNetworkInstaller(DockerService dockerService, State state)
         ExecutionPlan plan
     )
     {
-        yield return new ContractDependency(contract.NetworkId, contract.Id);
+        yield return new ContractDependency(contract.NetworkId, contract);
     }
 
     /// <inheritdoc />

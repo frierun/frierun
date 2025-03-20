@@ -11,7 +11,7 @@ public class PostgresqlInstaller(
     : IInstaller<Postgresql>, IUninstaller<PostgresqlDatabase>
 {
     private readonly DockerContainer _container = application.DependsOn.OfType<DockerContainer>().First();
-    
+
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Postgresql>.Initialize(
         Postgresql contract,
@@ -38,15 +38,19 @@ public class PostgresqlInstaller(
     /// <inheritdoc />
     IEnumerable<ContractDependency> IInstaller<Postgresql>.GetDependencies(Postgresql contract, ExecutionPlan plan)
     {
-        var attachNetworkContract = new ConnectExternalContainer(_container.Name, contract.NetworkName);
-        yield return new ContractDependency(attachNetworkContract.Id, contract.Id);
+        yield return new ContractDependency(
+            new ConnectExternalContainer(_container.Name, contract.NetworkName),
+            contract
+        );
     }
 
     /// <inheritdoc />
     Resource IInstaller<Postgresql>.Install(Postgresql contract, ExecutionPlan plan)
     {
-        var attachNetworkContract = new ConnectExternalContainer(_container.Name, contract.NetworkName);
-        var attachedNetwork = plan.GetResource<DockerAttachedNetwork>(attachNetworkContract.Id);
+        var attachedNetwork =
+            plan.GetResource<DockerAttachedNetwork>(
+                new ConnectExternalContainer(_container.Name, contract.NetworkName)
+            );
 
         if (contract.Admin)
         {

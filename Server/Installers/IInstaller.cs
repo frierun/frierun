@@ -49,7 +49,7 @@ public interface IInstaller<in TContract> : IInstaller
                     yield return result with
                     {
                         Contract = result.Contract with { Installer = GetType().Name },
-                        AdditionalContracts = result.AdditionalContracts.Append(new Substitute(contract.Id, matches))
+                        AdditionalContracts = result.AdditionalContracts.Append(new Substitute(contract, matches))
                     };
                     continue;
                 }

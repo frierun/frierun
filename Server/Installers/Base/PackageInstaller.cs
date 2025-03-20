@@ -30,13 +30,13 @@ public class PackageInstaller(State state) : IInstaller<Package>, IUninstaller<A
     /// <inheritdoc />
     IEnumerable<ContractDependency> IInstaller<Package>.GetDependencies(Package package, ExecutionPlan plan)
     {
-        return package.Contracts.Select(contract => new ContractDependency(contract.Id, package.Id));
+        return package.Contracts.Select(contract => new ContractDependency(contract, package));
     }
 
     /// <inheritdoc />
     Resource IInstaller<Package>.Install(Package package, ExecutionPlan plan)
     {
-        var dependencies = plan.GetDependentResources(package.Id).ToList();
+        var dependencies = plan.GetDependentResources(package).ToList();
 
         var url = package.ApplicationUrl;
         if (url == null)

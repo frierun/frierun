@@ -34,7 +34,7 @@ public class ExecutionService(
         var discoveryGraph = new DiscoveryGraph();
 
         discoveryGraph.Apply(DiscoverContract(package).First());
-        var initializedPackage = (Package)discoveryGraph.Contracts[package.Id];
+        var initializedPackage = (Package)discoveryGraph.Contracts[package];
         var prefix = initializedPackage.Prefix ?? initializedPackage.Name;
 
         var (nextId, nextContract) = discoveryGraph.Next();

@@ -28,7 +28,7 @@ public class RedisInstaller : IInstaller<Redis>, IUninstaller<RedisDatabase>
     /// <inheritdoc />
     IEnumerable<ContractDependency> IInstaller<Redis>.GetDependencies(Redis contract, ExecutionPlan plan)
     {
-        yield return new ContractDependency(contract.ContainerId, contract.Id);
+        yield return new ContractDependency(contract.ContainerId, contract);
     }
 
     /// <inheritdoc />

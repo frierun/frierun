@@ -53,10 +53,10 @@ public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller
 
                     return new ContractDependency(
                         ContractId.Create(contractType, contractName),
-                        contract.Id
+                        contract
                     );
                 }
-            ).Append(new ContractDependency(contract.Id, contract.OriginalId));
+            ).Append(new ContractDependency(contract, contract.OriginalId));
     }
 
     /// <inheritdoc />

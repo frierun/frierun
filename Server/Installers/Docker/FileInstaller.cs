@@ -19,7 +19,7 @@ public class FileInstaller(DockerService dockerService) : IInstaller<File>
     /// <inheritdoc />
     IEnumerable<ContractDependency> IInstaller<File>.GetDependencies(File contract, ExecutionPlan plan)
     {
-        yield return new ContractDependency(contract.VolumeId, contract.Id);
+        yield return new ContractDependency(contract.VolumeId, contract);
     }
 
     /// <inheritdoc />

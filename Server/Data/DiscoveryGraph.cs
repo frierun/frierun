@@ -32,12 +32,12 @@ public class DiscoveryGraph
         while (_uninitializedContracts.Count > 0)
         {
             var contract = _uninitializedContracts.Dequeue();
-            if (Contracts.ContainsKey(contract.Id))
+            if (Contracts.ContainsKey(contract))
             {
                 continue;
             }
 
-            return (contract.Id, contract);
+            return (contract, contract);
         }
 
         while (_emptyContracts.Count > 0)
