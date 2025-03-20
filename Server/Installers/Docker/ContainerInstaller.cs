@@ -1,13 +1,12 @@
 ﻿using Docker.DotNet.Models;
 using Frierun.Server.Data;
-using Frierun.Server.Services;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class ContainerInstaller(DockerService dockerService) : IInstaller<Container>, IUninstaller<DockerContainer>
+public class ContainerInstaller(DockerService dockerService, State state) : IInstaller<Container>, IUninstaller<DockerContainer>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<Container>.Initialize(Container contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<Container>.Initialize(Container contract, string prefix)
     {
         var baseName = contract.ContainerName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
 

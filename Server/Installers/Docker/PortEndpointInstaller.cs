@@ -3,10 +3,10 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class PortEndpointInstaller : IInstaller<PortEndpoint>, IUninstaller<DockerPortEndpoint>
+public class PortEndpointInstaller(State state) : IInstaller<PortEndpoint>, IUninstaller<DockerPortEndpoint>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<PortEndpoint>.Initialize(PortEndpoint contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<PortEndpoint>.Initialize(PortEndpoint contract, string prefix)
     {
         int port = contract.DestinationPort == 0 ? contract.Port : contract.DestinationPort;
 

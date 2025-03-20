@@ -75,6 +75,6 @@ public class ExecutionService(
     {
         return installerRegistry
             .GetInstallers(contract.GetType(), contract.Installer)
-            .SelectMany(installer => installer.Initialize(contract, prefix ?? "", state));
+            .SelectMany(installer => installer.Initialize(contract, prefix ?? ""));
     }
 }

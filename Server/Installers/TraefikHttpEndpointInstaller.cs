@@ -2,14 +2,14 @@
 
 namespace Frierun.Server.Installers;
 
-public class TraefikHttpEndpointInstaller(Application application)
+public class TraefikHttpEndpointInstaller(State state, Application application)
     : IInstaller<HttpEndpoint>, IUninstaller<TraefikHttpEndpoint>
 {
     private readonly DockerContainer _container = application.DependsOn.OfType<DockerContainer>().First();
     private readonly DockerPortEndpoint _port = application.DependsOn.OfType<DockerPortEndpoint>().First();
     
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix)
     {
         var baseName = contract.DomainName ?? $"{prefix}.localhost";
         var subdomain = baseName.Split('.')[0];

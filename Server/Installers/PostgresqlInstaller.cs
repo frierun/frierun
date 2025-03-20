@@ -5,6 +5,7 @@ namespace Frierun.Server.Installers;
 
 public class PostgresqlInstaller(
     DockerService dockerService,
+    State state,
     Application application,
     ILogger<PostgresqlInstaller> logger)
     : IInstaller<Postgresql>, IUninstaller<PostgresqlDatabase>
@@ -14,8 +15,7 @@ public class PostgresqlInstaller(
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Postgresql>.Initialize(
         Postgresql contract,
-        string prefix,
-        State state
+        string prefix
     )
     {
         var baseName = contract.DatabaseName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");

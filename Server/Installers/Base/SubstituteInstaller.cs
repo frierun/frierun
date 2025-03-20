@@ -1,13 +1,12 @@
 ﻿using System.Text.RegularExpressions;
 using Frierun.Server.Data;
-using Frierun.Server.Services;
 
 namespace Frierun.Server.Installers.Base;
 
 public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller<Substitute>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<Substitute>.Initialize(Substitute contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<Substitute>.Initialize(Substitute contract, string prefix)
     {
         yield return new InstallerInitializeResult(
             contract,

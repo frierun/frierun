@@ -3,13 +3,13 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers;
 
-public class MysqlInstaller(DockerService dockerService, Application application)
+public class MysqlInstaller(DockerService dockerService, State state, Application application)
     : IInstaller<Mysql>, IUninstaller<MysqlDatabase>
 {
     private readonly DockerContainer _container = application.DependsOn.OfType<DockerContainer>().First();
     
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<Mysql>.Initialize(Mysql contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<Mysql>.Initialize(Mysql contract, string prefix)
     {
         var baseName = contract.DatabaseName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
 

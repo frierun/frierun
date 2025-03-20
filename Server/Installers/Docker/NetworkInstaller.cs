@@ -3,10 +3,10 @@ using Network = Frierun.Server.Data.Network;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class NetworkInstaller(DockerService dockerService) : IInstaller<Network>, IUninstaller<DockerNetwork>
+public class NetworkInstaller(DockerService dockerService, State state) : IInstaller<Network>, IUninstaller<DockerNetwork>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<Network>.Initialize(Network contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<Network>.Initialize(Network contract, string prefix)
     {
         var baseName = contract.NetworkName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
         

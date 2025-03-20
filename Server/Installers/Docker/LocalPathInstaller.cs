@@ -5,7 +5,7 @@ namespace Frierun.Server.Installers.Docker;
 public class LocalPathInstaller : IInstaller<Volume>, IUninstaller<LocalPath>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<Volume>.Initialize(Volume contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<Volume>.Initialize(Volume contract, string prefix)
     {
         if (contract.Path != null)
         {

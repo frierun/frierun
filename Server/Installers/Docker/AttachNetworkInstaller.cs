@@ -8,8 +8,7 @@ public class AttachNetworkInstaller(DockerService dockerService, State state)
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<ConnectExternalContainer>.Initialize(
         ConnectExternalContainer contract,
-        string prefix,
-        State state
+        string prefix
     )
     {
         yield return new InstallerInitializeResult(

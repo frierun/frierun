@@ -8,7 +8,7 @@ namespace Frierun.Server.Installers.Docker;
 public class FileInstaller(DockerService dockerService) : IInstaller<File>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<File>.Initialize(File contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<File>.Initialize(File contract, string prefix)
     {
         yield return new InstallerInitializeResult(
             contract,

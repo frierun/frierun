@@ -12,7 +12,7 @@ public class ExecutionPlan : IExecutionPlan
 
     private ContractId<Package> RootContractId { get; }
 
-    public State State { get; }
+    private State State { get; }
 
     public IReadOnlyDictionary<ContractId, Contract> Contracts => _contracts;
 

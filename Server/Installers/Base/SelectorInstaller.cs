@@ -5,11 +5,7 @@ namespace Frierun.Server.Installers.Base;
 public class SelectorInstaller : IInstaller<Selector>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<Selector>.Initialize(
-        Selector contract,
-        string prefix,
-        State state
-    )
+    IEnumerable<InstallerInitializeResult> IInstaller<Selector>.Initialize(Selector contract, string prefix)
     {
         if (contract.SelectedOption != null)
         {
