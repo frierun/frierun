@@ -31,7 +31,6 @@ public class ExecutionService(
         return new ExecutionPlan(
             package,
             contracts,
-            state,
             installerRegistry
         );
     }

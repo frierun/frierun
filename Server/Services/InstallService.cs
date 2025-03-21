@@ -19,6 +19,13 @@ public class InstallService(
         try
         {
             var application = executionPlan.Install();
+            
+            state.AddResource(application);
+            foreach (var resource in application.DependsOn)
+            {
+                state.AddResource(resource);
+            }
+            
             stateSerializer.Save(state);
             return application;
         }

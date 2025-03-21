@@ -11,20 +11,16 @@ public class ExecutionPlan : IExecutionPlan
 
     private ContractId<Package> RootContractId { get; }
 
-    private State State { get; }
-
     public IReadOnlyDictionary<ContractId, Contract> Contracts => _contracts;
 
     public ExecutionPlan(
         Package package,
         Dictionary<ContractId, Contract> contracts,
-        State state,
         InstallerRegistry installerRegistry
     )
     {
         _contracts = contracts;
         RootContractId = new ContractId<Package>(package.Name);
-        State = state;
         _installerRegistry = installerRegistry;
 
         BuildGraph();
@@ -109,12 +105,6 @@ public class ExecutionPlan : IExecutionPlan
             .Where(resource => resource is not Application)
             .ToList();
         var application = GetResource<Application>(RootContractId) with { DependsOn = resources };
-
-        State.AddResource(application);
-        foreach (var resource in resources)
-        {
-            State.AddResource(resource);
-        }
 
         return application;
     }
