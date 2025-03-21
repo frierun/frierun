@@ -38,24 +38,25 @@ public class VolumeInstaller(DockerService dockerService, State state) : IInstal
         {
             return new LocalPath(contract.Path);
         }
-        
-        var volumeName = contract.VolumeName!;
-        var existingVolume = state.Resources
-            .OfType<DockerVolume>()
-            .FirstOrDefault(dockerVolume => dockerVolume.Name == volumeName);
 
-        if (existingVolume != null)
+        var volumeName = contract.VolumeName!;
+
+        if (state.Resources.OfType<DockerVolume>().All(dockerVolume => dockerVolume.Name != volumeName))
         {
-            return existingVolume;
+            dockerService.CreateVolume(volumeName).Wait();
         }
 
-        dockerService.CreateVolume(volumeName).Wait();
         return new DockerVolume(volumeName);
     }
 
     /// <inheritdoc />
     void IUninstaller<DockerVolume>.Uninstall(DockerVolume resource)
     {
+        if (state.Resources.OfType<DockerVolume>().Count(dockerVolume => dockerVolume.Name == resource.Name) > 1)
+        {
+            return;
+        }
+        
         dockerService.RemoveVolume(resource.Name).Wait();
     }
 }

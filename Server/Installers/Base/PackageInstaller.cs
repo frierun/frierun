@@ -58,9 +58,6 @@ public class PackageInstaller(State state) : IInstaller<Package>, IUninstaller<A
             Package: package,
             Url: url,
             Description: package.ApplicationDescription
-        )
-        {
-            DependsOn = dependencies
-        };
+        );
     }
 }

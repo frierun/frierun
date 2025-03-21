@@ -14,8 +14,19 @@ public class ExecutionService(
     /// Creates an execution plan for the given package.
     /// </summary>
     /// <exception cref="InstallerNotFoundException"></exception>
-    public ExecutionPlan Create(Package package)
+    public ExecutionPlan Create(Package package, string? applicationName = null)
     {
+        if (applicationName == null)
+        {
+            var count = 1;
+            applicationName = package.Name;
+            while (state.Resources.OfType<Application>().Any(application => application.Name == applicationName))
+            {
+                count++;
+                applicationName = $"{package.Name}{count}";
+            }
+        }
+        
         var contracts = DiscoverContracts(package);
         return new ExecutionPlan(
             package,

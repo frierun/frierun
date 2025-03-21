@@ -18,41 +18,12 @@ public class UninstallService(
 
         try
         {
-            var requiredByCount = new Dictionary<Resource, int>();
-            foreach (var resource in state.Resources)
+            foreach (var resource in application.DependsOn.Reverse())
             {
-                foreach (var dependency in resource.DependsOn)
-                {
-                    requiredByCount[dependency] = requiredByCount.GetValueOrDefault(dependency) + 1;
-                }
-            }
-            
-            var uninstallQueue = new Queue<Resource>();
-            uninstallQueue.Enqueue(application);
-            while (uninstallQueue.Count > 0)
-            {
-                var resource = uninstallQueue.Dequeue();
-                foreach (var dependency in resource.DependsOn)
-                {
-                    if (dependency is Application)
-                    {
-                        continue;
-                    }
-
-                    var count = requiredByCount[dependency];
-                    if (count == 1)
-                    {
-                        uninstallQueue.Enqueue(dependency);
-                        requiredByCount.Remove(dependency);
-                    }
-                    else
-                    {
-                        requiredByCount[dependency] = count - 1;
-                    }   
-                }
-                
                 UninstallResource(resource);
             }
+
+            UninstallResource(application);
             
             stateSerializer.Save(state);
         }

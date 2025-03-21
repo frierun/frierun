@@ -1,5 +1,4 @@
 ﻿using Frierun.Server.Installers;
-using Frierun.Server.Services;
 
 namespace Frierun.Server.Data;
 
@@ -7,7 +6,7 @@ public class ExecutionPlan : IExecutionPlan
 {
     private readonly InstallerRegistry _installerRegistry;
     private readonly Dictionary<ContractId, Contract> _contracts;
-    private readonly Dictionary<ContractId, Resource?> _resources = new();
+    private readonly OrderedDictionary<ContractId, Resource?> _resources = new();
     private readonly DirectedAcyclicGraph<ContractId> _graph = new();
 
     private ContractId<Package> RootContractId { get; }
@@ -105,12 +104,19 @@ public class ExecutionPlan : IExecutionPlan
             }
         );
 
-        foreach (var resource in _resources.Values.OfType<Resource>())
+        var resources = _resources.Values
+            .OfType<Resource>()
+            .Where(resource => resource is not Application)
+            .ToList();
+        var application = GetResource<Application>(RootContractId) with { DependsOn = resources };
+
+        State.AddResource(application);
+        foreach (var resource in resources)
         {
             State.AddResource(resource);
         }
 
-        return GetResource<Application>(RootContractId);
+        return application;
     }
 
     public Resource? GetResource(ContractId contractId)
