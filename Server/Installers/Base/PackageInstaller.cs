@@ -11,7 +11,7 @@ public class PackageInstaller(State state) : IInstaller<Package>, IUninstaller<A
 
         var count = 1;
         var prefix = basePrefix;
-        while (state.Resources.OfType<Application>().Any(application => application.Name == prefix))
+        while (state.Applications.Any(application => application.Name == prefix))
         {
             count++;
             prefix = $"{basePrefix}{count}";

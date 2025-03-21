@@ -5,8 +5,8 @@ namespace Frierun.Server.Installers;
 public class TraefikHttpEndpointInstaller(State state, Application application)
     : IInstaller<HttpEndpoint>, IUninstaller<TraefikHttpEndpoint>
 {
-    private readonly DockerContainer _container = application.DependsOn.OfType<DockerContainer>().First();
-    private readonly DockerPortEndpoint _port = application.DependsOn.OfType<DockerPortEndpoint>().First();
+    private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
+    private readonly DockerPortEndpoint _port = application.Resources.OfType<DockerPortEndpoint>().First();
 
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix)
@@ -60,12 +60,7 @@ public class TraefikHttpEndpointInstaller(State state, Application application)
             }
         );
 
-        return new TraefikHttpEndpoint(domain, _port.Port)
-        {
-            DependsOn =
-            [
-                application,
-            ]
-        };
+        plan.RequireApplication(application);
+        return new TraefikHttpEndpoint(domain, _port.Port);
     }
 }

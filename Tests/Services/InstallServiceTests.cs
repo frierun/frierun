@@ -1,6 +1,5 @@
 ﻿using Frierun.Server;
 using Frierun.Server.Data;
-using Frierun.Server.Services;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Substitute = NSubstitute.Substitute;
@@ -44,7 +43,7 @@ public class InstallServiceTests : BaseTests
         executionPlan.Install().Throws(_ => new Exception());
         var service = Resolve<InstallService>();
         
-        service.Handle(executionPlan);
+        Assert.Throws(typeof(Exception), () => service.Handle(executionPlan));
 
         Assert.True(stateManager.Ready);
     }

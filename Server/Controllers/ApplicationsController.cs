@@ -19,7 +19,7 @@ public class ApplicationsController : ControllerBase
     public IEnumerable<ApplicationResponse> List(State state)
     {
         
-        return state.Resources.OfType<Application>().Select(
+        return state.Applications.Select(
             application => new ApplicationResponse(
                 application.Id,
                 application.Name,
@@ -35,7 +35,7 @@ public class ApplicationsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(void))]
     public IActionResult Uninstall(Guid id, State state, UninstallService uninstallService)
     {
-        var application = state.Resources.OfType<Application>().FirstOrDefault(a => a.Id == id);
+        var application = state.Applications.FirstOrDefault(a => a.Id == id);
 
         if (application == null)
         {

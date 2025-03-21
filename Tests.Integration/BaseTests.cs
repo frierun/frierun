@@ -31,9 +31,9 @@ public class BaseTests : IDisposable
     private void ClearState()
     {
         var state = Services.GetRequiredService<State>();
-        foreach (var resource in state.Resources.ToList())
+        foreach (var application in state.Applications.ToList())
         {
-            state.RemoveResource(resource);
+            state.RemoveApplication(application);
         }
     }
     

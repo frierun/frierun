@@ -20,7 +20,7 @@ public class ExecutionService(
         {
             var count = 1;
             applicationName = package.Name;
-            while (state.Resources.OfType<Application>().Any(application => application.Name == applicationName))
+            while (state.Applications.Any(application => application.Name == applicationName))
             {
                 count++;
                 applicationName = $"{package.Name}{count}";

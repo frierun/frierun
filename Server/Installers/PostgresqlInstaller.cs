@@ -10,8 +10,8 @@ public class PostgresqlInstaller(
     ILogger<PostgresqlInstaller> logger)
     : IInstaller<Postgresql>, IUninstaller<PostgresqlDatabase>
 {
-    private readonly DockerContainer _container = application.DependsOn.OfType<DockerContainer>().First();
-    private readonly string _rootPassword = application.DependsOn.OfType<GeneratedPassword>().First().Value;
+    private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
+    private readonly string _rootPassword = application.Resources.OfType<GeneratedPassword>().First().Value;
 
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Postgresql>.Initialize(
@@ -48,6 +48,8 @@ public class PostgresqlInstaller(
     /// <inheritdoc />
     Resource IInstaller<Postgresql>.Install(Postgresql contract, ExecutionPlan plan)
     {
+        plan.RequireApplication(application);
+        
         if (contract.Admin)
         {
             return new PostgresqlDatabase(
@@ -55,13 +57,7 @@ public class PostgresqlInstaller(
                 Password: _rootPassword,
                 Database: "",
                 Host: _container.Name
-            )
-            {
-                DependsOn =
-                [
-                    application,
-                ]
-            };
+            );
         }
 
         var name = contract.DatabaseName;
@@ -84,13 +80,7 @@ public class PostgresqlInstaller(
         );
 
 
-        return new PostgresqlDatabase(name, password, name, _container.Name)
-        {
-            DependsOn =
-            [
-                application,
-            ]
-        };
+        return new PostgresqlDatabase(name, password, name, _container.Name);
     }
 
     /// <inheritdoc />

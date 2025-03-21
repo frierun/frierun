@@ -29,7 +29,7 @@ public class DependencyInstallerTests : BaseTests
         var application = InstallPackage(package);
 
         Assert.NotNull(application);
-        var installedContainers = application.DependsOn.OfType<DockerContainer>();
+        var installedContainers = application.Resources.OfType<DockerContainer>();
         Assert.Equal(
             [containers[0].ContainerName, containers[1].ContainerName],
             installedContainers.Select(c => c.Name)

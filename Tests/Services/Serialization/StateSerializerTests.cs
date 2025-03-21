@@ -15,7 +15,7 @@ public class StateSerializerTests : BaseTests
 
         var state = stateManager.Load();
 
-        Assert.Empty(state.Resources);
+        Assert.Empty(state.Applications);
     }
 
     [Fact]
@@ -26,7 +26,7 @@ public class StateSerializerTests : BaseTests
 
         var state = stateManager.Load();
 
-        Assert.Empty(state.Resources);
+        Assert.Empty(state.Applications);
     }
     
     [Fact]
@@ -34,15 +34,15 @@ public class StateSerializerTests : BaseTests
     {
         var application = Factory<Application>().Generate();
         var state = new State();
-        state.AddResource(application);
+        state.AddApplication(application);
         var stateManager = Resolve<StateSerializer>();
         stateManager.Save(state);
         
         var loadedState = stateManager.Load();
 
-        Assert.Single(loadedState.Resources);
-        Assert.Equal(application.Id, loadedState.Resources.First().Id);
-        Assert.NotSame(application, loadedState.Resources.First());
+        Assert.Single(loadedState.Applications);
+        Assert.Equal(application.Id, loadedState.Applications.First().Id);
+        Assert.NotSame(application, loadedState.Applications.First());
     }    
 
     [Fact]
@@ -50,14 +50,14 @@ public class StateSerializerTests : BaseTests
     {
         var application = Factory<Application>().Generate();
         var state = new State();
-        state.AddResource(application);
+        state.AddApplication(application);
         var stateManager = Resolve<StateSerializer>();
         stateManager.Save(state);
         
         var loadedState = stateManager.Load();
 
         // Package must be deserialized by reference
-        Assert.Same(application.Package, ((Application)loadedState.Resources.First()).Package); 
+        Assert.Same(application.Package, loadedState.Applications.First().Package); 
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public class StateSerializerTests : BaseTests
     {
         var application = Factory<Application>().Generate();
         var state = new State();
-        state.AddResource(application);
+        state.AddApplication(application);
         var stateManager = Resolve<StateSerializer>();
 
         stateManager.Save(state);

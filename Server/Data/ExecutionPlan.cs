@@ -8,6 +8,7 @@ public class ExecutionPlan : IExecutionPlan
     private readonly Dictionary<ContractId, Contract> _contracts;
     private readonly OrderedDictionary<ContractId, Resource?> _resources = new();
     private readonly DirectedAcyclicGraph<ContractId> _graph = new();
+    private readonly HashSet<Application> _requiredApplications = new();
 
     private ContractId<Package> RootContractId { get; }
 
@@ -83,6 +84,14 @@ public class ExecutionPlan : IExecutionPlan
     }
 
     /// <summary>
+    /// Adds an application that is required for the final result
+    /// </summary>
+    public void RequireApplication(Application application)
+    {
+        _requiredApplications.Add(application);
+    }
+
+    /// <summary>
     /// Installs all contracts in the execution plan.
     /// </summary>
     public Application Install()
@@ -100,11 +109,14 @@ public class ExecutionPlan : IExecutionPlan
             }
         );
 
-        var resources = _resources.Values
-            .OfType<Resource>()
-            .Where(resource => resource is not Application)
-            .ToList();
-        var application = GetResource<Application>(RootContractId) with { DependsOn = resources };
+        var application = GetResource<Application>(RootContractId) with
+        {
+            Resources = _resources.Values
+                .OfType<Resource>()
+                .Where(resource => resource is not Application)
+                .ToList(),
+            RequiredApplications = _requiredApplications.Select(app => app.Name).ToList()
+        };
 
         return application;
     }

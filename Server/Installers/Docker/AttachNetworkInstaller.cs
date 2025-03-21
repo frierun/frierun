@@ -38,8 +38,9 @@ public class AttachNetworkInstaller(DockerService dockerService, State state)
         var alreadyAttached = state.Resources
             .OfType<DockerAttachedNetwork>()
             .Any(
-                resource => resource.ContainerName == contract.ContainerName &&
-                            resource.NetworkName == contract.NetworkName
+                resource =>
+                    resource.ContainerName == contract.ContainerName &&
+                    resource.NetworkName == contract.NetworkName
             );
 
         if (container.NetworkName != network.Name && !alreadyAttached)

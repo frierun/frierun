@@ -16,11 +16,11 @@ public class MysqlInstallerTests : BaseTests
         var application = InstallPackage(package);
 
         Assert.NotNull(application);
-        var database = application.DependsOn.OfType<MysqlDatabase>().First();
+        var database = application.Resources.OfType<MysqlDatabase>().First();
         Assert.Equal(package.Name, database.User);
         Assert.Equal(package.Name, database.Database);
-        Assert.Single(application.DependsOn.OfType<DockerAttachedNetwork>());
-        Assert.Equal([providerApplication], database.DependsOn.OfType<Application>());
+        Assert.Single(application.Resources.OfType<DockerAttachedNetwork>());
+        Assert.Equal([providerApplication.Name], application.RequiredApplications);
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public class MysqlInstallerTests : BaseTests
         var application = InstallPackage(package);
 
         Assert.NotNull(application);
-        Assert.Equal(2, application.DependsOn.OfType<MysqlDatabase>().Count());
-        Assert.Single(application.DependsOn.OfType<DockerAttachedNetwork>());
+        Assert.Equal(2, application.Resources.OfType<MysqlDatabase>().Count());
+        Assert.Single(application.Resources.OfType<DockerAttachedNetwork>());
     }
 }

@@ -5,4 +5,8 @@ public record Application(
     Package? Package = null,
     string? Url = null,
     string? Description = null
-): Resource;
+) : Resource
+{
+    public IReadOnlyList<Resource> Resources { get; init; } = Array.Empty<Resource>();
+    public IReadOnlyList<string> RequiredApplications { get; init; } = Array.Empty<string>();
+}

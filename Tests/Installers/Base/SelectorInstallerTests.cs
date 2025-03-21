@@ -60,8 +60,8 @@ public class SelectorInstallerTests : BaseTests
         var application = InstallPackage(package);
         
         Assert.NotNull(application);
-        Assert.Single(application.DependsOn.OfType<DockerContainer>());
-        var container = application.DependsOn.OfType<DockerContainer>().First();
+        Assert.Single(application.Resources.OfType<DockerContainer>());
+        var container = application.Resources.OfType<DockerContainer>().First();
         Assert.Equal(containerContract.ContainerName, container.Name);
 
     }

@@ -10,7 +10,7 @@ public class PostgresqlInstallerTests : BaseTests
     public async Task Install_PostgresqlContract_CredentialsAreCorrect()
     {
         var state = Services.GetRequiredService<State>();
-        Assert.Empty(state.Resources);
+        Assert.Empty(state.Applications);
 
         var dbPackage = Services.GetRequiredService<PackageRegistry>().Find("postgresql");
         Assert.NotNull(dbPackage);
@@ -29,8 +29,8 @@ public class PostgresqlInstallerTests : BaseTests
         var application = InstallPackage(package);
         Assert.NotNull(application);
 
-        var container = application.DependsOn.OfType<DockerContainer>().First();
-        var database = application.DependsOn.OfType<PostgresqlDatabase>().First();
+        var container = application.Resources.OfType<DockerContainer>().First();
+        var database = application.Resources.OfType<PostgresqlDatabase>().First();
         Assert.Equal("db-client", database.User);
         Assert.Equal("db-client", database.Database);
         Assert.Equal("postgresql", database.Host);
@@ -55,14 +55,14 @@ public class PostgresqlInstallerTests : BaseTests
         UninstallApplication(application);
         UninstallApplication(dbApplication);
 
-        Assert.Empty(state.Resources);
+        Assert.Empty(state.Applications);
     }
 
     [Fact]
     public async Task Install_PostgresqlAdminContract_CredentialsAreCorrect()
     {
         var state = Services.GetRequiredService<State>();
-        Assert.Empty(state.Resources);
+        Assert.Empty(state.Applications);
 
         var dbPackage = Services.GetRequiredService<PackageRegistry>().Find("postgresql");
         Assert.NotNull(dbPackage);
@@ -81,8 +81,8 @@ public class PostgresqlInstallerTests : BaseTests
         var application = InstallPackage(package);
         Assert.NotNull(application);
 
-        var container = application.DependsOn.OfType<DockerContainer>().First();
-        var database = application.DependsOn.OfType<PostgresqlDatabase>().First();
+        var container = application.Resources.OfType<DockerContainer>().First();
+        var database = application.Resources.OfType<PostgresqlDatabase>().First();
         Assert.Equal("postgres", database.User);
         Assert.Empty(database.Database);
         Assert.Equal("postgresql", database.Host);
@@ -107,6 +107,6 @@ public class PostgresqlInstallerTests : BaseTests
         UninstallApplication(application);
         UninstallApplication(dbApplication);
 
-        Assert.Empty(state.Resources);
+        Assert.Empty(state.Applications);
     }
 }

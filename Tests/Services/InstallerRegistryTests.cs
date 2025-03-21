@@ -41,13 +41,13 @@ public class InstallerRegistryTests : BaseTests
         var package = new Package("traefik");
         var application = new Application("traefik", package)
         {
-            DependsOn = [
+            Resources = [
                 new DockerContainer("traefik", "traefik"),
                 new DockerPortEndpoint("127.0.0.1", 80, Protocol.Tcp)
             ]
         };
         var state = Resolve<State>();
-        state.AddResource(application);
+        state.AddApplication(application);
         var registry = Resolve<InstallerRegistry>();
 
         var result = registry.GetInstallers(typeof(HttpEndpoint)).ToList();
@@ -64,13 +64,13 @@ public class InstallerRegistryTests : BaseTests
         var registry = Resolve<InstallerRegistry>();
         var application = new Application("traefik", package)
         {
-            DependsOn = [
+            Resources = [
                 new DockerContainer("traefik", "traefik"),
                 new DockerPortEndpoint("127.0.0.1", 80, Protocol.Tcp)
             ]
         };
         var state = Resolve<State>();
-        state.AddResource(application);
+        state.AddApplication(application);
 
         var result = registry.GetInstallers(typeof(HttpEndpoint)).ToList();
 
@@ -85,15 +85,15 @@ public class InstallerRegistryTests : BaseTests
         var package = new Package("traefik");
         var application = new Application("traefik", package)
         {
-            DependsOn = [
+            Resources = [
                 new DockerContainer("traefik", "traefik"),
                 new DockerPortEndpoint("127.0.0.1", 80, Protocol.Tcp)
             ]
         };
         var state = Resolve<State>();
-        state.AddResource(application);
+        state.AddApplication(application);
         var registry = Resolve<InstallerRegistry>();
-        state.RemoveResource(application);
+        state.RemoveApplication(application);
 
         var result = registry.GetInstallers(typeof(HttpEndpoint)).ToList();
 

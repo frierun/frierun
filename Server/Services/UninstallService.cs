@@ -18,12 +18,26 @@ public class UninstallService(
 
         try
         {
-            foreach (var resource in application.DependsOn.Reverse())
+            foreach (var other in state.Applications)
             {
+                if (other.RequiredApplications.Contains(application.Name))
+                {
+                    throw new Exception($"Cannot uninstall {application.Name} because it is required by {other.Name}");
+                }
+            }
+            
+            foreach (var resource in application.Resources.Reverse())
+            {
+                if (resource is Application)
+                {
+                    throw new Exception("Application cannot contain another application");
+                }
+                
                 UninstallResource(resource);
             }
 
             UninstallResource(application);
+            state.RemoveApplication(application);
             
             stateSerializer.Save(state);
         }
@@ -44,6 +58,5 @@ public class UninstallService(
             throw new Exception($"Uninstaller not found for resource type {resource.GetType()}");
         }
         uninstaller.Uninstall(resource);
-        state.RemoveResource(resource);
     }
 }

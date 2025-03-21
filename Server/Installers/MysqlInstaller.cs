@@ -6,8 +6,8 @@ namespace Frierun.Server.Installers;
 public class MysqlInstaller(DockerService dockerService, State state, Application application)
     : IInstaller<Mysql>, IUninstaller<MysqlDatabase>
 {
-    private readonly DockerContainer _container = application.DependsOn.OfType<DockerContainer>().First();
-    private readonly string _rootPassword = application.DependsOn.OfType<GeneratedPassword>().First().Value;
+    private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
+    private readonly string _rootPassword = application.Resources.OfType<GeneratedPassword>().First().Value;
 
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Mysql>.Initialize(Mysql contract, string prefix)
@@ -41,6 +41,8 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
     /// <inheritdoc />
     Resource IInstaller<Mysql>.Install(Mysql contract, ExecutionPlan plan)
     {
+        plan.RequireApplication(application);
+        
         if (contract.Admin)
         {
             return new MysqlDatabase(
@@ -48,13 +50,7 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
                 Password: _rootPassword,
                 Database: "",
                 Host: _container.Name
-            )
-            {
-                DependsOn =
-                [
-                    application,
-                ]
-            };
+            );
         }
 
         var name = contract.DatabaseName;
@@ -78,13 +74,7 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
         );
 
 
-        return new MysqlDatabase(name, password, name, _container.Name)
-        {
-            DependsOn =
-            [
-                application,
-            ]
-        };
+        return new MysqlDatabase(name, password, name, _container.Name);
     }
 
     /// <inheritdoc />
