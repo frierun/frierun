@@ -43,7 +43,7 @@ public class InstallServiceTests : BaseTests
         executionPlan.Install().Throws(_ => new Exception());
         var service = Resolve<InstallService>();
         
-        Assert.Throws(typeof(Exception), () => service.Handle(executionPlan));
+        Assert.Throws<Exception>(() => service.Handle(executionPlan));
 
         Assert.True(stateManager.Ready);
     }

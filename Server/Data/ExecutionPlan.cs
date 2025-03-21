@@ -10,18 +10,14 @@ public class ExecutionPlan : IExecutionPlan
     private readonly DirectedAcyclicGraph<ContractId> _graph = new();
     private readonly HashSet<Application> _requiredApplications = new();
 
-    private ContractId<Package> RootContractId { get; }
-
     public IReadOnlyDictionary<ContractId, Contract> Contracts => _contracts;
 
     public ExecutionPlan(
-        Package package,
         Dictionary<ContractId, Contract> contracts,
         InstallerRegistry installerRegistry
     )
     {
         _contracts = contracts;
-        RootContractId = new ContractId<Package>(package.Name);
         _installerRegistry = installerRegistry;
 
         BuildGraph();
@@ -109,7 +105,8 @@ public class ExecutionPlan : IExecutionPlan
             }
         );
 
-        var application = GetResource<Application>(RootContractId) with
+        var application = _resources.Values.OfType<Application>().First();
+        return application with
         {
             Resources = _resources.Values
                 .OfType<Resource>()
@@ -117,8 +114,6 @@ public class ExecutionPlan : IExecutionPlan
                 .ToList(),
             RequiredApplications = _requiredApplications.Select(app => app.Name).ToList()
         };
-
-        return application;
     }
 
     public Resource? GetResource(ContractId contractId)

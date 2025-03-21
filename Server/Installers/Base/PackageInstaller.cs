@@ -5,18 +5,8 @@ namespace Frierun.Server.Installers.Base;
 public class PackageInstaller(State state) : IInstaller<Package>, IUninstaller<Application>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<Package>.Initialize(Package package, string _)
+    IEnumerable<InstallerInitializeResult> IInstaller<Package>.Initialize(Package package, string prefix)
     {
-        var basePrefix = package.Prefix ?? package.Name;
-
-        var count = 1;
-        var prefix = basePrefix;
-        while (state.Applications.Any(application => application.Name == prefix))
-        {
-            count++;
-            prefix = $"{basePrefix}{count}";
-        }
-
         yield return new InstallerInitializeResult(
             package with
             {
