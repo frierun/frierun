@@ -91,10 +91,7 @@ public class ContainerInstaller(DockerService dockerService, State state) : IIns
             throw new Exception("Failed to start container");
         }
 
-        return new DockerContainer(Name: contract.ContainerName!, NetworkName: network.Name)
-        {
-            DependsOn = plan.GetDependentResources(contract).ToList()
-        };
+        return new DockerContainer(Name: contract.ContainerName!, NetworkName: network.Name);
     }
 
     /// <inheritdoc />

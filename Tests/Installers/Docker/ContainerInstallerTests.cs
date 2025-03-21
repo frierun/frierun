@@ -15,7 +15,6 @@ public class ContainerInstallerTests : BaseTests
         var application = InstallPackage(package);
 
         Assert.NotNull(application);
-        var dockerContainer = application.DependsOn.OfType<DockerContainer>().First();
-        Assert.Contains(dockerContainer.DependsOn, r => r is DockerNetwork);
+        Assert.Single(application.DependsOn.OfType<DockerNetwork>());
     }
 }

@@ -45,17 +45,6 @@ public class TraefikHttpEndpointInstaller(State state, Application application)
 
         var containerContract = plan.GetContract(contract.ContainerId);
 
-        var attachedNetwork = plan.GetResource<DockerAttachedNetwork>(new ConnectExternalContainer(_container.Name));
-
-        var resource = new TraefikHttpEndpoint(domain, _port.Port)
-        {
-            DependsOn =
-            [
-                application,
-                attachedNetwork
-            ]
-        };
-
         plan.UpdateContract(
             containerContract with
             {
@@ -71,6 +60,12 @@ public class TraefikHttpEndpointInstaller(State state, Application application)
             }
         );
 
-        return resource;
+        return new TraefikHttpEndpoint(domain, _port.Port)
+        {
+            DependsOn =
+            [
+                application,
+            ]
+        };
     }
 }

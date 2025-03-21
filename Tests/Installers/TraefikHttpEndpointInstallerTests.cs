@@ -6,26 +6,32 @@ namespace Frierun.Tests.Installers;
 
 public class TraefikHttpEndpointInstallerTests : BaseTests
 {
-    [Fact]
-    public void Install_ContainerWithHttpEndpoint_ContainerDependsOnTraefik()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Install_ContainerWithHttpEndpoint_InstallTraefikFirst(bool reverseOrder)
     {
         var providerApplication = InstallPackage("traefik");
         Assert.NotNull(providerApplication);
 
         var container = Factory<Container>().Generate();
-        var package = Factory<Package>().Generate() with
+        List<Contract> contracts =
+        [
+            container,
+            Factory<HttpEndpoint>().Generate() with { ContainerName = container.Name }
+        ];
+        if (reverseOrder)
         {
-            Contracts =
-            [
-                container,
-                Factory<HttpEndpoint>().Generate() with { ContainerName = container.Name }
-            ]
-        };
+            contracts.Reverse();
+        }
+        var package = Factory<Package>().Generate() with { Contracts = contracts };
 
         var application = InstallPackage(package);
 
         Assert.NotNull(application);
-        var dockerContainer = application.DependsOn.OfType<DockerContainer>().First();
-        Assert.Contains(dockerContainer.DependsOn, r => r is TraefikHttpEndpoint);
+        var resources = application.DependsOn.ToList();
+        var endpointIndex = resources.FindIndex(r => r is TraefikHttpEndpoint);
+        var containerIndex = resources.FindIndex(r => r is DockerContainer);
+        Assert.True(endpointIndex < containerIndex);
     }
 }

@@ -7,6 +7,7 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
     : IInstaller<Mysql>, IUninstaller<MysqlDatabase>
 {
     private readonly DockerContainer _container = application.DependsOn.OfType<DockerContainer>().First();
+    private readonly string _rootPassword = application.DependsOn.OfType<GeneratedPassword>().First().Value;
 
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Mysql>.Initialize(Mysql contract, string prefix)
@@ -40,16 +41,11 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
     /// <inheritdoc />
     Resource IInstaller<Mysql>.Install(Mysql contract, ExecutionPlan plan)
     {
-        var attachedNetwork =
-            plan.GetResource<DockerAttachedNetwork>(
-                new ConnectExternalContainer(_container.Name, contract.NetworkName)
-            );
-
         if (contract.Admin)
         {
             return new MysqlDatabase(
                 User: "root",
-                Password: application.DependsOn.OfType<GeneratedPassword>().First().Value,
+                Password: _rootPassword,
                 Database: "",
                 Host: _container.Name
             )
@@ -57,7 +53,6 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
                 DependsOn =
                 [
                     application,
-                    attachedNetwork
                 ]
             };
         }
@@ -88,7 +83,6 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
             DependsOn =
             [
                 application,
-                attachedNetwork
             ]
         };
     }
@@ -112,11 +106,9 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
     /// </summary>
     private void RunSql(string sql)
     {
-        var rootPassword = application.DependsOn.OfType<GeneratedPassword>().First().Value;
-
         dockerService.ExecInContainer(
             _container.Name,
-            ["mysql", "-u", "root", $"-p{rootPassword}", "-e", sql]
+            ["mysql", "-u", "root", $"-p{_rootPassword}", "-e", sql]
         ).Wait();
     }
 }

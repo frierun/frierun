@@ -47,10 +47,7 @@ public class AttachNetworkInstaller(DockerService dockerService, State state)
             dockerService.AttachNetwork(network.Name, contract.ContainerName).Wait();
         }
 
-        return new DockerAttachedNetwork(ContainerName: contract.ContainerName, NetworkName: network.Name)
-        {
-            DependsOn = [network]
-        };
+        return new DockerAttachedNetwork(ContainerName: contract.ContainerName, NetworkName: network.Name);
     }
 
     /// <inheritdoc />

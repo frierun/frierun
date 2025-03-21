@@ -35,10 +35,7 @@ public class RedisInstaller : IInstaller<Redis>, IUninstaller<RedisDatabase>
     Resource? IInstaller<Redis>.Install(Redis contract, ExecutionPlan plan)
     {
         var container = plan.GetResource<DockerContainer>(contract.ContainerId);
-        
-        return new RedisDatabase(container.Name)
-        {
-            DependsOn = [container]
-        };
+
+        return new RedisDatabase(container.Name);
     }
 }

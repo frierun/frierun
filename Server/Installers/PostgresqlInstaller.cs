@@ -11,6 +11,7 @@ public class PostgresqlInstaller(
     : IInstaller<Postgresql>, IUninstaller<PostgresqlDatabase>
 {
     private readonly DockerContainer _container = application.DependsOn.OfType<DockerContainer>().First();
+    private readonly string _rootPassword = application.DependsOn.OfType<GeneratedPassword>().First().Value;
 
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Postgresql>.Initialize(
@@ -47,16 +48,11 @@ public class PostgresqlInstaller(
     /// <inheritdoc />
     Resource IInstaller<Postgresql>.Install(Postgresql contract, ExecutionPlan plan)
     {
-        var attachedNetwork =
-            plan.GetResource<DockerAttachedNetwork>(
-                new ConnectExternalContainer(_container.Name, contract.NetworkName)
-            );
-
         if (contract.Admin)
         {
             return new PostgresqlDatabase(
                 User: "postgres",
-                Password: application.DependsOn.OfType<GeneratedPassword>().First().Value,
+                Password: _rootPassword,
                 Database: "",
                 Host: _container.Name
             )
@@ -64,7 +60,6 @@ public class PostgresqlInstaller(
                 DependsOn =
                 [
                     application,
-                    attachedNetwork
                 ]
             };
         }
@@ -94,7 +89,6 @@ public class PostgresqlInstaller(
             DependsOn =
             [
                 application,
-                attachedNetwork
             ]
         };
     }
