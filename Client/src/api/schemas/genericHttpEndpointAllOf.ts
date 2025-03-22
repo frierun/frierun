@@ -7,4 +7,5 @@
 
 export type GenericHttpEndpointAllOf = {
   url: string;
+  readonly host: string;
 };

@@ -1,20 +1,20 @@
 ﻿import StateContext from "../providers/StateContext.tsx";
 import {useContext} from "react";
-import {getGetApplicationsQueryKey, useDeleteApplicationsId} from "../api/endpoints/applications.ts";
+import {getGetApplicationsQueryKey, useDeleteApplicationsName} from "../api/endpoints/applications.ts";
 import {useQueryClient} from "@tanstack/react-query";
 import Button from "./Button";
 
 type Props = {
-    applicationId: string;
+    name: string;
 }
 
-export default function Uninstall({applicationId}: Props) {
+export default function Uninstall({name}: Props) {
     const {waitForReady} = useContext(StateContext);
-    const {mutateAsync, isPending} = useDeleteApplicationsId();
+    const {mutateAsync, isPending} = useDeleteApplicationsName();
     const queryClient = useQueryClient()
     
     const uninstall = () => {
-        mutateAsync({id: applicationId})
+        mutateAsync({name})
             .then(waitForReady)
             .then(() => queryClient.invalidateQueries({queryKey: getGetApplicationsQueryKey()}));
     }

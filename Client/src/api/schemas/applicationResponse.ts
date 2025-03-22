@@ -6,7 +6,6 @@
  */
 
 export interface ApplicationResponse {
-  id: string;
   name: string;
   /** @nullable */
   packageName?: string | null;

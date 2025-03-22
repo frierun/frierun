@@ -7,8 +7,12 @@
 
 export * from "./application";
 export * from "./applicationAllOf";
+export * from "./applicationAllOfResourcesItem";
 export * from "./applicationResponse";
 export * from "./applicationType";
+export * from "./connectExternalContainer";
+export * from "./connectExternalContainerAllOf";
+export * from "./connectExternalContainerType";
 export * from "./container";
 export * from "./containerAllOf";
 export * from "./containerAllOfEnv";
@@ -18,6 +22,9 @@ export * from "./contractId";
 export * from "./dependency";
 export * from "./dependencyAllOf";
 export * from "./dependencyType";
+export * from "./dockerAttachedNetwork";
+export * from "./dockerAttachedNetworkAllOf";
+export * from "./dockerAttachedNetworkType";
 export * from "./dockerContainer";
 export * from "./dockerContainerAllOf";
 export * from "./dockerContainerType";

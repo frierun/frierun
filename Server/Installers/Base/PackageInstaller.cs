@@ -2,7 +2,7 @@
 
 namespace Frierun.Server.Installers.Base;
 
-public class PackageInstaller(State state) : IInstaller<Package>, IUninstaller<Application>
+public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
 {
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Package>.Initialize(Package package, string prefix)

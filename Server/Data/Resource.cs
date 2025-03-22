@@ -19,5 +19,4 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
 public abstract record Resource
 {
-    public Guid Id { get; init; } = Guid.NewGuid();
 }

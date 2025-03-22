@@ -30,7 +30,7 @@ public class VolumeInstallerTests : BaseTests
         Assert.NotNull(application2);
         var volume1 = application1.Resources.OfType<DockerVolume>().First();
         var volume2 = application2.Resources.OfType<DockerVolume>().First();
-        Assert.NotEqual(volume1, volume2);
+        Assert.NotSame(volume1, volume2);
 
         dockerClient.Volumes.Received(1).CreateAsync(Arg.Any<VolumesCreateParameters>());
     }

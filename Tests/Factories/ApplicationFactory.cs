@@ -10,7 +10,6 @@ public sealed class ApplicationFactory : Faker<Application>
     {
         StrictMode(true);
         CustomInstantiator(_ => new Application(""));
-        RuleFor(p => p.Id, f => f.Random.Guid());
         RuleFor(p => p.Name, f => f.Lorem.Word());
         RuleFor(p => p.Package, _ => packageFactory.Generate());
         RuleFor(p => p.Url, f => f.Internet.Url());

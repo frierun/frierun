@@ -8,5 +8,6 @@
 export type MysqlAllOf = {
   /** @nullable */
   databaseName?: string | null;
+  admin: boolean;
   networkName: string;
 };

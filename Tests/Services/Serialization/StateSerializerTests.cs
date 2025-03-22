@@ -41,7 +41,7 @@ public class StateSerializerTests : BaseTests
         var loadedState = stateManager.Load();
 
         Assert.Single(loadedState.Applications);
-        Assert.Equal(application.Id, loadedState.Applications.First().Id);
+        Assert.Equal(application.Name, loadedState.Applications.First().Name);
         Assert.NotSame(application, loadedState.Applications.First());
     }    
 
