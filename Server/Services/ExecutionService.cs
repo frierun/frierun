@@ -1,6 +1,5 @@
 ﻿using Frierun.Server.Data;
 using Frierun.Server.Installers;
-using Frierun.Server.Services;
 
 namespace Frierun.Server;
 
@@ -18,11 +17,35 @@ public class ExecutionService(
     {
         var contracts = DiscoverContracts(package);
         return new ExecutionPlan(
-            package,
             contracts,
-            state,
             installerRegistry
         );
+    }
+    
+    /// <summary>
+    /// Gets the application name from the package.
+    /// </summary>
+    private string GetApplicationName(Package package)
+    {
+        if (package.Prefix != null)
+        {
+            if (state.Applications.Any(application => application.Name == package.Prefix))
+            {
+                throw new Exception("Application with the same name already exists");
+            }
+
+            return package.Prefix;
+        }
+        
+        var count = 1;
+        var applicationName = package.Name;
+        while (state.Applications.Any(application => application.Name == applicationName))
+        {
+            count++;
+            applicationName = $"{package.Name}{count}";
+        }
+
+        return applicationName;
     }
 
     /// <summary>
@@ -32,17 +55,16 @@ public class ExecutionService(
     {
         var branchesStack = new Stack<(DiscoveryGraph graph, Queue<InstallerInitializeResult> queue)>();
         var discoveryGraph = new DiscoveryGraph();
+        var applicationName = GetApplicationName(package);
 
-        discoveryGraph.Apply(DiscoverContract(package).First());
-        var initializedPackage = (Package)discoveryGraph.Contracts[package.Id];
-        var prefix = initializedPackage.Prefix ?? initializedPackage.Name;
-
-        var (nextId, nextContract) = discoveryGraph.Next();
+        ContractId? nextId = package.Id;
+        Contract? nextContract = package;
+        
         while (nextId != null)
         {
             nextContract ??= contractRegistry.CreateContract(nextId);
 
-            var branches = new Queue<InstallerInitializeResult>(DiscoverContract(nextContract, prefix));
+            var branches = new Queue<InstallerInitializeResult>(DiscoverContract(nextContract, applicationName));
             if (branches.Count == 0)
             {
                 // no variants found for that contract, rollback to the previous branching point
@@ -75,6 +97,6 @@ public class ExecutionService(
     {
         return installerRegistry
             .GetInstallers(contract.GetType(), contract.Installer)
-            .SelectMany(installer => installer.Initialize(contract, prefix ?? "", state));
+            .SelectMany(installer => installer.Initialize(contract, prefix ?? ""));
     }
 }

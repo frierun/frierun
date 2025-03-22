@@ -7,6 +7,4 @@
 
 export interface Resource {
   Type: string;
-  id: string;
-  dependsOnIds: string[];
 }

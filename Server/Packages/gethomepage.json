@@ -8,10 +8,14 @@
     {
       "Type": "Container",
       "ImageName": "ghcr.io/gethomepage/homepage:latest",
-      "RequireDocker": true
+      "RequireDocker": true,
+      "Env": {
+        "HOMEPAGE_ALLOWED_HOSTS": "{{HttpEndpoint:frontend:Host}}"
+      }
     },
     {
       "Type": "HttpEndpoint",
+      "Name": "frontend",
       "Port": 3000
     },
     {

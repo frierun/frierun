@@ -39,9 +39,15 @@ public class InstallerRegistryTests : BaseTests
     public void GetInstaller_HasTraefik_ReturnsBothInstallers()
     {
         var package = new Package("traefik");
-        var application = new Application("traefik", package);
+        var application = new Application("traefik", package)
+        {
+            Resources = [
+                new DockerContainer("traefik", "traefik"),
+                new DockerPortEndpoint("127.0.0.1", 80, Protocol.Tcp)
+            ]
+        };
         var state = Resolve<State>();
-        state.AddResource(application);
+        state.AddApplication(application);
         var registry = Resolve<InstallerRegistry>();
 
         var result = registry.GetInstallers(typeof(HttpEndpoint)).ToList();
@@ -56,9 +62,15 @@ public class InstallerRegistryTests : BaseTests
     {
         var package = new Package("traefik");
         var registry = Resolve<InstallerRegistry>();
-        var application = new Application("traefik", package);
+        var application = new Application("traefik", package)
+        {
+            Resources = [
+                new DockerContainer("traefik", "traefik"),
+                new DockerPortEndpoint("127.0.0.1", 80, Protocol.Tcp)
+            ]
+        };
         var state = Resolve<State>();
-        state.AddResource(application);
+        state.AddApplication(application);
 
         var result = registry.GetInstallers(typeof(HttpEndpoint)).ToList();
 
@@ -71,11 +83,17 @@ public class InstallerRegistryTests : BaseTests
     public void GetInstaller_RemoveTraefik_ReturnsDefaultInstaller()
     {
         var package = new Package("traefik");
-        var application = new Application("traefik", package);
+        var application = new Application("traefik", package)
+        {
+            Resources = [
+                new DockerContainer("traefik", "traefik"),
+                new DockerPortEndpoint("127.0.0.1", 80, Protocol.Tcp)
+            ]
+        };
         var state = Resolve<State>();
-        state.AddResource(application);
+        state.AddApplication(application);
         var registry = Resolve<InstallerRegistry>();
-        state.RemoveResource(application);
+        state.RemoveApplication(application);
 
         var result = registry.GetInstallers(typeof(HttpEndpoint)).ToList();
 

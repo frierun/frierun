@@ -22,10 +22,31 @@ public class PostgresqlInstallerTests : BaseTests
         var application = InstallPackage(package);
 
         Assert.NotNull(application);
-        var database = application.DependsOn.OfType<PostgresqlDatabase>().First();
+        var database = application.Resources.OfType<PostgresqlDatabase>().First();
         Assert.Equal(package.Name, database.User);
         Assert.Equal(package.Name, database.Database);
-        Assert.Single(database.DependsOn.OfType<DockerNetwork>());
-        Assert.Equal([providerApplication], database.DependsOn.OfType<Application>());
+        Assert.Single(application.Resources.OfType<DockerAttachedNetwork>());
+        Assert.Equal([providerApplication.Name], application.RequiredApplications);
+    }    
+    
+    [Fact]
+    public void Install_PackageWithTwoContracts_OnlyOneNetworkAttached()
+    {
+        InstallPackage("postgresql");
+        
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts =
+            [
+                new Postgresql("first"),
+                new Postgresql("second"),
+            ]
+        };
+
+        var application = InstallPackage(package);
+
+        Assert.NotNull(application);
+        Assert.Equal(2, application.Resources.OfType<PostgresqlDatabase>().Count());
+        Assert.Single(application.Resources.OfType<DockerAttachedNetwork>());
     }    
 }

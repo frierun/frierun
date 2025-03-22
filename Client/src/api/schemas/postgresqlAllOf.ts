@@ -8,5 +8,6 @@
 export type PostgresqlAllOf = {
   /** @nullable */
   databaseName?: string | null;
+  admin: boolean;
   networkName: string;
 };

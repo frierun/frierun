@@ -5,7 +5,7 @@ namespace Frierun.Server.Installers.Base;
 public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>, IUninstaller<GenericHttpEndpoint>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix)
     {
         var portEndpoint = new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80);
         yield return new InstallerInitializeResult(
@@ -18,17 +18,18 @@ public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>, IUninstaller<
     /// <inheritdoc />
     IEnumerable<ContractDependency> IInstaller<HttpEndpoint>.GetDependencies(HttpEndpoint contract, ExecutionPlan plan)
     {
-        var portEndpoint = new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80);
-
-        yield return new ContractDependency(contract.Id, contract.ContainerId);
-        yield return new ContractDependency(portEndpoint.Id, contract.Id);
+        yield return new ContractDependency(contract, contract.ContainerId);
+        yield return new ContractDependency(
+            new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80),
+            contract
+        );
     }
 
     /// <inheritdoc />
     Resource IInstaller<HttpEndpoint>.Install(HttpEndpoint contract, ExecutionPlan plan)
     {
         var portEndpoint = plan.GetResource<DockerPortEndpoint>(
-            new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80).Id
+            new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80)
         );
 
         var url = new Uri($"http://{portEndpoint.Ip}:{portEndpoint.Port}");

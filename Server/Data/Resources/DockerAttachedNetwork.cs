@@ -1,6 +1,6 @@
 ﻿namespace Frierun.Server.Data;
 
-public record DockerContainer(
-    string Name,
+public record DockerAttachedNetwork(
+    string ContainerName,
     string NetworkName
 ) : Resource;

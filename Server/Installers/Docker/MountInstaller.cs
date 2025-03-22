@@ -6,7 +6,7 @@ namespace Frierun.Server.Installers.Docker;
 public class MountInstaller : IInstaller<Mount>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<Mount>.Initialize(Mount contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<Mount>.Initialize(Mount contract, string prefix)
     {
         yield return new InstallerInitializeResult(
             contract,
@@ -20,8 +20,8 @@ public class MountInstaller : IInstaller<Mount>
     /// <inheritdoc />
     IEnumerable<ContractDependency> IInstaller<Mount>.GetDependencies(Mount contract, ExecutionPlan plan)
     {
-        yield return new ContractDependency(contract.Id, contract.ContainerId);
-        yield return new ContractDependency(contract.VolumeId, contract.Id);
+        yield return new ContractDependency(contract, contract.ContainerId);
+        yield return new ContractDependency(contract.VolumeId, contract);
         // add dependency to volume so it would be added to resource dependencies
         yield return new ContractDependency(contract.VolumeId, contract.ContainerId);
     }

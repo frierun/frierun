@@ -1,13 +1,12 @@
 ﻿using Docker.DotNet.Models;
 using Frierun.Server.Data;
-using Frierun.Server.Services;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class ContainerInstaller(DockerService dockerService) : IInstaller<Container>, IUninstaller<DockerContainer>
+public class ContainerInstaller(DockerService dockerService, State state) : IInstaller<Container>, IUninstaller<DockerContainer>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<Container>.Initialize(Container contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<Container>.Initialize(Container contract, string prefix)
     {
         var baseName = contract.ContainerName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
 
@@ -31,12 +30,13 @@ public class ContainerInstaller(DockerService dockerService) : IInstaller<Contai
     /// <inheritdoc />
     IEnumerable<ContractDependency> IInstaller<Container>.GetDependencies(Container contract, ExecutionPlan plan)
     {
-        yield return new ContractDependency(contract.NetworkId, contract.Id);
+        yield return new ContractDependency(contract.NetworkId, contract);
     }
 
     /// <inheritdoc />
     Resource IInstaller<Container>.Install(Container contract, ExecutionPlan plan)
     {
+        var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
         var dockerParameters = new CreateContainerParameters
         {
             Cmd = contract.Command.ToList(),
@@ -47,11 +47,23 @@ public class ContainerInstaller(DockerService dockerService) : IInstaller<Contai
                 Mounts = new List<global::Docker.DotNet.Models.Mount>(),
                 PortBindings = new Dictionary<string, IList<PortBinding>>()
             },
-            Labels = new Dictionary<string, string>(),
+            Labels = new Dictionary<string, string>()
+            {
+                ["com.docker.compose.project"] = network.Name,
+                ["com.docker.compose.service"] = contract.Name
+            },
             Name = contract.ContainerName!,
             NetworkingConfig = new NetworkingConfig()
             {
-                EndpointsConfig = new Dictionary<string, EndpointSettings>()
+                EndpointsConfig  = new Dictionary<string, EndpointSettings>
+                {
+                    {
+                        network.Name, new EndpointSettings
+                        {
+                            Aliases = new List<string> { contract.Name }
+                        }
+                    }
+                }
             }
         };
 
@@ -79,10 +91,7 @@ public class ContainerInstaller(DockerService dockerService) : IInstaller<Contai
             throw new Exception("Failed to start container");
         }
 
-        return new DockerContainer(contract.ContainerName!)
-        {
-            DependsOn = plan.GetDependentResources(contract.Id).ToList()
-        };
+        return new DockerContainer(Name: contract.ContainerName!, NetworkName: network.Name);
     }
 
     /// <inheritdoc />

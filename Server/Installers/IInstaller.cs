@@ -7,7 +7,7 @@ namespace Frierun.Server.Installers;
 public interface IInstaller<in TContract> : IInstaller
     where TContract : Contract
 {
-    public IEnumerable<InstallerInitializeResult> Initialize(TContract contract, string prefix, State state)
+    public IEnumerable<InstallerInitializeResult> Initialize(TContract contract, string prefix)
     {
         yield return new InstallerInitializeResult(contract);
     }
@@ -23,9 +23,9 @@ public interface IInstaller<in TContract> : IInstaller
     }
 
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller.Initialize(Contract contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller.Initialize(Contract contract, string prefix)
     {
-        foreach (var result in Initialize((TContract)contract, prefix, state))
+        foreach (var result in Initialize((TContract)contract, prefix))
         {
             if (result.Contract is IHasStrings hasStrings)
             {
@@ -49,7 +49,7 @@ public interface IInstaller<in TContract> : IInstaller
                     yield return result with
                     {
                         Contract = result.Contract with { Installer = GetType().Name },
-                        AdditionalContracts = result.AdditionalContracts.Append(new Substitute(contract.Id, matches))
+                        AdditionalContracts = result.AdditionalContracts.Append(new Substitute(contract, matches))
                     };
                     continue;
                 }
@@ -82,7 +82,7 @@ public interface IInstaller
     /// <summary>
     /// Returns all possible ways to initializes contract
     /// </summary>
-    public IEnumerable<InstallerInitializeResult> Initialize(Contract contract, string prefix, State state);
+    public IEnumerable<InstallerInitializeResult> Initialize(Contract contract, string prefix);
 
     /// <summary>
     /// Returns all contract edges derived from the contract

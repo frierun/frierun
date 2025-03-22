@@ -1,9 +1,9 @@
 ﻿using System.Text.Json.Serialization;
-using Microsoft.VisualBasic.CompilerServices;
 
 namespace Frierun.Server.Data;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
+[JsonDerivedType(typeof(ConnectExternalContainer), nameof(ConnectExternalContainer))]
 [JsonDerivedType(typeof(Container), nameof(Container))]
 [JsonDerivedType(typeof(Dependency), nameof(Dependency))]
 [JsonDerivedType(typeof(File), nameof(File))]
@@ -31,4 +31,6 @@ public abstract record Contract(
     {
         throw new Exception("Not implemented");
     }
+    
+    public static implicit operator ContractId(Contract contract) => contract.Id;
 }

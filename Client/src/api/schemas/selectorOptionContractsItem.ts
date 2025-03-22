@@ -4,6 +4,7 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { ConnectExternalContainer } from "./connectExternalContainer";
 import type { Container } from "./container";
 import type { Dependency } from "./dependency";
 import type { File } from "./file";
@@ -22,6 +23,7 @@ import type { Substitute } from "./substitute";
 import type { Volume } from "./volume";
 
 export type SelectorOptionContractsItem =
+  | ConnectExternalContainer
   | Container
   | Dependency
   | File

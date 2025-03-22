@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export type DockerContainerAllOf = {
-  name: string;
+export type ConnectExternalContainerAllOf = {
+  containerName: string;
   networkName: string;
 };

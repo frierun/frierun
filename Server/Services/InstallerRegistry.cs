@@ -24,26 +24,13 @@ public class InstallerRegistry
             AddInstaller(installer);
         }
 
-        foreach (var application in state.Resources.OfType<Application>())
+        foreach (var application in state.Applications)
         {
             AddApplication(application);
         }
 
-        state.ResourceAdded += resource =>
-        {
-            if (resource is Application application)
-            {
-                AddApplication(application);
-            }
-        };
-
-        state.ResourceRemoved += resource =>
-        {
-            if (resource is Application application)
-            {
-                RemoveApplication(application);
-            }
-        };
+        state.ApplicationAdded += AddApplication;
+        state.ApplicationRemoved += RemoveApplication;
     }
 
     /// <summary>

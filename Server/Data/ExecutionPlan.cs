@@ -1,5 +1,4 @@
 ﻿using Frierun.Server.Installers;
-using Frierun.Server.Services;
 
 namespace Frierun.Server.Data;
 
@@ -7,25 +6,18 @@ public class ExecutionPlan : IExecutionPlan
 {
     private readonly InstallerRegistry _installerRegistry;
     private readonly Dictionary<ContractId, Contract> _contracts;
-    private readonly Dictionary<ContractId, Resource?> _resources = new();
+    private readonly OrderedDictionary<ContractId, Resource?> _resources = new();
     private readonly DirectedAcyclicGraph<ContractId> _graph = new();
-
-    private ContractId<Package> RootContractId { get; }
-
-    public State State { get; }
+    private readonly HashSet<Application> _requiredApplications = new();
 
     public IReadOnlyDictionary<ContractId, Contract> Contracts => _contracts;
 
     public ExecutionPlan(
-        Package package,
         Dictionary<ContractId, Contract> contracts,
-        State state,
         InstallerRegistry installerRegistry
     )
     {
         _contracts = contracts;
-        RootContractId = new ContractId<Package>(package.Name);
-        State = state;
         _installerRegistry = installerRegistry;
 
         BuildGraph();
@@ -79,18 +71,20 @@ public class ExecutionPlan : IExecutionPlan
 
     public void UpdateContract(Contract contract)
     {
-        if (_resources.ContainsKey(contract.Id))
+        if (_resources.ContainsKey(contract))
         {
             throw new Exception($"Resource {contract.Id} already installed");
         }
 
-        _contracts[contract.Id] = contract;
+        _contracts[contract] = contract;
     }
 
-    public IEnumerable<T> GetContractsOfType<T>()
-        where T : Contract
+    /// <summary>
+    /// Adds an application that is required for the final result
+    /// </summary>
+    public void RequireApplication(Application application)
     {
-        return _contracts.Values.OfType<T>();
+        _requiredApplications.Add(application);
     }
 
     /// <summary>
@@ -107,16 +101,19 @@ public class ExecutionPlan : IExecutionPlan
                     throw new Exception($"Resource {contractId} already installed");
                 }
                 var resource = GetInstaller(contract).Install(contract, this);
-                _resources[contract.Id] = resource;
+                _resources[contract] = resource;
             }
         );
 
-        foreach (var resource in _resources.Values.OfType<Resource>())
+        var application = _resources.Values.OfType<Application>().First();
+        return application with
         {
-            State.AddResource(resource);
-        }
-
-        return GetResource<Application>(RootContractId);
+            Resources = _resources.Values
+                .OfType<Resource>()
+                .Where(resource => resource is not Application)
+                .ToList(),
+            RequiredApplications = _requiredApplications.Select(app => app.Name).ToList()
+        };
     }
 
     public Resource? GetResource(ContractId contractId)

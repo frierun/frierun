@@ -8,7 +8,6 @@ namespace Frierun.Server.Controllers;
 public class ApplicationsController : ControllerBase
 {
     public record ApplicationResponse(
-        Guid Id,
         string Name,
         string? PackageName,
         string? Url,
@@ -19,9 +18,8 @@ public class ApplicationsController : ControllerBase
     public IEnumerable<ApplicationResponse> List(State state)
     {
         
-        return state.Resources.OfType<Application>().Select(
+        return state.Applications.Select(
             application => new ApplicationResponse(
-                application.Id,
                 application.Name,
                 application.Package?.Name,
                 application.Url,
@@ -30,12 +28,12 @@ public class ApplicationsController : ControllerBase
         );
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{name}")]
     [ProducesResponseType(StatusCodes.Status202Accepted)]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(void))]
-    public IActionResult Uninstall(Guid id, State state, UninstallService uninstallService)
+    public IActionResult Uninstall(string name, State state, UninstallService uninstallService)
     {
-        var application = state.Resources.OfType<Application>().FirstOrDefault(a => a.Id == id);
+        var application = state.Applications.FirstOrDefault(a => a.Name == name);
 
         if (application == null)
         {

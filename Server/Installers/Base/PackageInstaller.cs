@@ -5,18 +5,8 @@ namespace Frierun.Server.Installers.Base;
 public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<Package>.Initialize(Package package, string _, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller<Package>.Initialize(Package package, string prefix)
     {
-        var basePrefix = package.Prefix ?? package.Name;
-
-        var count = 1;
-        var prefix = basePrefix;
-        while (state.Resources.OfType<Application>().Any(application => application.Name == prefix))
-        {
-            count++;
-            prefix = $"{basePrefix}{count}";
-        }
-
         yield return new InstallerInitializeResult(
             package with
             {
@@ -30,13 +20,13 @@ public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
     /// <inheritdoc />
     IEnumerable<ContractDependency> IInstaller<Package>.GetDependencies(Package package, ExecutionPlan plan)
     {
-        return package.Contracts.Select(contract => new ContractDependency(contract.Id, package.Id));
+        return package.Contracts.Select(contract => new ContractDependency(contract, package));
     }
 
     /// <inheritdoc />
     Resource IInstaller<Package>.Install(Package package, ExecutionPlan plan)
     {
-        var dependencies = plan.GetDependentResources(package.Id).ToList();
+        var dependencies = plan.GetDependentResources(package).ToList();
 
         var url = package.ApplicationUrl;
         if (url == null)
@@ -58,9 +48,6 @@ public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
             Package: package,
             Url: url,
             Description: package.ApplicationDescription
-        )
-        {
-            DependsOn = dependencies
-        };
+        );
     }
 }

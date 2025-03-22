@@ -2,55 +2,36 @@
 
 namespace Frierun.Server.Data;
 
-public class State : IJsonOnDeserialized
+public class State
 {
-    private readonly IList<Resource> _resources = [];
-    public event Action<Resource> ResourceAdded = _ => { }; 
-    public event Action<Resource> ResourceRemoved = _ => { }; 
+    private readonly IList<Application> _applications = [];
+    public event Action<Application> ApplicationAdded = _ => { }; 
+    public event Action<Application> ApplicationRemoved = _ => { }; 
 
-    public IEnumerable<Resource> Resources
-    {
-        get => _resources;
-        init => _resources = new List<Resource>(value);
-    }
+    [JsonIgnore]
+    public IEnumerable<Resource> Resources => _applications.SelectMany(application => application.Resources);
     
-    /// <inheritdoc />
-    public void OnDeserialized()
+    public IEnumerable<Application> Applications
     {
-        foreach (var resource in Resources)
-        {
-            resource.Hydrate(this);
-        }
-    }
+        get => _applications;
+        init => _applications = new List<Application>(value);
+    }    
     
     /// <summary>
-    /// Gets a resource by its ID.
+    /// Adds a newly installed application to the state.
     /// </summary>
-    public Resource? FindResource(Guid id)
+    public void AddApplication(Application application)
     {
-        return Resources.FirstOrDefault(resource => resource.Id == id);
-    }
-    
-    /// <summary>
-    /// Adds a resource to the state if it does not already exist.
-    /// </summary>
-    public void AddResource(Resource resource)
-    {
-        if (FindResource(resource.Id) != null)
-        {
-            return;
-        }
-        
-        _resources.Add(resource);
-        ResourceAdded(resource);
+        _applications.Add(application);
+        ApplicationAdded(application);
     }
 
     /// <summary>
-    /// Removes a resource from the state.
+    /// Removes an application from the state.
     /// </summary>
-    public void RemoveResource(Resource resource)
+    public void RemoveApplication(Application application)
     {
-        _resources.Remove(resource);
-        ResourceRemoved(resource);
+        _applications.Remove(application);
+        ApplicationRemoved(application);
     }
 }

@@ -154,35 +154,35 @@ export function useGetApplications<
   return query;
 }
 
-export type deleteApplicationsIdResponse202 = {
+export type deleteApplicationsNameResponse202 = {
   data: void;
   status: 202;
 };
 
-export type deleteApplicationsIdResponse404 = {
+export type deleteApplicationsNameResponse404 = {
   data: ProblemDetails;
   status: 404;
 };
 
-export type deleteApplicationsIdResponseComposite =
-  | deleteApplicationsIdResponse202
-  | deleteApplicationsIdResponse404;
+export type deleteApplicationsNameResponseComposite =
+  | deleteApplicationsNameResponse202
+  | deleteApplicationsNameResponse404;
 
-export type deleteApplicationsIdResponse =
-  deleteApplicationsIdResponseComposite & {
+export type deleteApplicationsNameResponse =
+  deleteApplicationsNameResponseComposite & {
     headers: Headers;
   };
 
-export const getDeleteApplicationsIdUrl = (id: string) => {
-  return `/api/v1/applications/${id}`;
+export const getDeleteApplicationsNameUrl = (name: string) => {
+  return `/api/v1/applications/${name}`;
 };
 
-export const deleteApplicationsId = async (
-  id: string,
+export const deleteApplicationsName = async (
+  name: string,
   options?: RequestInit,
-): Promise<deleteApplicationsIdResponse> => {
-  return customFetch<deleteApplicationsIdResponse>(
-    getDeleteApplicationsIdUrl(id),
+): Promise<deleteApplicationsNameResponse> => {
+  return customFetch<deleteApplicationsNameResponse>(
+    getDeleteApplicationsNameUrl(name),
     {
       ...options,
       method: "DELETE",
@@ -190,24 +190,24 @@ export const deleteApplicationsId = async (
   );
 };
 
-export const getDeleteApplicationsIdMutationOptions = <
+export const getDeleteApplicationsNameMutationOptions = <
   TError = ProblemDetails,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteApplicationsId>>,
+    Awaited<ReturnType<typeof deleteApplicationsName>>,
     TError,
-    { id: string },
+    { name: string },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteApplicationsId>>,
+  Awaited<ReturnType<typeof deleteApplicationsName>>,
   TError,
-  { id: string },
+  { name: string },
   TContext
 > => {
-  const mutationKey = ["deleteApplicationsId"];
+  const mutationKey = ["deleteApplicationsName"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -217,41 +217,41 @@ export const getDeleteApplicationsIdMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof deleteApplicationsId>>,
-    { id: string }
+    Awaited<ReturnType<typeof deleteApplicationsName>>,
+    { name: string }
   > = (props) => {
-    const { id } = props ?? {};
+    const { name } = props ?? {};
 
-    return deleteApplicationsId(id, requestOptions);
+    return deleteApplicationsName(name, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type DeleteApplicationsIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof deleteApplicationsId>>
+export type DeleteApplicationsNameMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteApplicationsName>>
 >;
 
-export type DeleteApplicationsIdMutationError = ProblemDetails;
+export type DeleteApplicationsNameMutationError = ProblemDetails;
 
-export const useDeleteApplicationsId = <
+export const useDeleteApplicationsName = <
   TError = ProblemDetails,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteApplicationsId>>,
+    Awaited<ReturnType<typeof deleteApplicationsName>>,
     TError,
-    { id: string },
+    { name: string },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
-  Awaited<ReturnType<typeof deleteApplicationsId>>,
+  Awaited<ReturnType<typeof deleteApplicationsName>>,
   TError,
-  { id: string },
+  { name: string },
   TContext
 > => {
-  const mutationOptions = getDeleteApplicationsIdMutationOptions(options);
+  const mutationOptions = getDeleteApplicationsNameMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

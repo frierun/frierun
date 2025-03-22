@@ -10,7 +10,7 @@ public class RedisInstallerTests : BaseTests
     public async Task Install_RedisContract_CredentialsAreCorrect()
     {
         var state = Services.GetRequiredService<State>();
-        Assert.Empty(state.Resources);
+        Assert.Empty(state.Applications);
 
         var package = new Package(
             Name: "redis-client",
@@ -26,8 +26,8 @@ public class RedisInstallerTests : BaseTests
         var application = InstallPackage(package);
         Assert.NotNull(application);
         
-        var container = application.DependsOn.OfType<DockerContainer>().First();
-        var database = application.DependsOn.OfType<RedisDatabase>().First();
+        var container = application.Resources.OfType<DockerContainer>().First();
+        var database = application.Resources.OfType<RedisDatabase>().First();
         Assert.Equal("redis-client-redis", database.Host);
         
         // try to connect to the database from the client
@@ -58,6 +58,6 @@ public class RedisInstallerTests : BaseTests
         
         // clean up
         UninstallApplication(application);
-        Assert.Empty(state.Resources);        
+        Assert.Empty(state.Applications);        
     }
 }
