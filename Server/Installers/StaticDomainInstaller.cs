@@ -5,8 +5,7 @@ namespace Frierun.Server.Installers;
 public class StaticDomainInstaller(State state, Application application)
     : IInstaller<Domain>, IUninstaller<ResolvedDomain>
 {
-    private readonly string _domainName = application.Resources.OfType<ResolvedParameter>().First().Value ??
-                                          throw new Exception("Domain name not set");
+    private readonly string _domainName = application.Resources.OfType<ResolvedParameter>().First().Value ?? "";
 
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Domain>.Initialize(Domain contract, string prefix)

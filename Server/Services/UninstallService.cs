@@ -1,5 +1,4 @@
 ﻿using Frierun.Server.Data;
-using Frierun.Server.Services;
 
 namespace Frierun.Server;
 

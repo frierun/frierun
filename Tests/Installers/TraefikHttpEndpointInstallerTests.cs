@@ -1,6 +1,5 @@
 ﻿using Frierun.Server;
 using Frierun.Server.Data;
-using Frierun.Server.Services;
 
 namespace Frierun.Tests.Installers;
 

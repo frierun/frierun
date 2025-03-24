@@ -1,7 +1,6 @@
 ﻿using Frierun.Server;
 using Frierun.Server.Data;
 using Frierun.Server.Installers;
-using Frierun.Server.Services;
 using NSubstitute;
 using Substitute = NSubstitute.Substitute;
 

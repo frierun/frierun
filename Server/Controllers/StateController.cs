@@ -1,5 +1,4 @@
-﻿using Frierun.Server.Services;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace Frierun.Server.Controllers;
 

@@ -3,7 +3,7 @@ using System.Text.Json;
 using Frierun.Server.Data;
 using File = System.IO.File;
 
-namespace Frierun.Server.Services;
+namespace Frierun.Server;
 
 public class PackageSerializer(ILogger<PackageSerializer> logger, ContractRegistry contractRegistry)
 {

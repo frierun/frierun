@@ -3,7 +3,6 @@ using Autofac;
 using Docker.DotNet;
 using Frierun.Server.Data;
 using Frierun.Server.Installers;
-using Frierun.Server.Services;
 using Module = Autofac.Module;
 using ResolvedParameter = Autofac.Core.ResolvedParameter;
 

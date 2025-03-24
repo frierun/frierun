@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using Frierun.Server.Data;
 
-namespace Frierun.Server.Services;
+namespace Frierun.Server;
 
 public class ContractIdConverter(ContractRegistry contractRegistry) : JsonConverter<ContractId>
 {

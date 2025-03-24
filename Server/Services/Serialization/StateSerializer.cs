@@ -2,7 +2,7 @@
 using Frierun.Server.Data;
 using File = System.IO.File;
 
-namespace Frierun.Server.Services;
+namespace Frierun.Server;
 
 public class StateSerializer(string path, PackageRegistry packageRegistry)
 {
