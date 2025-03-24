@@ -44,11 +44,6 @@ public class ExecutionPlan : IExecutionPlan
             {
                 _graph.AddEdge(contract, dependency);
             }
-            
-            foreach (var dependency in GetInstaller(contract).GetDependencies(contract, this))
-            {
-                _graph.AddEdge(dependency.Preceding, dependency.Following);
-            }
         }
     }
 

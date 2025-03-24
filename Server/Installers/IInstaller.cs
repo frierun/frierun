@@ -12,11 +12,6 @@ public interface IInstaller<in TContract> : IInstaller
         yield return new InstallerInitializeResult(contract);
     }
 
-    public IEnumerable<ContractDependency> GetDependencies(TContract contract, ExecutionPlan plan)
-    {
-        yield break;
-    }
-
     public Resource? Install(TContract contract, ExecutionPlan plan)
     {
         return null;
@@ -64,13 +59,6 @@ public interface IInstaller<in TContract> : IInstaller
 
     /// <inheritdoc />
     [DebuggerStepThrough]
-    IEnumerable<ContractDependency> IInstaller.GetDependencies(Contract contract, ExecutionPlan plan)
-    {
-        return GetDependencies((TContract)contract, plan);
-    }
-
-    /// <inheritdoc />
-    [DebuggerStepThrough]
     Resource? IInstaller.Install(Contract contract, ExecutionPlan plan)
     {
         return Install((TContract)contract, plan);
@@ -83,11 +71,6 @@ public interface IInstaller
     /// Returns all possible ways to initializes contract
     /// </summary>
     public IEnumerable<InstallerInitializeResult> Initialize(Contract contract, string prefix);
-
-    /// <summary>
-    /// Returns all contract edges derived from the contract
-    /// </summary>
-    public IEnumerable<ContractDependency> GetDependencies(Contract contract, ExecutionPlan plan);
 
     /// <summary>
     /// Installs the contract

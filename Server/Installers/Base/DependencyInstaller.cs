@@ -5,8 +5,14 @@ namespace Frierun.Server.Installers.Base;
 public class DependencyInstaller : IInstaller<Dependency>
 {
     /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<Dependency>.GetDependencies(Dependency contract, ExecutionPlan plan)
+    IEnumerable<InstallerInitializeResult> IInstaller<Dependency>.Initialize(Dependency contract, string prefix)
     {
-        yield return new ContractDependency(contract.Preceding, contract.Following);
+        yield return new InstallerInitializeResult(
+            contract with
+            {
+                DependsOn = [contract.Preceding],
+                DependencyOf = [contract.Following]
+            }
+        );
     }
 }
