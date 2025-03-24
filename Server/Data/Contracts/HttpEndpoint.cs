@@ -11,6 +11,7 @@ public record HttpEndpoint(
 {
     public string ContainerName { get; init; } = ContainerName ?? "";
     [JsonIgnore] public ContractId<Container> ContainerId => new(ContainerName);
+    [JsonIgnore] public ContractId<Domain> DomainId => new(Name);
 
     /// <inheritdoc />
     public override Contract With(Contract other)

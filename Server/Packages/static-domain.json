@@ -1,0 +1,12 @@
+﻿{
+  "Name": "static-domain",
+  "ShortDescription": "Pre configured domain.",
+  "FullDescription": "Domain which must point to the server. Allows use subdomains for different services.",
+  "Tags": ["provider"],
+  "Contracts": [
+    {
+      "Type": "Parameter",
+      "Name": "domain"
+    }
+  ]
+}

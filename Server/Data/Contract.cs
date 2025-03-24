@@ -6,6 +6,7 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(ConnectExternalContainer), nameof(ConnectExternalContainer))]
 [JsonDerivedType(typeof(Container), nameof(Container))]
 [JsonDerivedType(typeof(Dependency), nameof(Dependency))]
+[JsonDerivedType(typeof(Domain), nameof(Domain))]
 [JsonDerivedType(typeof(File), nameof(File))]
 [JsonDerivedType(typeof(HttpEndpoint), nameof(HttpEndpoint))]
 [JsonDerivedType(typeof(Mount), nameof(Mount))]

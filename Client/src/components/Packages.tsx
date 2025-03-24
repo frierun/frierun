@@ -14,6 +14,7 @@ export default function Packages() {
         network: '#89c1ff',
         storage: '#b5e3ca',
         dev: '#b3c422',
+        provider: '#b3c422',
         dashboard: '#e3b5d4',
     }
     return (
