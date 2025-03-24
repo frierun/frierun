@@ -16,6 +16,9 @@ public class PackageTests : BaseTests
         
         HashSet<string> ignoredPackages =
         [
+            // internal
+            "static-domain",
+            
             // skip due to port 53 already in use
             "adguard",
             "pi-hole",
