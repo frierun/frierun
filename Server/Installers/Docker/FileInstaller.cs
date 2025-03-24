@@ -11,15 +11,12 @@ public class FileInstaller(DockerService dockerService) : IInstaller<File>
     IEnumerable<InstallerInitializeResult> IInstaller<File>.Initialize(File contract, string prefix)
     {
         yield return new InstallerInitializeResult(
-            contract,
+            contract with
+            {
+                DependsOn = contract.DependsOn.Append(contract.VolumeId),
+            },
             [contract.VolumeId]
         );
-    }
-
-    /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<File>.GetDependencies(File contract, ExecutionPlan plan)
-    {
-        yield return new ContractDependency(contract.VolumeId, contract);
     }
 
     /// <inheritdoc />

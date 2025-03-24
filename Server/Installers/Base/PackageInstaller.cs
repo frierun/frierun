@@ -7,10 +7,33 @@ public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Package>.Initialize(Package package, string prefix)
     {
+        var applicationUrl = package.ApplicationUrl;
+        
+        // auto-detect application URL
+        if (applicationUrl == null)
+        {
+            var httpEndpoint = package.Contracts.OfType<HttpEndpoint>().FirstOrDefault();
+            if (httpEndpoint != null)
+            {
+                applicationUrl = $"{{{{{httpEndpoint.Id}:Url}}}}";
+            }
+        }
+        
+        // use the first endpoint if not found any other
+        if (applicationUrl == null)
+        {
+            var endpoint = package.Contracts.OfType<PortEndpoint>().FirstOrDefault();
+            if (endpoint != null)
+            {
+                applicationUrl = $"{{{{{endpoint.Id}:Url}}}}";
+            }
+        }
+        
         yield return new InstallerInitializeResult(
             package with
             {
-                Prefix = prefix
+                Prefix = prefix,
+                ApplicationUrl = applicationUrl,
             },
             null,
             package.Contracts
@@ -18,35 +41,12 @@ public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
     }
 
     /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<Package>.GetDependencies(Package package, ExecutionPlan plan)
-    {
-        return package.Contracts.Select(contract => new ContractDependency(contract, package));
-    }
-
-    /// <inheritdoc />
     Resource IInstaller<Package>.Install(Package package, ExecutionPlan plan)
     {
-        var dependencies = plan.GetDependentResources(package).ToList();
-
-        var url = package.ApplicationUrl;
-        if (url == null)
-        {
-            url = dependencies.OfType<GenericHttpEndpoint>().FirstOrDefault()?.Url.ToString();
-        }
-
-        if (url == null)
-        {
-            var portEndpoint = dependencies.OfType<DockerPortEndpoint>().FirstOrDefault();
-            if (portEndpoint != null)
-            {
-                url = $"{portEndpoint.Protocol.ToString().ToLower()}://{portEndpoint.Ip}:{portEndpoint.Port}";
-            }
-        }
-
         return new Application(
             Name: package.Prefix!,
             Package: package,
-            Url: url,
+            Url: package.ApplicationUrl,
             Description: package.ApplicationDescription
         );
     }

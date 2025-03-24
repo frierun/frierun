@@ -21,16 +21,11 @@ public class ContainerInstaller(DockerService dockerService, State state) : IIns
         yield return new InstallerInitializeResult(
             contract with
             {
-                ContainerName = name
+                ContainerName = name,
+                DependsOn = contract.DependsOn.Append(contract.NetworkId),
             },
             [contract.NetworkId]
         );
-    }
-
-    /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<Container>.GetDependencies(Container contract, ExecutionPlan plan)
-    {
-        yield return new ContractDependency(contract.NetworkId, contract);
     }
 
     /// <inheritdoc />

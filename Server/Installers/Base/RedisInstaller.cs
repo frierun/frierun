@@ -8,7 +8,10 @@ public class RedisInstaller : IInstaller<Redis>, IUninstaller<RedisDatabase>
     IEnumerable<InstallerInitializeResult> IInstaller<Redis>.Initialize(Redis contract, string prefix)
     {
         yield return new InstallerInitializeResult(
-            contract,
+            contract with
+            {
+                DependsOn = contract.DependsOn.Append(contract.ContainerId)
+            },
             [],
             [
                 new Container(
@@ -24,13 +27,7 @@ public class RedisInstaller : IInstaller<Redis>, IUninstaller<RedisDatabase>
             ]
         );
     }
-
-    /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<Redis>.GetDependencies(Redis contract, ExecutionPlan plan)
-    {
-        yield return new ContractDependency(contract.ContainerId, contract);
-    }
-
+    
     /// <inheritdoc />
     Resource? IInstaller<Redis>.Install(Redis contract, ExecutionPlan plan)
     {

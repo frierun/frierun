@@ -12,18 +12,12 @@ public class AttachNetworkInstaller(DockerService dockerService, State state)
     )
     {
         yield return new InstallerInitializeResult(
-            contract,
+            contract with
+            {
+                DependsOn = contract.DependsOn.Append(contract.NetworkId),
+            },
             [contract.NetworkId]
         );
-    }
-
-    /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<ConnectExternalContainer>.GetDependencies(
-        ConnectExternalContainer contract,
-        ExecutionPlan plan
-    )
-    {
-        yield return new ContractDependency(contract.NetworkId, contract);
     }
 
     /// <inheritdoc />

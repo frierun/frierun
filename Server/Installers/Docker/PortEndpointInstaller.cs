@@ -21,17 +21,15 @@ public class PortEndpointInstaller(State state) : IInstaller<PortEndpoint>, IUni
         }
 
         yield return new InstallerInitializeResult(
-            contract with { DestinationPort = port },
+            contract with
+            {
+                DestinationPort = port,
+                DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
+            },
             [contract.ContainerId]
         );
     }
-
-    /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<PortEndpoint>.GetDependencies(PortEndpoint contract, ExecutionPlan plan)
-    {
-        yield return new ContractDependency(contract, contract.ContainerId);
-    }
-
+    
     /// <inheritdoc />
     Resource IInstaller<PortEndpoint>.Install(PortEndpoint contract, ExecutionPlan plan)
     {

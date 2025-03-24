@@ -22,19 +22,15 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
             name = $"{baseName}{count}";
         }
 
+        var connectExternalContainer = new ConnectExternalContainer(_container.Name, contract.NetworkName);
         yield return new InstallerInitializeResult(
-            contract with { DatabaseName = name },
+            contract with
+            {
+                DatabaseName = name,
+                DependsOn = contract.DependsOn.Append(connectExternalContainer),
+            },
             null,
-            [new ConnectExternalContainer(_container.Name, contract.NetworkName)]
-        );
-    }
-
-    /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<Mysql>.GetDependencies(Mysql contract, ExecutionPlan plan)
-    {
-        yield return new ContractDependency(
-            new ConnectExternalContainer(_container.Name, contract.NetworkName),
-            contract
+            [connectExternalContainer]
         );
     }
 

@@ -19,5 +19,7 @@ public sealed class ContainerFactory: Faker<Container>
         RuleFor(p => p.Env, f => new Dictionary<string, string>());
         RuleFor(p => p.Configure, _ => Array.Empty<Action<CreateContainerParameters>>());
         Ignore(p => p.Installer);
+        Ignore(p => p.DependsOn);
+        Ignore(p => p.DependencyOf);
     }
 }

@@ -9,23 +9,18 @@ public class MountInstaller : IInstaller<Mount>
     IEnumerable<InstallerInitializeResult> IInstaller<Mount>.Initialize(Mount contract, string prefix)
     {
         yield return new InstallerInitializeResult(
-            contract,
+            contract with
+            {
+                DependsOn = contract.DependsOn.Append(contract.VolumeId),
+                DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
+            },
             [
                 contract.ContainerId,
                 contract.VolumeId
             ]
         );
     }
-
-    /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<Mount>.GetDependencies(Mount contract, ExecutionPlan plan)
-    {
-        yield return new ContractDependency(contract, contract.ContainerId);
-        yield return new ContractDependency(contract.VolumeId, contract);
-        // add dependency to volume so it would be added to resource dependencies
-        yield return new ContractDependency(contract.VolumeId, contract.ContainerId);
-    }
-
+    
     /// <inheritdoc />
     Resource? IInstaller<Mount>.Install(Mount contract, ExecutionPlan plan)
     {

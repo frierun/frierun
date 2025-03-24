@@ -26,15 +26,4 @@ public class SelectorInstaller : IInstaller<Selector>
             );
         }
     }
-
-    /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<Selector>.GetDependencies(Selector selector, ExecutionPlan plan)
-    {
-        var package = plan.Contracts.Values.OfType<Package>().First();
-        return selector
-            .Options
-            .First(option => option.Name == selector.SelectedOption)
-            .Contracts
-            .Select(contract => new ContractDependency(contract, package));
-    }
 }

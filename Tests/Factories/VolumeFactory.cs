@@ -15,5 +15,7 @@ public sealed class VolumeFactory: Faker<Volume>
         Ignore(p => p.Path);
         Ignore(p => p.VolumeName);
         Ignore(p => p.Installer);
+        Ignore(p => p.DependsOn);
+        Ignore(p => p.DependencyOf);
     }
 }

@@ -9,19 +9,13 @@ public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>, IUninstaller<
     {
         var portEndpoint = new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80);
         yield return new InstallerInitializeResult(
-            contract,
+            contract with
+            {
+                DependsOn = contract.DependsOn.Append(portEndpoint),
+                DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
+            },
             [contract.ContainerId],
             [portEndpoint]
-        );
-    }
-
-    /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<HttpEndpoint>.GetDependencies(HttpEndpoint contract, ExecutionPlan plan)
-    {
-        yield return new ContractDependency(contract, contract.ContainerId);
-        yield return new ContractDependency(
-            new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80),
-            contract
         );
     }
 

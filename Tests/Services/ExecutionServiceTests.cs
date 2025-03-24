@@ -28,7 +28,7 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_WithoutInstaller_ThrowsException()
     {
-        var contract = Substitute.For<Contract>("", null);
+        var contract = Substitute.For<Contract>("", null, null, null);
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
 

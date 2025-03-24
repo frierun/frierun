@@ -35,6 +35,16 @@ public class ExecutionPlan : IExecutionPlan
 
         foreach (var contract in _contracts.Values)
         {
+            foreach (var dependency in contract.DependsOn)
+            {
+                _graph.AddEdge(dependency, contract);
+            }
+
+            foreach (var dependency in contract.DependencyOf)
+            {
+                _graph.AddEdge(contract, dependency);
+            }
+            
             foreach (var dependency in GetInstaller(contract).GetDependencies(contract, this))
             {
                 _graph.AddEdge(dependency.Preceding, dependency.Following);
@@ -136,39 +146,5 @@ public class ExecutionPlan : IExecutionPlan
         }
 
         return (T)resource;
-    }
-
-    /// <summary>
-    /// Gets all resources that are prerequisites for the given contract.
-    /// If a required contract doesn't emit resource, get its prerequisites recursively.
-    /// </summary>
-    public IEnumerable<Resource> GetDependentResources(ContractId contractId)
-    {
-        var visited = new HashSet<ContractId>();
-        var queue = new Queue<ContractId>();
-
-        queue.Enqueue(contractId);
-        while (queue.Count > 0)
-        {
-            var current = queue.Dequeue();
-
-            foreach (var prerequisite in _graph.GetPrerequisites(current))
-            {
-                if (!visited.Add(prerequisite))
-                {
-                    continue;
-                }
-                
-                var resource = GetResource(prerequisite);
-                if (resource != null)
-                {
-                    yield return resource;
-                }
-                else
-                {
-                    queue.Enqueue(prerequisite);
-                }
-            }
-        }
     }
 }

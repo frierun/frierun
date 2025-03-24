@@ -15,6 +15,8 @@ public sealed class MountFactory: Faker<Mount>
         RuleFor(p => p.ContainerName, f => f.Lorem.Word());
         RuleFor(p => p.ReadOnly, f => f.Random.Bool());
         Ignore(p => p.Installer);
+        Ignore(p => p.DependsOn);
+        Ignore(p => p.DependencyOf);
         Ignore(p => p.Name);
     }
 }

@@ -23,18 +23,17 @@ public class TraefikHttpEndpointInstaller(State state, Application application)
             name = $"{subdomain}{count}.{domain}";
         }
 
+        var connectExternalContainer = new ConnectExternalContainer(_container.Name);        
         yield return new InstallerInitializeResult(
-            contract with { DomainName = name },
+            contract with
+            {
+                DomainName = name,
+                DependsOn = contract.DependsOn.Append(connectExternalContainer),
+                DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
+            },
             [contract.ContainerId],
-            [new ConnectExternalContainer(_container.Name)]
+            [connectExternalContainer]
         );
-    }
-
-    /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<HttpEndpoint>.GetDependencies(HttpEndpoint contract, ExecutionPlan plan)
-    {
-        yield return new ContractDependency(contract, contract.ContainerId);
-        yield return new ContractDependency(new ConnectExternalContainer(_container.Name), contract);
     }
 
     /// <inheritdoc />

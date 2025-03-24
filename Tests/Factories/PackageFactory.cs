@@ -23,6 +23,8 @@ public sealed class PackageFactory : Faker<Package>
         RuleFor(p => p.Tags, f => new List<string>(f.Lorem.Words()));
         RuleFor(p => p.Contracts, _ => Array.Empty<Contract>());
         Ignore(p => p.Installer);
+        Ignore(p => p.DependsOn);
+        Ignore(p => p.DependencyOf);
         FinishWith((_, package) => packageRegistry.Packages.Add(package));
     }
 }

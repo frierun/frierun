@@ -8,34 +8,7 @@ public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Substitute>.Initialize(Substitute contract, string prefix)
     {
-        yield return new InstallerInitializeResult(
-            contract,
-            contract.Matches
-                .SelectMany(pair => pair.Value)
-                .Select(match => match.Groups[1].Value)
-                .Select(
-                    insertion =>
-                    {
-                        var match = Substitute.VariableRegex.Match(insertion);
-                        if (!match.Success)
-                        {
-                            throw new Exception($"Invalid insertion format: {insertion}");
-                        }
-
-                        var contractTypeName = match.Groups[1].Value;
-                        var contractType = contractRegistry.GetContractType(contractTypeName);
-                        var contractName = match.Groups[2].Value;
-
-                        return ContractId.Create(contractType, contractName);
-                    }
-                )
-        );
-    }
-
-    /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<Substitute>.GetDependencies(Substitute contract, ExecutionPlan plan)
-    {
-        return contract.Matches
+        var contractIds = contract.Matches
             .SelectMany(pair => pair.Value)
             .Select(match => match.Groups[1].Value)
             .Select(
@@ -51,12 +24,19 @@ public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller
                     var contractType = contractRegistry.GetContractType(contractTypeName);
                     var contractName = match.Groups[2].Value;
 
-                    return new ContractDependency(
-                        ContractId.Create(contractType, contractName),
-                        contract
-                    );
+                    return ContractId.Create(contractType, contractName);
                 }
-            ).Append(new ContractDependency(contract, contract.OriginalId));
+            )
+            .ToList();
+        
+        yield return new InstallerInitializeResult(
+            contract with
+            {
+                DependsOn = contract.DependsOn.Concat(contractIds),
+                DependencyOf = contract.DependencyOf.Append(contract.OriginalId)
+            },
+            contractIds
+        );
     }
 
     /// <inheritdoc />

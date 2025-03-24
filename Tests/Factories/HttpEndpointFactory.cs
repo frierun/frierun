@@ -14,5 +14,7 @@ public sealed class HttpEndpointFactory : Faker<HttpEndpoint>
         RuleFor(p => p.ContainerName, f => f.Lorem.Word());
         Ignore(p => p.DomainName);
         Ignore(p => p.Installer);
+        Ignore(p => p.DependsOn);
+        Ignore(p => p.DependencyOf);
     }
 }
