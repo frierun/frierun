@@ -34,8 +34,7 @@ public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller
             {
                 DependsOn = contract.DependsOn.Concat(contractIds),
                 DependencyOf = contract.DependencyOf.Append(contract.OriginalId)
-            },
-            contractIds
+            }
         );
     }
 

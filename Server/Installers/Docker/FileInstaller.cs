@@ -14,8 +14,7 @@ public class FileInstaller(DockerService dockerService) : IInstaller<File>
             contract with
             {
                 DependsOn = contract.DependsOn.Append(contract.VolumeId),
-            },
-            [contract.VolumeId]
+            }
         );
     }
 

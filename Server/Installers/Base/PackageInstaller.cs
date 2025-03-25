@@ -35,7 +35,6 @@ public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
                 Prefix = prefix,
                 ApplicationUrl = applicationUrl,
             },
-            null,
             package.Contracts
         );
     }

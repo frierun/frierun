@@ -15,8 +15,7 @@ public class AttachNetworkInstaller(DockerService dockerService, State state)
             contract with
             {
                 DependsOn = contract.DependsOn.Append(contract.NetworkId),
-            },
-            [contract.NetworkId]
+            }
         );
     }
 

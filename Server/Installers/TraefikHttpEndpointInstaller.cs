@@ -31,7 +31,6 @@ public class TraefikHttpEndpointInstaller(State state, Application application)
                 DependsOn = contract.DependsOn.Append(connectExternalContainer),
                 DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
             },
-            [contract.ContainerId],
             [connectExternalContainer]
         );
     }

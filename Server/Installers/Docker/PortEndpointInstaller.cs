@@ -25,8 +25,7 @@ public class PortEndpointInstaller(State state) : IInstaller<PortEndpoint>, IUni
             {
                 DestinationPort = port,
                 DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
-            },
-            [contract.ContainerId]
+            }
         );
     }
     

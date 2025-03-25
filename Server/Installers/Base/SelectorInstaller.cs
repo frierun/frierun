@@ -11,7 +11,6 @@ public class SelectorInstaller : IInstaller<Selector>
         {
             yield return new InstallerInitializeResult(
                 contract,
-                null,
                 contract.Options.First(option => option.Name == contract.SelectedOption).Contracts
             );
             yield break;
@@ -21,7 +20,6 @@ public class SelectorInstaller : IInstaller<Selector>
         {
             yield return new InstallerInitializeResult(
                 contract with { SelectedOption = name },
-                null,
                 contracts
             );
         }

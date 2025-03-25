@@ -13,11 +13,7 @@ public class MountInstaller : IInstaller<Mount>
             {
                 DependsOn = contract.DependsOn.Append(contract.VolumeId),
                 DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
-            },
-            [
-                contract.ContainerId,
-                contract.VolumeId
-            ]
+            }
         );
     }
     

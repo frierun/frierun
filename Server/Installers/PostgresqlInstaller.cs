@@ -36,7 +36,6 @@ public class PostgresqlInstaller(
                 DatabaseName = name,
                 DependsOn = contract.DependsOn.Append(connectExternalContainer),
             },
-            null,
             [connectExternalContainer]
         );
     }

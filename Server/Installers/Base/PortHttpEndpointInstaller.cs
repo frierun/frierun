@@ -14,7 +14,6 @@ public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>, IUninstaller<
                 DependsOn = contract.DependsOn.Append(portEndpoint),
                 DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
             },
-            [contract.ContainerId],
             [portEndpoint]
         );
     }

@@ -67,12 +67,20 @@ public class DiscoveryGraph
             _uninitializedContracts.Enqueue(additionalContract);
         }
 
-        foreach (var contractId in result.RequiredContracts)
+        foreach (var contractId in result.Contract.DependsOn)
         {
             if (!Contracts.ContainsKey(contractId))
             {
                 _emptyContracts.Add(contractId);
             }
-        }        
+        }
+        
+        foreach (var contractId in result.Contract.DependencyOf)
+        {
+            if (!Contracts.ContainsKey(contractId))
+            {
+                _emptyContracts.Add(contractId);
+            }
+        }
     }
 }

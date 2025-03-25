@@ -12,7 +12,6 @@ public class RedisInstaller : IInstaller<Redis>, IUninstaller<RedisDatabase>
             {
                 DependsOn = contract.DependsOn.Append(contract.ContainerId)
             },
-            [],
             [
                 new Container(
                     Name: contract.ContainerName,

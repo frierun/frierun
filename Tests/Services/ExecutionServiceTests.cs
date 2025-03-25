@@ -60,7 +60,7 @@ public class ExecutionServiceTests : BaseTests
         var service = Resolve<ExecutionService>();
         installer
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
-            .Returns([new InstallerInitializeResult(contract, null, [unknownContract])]);
+            .Returns([new InstallerInitializeResult(contract, [unknownContract])]);
 
         Assert.Throws<InstallerNotFoundException>(() => service.Create(package));
     }
@@ -96,7 +96,7 @@ public class ExecutionServiceTests : BaseTests
         var service = Resolve<ExecutionService>();
         installer
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
-            .Returns([new InstallerInitializeResult(contract, null, [contract])]);
+            .Returns([new InstallerInitializeResult(contract, [contract])]);
 
         var plan = service.Create(package);
 
@@ -119,8 +119,8 @@ public class ExecutionServiceTests : BaseTests
         installer
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
             .Returns(info => [
-                new InstallerInitializeResult(info.Arg<Contract>(), null, [unknownContract]),
-                new InstallerInitializeResult(info.Arg<Contract>(), null, [knownContract])
+                new InstallerInitializeResult(info.Arg<Contract>(), [unknownContract]),
+                new InstallerInitializeResult(info.Arg<Contract>(), [knownContract])
             ]);
 
         var plan = service.Create(package);
@@ -146,12 +146,12 @@ public class ExecutionServiceTests : BaseTests
         installer
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
             .Returns(info => [
-                new InstallerInitializeResult(info.Arg<Contract>(), null, [unknownContract]),
+                new InstallerInitializeResult(info.Arg<Contract>(), [unknownContract]),
             ]);
         installer2
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
             .Returns(info => [
-                new InstallerInitializeResult(info.Arg<Contract>(), null, [knownContract])
+                new InstallerInitializeResult(info.Arg<Contract>(), [knownContract])
             ]);
 
         var plan = service.Create(package);

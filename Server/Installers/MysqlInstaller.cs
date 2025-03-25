@@ -29,7 +29,6 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
                 DatabaseName = name,
                 DependsOn = contract.DependsOn.Append(connectExternalContainer),
             },
-            null,
             [connectExternalContainer]
         );
     }

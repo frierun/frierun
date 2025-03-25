@@ -23,8 +23,7 @@ public class ContainerInstaller(DockerService dockerService, State state) : IIns
             {
                 ContainerName = name,
                 DependsOn = contract.DependsOn.Append(contract.NetworkId),
-            },
-            [contract.NetworkId]
+            }
         );
     }
 
