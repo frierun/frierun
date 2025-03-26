@@ -6,6 +6,9 @@ namespace Frierun.Server.Installers.Docker;
 public class NetworkInstaller(DockerService dockerService, State state) : IInstaller<Network>, IUninstaller<DockerNetwork>
 {
     /// <inheritdoc />
+    public Application? Application => null;
+    
+    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Network>.Initialize(Network contract, string prefix)
     {
         var baseName = contract.NetworkName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");

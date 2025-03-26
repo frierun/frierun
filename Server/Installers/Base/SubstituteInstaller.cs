@@ -6,6 +6,9 @@ namespace Frierun.Server.Installers.Base;
 public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller<Substitute>
 {
     /// <inheritdoc />
+    public Application? Application => null;
+    
+    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Substitute>.Initialize(Substitute contract, string prefix)
     {
         var contractIds = contract.Matches

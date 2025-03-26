@@ -13,7 +13,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
 
     const [domain, setDomain] = useState('');
     const [port, setPort] = useState(0);
-    const hasTraefik = contract.installer === 'TraefikHttpEndpointInstaller';
+    const hasTraefik = contract.installer?.typeName === 'TraefikHttpEndpointInstaller';
     const [installerType, setInstallerType] = useState('');
 
     useEffect(() => {
@@ -22,7 +22,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
             .filter(contract => contract.Type === 'PortEndpoint')
             .find(port => port.containerName === contract.containerName && port.port === contract.port)
             ?.destinationPort ?? defaultPort)
-        setInstallerType(contract.installer ?? 'PortHttpEndpointInstaller');
+        setInstallerType(contract.installer?.typeName ?? 'PortHttpEndpointInstaller');
     }, [contract, contracts]);
 
     const updateInstallerType = (installerType: string) => {
@@ -38,7 +38,9 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
         setDomain(domainName);
         updateContracts([{
             ...contract,
-            installer: 'TraefikHttpEndpointInstaller',
+            installer: {
+                typeName: 'TraefikHttpEndpointInstaller'
+            },
             domainName
         }]);
     }
@@ -52,7 +54,9 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
         updateContracts([
             {
                 ...contract,
-                installer: 'PortHttpEndpointInstaller',
+                installer: {
+                    typeName: 'PortHttpEndpointInstaller'
+                },
                 domainName: null
             },
             {
@@ -61,7 +65,9 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
                 protocol: 'Tcp',
                 containerName: contract.containerName,
                 port: contract.port,
-                destinationPort: port
+                destinationPort: port,
+                dependsOn: [],
+                dependencyOf: []
             }
         ]);
     }
@@ -89,12 +95,12 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
                         </div>
                         <div>
                             <input
-                                    type="radio"
-                                    id={"PortHttpEndpointInstallerRadio"}
-                                    value="PortHttpEndpointInstaller"
-                                    checked={installerType === "PortHttpEndpointInstaller"}
-                                    onChange={e => updateInstallerType(e.target.value)}
-                                />
+                                type="radio"
+                                id={"PortHttpEndpointInstallerRadio"}
+                                value="PortHttpEndpointInstaller"
+                                checked={installerType === "PortHttpEndpointInstaller"}
+                                onChange={e => updateInstallerType(e.target.value)}
+                            />
                             <label htmlFor={"PortHttpEndpointInstallerRadio"}>
                                 Port
                             </label>

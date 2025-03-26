@@ -16,6 +16,7 @@ import type { LocalPath } from "./localPath";
 import type { MysqlDatabase } from "./mysqlDatabase";
 import type { PostgresqlDatabase } from "./postgresqlDatabase";
 import type { RedisDatabase } from "./redisDatabase";
+import type { ResolvedDomain } from "./resolvedDomain";
 import type { ResolvedParameter } from "./resolvedParameter";
 import type { TraefikHttpEndpoint } from "./traefikHttpEndpoint";
 
@@ -32,5 +33,6 @@ export type ApplicationAllOfResourcesItem =
   | MysqlDatabase
   | PostgresqlDatabase
   | RedisDatabase
+  | ResolvedDomain
   | ResolvedParameter
   | TraefikHttpEndpoint;

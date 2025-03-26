@@ -6,6 +6,9 @@ namespace Frierun.Server.Installers.Docker;
 public class MountInstaller : IInstaller<Mount>
 {
     /// <inheritdoc />
+    public Application? Application => null;
+    
+    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Mount>.Initialize(Mount contract, string prefix)
     {
         yield return new InstallerInitializeResult(

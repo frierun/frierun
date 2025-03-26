@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Frierun.Server.Installers;
 
 namespace Frierun.Server.Data;
 
@@ -23,13 +24,13 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
 public abstract record Contract(
     string Name,
-    string? Installer = null,
+    InstallerDefinition? Installer = null,
     IEnumerable<ContractId>? DependsOn = null,
     IEnumerable<ContractId>? DependencyOf = null
 )
 {
     [JsonIgnore] public ContractId Id => ContractId.Create(GetType(), Name);
-    
+
     public IEnumerable<ContractId> DependsOn { get; init; } = DependsOn ?? Array.Empty<ContractId>();
     public IEnumerable<ContractId> DependencyOf { get; init; } = DependencyOf ?? Array.Empty<ContractId>();
 

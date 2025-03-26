@@ -125,7 +125,7 @@ public class InstallerRegistry
     /// <summary>
     /// Gets possible installers for the resource type
     /// </summary>
-    public IEnumerable<IInstaller> GetInstallers(Type contractType, string? name = null)
+    public IEnumerable<IInstaller> GetInstallers(Type contractType, InstallerDefinition? definition = null)
     {
         if (!_installers.TryGetValue(contractType, out var installers))
         {
@@ -134,10 +134,17 @@ public class InstallerRegistry
 
         foreach (var installer in installers)
         {
-            if (name == null || installer.GetType().Name == name)
+            if (definition != null && definition.TypeName != installer.GetType().Name)
             {
-                yield return installer;
+                continue;
             }
+            
+            if (definition?.ApplicationName != null && installer.Application?.Name != definition.ApplicationName)
+            {
+                continue;
+            }
+            
+            yield return installer;
         }
     }
     

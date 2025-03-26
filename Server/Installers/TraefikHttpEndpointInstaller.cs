@@ -9,6 +9,9 @@ public class TraefikHttpEndpointInstaller(State state, Application application)
     private readonly DockerPortEndpoint _port = application.Resources.OfType<DockerPortEndpoint>().First();
 
     /// <inheritdoc />
+    public Application? Application => application;
+    
+    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix)
     {
         var baseName = contract.DomainName ?? $"{prefix}.localhost";

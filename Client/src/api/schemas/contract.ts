@@ -4,10 +4,13 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { InstallerDefinition } from "./installerDefinition";
+import type { ContractId } from "./contractId";
 
 export interface Contract {
   Type: string;
   name: string;
-  /** @nullable */
-  installer?: string | null;
+  installer?: InstallerDefinition;
+  dependsOn: ContractId[];
+  dependencyOf: ContractId[];
 }

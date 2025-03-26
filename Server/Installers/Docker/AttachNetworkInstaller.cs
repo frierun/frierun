@@ -6,6 +6,9 @@ public class AttachNetworkInstaller(DockerService dockerService, State state)
     : IInstaller<ConnectExternalContainer>, IUninstaller<DockerAttachedNetwork>
 {
     /// <inheritdoc />
+    public Application? Application => null;
+    
+    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<ConnectExternalContainer>.Initialize(
         ConnectExternalContainer contract,
         string prefix

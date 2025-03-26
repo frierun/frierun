@@ -10,6 +10,9 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
     private readonly string _rootPassword = application.Resources.OfType<GeneratedPassword>().First().Value;
 
     /// <inheritdoc />
+    public Application? Application => application;
+
+    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Mysql>.Initialize(Mysql contract, string prefix)
     {
         var baseName = contract.DatabaseName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");

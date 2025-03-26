@@ -5,6 +5,9 @@ namespace Frierun.Server.Installers.Base;
 public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
 {
     /// <inheritdoc />
+    public Application? Application => null;
+    
+    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Package>.Initialize(Package package, string prefix)
     {
         var applicationUrl = package.ApplicationUrl;

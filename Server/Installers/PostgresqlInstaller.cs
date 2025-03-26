@@ -14,6 +14,9 @@ public class PostgresqlInstaller(
     private readonly string _rootPassword = application.Resources.OfType<GeneratedPassword>().First().Value;
 
     /// <inheritdoc />
+    public Application? Application => application;
+    
+    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Postgresql>.Initialize(
         Postgresql contract,
         string prefix

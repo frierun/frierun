@@ -43,7 +43,13 @@ public interface IInstaller<in TContract> : IInstaller
                 {
                     yield return result with
                     {
-                        Contract = result.Contract with { Installer = GetType().Name },
+                        Contract = result.Contract with
+                        {
+                            Installer = new InstallerDefinition(
+                                TypeName: GetType().Name,
+                                ApplicationName: Application?.Name
+                            )
+                        },
                         AdditionalContracts = result.AdditionalContracts.Append(new Substitute(contract, matches))
                     };
                     continue;
@@ -52,7 +58,13 @@ public interface IInstaller<in TContract> : IInstaller
 
             yield return result with
             {
-                Contract = result.Contract with { Installer = GetType().Name }
+                Contract = result.Contract with
+                {
+                    Installer = new InstallerDefinition(
+                        TypeName: GetType().Name,
+                        ApplicationName: Application?.Name
+                    )
+                },
             };
         }
     }
@@ -67,6 +79,8 @@ public interface IInstaller<in TContract> : IInstaller
 
 public interface IInstaller
 {
+    public Application? Application { get; }
+
     /// <summary>
     /// Returns all possible ways to initializes contract
     /// </summary>

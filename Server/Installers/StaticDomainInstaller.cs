@@ -8,6 +8,9 @@ public class StaticDomainInstaller(State state, Application application)
     private readonly string _domainName = application.Resources.OfType<ResolvedParameter>().First().Value ?? "";
 
     /// <inheritdoc />
+    public Application? Application => application;
+    
+    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Domain>.Initialize(Domain contract, string prefix)
     {
         if (contract.Subdomain != null && !IsSubdomainExist(contract.Subdomain))

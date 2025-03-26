@@ -5,6 +5,9 @@ namespace Frierun.Server.Installers.Base;
 public class RedisInstaller : IInstaller<Redis>, IUninstaller<RedisDatabase>
 {
     /// <inheritdoc />
+    public Application? Application => null;
+    
+    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Redis>.Initialize(Redis contract, string prefix)
     {
         yield return new InstallerInitializeResult(

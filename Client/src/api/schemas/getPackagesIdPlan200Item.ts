@@ -7,6 +7,7 @@
 import type { ConnectExternalContainer } from "./connectExternalContainer";
 import type { Container } from "./container";
 import type { Dependency } from "./dependency";
+import type { Domain } from "./domain";
 import type { File } from "./file";
 import type { HttpEndpoint } from "./httpEndpoint";
 import type { Mount } from "./mount";
@@ -26,6 +27,7 @@ export type GetPackagesIdPlan200Item =
   | ConnectExternalContainer
   | Container
   | Dependency
+  | Domain
   | File
   | HttpEndpoint
   | Mount

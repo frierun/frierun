@@ -10,4 +10,5 @@ export type DockerPortEndpointAllOf = {
   ip: string;
   port: number;
   protocol: Protocol;
+  readonly url: string;
 };

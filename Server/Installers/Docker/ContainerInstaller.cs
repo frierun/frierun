@@ -6,6 +6,9 @@ namespace Frierun.Server.Installers.Docker;
 public class ContainerInstaller(DockerService dockerService, State state) : IInstaller<Container>, IUninstaller<DockerContainer>
 {
     /// <inheritdoc />
+    public Application? Application => null;
+    
+    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Container>.Initialize(Container contract, string prefix)
     {
         var baseName = contract.ContainerName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");

@@ -1,10 +1,8 @@
 ﻿import {useContext, useState} from "react";
 import StateContext from "@/providers/StateContext.tsx";
-import {getGetApplicationsQueryKey} from "@/api/endpoints/applications.ts";
 import {useQueryClient} from "@tanstack/react-query";
 import {useNavigate} from "react-router-dom";
 import Button from "@/components/Button.tsx";
-import {usePostPackagesIdInstall} from "@/api/endpoints/packages.ts";
 import HttpEndpointForm from "@/components/contracts/HttpEndpointForm.tsx";
 import PortEndpointForm from "@/components/contracts/PortEndpointForm.tsx";
 import Debug from "@/components/Debug";
@@ -12,6 +10,8 @@ import ParameterForm from "@/components/contracts/ParameterForm.tsx";
 import {GetPackagesIdPlan200Item, Package,} from "@/api/schemas";
 import VolumeForm from "@/components/contracts/VolumeForm.tsx";
 import SelectorForm from "@/components/contracts/SelectorForm.tsx";
+import {usePostPackagesIdInstall} from "@/api/endpoints/packages.ts";
+import {getGetApplicationsQueryKey} from "@/api/endpoints/applications.ts";
 
 type Props = {
     contracts: GetPackagesIdPlan200Item[];
@@ -44,6 +44,8 @@ export default function InstallForm({contracts, name}: Props) {
                 prefix,
                 tags: [],
                 contracts: Object.entries(overrides).flatMap(([_, value]) => value),
+                dependsOn: [],
+                dependencyOf: []
             }
         });
         
