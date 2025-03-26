@@ -31,8 +31,8 @@ public abstract record Contract(
 {
     [JsonIgnore] public ContractId Id => ContractId.Create(GetType(), Name);
 
-    public IEnumerable<ContractId> DependsOn { get; init; } = DependsOn ?? Array.Empty<ContractId>();
-    public IEnumerable<ContractId> DependencyOf { get; init; } = DependencyOf ?? Array.Empty<ContractId>();
+    [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = DependsOn ?? Array.Empty<ContractId>();
+    [JsonIgnore] public IEnumerable<ContractId> DependencyOf { get; init; } = DependencyOf ?? Array.Empty<ContractId>();
 
     public virtual Contract With(Contract other)
     {

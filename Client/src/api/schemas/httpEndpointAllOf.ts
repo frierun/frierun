@@ -7,7 +7,5 @@
 
 export type HttpEndpointAllOf = {
   port: number;
-  /** @nullable */
-  domainName?: string | null;
   containerName: string;
 };

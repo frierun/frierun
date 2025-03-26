@@ -44,8 +44,6 @@ export default function InstallForm({contracts, name}: Props) {
                 prefix,
                 tags: [],
                 contracts: Object.entries(overrides).flatMap(([_, value]) => value),
-                dependsOn: [],
-                dependencyOf: []
             }
         });
         

@@ -6,7 +6,8 @@
   "Contracts": [
     {
       "Type": "Parameter",
-      "Name": "domain"
+      "Name": "domain",
+      "DefaultValue": "localhost"
     }
   ]
 }

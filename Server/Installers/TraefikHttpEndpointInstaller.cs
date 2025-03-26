@@ -2,36 +2,23 @@
 
 namespace Frierun.Server.Installers;
 
-public class TraefikHttpEndpointInstaller(State state, Application application)
+public class TraefikHttpEndpointInstaller(Application application)
     : IInstaller<HttpEndpoint>, IUninstaller<TraefikHttpEndpoint>
 {
     private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
     private readonly DockerPortEndpoint _port = application.Resources.OfType<DockerPortEndpoint>().First();
 
     /// <inheritdoc />
-    public Application? Application => application;
+    public Application Application => application;
     
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix)
     {
-        var baseName = contract.DomainName ?? $"{prefix}.localhost";
-        var subdomain = baseName.Split('.')[0];
-        var domain = baseName.Substring(subdomain.Length + 1);
-
-        var count = 1;
-        var name = baseName;
-        while (state.Resources.OfType<TraefikHttpEndpoint>().Any(c => c.Domain == name))
-        {
-            count++;
-            name = $"{subdomain}{count}.{domain}";
-        }
-
         var connectExternalContainer = new ConnectExternalContainer(_container.Name);        
         yield return new InstallerInitializeResult(
             contract with
             {
-                DomainName = name,
-                DependsOn = contract.DependsOn.Append(connectExternalContainer),
+                DependsOn = contract.DependsOn.Append(connectExternalContainer).Append(contract.DomainId),
                 DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
             },
             [connectExternalContainer]
@@ -41,7 +28,7 @@ public class TraefikHttpEndpointInstaller(State state, Application application)
     /// <inheritdoc />
     Resource IInstaller<HttpEndpoint>.Install(HttpEndpoint contract, ExecutionPlan plan)
     {
-        var domain = contract.DomainName!;
+        var domain = plan.GetResource<ResolvedDomain>(contract.DomainId).Value;
         var subdomain = domain.Split('.')[0];
 
         var containerContract = plan.GetContract(contract.ContainerId);

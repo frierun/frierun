@@ -27,6 +27,8 @@ public class PortHttpEndpointInstallerTests : BaseTests
         var resources = application.Resources.ToList();
         var endpointIndex = resources.FindIndex(r => r is DockerPortEndpoint);
         var containerIndex = resources.FindIndex(r => r is DockerContainer);
+        Assert.NotEqual(-1, endpointIndex);
+        Assert.NotEqual(-1, containerIndex);
         Assert.True(endpointIndex < containerIndex);
     }
 }

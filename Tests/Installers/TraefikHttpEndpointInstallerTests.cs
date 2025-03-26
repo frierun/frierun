@@ -10,6 +10,7 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
     [InlineData(true)]
     public void Install_ContainerWithHttpEndpoint_InstallTraefikFirst(bool reverseOrder)
     {
+        InstallPackage("static-domain");
         var providerApplication = InstallPackage("traefik");
         Assert.NotNull(providerApplication);
 
@@ -31,6 +32,8 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
         var resources = application.Resources.ToList();
         var endpointIndex = resources.FindIndex(r => r is TraefikHttpEndpoint);
         var containerIndex = resources.FindIndex(r => r is DockerContainer);
+        Assert.NotEqual(-1, endpointIndex);
+        Assert.NotEqual(-1, containerIndex);
         Assert.True(endpointIndex < containerIndex);
     }
 }

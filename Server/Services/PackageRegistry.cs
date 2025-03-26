@@ -11,7 +11,7 @@ public class PackageRegistry(PackageSerializer packageSerializer)
     /// </summary>
     public void Load()
     {
-        foreach (var package in packageSerializer.Load().OrderBy(package => package.Name))
+        foreach (var package in packageSerializer.LoadAll().OrderBy(package => package.Name))
         {
             Packages.Add(package);
         }

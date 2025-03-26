@@ -39,9 +39,13 @@ public class UninstallServiceTests : BaseTests
     [Fact]
     public void Handle_DependentApplication_ThrowsExceptionOnWrongOrder()
     {
+        InstallPackage("static-domain");
         var traefik = InstallPackage("traefik");
-        InstallPackage("frierun");
+        var application = InstallPackage("frierun");
+        
         Assert.NotNull(traefik);
+        Assert.NotNull(application);
+        Assert.Single(application.Resources.OfType<TraefikHttpEndpoint>());
         
         Assert.Throws<Exception>(() => Resolve<UninstallService>().Handle(traefik));
     }

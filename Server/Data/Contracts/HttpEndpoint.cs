@@ -5,8 +5,7 @@ namespace Frierun.Server.Data;
 public record HttpEndpoint(
     string? Name = null,
     int Port = 0,
-    string? ContainerName = null,
-    string? DomainName = null
+    string? ContainerName = null
 ) : Contract(Name ?? $"{Port}{(ContainerName != null ? $" at {ContainerName}" : "")}")
 {
     public string ContainerName { get; init; } = ContainerName ?? "";
@@ -23,7 +22,6 @@ public record HttpEndpoint(
 
         return this with
         {
-            DomainName = endpoint.DomainName ?? DomainName,
             Installer = endpoint.Installer ?? Installer,
         };
     }

@@ -17,7 +17,11 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
     const [installerType, setInstallerType] = useState('');
 
     useEffect(() => {
-        setDomain(contract.domainName ?? '');
+        setDomain(contracts
+            .filter(contract => contract.Type === 'Domain')
+            .find(domain => domain.name === contract.name)
+            ?.subdomain ?? ''
+        )
         setPort(contracts
             .filter(contract => contract.Type === 'PortEndpoint')
             .find(port => port.containerName === contract.containerName && port.port === contract.port)
@@ -36,13 +40,19 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
 
     const updateDomain = (domainName: string) => {
         setDomain(domainName);
-        updateContracts([{
-            ...contract,
-            installer: {
-                typeName: 'TraefikHttpEndpointInstaller'
+        updateContracts([
+            {
+                ...contract,
+                installer: {
+                    typeName: 'TraefikHttpEndpointInstaller'
+                }
             },
-            domainName
-        }]);
+            {
+                Type: 'Domain',
+                name: contract.name,
+                subdomain: domainName,
+            }
+        ]);
     }
 
     const updatePort = (portValue: string) => {
@@ -57,7 +67,6 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
                 installer: {
                     typeName: 'PortHttpEndpointInstaller'
                 },
-                domainName: null
             },
             {
                 Type: 'PortEndpoint',
@@ -66,8 +75,6 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
                 containerName: contract.containerName,
                 port: contract.port,
                 destinationPort: port,
-                dependsOn: [],
-                dependencyOf: []
             }
         ]);
     }
