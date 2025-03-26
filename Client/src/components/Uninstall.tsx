@@ -12,11 +12,11 @@ export default function Uninstall({name}: Props) {
     const {waitForReady} = useContext(StateContext);
     const {mutateAsync, isPending} = useDeleteApplicationsName();
     const queryClient = useQueryClient()
-    
-    const uninstall = () => {
-        mutateAsync({name})
-            .then(waitForReady)
-            .then(() => queryClient.invalidateQueries({queryKey: getGetApplicationsQueryKey()}));
+
+    const uninstall = async () => {
+        await mutateAsync({name});
+        await waitForReady();
+        await queryClient.invalidateQueries({queryKey: getGetApplicationsQueryKey()});
     }
 
     return (

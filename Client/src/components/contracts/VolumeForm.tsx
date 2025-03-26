@@ -22,7 +22,7 @@ export default function VolumeForm({contract, updateContract}: Props) {
                 setValue(contract.path ?? '/data');
                 break;
         }
-    }, [contract, installer]);
+    }, [contract, getVolumesResponse, installer]);
 
     useEffect(() => {
         switch (installer) {
@@ -48,7 +48,7 @@ export default function VolumeForm({contract, updateContract}: Props) {
                 });
                 break;
         }
-    }, [value, installer]);
+    }, [value, installer, updateContract, contract]);
 
     return (
         <>
@@ -73,7 +73,7 @@ export default function VolumeForm({contract, updateContract}: Props) {
                             New volume
                         </label>
                     </div>
-                    {!!getVolumesResponse?.data?.length && (
+                    {!!getVolumesResponse?.data.length && (
                         <div>
                             <input
                                 id={"ExistingVolume" + value}
@@ -111,7 +111,7 @@ export default function VolumeForm({contract, updateContract}: Props) {
 
                             <select
                                 value={value}
-                                onChange={e => setValue(e.target.value)}
+                                onChange={e => { setValue(e.target.value); }}
                             >
                                 {getVolumesResponse?.data.map(volume => (
                                     <option key={volume.name} value={volume.name}>{volume.name}</option>
@@ -130,7 +130,7 @@ export default function VolumeForm({contract, updateContract}: Props) {
                             <input
                                 type="text"
                                 value={value}
-                                onChange={e => setValue(e.target.value)}
+                                onChange={e => { setValue(e.target.value); }}
                             />
                         </div>
                     )

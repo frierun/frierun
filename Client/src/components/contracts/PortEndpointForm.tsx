@@ -44,7 +44,7 @@ export default function PortEndpointForm({contract, updateContract}: Props) {
                 </label>
                 <input
                     value={port}
-                    onChange={e => updatePort(e.target.value)}
+                    onChange={e => { updatePort(e.target.value); }}
                 />
             </div>
         </>

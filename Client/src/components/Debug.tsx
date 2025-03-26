@@ -1,14 +1,11 @@
 import {PropsWithChildren, useState} from "react";
 
-
-type Props = {
-}
-export default function Debug({children}:PropsWithChildren<Props>)
+export default function Debug({children}:PropsWithChildren)
 {
     const [visible, setVisible] = useState(false);
 
     return <>
-        <a onClick={()=> setVisible((old) => !old)}>Debug info {!visible ? '↓' : '↑'}</a>
+        <a onClick={()=> { setVisible((old) => !old); }}>Debug info {!visible ? '↓' : '↑'}</a>
         {visible && <div className={"card mt-2"}>{children}</div>}
     </>
 }

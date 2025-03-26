@@ -6,10 +6,16 @@ import tseslint from 'typescript-eslint'
 import react from 'eslint-plugin-react'
 
 export default tseslint.config(
-    {ignores: ['dist', 'src/api']},
+    {
+        ignores: [
+            'dist', 
+            'src/api',
+            'orval.config.ts',
+        ]
+    },
     {
         // Set the react version
-        settings: { react: { version: '18.3' } },
+        settings: {react: {version: '18.3'}},
         plugins: {
             // Add the react plugin
             react,
@@ -20,7 +26,7 @@ export default tseslint.config(
             ...react.configs.recommended.rules,
             ...react.configs['jsx-runtime'].rules,
         },
-    },    
+    },
     {
         extends: [js.configs.recommended, ...tseslint.configs.strictTypeChecked],
         files: ['**/*.{ts,tsx}'],
@@ -42,6 +48,14 @@ export default tseslint.config(
                 'warn',
                 {allowConstantExport: true},
             ],
+            '@typescript-eslint/no-unnecessary-condition': [
+                'error',
+                {allowConstantLoopConditions: true},
+            ],
+            "@typescript-eslint/no-misused-promises": [
+                "error",
+                {checksVoidReturn: false}
+            ]
         },
     },
 )

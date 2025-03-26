@@ -34,7 +34,7 @@ export default function InstallForm({contracts, name}: Props) {
     const [overrides, setOverrides] = useState<Overrides>({});
 
     const packageContract = contracts.find(contract => contract.Type === 'Package');
-    
+
     const install = async () => {
         setError(null);
         const result = await mutateAsync({
@@ -43,27 +43,20 @@ export default function InstallForm({contracts, name}: Props) {
                 name,
                 prefix,
                 tags: [],
-                contracts: Object.entries(overrides).flatMap(([_, value]) => value),
+                contracts: Object.entries(overrides).flatMap(([, value]) => value),
             }
         });
-        
-        if (result.status === 404)
-        {
+
+        if (result.status === 404) {
             setError("Package not found");
             return;
         }
-        
-        if (result.status === 409)
-        {
+
+        if (result.status === 409) {
             setError(`Couldn't install contract ${result.data.Type}. Install the missing dependencies first.`);
             return;
         }
-        
-        if (result.status !== 202)
-        {
-            return;
-        }
-        
+
         await waitForReady();
         await queryClient.invalidateQueries({queryKey: getGetApplicationsQueryKey()});
         navigate('/');
@@ -79,7 +72,9 @@ export default function InstallForm({contracts, name}: Props) {
         )
     }
 
-    const updateContract = (contract: Package['contracts'][0]) => updateContracts([contract]);
+    const updateContract = (contract: Package['contracts'][0]) => {
+        updateContracts([contract]);
+    };
 
     return (
         <>
@@ -113,7 +108,9 @@ export default function InstallForm({contracts, name}: Props) {
                         <label className={"inline-block w-48"}>
                             Application name:
                         </label>
-                        <input value={prefix} onChange={e => setPrefix(e.target.value)}/>
+                        <input value={prefix} onChange={e => {
+                            setPrefix(e.target.value);
+                        }}/>
                     </div>
                     {contracts
                         .filter(contract => contract.Type === 'Parameter')

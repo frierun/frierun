@@ -70,7 +70,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
             },
             {
                 Type: 'PortEndpoint',
-                name: `${contract.containerName}:${contract.port}/tcp`,
+                name: `${contract.containerName}:${contract.port.toString()}/tcp`,
                 protocol: 'Tcp',
                 containerName: contract.containerName,
                 port: contract.port,
@@ -94,7 +94,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
                                 id={"TraefikHttpEndpointInstallerRadio"}
                                 value="TraefikHttpEndpointInstaller"
                                 checked={installerType === "TraefikHttpEndpointInstaller"}
-                                onChange={e => updateInstallerType(e.target.value)}
+                                onChange={e => { updateInstallerType(e.target.value); }}
                             >
                             </input>
                             <label htmlFor={"TraefikHttpEndpointInstallerRadio"}>Traefik
@@ -106,7 +106,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
                                 id={"PortHttpEndpointInstallerRadio"}
                                 value="PortHttpEndpointInstaller"
                                 checked={installerType === "PortHttpEndpointInstaller"}
-                                onChange={e => updateInstallerType(e.target.value)}
+                                onChange={e => { updateInstallerType(e.target.value); }}
                             />
                             <label htmlFor={"PortHttpEndpointInstallerRadio"}>
                                 Port
@@ -119,7 +119,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
                         <label className={"inline-block w-48"}>
                             Domain:
                         </label>
-                        <input value={domain} onChange={e => updateDomain(e.target.value)}/>
+                        <input value={domain} onChange={e => { updateDomain(e.target.value); }}/>
                     </div>
                 )}
                 {installerType === 'PortHttpEndpointInstaller' && (
@@ -127,7 +127,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
                         <label className={"inline-block w-48"}>
                             Port:
                         </label>
-                        <input value={port} onChange={e => updatePort(e.target.value)}/>
+                        <input value={port} onChange={e => { updatePort(e.target.value); }}/>
                     </div>
                 )}
             </div>
