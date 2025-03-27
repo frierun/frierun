@@ -39,6 +39,7 @@ export * from "./dockerVolumeAllOf";
 export * from "./dockerVolumeType";
 export * from "./domain";
 export * from "./domainAllOf";
+export * from "./domainInstaller";
 export * from "./domainType";
 export * from "./file";
 export * from "./fileAllOf";
