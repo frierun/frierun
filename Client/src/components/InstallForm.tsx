@@ -1,4 +1,4 @@
-﻿import {useContext, useState} from "react";
+﻿import {useCallback, useContext, useState} from "react";
 import StateContext from "@/providers/StateContext.tsx";
 import {useQueryClient} from "@tanstack/react-query";
 import {useNavigate} from "react-router-dom";
@@ -62,19 +62,19 @@ export default function InstallForm({contracts, name}: Props) {
         navigate('/');
     };
 
-    const updateContracts = (contracts: Package['contracts']) => {
+    const updateContracts = useCallback((contracts: Package['contracts']) => {
         const contract = contracts[0];
         const key = `${contract.Type} ${contract.name}`;
-        setOverrides({
+        setOverrides(overrides => ({
                 ...overrides,
                 [key]: contracts
-            }
+            })
         )
-    }
+    }, []);
 
-    const updateContract = (contract: Package['contracts'][0]) => {
+    const updateContract = useCallback((contract: Package['contracts'][0]) => {
         updateContracts([contract]);
-    };
+    }, [updateContracts]);
 
     return (
         <>
