@@ -2,7 +2,7 @@
 
 namespace Frierun.Server.Installers.Base;
 
-public class SelectorInstaller : IInstaller<Selector>
+public class SelectorInstaller : IInstaller<Selector>, IUninstaller<ResolvedSelector>
 {
     /// <inheritdoc />
     public Application? Application => null;
