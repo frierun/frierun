@@ -13,13 +13,24 @@
       "ImageName": "traefik:v3.1",
       "Command": [
         "--api.insecure=true",
-        "--providers.docker"
+        "--providers.docker",
+        "--entryPoints.web.address=:80",
+        "--entryPoints.websecure.address=:443",
+        "--certificatesresolvers.httpchallenge.acme.httpchallenge.entrypoint=web",
+        "--certificatesresolvers.tlschallenge.acme.tlschallenge=true"
       ],
       "RequireDocker": true
     },
     {
       "Type": "PortEndpoint",
+      "Name": "Web",
       "Port": 80,
+      "Protocol": "tcp"
+    },
+    {
+      "Type": "PortEndpoint",
+      "Name": "WebSecure",
+      "Port": 443,
       "Protocol": "tcp"
     }
   ]

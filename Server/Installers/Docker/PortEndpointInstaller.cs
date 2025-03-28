@@ -46,7 +46,7 @@ public class PortEndpointInstaller(State state) : IInstaller<PortEndpoint>, IUni
         var internalPort = contract.Port;
 
         // TODO: fill the correct ip of the host
-        var endpoint = new DockerPortEndpoint("127.0.0.1", externalPort, contract.Protocol);
+        var endpoint = new DockerPortEndpoint(contract.Name, "127.0.0.1", externalPort, contract.Protocol);
 
         plan.UpdateContract(
             containerContract with

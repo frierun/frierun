@@ -9,6 +9,18 @@
       "Type": "Parameter",
       "Name": "Domain",
       "DefaultValue": "localhost"
+    },
+    {
+      "Type": "Selector",
+      "Name": "Internal",
+      "Options": [
+        {
+          "Name": "Yes"
+        },
+        {
+          "Name": "No"
+        }
+      ]
     }
   ]
 }

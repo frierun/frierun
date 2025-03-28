@@ -6,10 +6,11 @@ public class StaticDomainInstaller(State state, Application application)
     : IInstaller<Domain>, IUninstaller<ResolvedDomain>
 {
     private readonly string _domainName = application.Resources.OfType<ResolvedParameter>().First().Value ?? "";
+    private readonly bool _isInternal = application.Resources.OfType<ResolvedSelector>().First().Value == "Yes";
 
     /// <inheritdoc />
     public Application? Application => application;
-    
+
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Domain>.Initialize(Domain contract, string prefix)
     {
@@ -18,7 +19,7 @@ public class StaticDomainInstaller(State state, Application application)
             yield return new InstallerInitializeResult(contract);
             yield break;
         }
-        
+
         var count = 0;
         var subdomain = prefix;
         if (contract.Name != "")
@@ -49,10 +50,9 @@ public class StaticDomainInstaller(State state, Application application)
     /// <inheritdoc />
     Resource? IInstaller<Domain>.Install(Domain contract, ExecutionPlan plan)
     {
-        return new ResolvedDomain(
-            string.IsNullOrEmpty(contract.Subdomain)
-                ? _domainName
-                : $"{contract.Subdomain}.{_domainName}"
-        );
+        var domain = string.IsNullOrEmpty(contract.Subdomain)
+            ? _domainName
+            : $"{contract.Subdomain}.{_domainName}";
+        return new ResolvedDomain(domain, false);
     }
 }

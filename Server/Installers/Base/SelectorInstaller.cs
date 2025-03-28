@@ -27,4 +27,10 @@ public class SelectorInstaller : IInstaller<Selector>
             );
         }
     }
+
+    /// <inheritdoc />
+    Resource? IInstaller<Selector>.Install(Selector contract, ExecutionPlan plan)
+    {
+        return new ResolvedSelector(contract.Name, contract.SelectedOption);
+    }
 }
