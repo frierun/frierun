@@ -32,16 +32,13 @@
     },
     {
       "Type": "File",
-      "Name": "chown data",
       "VolumeName": "data",
       "Path": "",
       "Owner": 1000,
-      "Group": 1000
-    },
-    {
-      "Type": "Dependency",
-      "Preceding": "File:chown data",
-      "Following": "Container"
+      "Group": 1000,
+      "DependencyOf": [
+        "Container"
+      ]
     }
   ]
 }

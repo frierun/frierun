@@ -5,11 +5,16 @@ namespace Frierun.Server.Installers.Base;
 public class RedisInstaller : IInstaller<Redis>, IUninstaller<RedisDatabase>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<Redis>.Initialize(Redis contract, string prefix, State state)
+    public Application? Application => null;
+    
+    /// <inheritdoc />
+    IEnumerable<InstallerInitializeResult> IInstaller<Redis>.Initialize(Redis contract, string prefix)
     {
         yield return new InstallerInitializeResult(
-            contract,
-            [],
+            contract with
+            {
+                DependsOn = contract.DependsOn.Append(contract.ContainerId)
+            },
             [
                 new Container(
                     Name: contract.ContainerName,
@@ -24,21 +29,12 @@ public class RedisInstaller : IInstaller<Redis>, IUninstaller<RedisDatabase>
             ]
         );
     }
-
-    /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<Redis>.GetDependencies(Redis contract, ExecutionPlan plan)
-    {
-        yield return new ContractDependency(contract.ContainerId, contract.Id);
-    }
-
+    
     /// <inheritdoc />
     Resource? IInstaller<Redis>.Install(Redis contract, ExecutionPlan plan)
     {
         var container = plan.GetResource<DockerContainer>(contract.ContainerId);
-        
-        return new RedisDatabase(container.Name)
-        {
-            DependsOn = [container]
-        };
+
+        return new RedisDatabase(container.Name);
     }
 }

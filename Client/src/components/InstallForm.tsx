@@ -1,10 +1,8 @@
-﻿import {useContext, useState} from "react";
+﻿import {useCallback, useContext, useState} from "react";
 import StateContext from "@/providers/StateContext.tsx";
-import {getGetApplicationsQueryKey} from "@/api/endpoints/applications.ts";
 import {useQueryClient} from "@tanstack/react-query";
 import {useNavigate} from "react-router-dom";
 import Button from "@/components/Button.tsx";
-import {usePostPackagesIdInstall} from "@/api/endpoints/packages.ts";
 import HttpEndpointForm from "@/components/contracts/HttpEndpointForm.tsx";
 import PortEndpointForm from "@/components/contracts/PortEndpointForm.tsx";
 import Debug from "@/components/Debug";
@@ -12,6 +10,8 @@ import ParameterForm from "@/components/contracts/ParameterForm.tsx";
 import {GetPackagesIdPlan200Item, Package,} from "@/api/schemas";
 import VolumeForm from "@/components/contracts/VolumeForm.tsx";
 import SelectorForm from "@/components/contracts/SelectorForm.tsx";
+import {usePostPackagesIdInstall} from "@/api/endpoints/packages.ts";
+import {getGetApplicationsQueryKey} from "@/api/endpoints/applications.ts";
 
 type Props = {
     contracts: GetPackagesIdPlan200Item[];
@@ -34,7 +34,7 @@ export default function InstallForm({contracts, name}: Props) {
     const [overrides, setOverrides] = useState<Overrides>({});
 
     const packageContract = contracts.find(contract => contract.Type === 'Package');
-    
+
     const install = async () => {
         setError(null);
         const result = await mutateAsync({
@@ -43,43 +43,38 @@ export default function InstallForm({contracts, name}: Props) {
                 name,
                 prefix,
                 tags: [],
-                contracts: Object.entries(overrides).flatMap(([_, value]) => value),
+                contracts: Object.entries(overrides).flatMap(([, value]) => value),
             }
         });
-        
-        if (result.status === 404)
-        {
+
+        if (result.status === 404) {
             setError("Package not found");
             return;
         }
-        
-        if (result.status === 409)
-        {
+
+        if (result.status === 409) {
             setError(`Couldn't install contract ${result.data.Type}. Install the missing dependencies first.`);
             return;
         }
-        
-        if (result.status !== 202)
-        {
-            return;
-        }
-        
+
         await waitForReady();
         await queryClient.invalidateQueries({queryKey: getGetApplicationsQueryKey()});
         navigate('/');
     };
 
-    const updateContracts = (contracts: Package['contracts']) => {
+    const updateContracts = useCallback((contracts: Package['contracts']) => {
         const contract = contracts[0];
         const key = `${contract.Type} ${contract.name}`;
-        setOverrides({
+        setOverrides(overrides => ({
                 ...overrides,
                 [key]: contracts
-            }
+            })
         )
-    }
+    }, []);
 
-    const updateContract = (contract: Package['contracts'][0]) => updateContracts([contract]);
+    const updateContract = useCallback((contract: Package['contracts'][0]) => {
+        updateContracts([contract]);
+    }, [updateContracts]);
 
     return (
         <>
@@ -113,7 +108,9 @@ export default function InstallForm({contracts, name}: Props) {
                         <label className={"inline-block w-48"}>
                             Application name:
                         </label>
-                        <input value={prefix} onChange={e => setPrefix(e.target.value)}/>
+                        <input value={prefix} onChange={e => {
+                            setPrefix(e.target.value);
+                        }}/>
                     </div>
                     {contracts
                         .filter(contract => contract.Type === 'Parameter')

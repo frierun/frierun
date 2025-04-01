@@ -20,7 +20,6 @@ public class MountInstallerTests : BaseTests
         var application = InstallPackage(package);
 
         Assert.NotNull(application);
-        var dockerContainer = application.DependsOn.OfType<DockerContainer>().First();
-        Assert.Contains(dockerContainer.DependsOn, r => r is DockerVolume);
+        Assert.Single(application.Resources.OfType<DockerVolume>());
     }
 }

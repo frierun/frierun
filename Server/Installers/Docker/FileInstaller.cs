@@ -8,18 +8,17 @@ namespace Frierun.Server.Installers.Docker;
 public class FileInstaller(DockerService dockerService) : IInstaller<File>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<File>.Initialize(File contract, string prefix, State state)
+    public Application? Application => null;
+    
+    /// <inheritdoc />
+    IEnumerable<InstallerInitializeResult> IInstaller<File>.Initialize(File contract, string prefix)
     {
         yield return new InstallerInitializeResult(
-            contract,
-            [contract.VolumeId]
+            contract with
+            {
+                DependsOn = contract.DependsOn.Append(contract.VolumeId),
+            }
         );
-    }
-
-    /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<File>.GetDependencies(File contract, ExecutionPlan plan)
-    {
-        yield return new ContractDependency(contract.VolumeId, contract.Id);
     }
 
     /// <inheritdoc />

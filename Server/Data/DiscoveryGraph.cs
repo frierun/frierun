@@ -32,12 +32,12 @@ public class DiscoveryGraph
         while (_uninitializedContracts.Count > 0)
         {
             var contract = _uninitializedContracts.Dequeue();
-            if (Contracts.ContainsKey(contract.Id))
+            if (Contracts.ContainsKey(contract))
             {
                 continue;
             }
 
-            return (contract.Id, contract);
+            return (contract, contract);
         }
 
         while (_emptyContracts.Count > 0)
@@ -67,12 +67,20 @@ public class DiscoveryGraph
             _uninitializedContracts.Enqueue(additionalContract);
         }
 
-        foreach (var contractId in result.RequiredContracts)
+        foreach (var contractId in result.Contract.DependsOn)
         {
             if (!Contracts.ContainsKey(contractId))
             {
                 _emptyContracts.Add(contractId);
             }
-        }        
+        }
+        
+        foreach (var contractId in result.Contract.DependencyOf)
+        {
+            if (!Contracts.ContainsKey(contractId))
+            {
+                _emptyContracts.Add(contractId);
+            }
+        }
     }
 }

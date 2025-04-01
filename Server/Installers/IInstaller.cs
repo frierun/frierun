@@ -7,14 +7,9 @@ namespace Frierun.Server.Installers;
 public interface IInstaller<in TContract> : IInstaller
     where TContract : Contract
 {
-    public IEnumerable<InstallerInitializeResult> Initialize(TContract contract, string prefix, State state)
+    public IEnumerable<InstallerInitializeResult> Initialize(TContract contract, string prefix)
     {
         yield return new InstallerInitializeResult(contract);
-    }
-
-    public IEnumerable<ContractDependency> GetDependencies(TContract contract, ExecutionPlan plan)
-    {
-        yield break;
     }
 
     public Resource? Install(TContract contract, ExecutionPlan plan)
@@ -23,9 +18,9 @@ public interface IInstaller<in TContract> : IInstaller
     }
 
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller.Initialize(Contract contract, string prefix, State state)
+    IEnumerable<InstallerInitializeResult> IInstaller.Initialize(Contract contract, string prefix)
     {
-        foreach (var result in Initialize((TContract)contract, prefix, state))
+        foreach (var result in Initialize((TContract)contract, prefix))
         {
             if (result.Contract is IHasStrings hasStrings)
             {
@@ -48,8 +43,14 @@ public interface IInstaller<in TContract> : IInstaller
                 {
                     yield return result with
                     {
-                        Contract = result.Contract with { Installer = GetType().Name },
-                        AdditionalContracts = result.AdditionalContracts.Append(new Substitute(contract.Id, matches))
+                        Contract = result.Contract with
+                        {
+                            Installer = new InstallerDefinition(
+                                TypeName: GetType().Name,
+                                ApplicationName: Application?.Name
+                            )
+                        },
+                        AdditionalContracts = result.AdditionalContracts.Append(new Substitute(contract, matches))
                     };
                     continue;
                 }
@@ -57,16 +58,15 @@ public interface IInstaller<in TContract> : IInstaller
 
             yield return result with
             {
-                Contract = result.Contract with { Installer = GetType().Name }
+                Contract = result.Contract with
+                {
+                    Installer = new InstallerDefinition(
+                        TypeName: GetType().Name,
+                        ApplicationName: Application?.Name
+                    )
+                },
             };
         }
-    }
-
-    /// <inheritdoc />
-    [DebuggerStepThrough]
-    IEnumerable<ContractDependency> IInstaller.GetDependencies(Contract contract, ExecutionPlan plan)
-    {
-        return GetDependencies((TContract)contract, plan);
     }
 
     /// <inheritdoc />
@@ -79,15 +79,12 @@ public interface IInstaller<in TContract> : IInstaller
 
 public interface IInstaller
 {
+    public Application? Application { get; }
+
     /// <summary>
     /// Returns all possible ways to initializes contract
     /// </summary>
-    public IEnumerable<InstallerInitializeResult> Initialize(Contract contract, string prefix, State state);
-
-    /// <summary>
-    /// Returns all contract edges derived from the contract
-    /// </summary>
-    public IEnumerable<ContractDependency> GetDependencies(Contract contract, ExecutionPlan plan);
+    public IEnumerable<InstallerInitializeResult> Initialize(Contract contract, string prefix);
 
     /// <summary>
     /// Installs the contract

@@ -1,7 +1,6 @@
 ﻿using Frierun.Server;
 using Frierun.Server.Data;
 using Frierun.Server.Installers;
-using Frierun.Server.Services;
 using NSubstitute;
 using Substitute = NSubstitute.Substitute;
 
@@ -28,7 +27,7 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_WithoutInstaller_ThrowsException()
     {
-        var contract = Substitute.For<Contract>("", null);
+        var contract = Substitute.For<Contract>("", null, null, null);
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
 
@@ -44,7 +43,7 @@ public class ExecutionServiceTests : BaseTests
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
         installer
-            .Initialize(Arg.Any<Contract>(), Arg.Any<string>(), Arg.Any<State>())
+            .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
             .Returns([]);
 
         Assert.Throws<InstallerNotFoundException>(() => service.Create(package));
@@ -60,8 +59,8 @@ public class ExecutionServiceTests : BaseTests
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
         installer
-            .Initialize(Arg.Any<Contract>(), Arg.Any<string>(), Arg.Any<State>())
-            .Returns([new InstallerInitializeResult(contract, null, [unknownContract])]);
+            .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
+            .Returns([new InstallerInitializeResult(contract, [unknownContract])]);
 
         Assert.Throws<InstallerNotFoundException>(() => service.Create(package));
     }
@@ -75,7 +74,7 @@ public class ExecutionServiceTests : BaseTests
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
         installer
-            .Initialize(Arg.Any<Contract>(), Arg.Any<string>(), Arg.Any<State>())
+            .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
             .Returns([new InstallerInitializeResult(contract)]);
 
         var plan = service.Create(package);
@@ -84,7 +83,7 @@ public class ExecutionServiceTests : BaseTests
         Assert.Equal(2, plan.Contracts.Count);
         Assert.Contains(package.Id, plan.Contracts);
         Assert.Contains(contract.Id, plan.Contracts);
-        installer.Received(1).Initialize(Arg.Any<Contract>(), Arg.Any<string>(), Arg.Any<State>());
+        installer.Received(1).Initialize(Arg.Any<Contract>(), Arg.Any<string>());
     }
     
     [Fact]
@@ -96,8 +95,8 @@ public class ExecutionServiceTests : BaseTests
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
         installer
-            .Initialize(Arg.Any<Contract>(), Arg.Any<string>(), Arg.Any<State>())
-            .Returns([new InstallerInitializeResult(contract, null, [contract])]);
+            .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
+            .Returns([new InstallerInitializeResult(contract, [contract])]);
 
         var plan = service.Create(package);
 
@@ -118,10 +117,10 @@ public class ExecutionServiceTests : BaseTests
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
         installer
-            .Initialize(Arg.Any<Contract>(), Arg.Any<string>(), Arg.Any<State>())
+            .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
             .Returns(info => [
-                new InstallerInitializeResult(info.Arg<Contract>(), null, [unknownContract]),
-                new InstallerInitializeResult(info.Arg<Contract>(), null, [knownContract])
+                new InstallerInitializeResult(info.Arg<Contract>(), [unknownContract]),
+                new InstallerInitializeResult(info.Arg<Contract>(), [knownContract])
             ]);
 
         var plan = service.Create(package);
@@ -145,14 +144,14 @@ public class ExecutionServiceTests : BaseTests
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
         installer
-            .Initialize(Arg.Any<Contract>(), Arg.Any<string>(), Arg.Any<State>())
+            .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
             .Returns(info => [
-                new InstallerInitializeResult(info.Arg<Contract>(), null, [unknownContract]),
+                new InstallerInitializeResult(info.Arg<Contract>(), [unknownContract]),
             ]);
         installer2
-            .Initialize(Arg.Any<Contract>(), Arg.Any<string>(), Arg.Any<State>())
+            .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
             .Returns(info => [
-                new InstallerInitializeResult(info.Arg<Contract>(), null, [knownContract])
+                new InstallerInitializeResult(info.Arg<Contract>(), [knownContract])
             ]);
 
         var plan = service.Create(package);

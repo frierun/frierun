@@ -6,7 +6,6 @@ using Docker.DotNet;
 using Docker.DotNet.Models;
 using Frierun.Server;
 using Frierun.Server.Data;
-using Frierun.Server.Services;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Substitute = NSubstitute.Substitute;

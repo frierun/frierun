@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using Frierun.Server.Data;
 
-namespace Frierun.Server.Services;
+namespace Frierun.Server;
 
 public class PackageConverter(PackageRegistry packageRegistry) : JsonConverter<Package>
 {

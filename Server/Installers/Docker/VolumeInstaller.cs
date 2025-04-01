@@ -2,10 +2,13 @@
 
 namespace Frierun.Server.Installers.Docker;
 
-public class VolumeInstaller(DockerService dockerService) : IInstaller<Volume>, IUninstaller<DockerVolume>
+public class VolumeInstaller(DockerService dockerService, State state) : IInstaller<Volume>, IUninstaller<DockerVolume>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<Volume>.Initialize(Volume contract, string prefix, State state)
+    public Application? Application => null;
+    
+    /// <inheritdoc />
+    IEnumerable<InstallerInitializeResult> IInstaller<Volume>.Initialize(Volume contract, string prefix)
     {
         if (contract.VolumeName != null || contract.Path != null)
         {
@@ -38,25 +41,25 @@ public class VolumeInstaller(DockerService dockerService) : IInstaller<Volume>, 
         {
             return new LocalPath(contract.Path);
         }
-        
-        var volumeName = contract.VolumeName!;
-        var existingVolume = plan.State
-            .Resources
-            .OfType<DockerVolume>()
-            .FirstOrDefault(dockerVolume => dockerVolume.Name == volumeName);
 
-        if (existingVolume != null)
+        var volumeName = contract.VolumeName!;
+
+        if (state.Resources.OfType<DockerVolume>().All(dockerVolume => dockerVolume.Name != volumeName))
         {
-            return existingVolume;
+            dockerService.CreateVolume(volumeName).Wait();
         }
 
-        dockerService.CreateVolume(volumeName).Wait();
         return new DockerVolume(volumeName);
     }
 
     /// <inheritdoc />
     void IUninstaller<DockerVolume>.Uninstall(DockerVolume resource)
     {
+        if (state.Resources.OfType<DockerVolume>().Count(dockerVolume => dockerVolume.Name == resource.Name) > 1)
+        {
+            return;
+        }
+        
         dockerService.RemoveVolume(resource.Name).Wait();
     }
 }

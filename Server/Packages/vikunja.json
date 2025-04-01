@@ -3,7 +3,9 @@
   "Url": "https://vikunja.io/docs/installing/#docker",
   "ShortDescription": "To-do lists",
   "FullDescription": "Vikunja, the fluffy, open-source, self-hostable to-do app.",
-  "Tags": ["dashboard"],
+  "Tags": [
+    "dashboard"
+  ],
   "Contracts": [
     {
       "Type": "Selector",
@@ -62,12 +64,10 @@
               "VolumeName": "db",
               "Path": "",
               "Owner": 1000,
-              "Group": 1000
-            },
-            {
-              "Type": "Dependency",
-              "Preceding": "File:chown db",
-              "Following": "Container"
+              "Group": 1000,
+              "DependencyOf": [
+                "Container"
+              ]
             }
           ]
         }
@@ -88,12 +88,10 @@
       "VolumeName": "files",
       "Path": "",
       "Owner": 1000,
-      "Group": 1000
-    },
-    {
-      "Type": "Dependency",
-      "Preceding": "File:chown files",
-      "Following": "Container"
-    }    
+      "Group": 1000,
+      "DependencyOf": [
+        "Container"
+      ]
+    }
   ]
 }

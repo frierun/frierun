@@ -2,20 +2,18 @@
 
 namespace Frierun.Server.Installers.Base;
 
-public class SelectorInstaller : IInstaller<Selector>
+public class SelectorInstaller : IInstaller<Selector>, IUninstaller<ResolvedSelector>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<Selector>.Initialize(
-        Selector contract,
-        string prefix,
-        State state
-    )
+    public Application? Application => null;
+    
+    /// <inheritdoc />
+    IEnumerable<InstallerInitializeResult> IInstaller<Selector>.Initialize(Selector contract, string prefix)
     {
         if (contract.SelectedOption != null)
         {
             yield return new InstallerInitializeResult(
                 contract,
-                null,
                 contract.Options.First(option => option.Name == contract.SelectedOption).Contracts
             );
             yield break;
@@ -25,20 +23,14 @@ public class SelectorInstaller : IInstaller<Selector>
         {
             yield return new InstallerInitializeResult(
                 contract with { SelectedOption = name },
-                null,
                 contracts
             );
         }
     }
 
     /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<Selector>.GetDependencies(Selector selector, ExecutionPlan plan)
+    Resource? IInstaller<Selector>.Install(Selector contract, ExecutionPlan plan)
     {
-        var package = plan.Contracts.Values.OfType<Package>().First();
-        return selector
-            .Options
-            .First(option => option.Name == selector.SelectedOption)
-            .Contracts
-            .Select(contract => new ContractDependency(contract.Id, package.Id));
+        return new ResolvedSelector(contract.Name, contract.SelectedOption);
     }
 }

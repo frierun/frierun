@@ -1,7 +1,6 @@
 ﻿using Bogus;
 using Frierun.Server;
 using Frierun.Server.Data;
-using Frierun.Server.Services;
 using File = Frierun.Server.Data.File;
 
 namespace Frierun.Tests.Services;

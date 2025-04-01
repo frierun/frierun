@@ -5,7 +5,14 @@ namespace Frierun.Server.Data;
 public record ContractId<TContract>(
     string Name
 ) : ContractId(typeof(TContract), Name)
-    where TContract : Contract;
+    where TContract : Contract
+{
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return $"{Type.Name}:{Name}";
+    }
+}
 
 public abstract record ContractId(
     [property: JsonIgnore] Type Type,
@@ -32,12 +39,6 @@ public abstract record ContractId(
     public override int GetHashCode()
     {
         return HashCode.Combine(Type, Name);
-    }
-
-    /// <inheritdoc />
-    public override string ToString()
-    {
-        return $"{Type.Name}:{Name}";
     }
     
     public static ContractId Create(Type type, string name)

@@ -34,40 +34,25 @@
     },
     {
       "Type": "File",
-      "Name": "servers.json",
       "VolumeName": "config",
       "Path": "servers.json",
-      "Text": "{\"Servers\": {\"1\": {\"Name\": \"Server\",\"Group\": \"Servers\",\"Port\": 5432,\"Username\": \"{{Postgresql:Root:User}}\",\"Host\": \"{{Postgresql:Root:Host}}\",\"SSLMode\": \"prefer\",\"MaintenanceDB\": \"postgres\", \"PassFile\": \".pgpass\"}}}"
+      "Text": "{\"Servers\": {\"1\": {\"Name\": \"Server\",\"Group\": \"Servers\",\"Port\": 5432,\"Username\": \"{{Postgresql:Root:User}}\",\"Host\": \"{{Postgresql:Root:Host}}\",\"SSLMode\": \"prefer\",\"MaintenanceDB\": \"postgres\", \"PassFile\": \".pgpass\"}}}",
+      "DependencyOf": ["Container"]
     },
     {
       "Type": "File",
-      "Name": "pgpass",
       "VolumeName": "config",
       "Path": "pgpass",
       "Owner": 5050,
-      "Text": "{{Postgresql:Root:Host}}:*:*:{{Postgresql:Root:User}}:{{Postgresql:Root:Password}}\n"
+      "Text": "{{Postgresql:Root:Host}}:*:*:{{Postgresql:Root:User}}:{{Postgresql:Root:Password}}\n",
+      "DependencyOf": ["Container"]
     },
     {
       "Type": "File",
-      "Name": "chown config",
       "VolumeName": "config",
       "Path": "",
-      "Owner": 5050
-    },
-    {
-      "Type": "Dependency",
-      "Preceding": "File:servers.json",
-      "Following": "Container"
-    },
-    {
-      "Type": "Dependency",
-      "Preceding": "File:pgpass",
-      "Following": "Container"
-    },
-    {
-      "Type": "Dependency",
-      "Preceding": "File:chown config",
-      "Following": "Container"
+      "Owner": 5050,
+      "DependencyOf": ["Container"]
     }
   ]
 }

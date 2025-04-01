@@ -5,15 +5,21 @@ namespace Frierun.Server.Installers;
 
 public class PostgresqlInstaller(
     DockerService dockerService,
+    State state,
     Application application,
     ILogger<PostgresqlInstaller> logger)
     : IInstaller<Postgresql>, IUninstaller<PostgresqlDatabase>
 {
+    private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
+    private readonly string _rootPassword = application.Resources.OfType<GeneratedPassword>().First().Value;
+
+    /// <inheritdoc />
+    public Application? Application => application;
+    
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Postgresql>.Initialize(
         Postgresql contract,
-        string prefix,
-        State state
+        string prefix
     )
     {
         var baseName = contract.DatabaseName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
@@ -26,40 +32,30 @@ public class PostgresqlInstaller(
             name = $"{baseName}{count}";
         }
 
+        var connectExternalContainer = new ConnectExternalContainer(_container.Name, contract.NetworkName);
         yield return new InstallerInitializeResult(
-            contract with { DatabaseName = name },
-            [contract.NetworkId]
+            contract with
+            {
+                DatabaseName = name,
+                DependsOn = contract.DependsOn.Append(connectExternalContainer),
+            },
+            [connectExternalContainer]
         );
-    }
-
-    /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<Postgresql>.GetDependencies(Postgresql contract, ExecutionPlan plan)
-    {
-        yield return new ContractDependency(contract.NetworkId, contract.Id);
     }
 
     /// <inheritdoc />
     Resource IInstaller<Postgresql>.Install(Postgresql contract, ExecutionPlan plan)
     {
-        var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
-        var container = application.DependsOn.OfType<DockerContainer>().First();
-        dockerService.AttachNetwork(network.Name, container.Name).Wait();
-
+        plan.RequireApplication(application);
+        
         if (contract.Admin)
         {
             return new PostgresqlDatabase(
                 User: "postgres",
-                Password: application.DependsOn.OfType<GeneratedPassword>().First().Value,
+                Password: _rootPassword,
                 Database: "",
-                Host: container.Name
-            )
-            {
-                DependsOn =
-                [
-                    application,
-                    network
-                ]
-            };
+                Host: _container.Name
+            );
         }
 
         var name = contract.DatabaseName;
@@ -82,14 +78,7 @@ public class PostgresqlInstaller(
         );
 
 
-        return new PostgresqlDatabase(name, password, name, container.Name)
-        {
-            DependsOn =
-            [
-                application,
-                network
-            ]
-        };
+        return new PostgresqlDatabase(name, password, name, _container.Name);
     }
 
     /// <inheritdoc />
@@ -104,15 +93,6 @@ public class PostgresqlInstaller(
                 ]
             );
         }
-
-        var network = resource.DependsOn.OfType<DockerNetwork>().FirstOrDefault();
-        if (network == null)
-        {
-            return;
-        }
-
-        var container = application.AllDependencies.OfType<DockerContainer>().First();
-        dockerService.DetachNetwork(network.Name, container.Name).Wait();
     }
 
     /// <summary>
@@ -120,12 +100,11 @@ public class PostgresqlInstaller(
     /// </summary>
     private void RunSql(IList<string> sqlList)
     {
-        var container = application.DependsOn.OfType<DockerContainer>().First();
         var command = new List<string> { "psql", "-U", "postgres" };
         command.AddRange(sqlList.SelectMany(sql => new[] { "-c", sql }));
 
         var result = dockerService.ExecInContainer(
-            container.Name,
+            _container.Name,
             command
         ).Result;
 

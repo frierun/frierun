@@ -12,7 +12,7 @@ public class MysqlInstallerTests : BaseTests
     public async Task Install_MysqlContract_CredentialsAreCorrect(string packageName)
     {
         var state = Services.GetRequiredService<State>();
-        Assert.Empty(state.Resources);
+        Assert.Empty(state.Applications);
 
         var dbPackage = Services.GetRequiredService<PackageRegistry>().Find(packageName);
         Assert.NotNull(dbPackage);
@@ -31,8 +31,8 @@ public class MysqlInstallerTests : BaseTests
         var application = InstallPackage(package);
         Assert.NotNull(application);
 
-        var container = application.DependsOn.OfType<DockerContainer>().First();
-        var database = application.DependsOn.OfType<MysqlDatabase>().First();
+        var container = application.Resources.OfType<DockerContainer>().First();
+        var database = application.Resources.OfType<MysqlDatabase>().First();
         Assert.Equal("db-client", database.User);
         Assert.Equal("db-client", database.Database);
         Assert.Equal(packageName, database.Host);
@@ -60,7 +60,7 @@ public class MysqlInstallerTests : BaseTests
         UninstallApplication(application);
         UninstallApplication(dbApplication);
 
-        Assert.Empty(state.Resources);
+        Assert.Empty(state.Applications);
     }
 
     [Theory]
@@ -69,7 +69,7 @@ public class MysqlInstallerTests : BaseTests
     public async Task Install_MysqlAdminContract_CredentialsAreCorrect(string packageName)
     {
         var state = Services.GetRequiredService<State>();
-        Assert.Empty(state.Resources);
+        Assert.Empty(state.Applications);
 
         var dbPackage = Services.GetRequiredService<PackageRegistry>().Find(packageName);
         Assert.NotNull(dbPackage);
@@ -88,8 +88,8 @@ public class MysqlInstallerTests : BaseTests
         var application = InstallPackage(package);
         Assert.NotNull(application);
 
-        var container = application.DependsOn.OfType<DockerContainer>().First();
-        var database = application.DependsOn.OfType<MysqlDatabase>().First();
+        var container = application.Resources.OfType<DockerContainer>().First();
+        var database = application.Resources.OfType<MysqlDatabase>().First();
         Assert.Equal("root", database.User);
         Assert.Empty(database.Database);
         Assert.Equal(packageName, database.Host);
@@ -116,6 +116,6 @@ public class MysqlInstallerTests : BaseTests
         UninstallApplication(application);
         UninstallApplication(dbApplication);
 
-        Assert.Empty(state.Resources);
+        Assert.Empty(state.Applications);
     }
 }

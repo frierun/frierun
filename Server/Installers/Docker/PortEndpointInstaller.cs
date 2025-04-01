@@ -3,10 +3,13 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class PortEndpointInstaller : IInstaller<PortEndpoint>, IUninstaller<DockerPortEndpoint>
+public class PortEndpointInstaller(State state) : IInstaller<PortEndpoint>, IUninstaller<DockerPortEndpoint>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<PortEndpoint>.Initialize(PortEndpoint contract, string prefix, State state)
+    public Application? Application => null;
+    
+    /// <inheritdoc />
+    IEnumerable<InstallerInitializeResult> IInstaller<PortEndpoint>.Initialize(PortEndpoint contract, string prefix)
     {
         int port = contract.DestinationPort == 0 ? contract.Port : contract.DestinationPort;
 
@@ -21,17 +24,14 @@ public class PortEndpointInstaller : IInstaller<PortEndpoint>, IUninstaller<Dock
         }
 
         yield return new InstallerInitializeResult(
-            contract with { DestinationPort = port },
-            [contract.ContainerId]
+            contract with
+            {
+                DestinationPort = port,
+                DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
+            }
         );
     }
-
-    /// <inheritdoc />
-    IEnumerable<ContractDependency> IInstaller<PortEndpoint>.GetDependencies(PortEndpoint contract, ExecutionPlan plan)
-    {
-        yield return new ContractDependency(contract.Id, contract.ContainerId);
-    }
-
+    
     /// <inheritdoc />
     Resource IInstaller<PortEndpoint>.Install(PortEndpoint contract, ExecutionPlan plan)
     {
@@ -46,7 +46,7 @@ public class PortEndpointInstaller : IInstaller<PortEndpoint>, IUninstaller<Dock
         var internalPort = contract.Port;
 
         // TODO: fill the correct ip of the host
-        var endpoint = new DockerPortEndpoint("127.0.0.1", externalPort, contract.Protocol);
+        var endpoint = new DockerPortEndpoint(contract.Name, "127.0.0.1", externalPort, contract.Protocol);
 
         plan.UpdateContract(
             containerContract with

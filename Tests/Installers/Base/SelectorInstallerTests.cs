@@ -15,7 +15,7 @@ public class SelectorInstallerTests : BaseTests
         ], "option2");
         IInstaller installer = new SelectorInstaller();
 
-        var result = installer.Initialize(selector, "prefix", new State()).ToList();
+        var result = installer.Initialize(selector, "prefix").ToList();
 
         // Assert
         Assert.Single(result);
@@ -34,7 +34,7 @@ public class SelectorInstallerTests : BaseTests
         ]);
         IInstaller installer = new SelectorInstaller();
 
-        var result = installer.Initialize(selector, "prefix", new State()).ToList();
+        var result = installer.Initialize(selector, "prefix").ToList();
 
         Assert.Equal(2, result.Count);
         var resolvedContract1 = (Selector)result[0].Contract; 
@@ -60,8 +60,8 @@ public class SelectorInstallerTests : BaseTests
         var application = InstallPackage(package);
         
         Assert.NotNull(application);
-        Assert.Single(application.DependsOn);
-        var container = application.DependsOn.OfType<DockerContainer>().First();
+        Assert.Single(application.Resources.OfType<DockerContainer>());
+        var container = application.Resources.OfType<DockerContainer>().First();
         Assert.Equal(containerContract.ContainerName, container.Name);
 
     }

@@ -2,8 +2,7 @@ import {PropsWithChildren, useContext} from "react";
 import IndicatorStripe from "../components/IndicatorStripe";
 import StateContext from "@/providers/StateContext.tsx";
 
-type Props = {}
-export default function Layout({children}: PropsWithChildren<Props>) {
+export default function Layout({children}: PropsWithChildren) {
     const {ready} = useContext(StateContext);
 
     return <>

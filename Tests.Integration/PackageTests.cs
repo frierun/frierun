@@ -16,6 +16,9 @@ public class PackageTests : BaseTests
         
         HashSet<string> ignoredPackages =
         [
+            // internal
+            "static-domain",
+            
             // skip due to port 53 already in use
             "adguard",
             "pi-hole",
@@ -53,7 +56,7 @@ public class PackageTests : BaseTests
         var application = InstallPackage(packageName);
 
         Assert.NotNull(application);
-        Assert.NotNull(state.Resources.OfType<Application>().FirstOrDefault(app => app.Name == packageName));
+        Assert.NotNull(state.Applications.FirstOrDefault(app => app.Name == packageName));
         var containers = await dockerClient.Containers.ListContainersAsync(new ContainersListParameters());
         Assert.NotEmpty(containers);
         Assert.All(
@@ -67,7 +70,7 @@ public class PackageTests : BaseTests
         // uninstall package
         UninstallApplication(application);
 
-        Assert.Empty(state.Resources);
+        Assert.Empty(state.Applications);
         containers = await dockerClient.Containers.ListContainersAsync(new ContainersListParameters());
         Assert.Empty(containers);
     }

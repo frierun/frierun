@@ -37,7 +37,7 @@ export default function SelectorForm({contract, updateContract}: Props) {
                                 id={`Selector${contract.name}${option.name}Radio`}
                                 value={option.name}
                                 checked={value === option.name}
-                                onChange={() => updateValue(option.name)}
+                                onChange={() => { updateValue(option.name); }}
                             >
                             </input>
                             <label htmlFor={`Selector${contract.name}${option.name}Radio`}>

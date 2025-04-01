@@ -1,5 +1,4 @@
 ﻿using Frierun.Server.Data;
-using Frierun.Server.Services;
 
 namespace Frierun.Server;
 
@@ -18,41 +17,26 @@ public class UninstallService(
 
         try
         {
-            var requiredByCount = new Dictionary<Resource, int>();
-            foreach (var resource in state.Resources)
+            foreach (var other in state.Applications)
             {
-                foreach (var dependency in resource.DependsOn)
+                if (other.RequiredApplications.Contains(application.Name))
                 {
-                    requiredByCount[dependency] = requiredByCount.GetValueOrDefault(dependency) + 1;
+                    throw new Exception($"Cannot uninstall {application.Name} because it is required by {other.Name}");
                 }
             }
             
-            var uninstallQueue = new Queue<Resource>();
-            uninstallQueue.Enqueue(application);
-            while (uninstallQueue.Count > 0)
+            foreach (var resource in application.Resources.Reverse())
             {
-                var resource = uninstallQueue.Dequeue();
-                foreach (var dependency in resource.DependsOn)
+                if (resource is Application)
                 {
-                    if (dependency is Application)
-                    {
-                        continue;
-                    }
-
-                    var count = requiredByCount[dependency];
-                    if (count == 1)
-                    {
-                        uninstallQueue.Enqueue(dependency);
-                        requiredByCount.Remove(dependency);
-                    }
-                    else
-                    {
-                        requiredByCount[dependency] = count - 1;
-                    }   
+                    throw new Exception("Application cannot contain another application");
                 }
                 
                 UninstallResource(resource);
             }
+
+            UninstallResource(application);
+            state.RemoveApplication(application);
             
             stateSerializer.Save(state);
         }
@@ -73,6 +57,5 @@ public class UninstallService(
             throw new Exception($"Uninstaller not found for resource type {resource.GetType()}");
         }
         uninstaller.Uninstall(resource);
-        state.RemoveResource(resource);
     }
 }

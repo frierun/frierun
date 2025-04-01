@@ -7,7 +7,7 @@ public record PortEndpoint(
     int Port,
     string? ContainerName = null,
     int DestinationPort = 0
-) : Contract($"{ContainerName ?? ""}:{Port}/{Protocol}")
+) : Contract($"{(ContainerName != null ? ContainerName + ":" : "")}{Port}/{Protocol}")
 {
     public string ContainerName { get; init; } = ContainerName ?? "";
     [JsonIgnore] public ContractId<Container> ContainerId => new (ContainerName);

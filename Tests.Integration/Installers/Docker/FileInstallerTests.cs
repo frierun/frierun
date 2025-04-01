@@ -26,14 +26,14 @@ public class FileInstallerTests : BaseTests
         var application = InstallPackage(package);
 
         Assert.NotNull(application);
-        var volume = application.DependsOn.OfType<DockerVolume>().FirstOrDefault();
+        var volume = application.Resources.OfType<DockerVolume>().FirstOrDefault();
         Assert.NotNull(volume);
-        var container = application.DependsOn.OfType<DockerContainer>().First();
+        var container = application.Resources.OfType<DockerContainer>().First();
 
         await checkContainer(container.Name);
 
         UninstallApplication(application);
-        Assert.Empty(state.Resources);
+        Assert.Empty(state.Applications);
     }
 
     [Fact]
@@ -170,7 +170,7 @@ public class FileInstallerTests : BaseTests
         Assert.Equal("test-text", System.IO.File.ReadAllText(filePath));
         
         UninstallApplication(application);
-        Assert.Empty(state.Resources);
+        Assert.Empty(state.Applications);
         
         directory.Delete(true);
     }

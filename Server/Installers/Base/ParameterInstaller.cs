@@ -5,7 +5,10 @@ namespace Frierun.Server.Installers.Base;
 public class ParameterInstaller : IInstaller<Parameter>, IUninstaller<ResolvedParameter>
 {
     /// <inheritdoc />
-    IEnumerable<InstallerInitializeResult> IInstaller<Parameter>.Initialize(Parameter contract, string prefix, State state)
+    public Application? Application => null;
+    
+    /// <inheritdoc />
+    IEnumerable<InstallerInitializeResult> IInstaller<Parameter>.Initialize(Parameter contract, string prefix)
     {
         var value = contract.Value ?? contract.DefaultValue;
 

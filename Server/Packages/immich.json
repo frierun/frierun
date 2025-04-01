@@ -16,7 +16,8 @@
         "DB_PASSWORD": "postgres",
         "DB_DATABASE_NAME": "immich",
         "REDIS_HOSTNAME": "{{Redis::Host}}"
-      }
+      },
+      "DependsOn": ["Container:database"]
     },
     {
       "Type": "HttpEndpoint",
@@ -71,11 +72,6 @@
       "ContainerName": "database",
       "VolumeName": "db",
       "Path": "/var/lib/postgresql/data"
-    },
-    {
-      "Type": "Dependency",
-      "Preceding": "Container:database",
-      "Following": "Container:server"
     }
   ]
 }

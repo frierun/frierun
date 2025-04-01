@@ -7,4 +7,5 @@
 
 export type DockerContainerAllOf = {
   name: string;
+  networkName: string;
 };

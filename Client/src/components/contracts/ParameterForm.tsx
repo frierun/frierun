@@ -34,7 +34,9 @@ export default function ParameterForm({contract, updateContract}: Props) {
                 </label>
                 <input
                     value={value}
-                    onChange={e => updateValue(e.target.value)}
+                    onChange={e => {
+                        updateValue(e.target.value);
+                    }}
                 />
             </div>
         </>
