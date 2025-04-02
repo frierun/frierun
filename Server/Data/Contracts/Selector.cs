@@ -4,10 +4,12 @@ public record SelectorOption(string Name, List<Contract> Contracts);
 
 public record Selector(
     string Name,
-    List<SelectorOption> Options,
+    IList<SelectorOption>? Options = null,
     string? SelectedOption = null
 ) : Contract(Name ?? "")
 {
+    public IList<SelectorOption> Options { get; init; } = Options ?? new List<SelectorOption>();
+    
     public override Contract With(Contract other)
     {
         if (other is not Selector selector || other.Id != Id)
