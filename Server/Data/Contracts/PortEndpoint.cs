@@ -5,9 +5,10 @@ namespace Frierun.Server.Data;
 public record PortEndpoint(
     Protocol Protocol,
     int Port,
+    string? Name = null,
     string? ContainerName = null,
     int DestinationPort = 0
-) : Contract($"{(ContainerName != null ? ContainerName + ":" : "")}{Port}/{Protocol}")
+) : Contract(Name ?? $"{(ContainerName != null ? ContainerName + ":" : "")}{Port}/{Protocol}")
 {
     public string ContainerName { get; init; } = ContainerName ?? "";
     [JsonIgnore] public ContractId<Container> ContainerId => new (ContainerName);

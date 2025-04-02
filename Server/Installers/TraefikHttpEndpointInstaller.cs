@@ -6,7 +6,6 @@ public class TraefikHttpEndpointInstaller(Application application)
     : IInstaller<HttpEndpoint>, IUninstaller<TraefikHttpEndpoint>
 {
     private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
-    private readonly DockerPortEndpoint _port = application.Resources.OfType<DockerPortEndpoint>().First();
 
     private readonly int _webPort = application.Resources.OfType<DockerPortEndpoint>()
         .FirstOrDefault(endpoint => endpoint.Name == "Web")?.Port ?? 0;
@@ -75,6 +74,8 @@ public class TraefikHttpEndpointInstaller(Application application)
         );
 
         plan.RequireApplication(application);
-        return new TraefikHttpEndpoint(domain, _port.Port, certResolver != null);
+        return certResolver == null
+            ? new TraefikHttpEndpoint(domain, _webPort)
+            : new TraefikHttpEndpoint(domain, _webSecurePort, true);
     }
 }

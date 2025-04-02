@@ -6,11 +6,13 @@ public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>, IUninstaller<
 {
     /// <inheritdoc />
     public Application? Application => null;
-    
+
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix)
     {
-        var portEndpoint = new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80);
+        var portEndpoint = new PortEndpoint(
+            Protocol.Tcp, contract.Port, ContainerName: contract.ContainerName, DestinationPort: 80
+        );
         yield return new InstallerInitializeResult(
             contract with
             {
@@ -25,7 +27,7 @@ public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>, IUninstaller<
     Resource IInstaller<HttpEndpoint>.Install(HttpEndpoint contract, ExecutionPlan plan)
     {
         var portEndpoint = plan.GetResource<DockerPortEndpoint>(
-            new PortEndpoint(Protocol.Tcp, contract.Port, contract.ContainerName, 80)
+            new PortEndpoint(Protocol.Tcp, contract.Port, ContainerName: contract.ContainerName, DestinationPort: 80)
         );
 
         var url = new Uri($"http://{portEndpoint.Ip}:{portEndpoint.Port}");
