@@ -25,5 +25,11 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0@sha256:b4bea3a52a0a77317fa93c5bbdb07662
 WORKDIR /App
 COPY --from=build_cs /App/out .
 VOLUME /App/Frierun
-ENTRYPOINT ["dotnet", "Frierun.Server.dll"]
+
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod 0755 /entrypoint.sh
+
+EXPOSE 8080
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["dotnet", "Frierun.Server.dll"]
 
