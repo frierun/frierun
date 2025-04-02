@@ -53,6 +53,6 @@ public class StaticDomainInstaller(State state, Application application)
         var domain = string.IsNullOrEmpty(contract.Subdomain)
             ? _domainName
             : $"{contract.Subdomain}.{_domainName}";
-        return new ResolvedDomain(domain, false);
+        return new ResolvedDomain(domain, _isInternal);
     }
 }

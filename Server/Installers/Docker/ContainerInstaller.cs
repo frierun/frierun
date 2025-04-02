@@ -57,7 +57,7 @@ public class ContainerInstaller(DockerService dockerService, State state) : IIns
                     {
                         network.Name, new EndpointSettings
                         {
-                            Aliases = new List<string> { contract.Name }
+                            Aliases = contract.Name == "" ? Array.Empty<string>() : new List<string> { contract.Name }
                         }
                     }
                 }
