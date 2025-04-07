@@ -1,5 +1,6 @@
 import Uninstall from "./Uninstall.tsx";
 import {useGetApplications} from "@/api/endpoints/applications.ts";
+import ApplicationTips from "@/components/ApplicationTips.tsx";
 
 export default function Applications() {
     const {data, isPending, isError} = useGetApplications();
@@ -12,7 +13,7 @@ export default function Applications() {
             <h1 className="">
                 Installed Applications
             </h1>
-            {data.data.length === 0 && <div className={"mb-3"}>Select a package you like and install it. You can install severall instances of the same package.</div>}
+            <ApplicationTips />
             <div className={"grid grid-cols-1 lg:grid-cols-2 xxl:grid-cols-3 gap-4"}>
                 {data.data.map((item) => (
                     <div className={"bg-gray p-2 lg:p-4 rounded-md flex justify-between"} key={item.name}>

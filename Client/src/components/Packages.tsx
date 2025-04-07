@@ -1,6 +1,5 @@
-import {Link} from "react-router-dom";
-import Button from "./Button";
 import {useGetPackages} from "@/api/endpoints/packages";
+import Package from "@/components/Package.tsx";
 
 export default function Packages() {
     const {data, isPending, isError} = useGetPackages();
@@ -8,56 +7,33 @@ export default function Packages() {
     if (isPending) return <p>Loading...</p>
     if (isError) return <p>Error!</p>
 
-    const colors : { [tagName: string]: string } = {
-        default: '#ddd',
-        internet: '#a7aadd',
-        network: '#89c1ff',
-        storage: '#b5e3ca',
-        dev: '#b3c422',
-        provider: '#b3c422',
-        dashboard: '#e3b5d4',
-    }
     return (
-        <div className={"my-6"}>
-            <h1 className="">
-                Packages
-            </h1>
-            <div className={"grid lg:grid-cols-3 xxl:grid-cols-4 gap-3"}>
-                {data.data.map((item) => (
-                    <div key={item.name} className={"bg-gray p-2 lg:p-3 rounded-md flex justify-between items-center"}>
-                        <div className={"flex gap-3"}>
-                            <div className={"h-12 w-12 rounded flex-shrink-0"}>
-                                <img src={`/packages/${item.name}.png`} className={"rounded"} alt={item.name}/>
-                            </div>
-                            <div>
-                                <div className={"text-bold text-md font-bold"}>{item.name}</div>
-                                <div className={"my-2"}>
-                                    {item.shortDescription ?? ''}
-                                </div>
-                                <div className={"mt-1 flex gap-1"}>
-                                    {item.tags.map(tag => (
-                                        <div
-                                            key={tag}
-                                            className={`rounded-full px-3 py-0.5 text-sm font-bold`}
-                                            style={{backgroundColor: colors[tag] ?? colors.default}}
-                                        >
-                                            {tag}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <Link to={`/packages/${item.name}`}>
-                                <Button type={"primary"}>
-                                    Install
-                                </Button>
-                            </Link>
-                        </div>
+        <>
+            <div className={"my-12"}>
+                <h1>Provider packages</h1>
+                <div className={"mb-4"}>These packages may be needed to install other packages</div>
+                <div>
+                    <div className={"grid lg:grid-cols-3 xxl:grid-cols-4 gap-3"}>
+                        {data.data
+                            .filter(item => item.tags.includes('provider'))
+                            .map((item) => (
+                                <Package key={item.name} pkg={item}/>
+                            ))}
                     </div>
-                ))}
+                </div>
             </div>
-        </div>
+            <div className={"my-12"}>
+                <h1>Packages
+                </h1>
+                <div className={"grid lg:grid-cols-3 xxl:grid-cols-4 gap-3"}>
+                    {data.data
+                        .filter(item => !item.tags.includes('provider'))
+                        .map((item) => (
+                            <Package key={item.name} pkg={item}/>
+                        ))}
+                </div>
+            </div>
+        </>
     )
 }
 
