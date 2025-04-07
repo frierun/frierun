@@ -8,29 +8,32 @@ export default function Packages() {
     if (isError) return <p>Error!</p>
 
     return (
-        <div className={"my-6"}>
-            <h1>Provider packages</h1>
-            <div>They enhance how Frierun can install other packages</div>
-            <div>
+        <>
+            <div className={"my-12"}>
+                <h1>Provider packages</h1>
+                <div className={"mb-4"}>These packages may be needed to install other packages</div>
+                <div>
+                    <div className={"grid lg:grid-cols-3 xxl:grid-cols-4 gap-3"}>
+                        {data.data
+                            .filter(item => item.tags.includes('provider'))
+                            .map((item) => (
+                                <Package key={item.name} pkg={item}/>
+                            ))}
+                    </div>
+                </div>
+            </div>
+            <div className={"my-12"}>
+                <h1>Packages
+                </h1>
                 <div className={"grid lg:grid-cols-3 xxl:grid-cols-4 gap-3"}>
                     {data.data
-                        .filter(item => item.tags.includes('provider'))
+                        .filter(item => !item.tags.includes('provider'))
                         .map((item) => (
                             <Package key={item.name} pkg={item}/>
                         ))}
                 </div>
             </div>
-            <h1>
-                Packages
-            </h1>
-            <div className={"grid lg:grid-cols-3 xxl:grid-cols-4 gap-3"}>
-                {data.data
-                    .filter(item => !item.tags.includes('provider'))
-                    .map((item) => (
-                        <Package key={item.name} pkg={item}/>
-                    ))}
-            </div>
-        </div>
+        </>
     )
 }
 

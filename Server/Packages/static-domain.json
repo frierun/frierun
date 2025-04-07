@@ -1,6 +1,6 @@
 ﻿{
   "Name": "static-domain",
-  "ShortDescription": "Pre configured domain.",
+  "ShortDescription": "Your own preconfigured domain/localhost",
   "FullDescription": "Domain which must point to the server. Allows use subdomains for different services.",
   "Tags": ["provider"],
   "ApplicationDescription": "Domain: {{Parameter:Domain:Value}}",
