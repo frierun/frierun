@@ -73,7 +73,6 @@ public class TraefikHttpEndpointInstaller(Application application)
             }
         );
 
-        plan.RequireApplication(application);
         return certResolver == null
             ? new TraefikHttpEndpoint(domain, _webPort)
             : new TraefikHttpEndpoint(domain, _webSecurePort, true);
