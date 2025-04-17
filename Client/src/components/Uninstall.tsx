@@ -20,6 +20,16 @@ export default function Uninstall({name}: Props) {
     }
 
     return (
-        <Button type={"default"} onClick={uninstall} disabled={isPending}>Uninstall</Button>
+        <Button
+            type={"default"}
+            onClick={() => {
+                if (confirm(`Are you sure you want to uninstall application ${name}?`)) {
+                    void uninstall();
+                }
+            }}
+            disabled={isPending}
+        >
+            Uninstall
+        </Button>
     );
 }
