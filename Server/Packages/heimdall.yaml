@@ -1,0 +1,16 @@
+﻿Name: "heimdall"
+Url: "https://hub.docker.com/r/linuxserver/heimdall/"
+ShortDescription: "App dashboard"
+FullDescription: "Heimdall is an elegant solution to organise all your web applications.
+  It’s dedicated to this purpose so you won’t lose your links in a sea of bookmarks."
+Tags: [ "dashboard" ]
+Contracts:
+  - Type: "Container"
+    ImageName: "lscr.io/linuxserver/heimdall:latest"
+    
+  - Type: "HttpEndpoint"
+    Port: 80
+    
+  - Type: "Mount"
+    VolumeName: "config"
+    Path: "/config"

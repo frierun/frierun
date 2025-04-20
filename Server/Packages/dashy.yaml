@@ -1,0 +1,15 @@
+﻿Name: "dashy"
+Url: "https://dashy.to/docs/quick-start"
+ShortDescription: "Homepage for your Homelab"
+FullDescription: "Dashy helps you organize your self-hosted services by making them accessible from a single place."
+Tags: [ "dashboard" ]
+Contracts:
+  - Type: "Container"
+    ImageName: "lissy93/dashy:latest"
+    
+  - Type: "HttpEndpoint"
+    Port: 8080
+    
+  - Type: "Mount"
+    VolumeName: "data"
+    Path: "/app/user-data"

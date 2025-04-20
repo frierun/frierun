@@ -17,20 +17,26 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Autofac" Version="8.1.1" />
-        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
-        <PackageReference Include="Docker.DotNet" Version="3.125.15" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
-        <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="9.0.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="7.1.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.1.0" />
-        <InternalsVisibleTo Include="Tests.Integration" />
+        <PackageReference Include="Autofac" Version="8.1.1"/>
+        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0"/>
+        <PackageReference Include="Docker.DotNet" Version="3.125.15"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="9.0.0"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="7.1.0"/>
+        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.1.0"/>
+        <InternalsVisibleTo Include="Tests.Integration"/>
+        <PackageReference Include="YamlDotNet" Version="16.3.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="state.json.default">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+        <None Update="state.json.default">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Packages\*.yaml">
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        </None>
     </ItemGroup>
 
     <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
@@ -39,7 +45,7 @@
             <Output TaskParameter="ExitCode" PropertyName="ErrorCode"/>
         </Exec>
         <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE."/>
-        
+
         <Message Importance="high" Text="Restoring dependencies using 'pnpm'. This may take several minutes..."/>
         <Exec WorkingDirectory="$(SpaRoot)" Command="pnpm install"/>
     </Target>
@@ -50,7 +56,7 @@
             <Output TaskParameter="ExitCode" PropertyName="ErrorCode"/>
         </Exec>
         <Message Condition="'$(ErrorCode)' != '0'" Importance="high" Text="Node.js is not installed, skipping client rebuild step. It must be done manually."/>
-        
+
         <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
         <Exec Condition="'$(ErrorCode)' == '0'" WorkingDirectory="$(SpaRoot)" Command="pnpm install"/>
         <Exec Condition="'$(ErrorCode)' == '0'" WorkingDirectory="$(SpaRoot)" Command="pnpm run build"/>
@@ -66,6 +72,6 @@
                 <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
             </ResolvedFileToPublish>
         </ItemGroup>
-    </Target>    
-    
+    </Target>
+
 </Project>

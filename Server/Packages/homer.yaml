@@ -1,0 +1,16 @@
+﻿Name: "homer"
+Url: "https://github.com/bastienwirtz/homer"
+ShortDescription: "Simple static app dashboard"
+FullDescription: "Homer is a dead simple static HOMepage for your servER (or anything else)
+  to keep your services and favorite links on hand, based on a simple yaml configuration file."
+Tags: [ "dashboard" ]
+Contracts:
+  - Type: "Container"
+    ImageName: "b4bz/homer:latest"
+    
+  - Type: "HttpEndpoint"
+    Port: 8080
+    
+  - Type: "Mount"
+    VolumeName: "assets"
+    Path: "/www/assets"

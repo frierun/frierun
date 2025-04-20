@@ -1,0 +1,62 @@
+﻿Name: "immich"
+Url: "https://immich.app/docs/install/docker-compose"
+ShortDescription: "Photo and video management"
+FullDescription: "Easily back up, organize, and manage your photos on your own server.
+  Immich helps you browse, search and organize your photos and videos with ease, without sacrificing your privacy."
+Tags: [ "storage" ]
+Contracts:
+  - Type: "Container"
+    Name: "server"
+    ImageName: "ghcr.io/immich-app/immich-server:release"
+    Env:
+      DB_USERNAME: "postgres"
+      DB_PASSWORD: "postgres"
+      DB_DATABASE_NAME: "immich"
+      REDIS_HOSTNAME: "{{Redis::Host}}"
+    DependsOn: [ "Container:database" ]
+    
+  - Type: "HttpEndpoint"
+    ContainerName: "server"
+    Port: 2283
+    
+  - Type: "Mount"
+    ContainerName: "server"
+    VolumeName: "upload"
+    Path: "/usr/src/app/upload"
+    
+  - Type: "Container"
+    Name: "machine-learning"
+    ImageName: "ghcr.io/immich-app/immich-machine-learning:release"
+    
+  - Type: "Mount"
+    ContainerName: "machine-learning"
+    VolumeName: "model-cache"
+    Path: "/cache"
+    
+  - Type: "Container"
+    Name: "database"
+    ImageName: "docker.io/tensorchord/pgvecto-rs:pg14-v0.2.0@sha256:90724186f0a3517cf6914295b5ab410db9ce23190a2d9d0b9dd6463e3fa298f0"
+    Command:
+      - "postgres"
+      - "-c"
+      - "shared_preload_libraries=vectors.so"
+      - "-c"
+      - "search_path=\"$$user\", public, vectors"
+      - "-c"
+      - "logging_collector=on"
+      - "-c"
+      - "max_wal_size=2GB"
+      - "-c"
+      - "shared_buffers=512MB"
+      - "-c"
+      - "wal_compression=on"
+    Env:
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_DB: "immich"
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+      
+  - Type: "Mount"
+    ContainerName: "database"
+    VolumeName: "db"
+    Path: "/var/lib/postgresql/data"
