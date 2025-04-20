@@ -5,7 +5,7 @@ namespace Frierun.Server;
 
 public class YamlBoolConverter : JsonConverter<bool>
 {
-    private HashSet<string> _trueValues = new(StringComparer.OrdinalIgnoreCase)
+    private readonly HashSet<string> _trueValues = new(StringComparer.OrdinalIgnoreCase)
     {
         "true",
         "yes",
@@ -13,7 +13,7 @@ public class YamlBoolConverter : JsonConverter<bool>
         "1"
     };
     
-    private HashSet<string> _falseValues = new(StringComparer.OrdinalIgnoreCase)
+    private readonly HashSet<string> _falseValues = new(StringComparer.OrdinalIgnoreCase)
     {
         "false",
         "no",
@@ -46,6 +46,6 @@ public class YamlBoolConverter : JsonConverter<bool>
     /// <inheritdoc />
     public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options)
     {
-        throw new NotImplementedException();
+        throw new NotSupportedException();
     }
 }
