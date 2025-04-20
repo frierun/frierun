@@ -39,8 +39,6 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
     /// <inheritdoc />
     Resource IInstaller<Mysql>.Install(Mysql contract, ExecutionPlan plan)
     {
-        plan.RequireApplication(application);
-        
         if (contract.Admin)
         {
             return new MysqlDatabase(

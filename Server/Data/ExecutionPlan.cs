@@ -83,15 +83,7 @@ public class ExecutionPlan : IExecutionPlan
 
         _contracts[contract] = contract;
     }
-
-    /// <summary>
-    /// Adds an application that is required for the final result
-    /// </summary>
-    public void RequireApplication(Application application)
-    {
-        _requiredApplications.Add(application);
-    }
-
+    
     /// <summary>
     /// Installs all contracts in the execution plan.
     /// </summary>
@@ -105,8 +97,13 @@ public class ExecutionPlan : IExecutionPlan
                 {
                     throw new Exception($"Resource {contractId} already installed");
                 }
-                var resource = GetInstaller(contract).Install(contract, this);
+                var installer = GetInstaller(contract);
+                var resource = installer.Install(contract, this);
                 _resources[contract] = resource;
+                if (installer.Application != null)
+                {
+                    _requiredApplications.Add(installer.Application);
+                }
             }
         );
 

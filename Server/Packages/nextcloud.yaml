@@ -1,0 +1,48 @@
+﻿Name: "nextcloud"
+Url: "https://github.com/nextcloud/docker/"
+ShortDescription: "Content collab platform"
+FullDescription: "Store your documents, calendar, contacts, and photos securely on your server
+  or preferred cloud with Nextcloud’s self-hosted content collaboration platform."
+Tags: [ "storage" ]
+ApplicationDescription: "Login: admin\nPassword: {{Password::Value}}"
+Contracts:
+  - Type: "Selector"
+    Name: "Database"
+    Options:
+      - Name: "MySQL"
+        Contracts:
+          - Type: "Container"
+            ImageName: "nextcloud:latest"
+            Env:
+              MYSQL_HOST: "{{Mysql::Host}}"
+              MYSQL_DATABASE: "{{Mysql::Database}}"
+              MYSQL_USER: "{{Mysql::User}}"
+              MYSQL_PASSWORD: "{{Mysql::Password}}"
+              NEXTCLOUD_ADMIN_USER: "admin"
+              NEXTCLOUD_ADMIN_PASSWORD: "{{Password::Value}}"
+      - Name: "PostgreSQL"
+        Contracts:
+          - Type: "Container"
+            ImageName: "nextcloud:latest"
+            Env:
+              POSTGRES_HOST: "{{Postgresql::Host}}"
+              POSTGRES_DB: "{{Postgresql::Database}}"
+              POSTGRES_USER: "{{Postgresql::User}}"
+              POSTGRES_PASSWORD: "{{Postgresql::Password}}"
+              NEXTCLOUD_ADMIN_USER: "admin"
+              NEXTCLOUD_ADMIN_PASSWORD: "{{Password::Value}}"
+      - Name: "SQLite"
+        Contracts:
+          - Type: "Container"
+            ImageName: "nextcloud:latest"
+            Env:
+              SQLITE_DATABASE: "nextcloud"
+              NEXTCLOUD_ADMIN_USER: "admin"
+              NEXTCLOUD_ADMIN_PASSWORD: "{{Password::Value}}"
+              
+  - Type: "HttpEndpoint"
+    Port: 80
+    
+  - Type: "Mount"
+    VolumeName: "data"
+    Path: "/var/www/html"

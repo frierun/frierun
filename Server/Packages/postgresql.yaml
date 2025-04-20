@@ -1,0 +1,17 @@
+﻿Name: "postgresql"
+Url: "https://hub.docker.com/_/postgres"
+ApplicationDescription: "Postgres password: {{Password::Value}}"
+ShortDescription: "SQL database"
+FullDescription: "PostgreSQL is a powerful, open source object-relational database system
+  with over 35 years of active development that has earned it a strong reputation for reliability,
+  feature robustness, and performance."
+Tags: [ "storage", "provider" ]
+Contracts:
+  - Type: "Container"
+    ImageName: "postgres:17"
+    Env:
+      POSTGRES_PASSWORD: "{{Password::Value}}"
+      
+  - Type: "Mount"
+    VolumeName: "data"
+    Path: "/var/lib/postgresql/data"

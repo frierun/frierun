@@ -46,8 +46,6 @@ public class PostgresqlInstaller(
     /// <inheritdoc />
     Resource IInstaller<Postgresql>.Install(Postgresql contract, ExecutionPlan plan)
     {
-        plan.RequireApplication(application);
-        
         if (contract.Admin)
         {
             return new PostgresqlDatabase(

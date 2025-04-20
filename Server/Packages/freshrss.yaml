@@ -1,0 +1,41 @@
+﻿Name: "freshrss"
+Url: "https://github.com/FreshRSS/FreshRSS/tree/edge/Docker"
+ShortDescription: "RSS and Atom feed aggregator"
+FullDescription: "FreshRSS is a self-hosted RSS and Atom feed aggregator.
+  It is lightweight, easy to work with, powerful, and customizable."
+Tags: [ "internet" ]
+ApplicationDescription: "Login: admin
+  Password: {{Password::Value}}"
+Contracts:
+  - Type: "Selector"
+    Name: "Database"
+    Options:
+      - Name: "MySQL"
+        Contracts:
+          - Type: "Container"
+            ImageName: "freshrss/freshrss:1"
+            Env:
+              FRESHRSS_INSTALL: "--db-type mysql --language en --default-user admin --db-host {{Mysql::Host}} --db-base {{Mysql::Database}} --db-user {{Mysql::User}} --db-password {{Mysql::Password}}"
+              FRESHRSS_USER: "--user admin --password {{Password::Value}}"
+      - Name: "PostgreSQL"
+        Contracts:
+          - Type: "Container"
+            ImageName: "freshrss/freshrss:1"
+            Env:
+              FRESHRSS_INSTALL: "--db-type pgsql --language en --default-user admin --db-host {{Postgresql::Host}} --db-base {{Postgresql::Database}} --db-user {{Postgresql::User}} --db-password {{Postgresql::Password}}"
+              FRESHRSS_USER: "--user admin --password {{Password::Value}}"
+      - Name: "SQLite"
+        Contracts:
+          - Type: "Container"
+            ImageName: "freshrss/freshrss:1"
+            Env:
+              FRESHRSS_INSTALL: "--db-type sqlite --language en --default-user admin"
+              FRESHRSS_USER: "--user admin --password {{Password::Value}}"
+  - Type: "HttpEndpoint"
+    Port: 80
+  - Type: "Mount"
+    VolumeName: "data"
+    Path: "/var/www/FreshRSS/data"
+  - Type: "Mount"
+    VolumeName: "extensions"
+    Path: "/var/www/FreshRSS/extensions"

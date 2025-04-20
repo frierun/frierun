@@ -33,7 +33,7 @@ public class PackageTests : BaseTests
             "pgadmin",
         ];
         
-        foreach (var fileName in Directory.EnumerateFiles(packagesDirectory, "*.json"))
+        foreach (var fileName in Directory.EnumerateFiles(packagesDirectory, "*.yaml"))
         {
             var packageName = Path.GetFileNameWithoutExtension(fileName);
             if (ignoredPackages.Contains(packageName))

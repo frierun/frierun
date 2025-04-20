@@ -1,0 +1,58 @@
+﻿Name: "vikunja"
+Url: "https://vikunja.io/docs/installing/#docker"
+ShortDescription: "To-do lists"
+FullDescription: "Vikunja, the fluffy, open-source, self-hostable to-do app."
+Tags: [ "dashboard" ]
+Contracts:
+  - Type: "Selector"
+    Name: "Database"
+    Options:
+      - Name: "MySQL"
+        Contracts:
+          - Type: "Container"
+            ImageName: "vikunja/vikunja:latest"
+            Env:
+              VIKUNJA_DATABASE_TYPE: "mysql"
+              VIKUNJA_DATABASE_HOST: "{{Mysql::Host}}"
+              VIKUNJA_DATABASE_DATABASE: "{{Mysql::Database}}"
+              VIKUNJA_DATABASE_USER: "{{Mysql::User}}"
+              VIKUNJA_DATABASE_PASSWORD: "{{Mysql::Password}}"
+      - Name: "PostgreSQL"
+        Contracts:
+          - Type: "Container"
+            ImageName: "vikunja/vikunja:latest"
+            Env:
+              VIKUNJA_DATABASE_TYPE: "postgres"
+              VIKUNJA_DATABASE_HOST: "{{Postgresql::Host}}"
+              VIKUNJA_DATABASE_DATABASE: "{{Postgresql::Database}}"
+              VIKUNJA_DATABASE_USER: "{{Postgresql::User}}"
+              VIKUNJA_DATABASE_PASSWORD: "{{Postgresql::Password}}"
+      - Name: "SQLite"
+        Contracts:
+          - Type: "Container"
+            ImageName: "vikunja/vikunja:latest"
+            Env:
+              VIKUNJA_DATABASE_TYPE: "sqlite"
+          - Type: "Mount"
+            VolumeName: "db"
+            Path: "/db"
+          - Type: "File"
+            VolumeName: "db"
+            Path: ""
+            Owner: 1000
+            Group: 1000
+            DependencyOf: [ "Container" ]
+            
+  - Type: "HttpEndpoint"
+    Port: 3456
+    
+  - Type: "Mount"
+    VolumeName: "files"
+    Path: "/app/vikunja/files"
+    
+  - Type: "File"
+    VolumeName: "files"
+    Path: ""
+    Owner: 1000
+    Group: 1000
+    DependencyOf: [ "Container" ]

@@ -1,0 +1,22 @@
+﻿Name: "phpmyadmin"
+Url: "https://hub.docker.com/_/phpmyadmin"
+ApplicationDescription: "Login: {{Mysql:Root:User}}\nPassword: {{Mysql:Root:Password}}"
+ShortDescription: "MySql Server tools/administration"
+FullDescription: "phpMyAdmin is a free software tool written in PHP, intended to handle the administration of MySQL over the Web."
+Tags: [ "dev" ]
+Contracts:
+  - Type: "Container"
+    ImageName: "phpmyadmin:latest"
+    Env:
+      PMA_HOST: "{{Mysql:Root:Host}}"
+      PMA_CONTROLHOST: "{{Mysql::Host}}"
+      PMA_PMADB: "{{Mysql::Database}}"
+      PMA_CONTROLUSER: "{{Mysql::User}}"
+      PMA_CONTROLPASS: "{{Mysql::Password}}"
+      
+  - Type: "HttpEndpoint"
+    Port: 80
+    
+  - Type: "Mysql"
+    Name: "Root"
+    Admin: true

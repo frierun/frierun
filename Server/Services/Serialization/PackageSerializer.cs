@@ -1,7 +1,10 @@
 ﻿using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Frierun.Server.Data;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.TypeResolvers;
 using File = System.IO.File;
 
 namespace Frierun.Server;
@@ -10,8 +13,13 @@ public class PackageSerializer(ILogger<PackageSerializer> logger, ContractRegist
 {
     private readonly JsonSerializerOptions _serializerOptions = new()
     {
-        Converters = { new ContractIdConverter(contractRegistry) },
-        TypeInfoResolver = new DefaultJsonTypeInfoResolver()
+        Converters =
+        {
+            new ContractIdConverter(contractRegistry),
+            new YamlBoolConverter()
+        },
+        NumberHandling = JsonNumberHandling.AllowReadingFromString,
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver
         {
             Modifiers =
             {
@@ -38,8 +46,13 @@ public class PackageSerializer(ILogger<PackageSerializer> logger, ContractRegist
             yield break;
         }
 
-        foreach (var fileName in Directory.EnumerateFiles(packagesDirectory, "*.json"))
+        foreach (var fileName in Directory.EnumerateFiles(packagesDirectory))
         {
+            if (!fileName.EndsWith(".json") && !fileName.EndsWith(".yaml") && !fileName.EndsWith(".yml"))
+            {
+                continue;
+            }
+            
             using Stream stream = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
             var package = Load(stream);
             if (package is null)
@@ -57,6 +70,15 @@ public class PackageSerializer(ILogger<PackageSerializer> logger, ContractRegist
     /// </summary>
     public Package? Load(Stream stream)
     {
-        return JsonSerializer.Deserialize<Package>(stream, _serializerOptions);
+        var deserializer = new DeserializerBuilder()
+            .WithTypeResolver(new StaticTypeResolver())
+            .Build();
+        
+        using StreamReader reader = new(stream);
+        
+        var obj = deserializer.Deserialize(reader);
+        
+        var json = JsonSerializer.SerializeToDocument(obj);
+        return json.Deserialize<Package>(_serializerOptions);
     }
 }

@@ -1,0 +1,21 @@
+﻿Name: "emby"
+Url: "https://hub.docker.com/r/emby/embyserver"
+ShortDescription: "Media server on any device"
+FullDescription: "Your personal media on any device.
+  Bringing all of your home videos, music, and photos together into one place has never been easier.
+  Your personal Emby Server automatically converts and streams your media on-the-fly to play on any device."
+Tags: [ "storage" ]
+Contracts:
+  - Type: "Container"
+    ImageName: "emby/embyserver:latest"
+    
+  - Type: "HttpEndpoint"
+    Port: 8096
+    
+  - Type: "Mount"
+    VolumeName: "media"
+    Path: "/mnt/media"
+    
+  - Type: "Mount"
+    VolumeName: "config"
+    Path: "/config"

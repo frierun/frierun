@@ -1,0 +1,22 @@
+﻿Name: "home-assistant"
+Url: "https://jellyfin.org/docs/general/installation/container"
+ShortDescription: "Smart home dashboard and integrations"
+FullDescription: "Home Assistant dashboards allow you to display information about your smart home.
+  Dashboards are customizable and provide a powerful way to manage your home from your mobile or desktop."
+Tags: [ "smart home", "dashboard" ]
+Contracts:
+  - Type: "Container"
+    ImageName: "ghcr.io/home-assistant/home-assistant:stable"
+    
+  - Type: "HttpEndpoint"
+    Port: 8123
+    
+  - Type: "Mount"
+    VolumeName: "config"
+    Path: "/config"
+    
+  - Type: "File"
+    VolumeName: "config"
+    Path: "configuration.yaml"
+    Text: "http:\n  use_x_forwarded_for: true\n  trusted_proxies:\n    - 172.16.0.0/12\n"
+    DependencyOf: [ "Container" ]
