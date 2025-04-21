@@ -69,7 +69,8 @@ public class AutofacModule : Module
         builder.RegisterType<UninstallService>().AsSelf().SingleInstance();
 
         builder.Register<IDockerClient>(
-                _ => new DockerClientConfiguration(new Uri("npipe://./pipe/podman-machine-default")).CreateClient()
+                //_ => new DockerClientConfiguration(new Uri("npipe://./pipe/podman-machine-default")).CreateClient()
+                _ => new DockerClientConfiguration().CreateClient()
             )
             .SingleInstance();
 
