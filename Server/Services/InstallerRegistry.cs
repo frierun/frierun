@@ -1,25 +1,32 @@
-﻿using Autofac.Features.Indexed;
+﻿using Autofac;
+using Autofac.Features.Indexed;
 using Frierun.Server.Data;
 using Frierun.Server.Installers;
 
 namespace Frierun.Server;
 
-public class InstallerRegistry
+public class InstallerRegistry : IDisposable
 {
-    private readonly IIndex<string, IEnumerable<Func<Application, IInstaller>>> _installerFactories;
+    private readonly IIndex<string, ProviderScopeBuilder> _scopeBuilders;
+    private readonly ILifetimeScope _container;
+    private readonly ILifetimeScope _baseScope;
+    private readonly Dictionary<Application, ILifetimeScope> _applicationScopes = new();
     private readonly Dictionary<Application, IList<IInstaller>> _applicationInstallers = new();
     private readonly Dictionary<Type, IList<IInstaller>> _installers = new();
     private readonly Dictionary<Type, IUninstaller> _uninstallers = new();
 
     public InstallerRegistry(
         State state,
-        IEnumerable<IInstaller> staticInstallers,
-        IIndex<string, IEnumerable<Func<Application, IInstaller>>> installerFactories
+        IIndex<string, ProviderScopeBuilder> scopeBuilders,
+        ILifetimeScope container
     )
     {
-        _installerFactories = installerFactories;
+        _scopeBuilders = scopeBuilders;
+        _container = container;
 
-        foreach (var installer in staticInstallers)
+        var baseBuilder = _scopeBuilders["base"];
+        _baseScope = container.BeginLifetimeScope(builder => baseBuilder(builder));
+        foreach (var installer in _baseScope.Resolve<IEnumerable<IInstaller>>())
         {
             AddInstaller(installer);
         }
@@ -33,6 +40,17 @@ public class InstallerRegistry
         state.ApplicationRemoved += RemoveApplication;
     }
 
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        foreach (var applicationScope in _applicationScopes.Values)
+        {
+            applicationScope.Dispose();
+        }
+        
+        _baseScope.Dispose();
+    }
+
     /// <summary>
     /// Adds installers from the application to the registry.
     /// </summary>
@@ -44,17 +62,30 @@ public class InstallerRegistry
             return;
         }
 
+        if (_scopeBuilders.TryGetValue(packageName, out var scopeBuilder) == false)
+        {
+            return;
+        }
+        
         if (_applicationInstallers.ContainsKey(application))
         {
             throw new Exception("Application already added to the registry");
         }
+        
+        var scope = _container.BeginLifetimeScope(
+            _scopeBuilders[packageName],
+            builder =>
+            {
+                builder.RegisterInstance(application).AsSelf().SingleInstance();
+                scopeBuilder(builder);
+            }
+        );
 
-        var installers = _installerFactories[packageName]
-            .Select(installerFactory => installerFactory(application))
-            .ToList();
+        var installers = scope.Resolve<IEnumerable<IInstaller>>().ToList();
 
         installers.ForEach(AddInstaller);
         _applicationInstallers[application] = installers;
+        _applicationScopes[application] = scope;
     }
 
     /// <summary>
@@ -68,7 +99,7 @@ public class InstallerRegistry
             return;
         }
 
-        if (!_applicationInstallers.TryGetValue(application, out var installers))
+        if (!_applicationInstallers.Remove(application, out var installers))
         {
             return;
         }
@@ -85,6 +116,9 @@ public class InstallerRegistry
                 .ToList()
                 .ForEach(list => list.Remove(installer));
         }
+        
+        _applicationScopes[application].Dispose();
+        _applicationScopes.Remove(application);
     }
 
     /// <summary>

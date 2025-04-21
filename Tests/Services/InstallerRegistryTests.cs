@@ -72,6 +72,25 @@ public class InstallerRegistryTests : BaseTests
         Assert.Single(result);
         Assert.IsType<PortHttpEndpointInstaller>(result[0]);
     }
+    
+    [Fact]
+    public void GetInstaller_AddTraefikSeveralTimes_ReturnsBothInstallers()
+    {
+        var registry = Resolve<InstallerRegistry>();
+        var uninstallService = Resolve<UninstallService>();
+        var application = InstallPackage("traefik");
+        Assert.NotNull(application);
+        uninstallService.Handle(application);
+        var application2 = InstallPackage("traefik");
+
+        var result = registry.GetInstallers(typeof(HttpEndpoint)).ToList();
+
+        Assert.NotEqual(application, application2);
+        Assert.Equal(2, result.Count);
+        Assert.IsType<TraefikHttpEndpointInstaller>(result[0]);
+        Assert.IsType<PortHttpEndpointInstaller>(result[1]);
+    }
+    
 
     [Fact]
     public void GetInstaller_TwoTraefik_FilteredByInstallerDefinition()
