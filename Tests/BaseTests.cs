@@ -1,11 +1,14 @@
 ﻿using System.Reflection;
 using Autofac;
+using Autofac.Core;
 using Autofac.Extensions.DependencyInjection;
+using Autofac.Features.Metadata;
 using Bogus;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using Frierun.Server;
 using Frierun.Server.Data;
+using Frierun.Server.Installers;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Substitute = NSubstitute.Substitute;
@@ -16,6 +19,7 @@ public abstract class BaseTests
 {
     private IContainer? Provider { get; set; }
     private ContainerBuilder? ContainerBuilder { get; set; }
+    protected IDockerClient DockerClient { get; } = CreateDockerSubstitute();
 
     /// <summary>
     /// Resolves object from the provider.
@@ -71,7 +75,32 @@ public abstract class BaseTests
         }
 
         // mock docker client
-        var dockerClient = Mock<IDockerClient>();
+        ContainerBuilder.RegisterInstance(DockerClient)
+            .As<IDockerClient>()
+            .SingleInstance();
+        
+        ContainerBuilder.RegisterDecorator<ProviderScopeBuilder>(
+            (_, _, builder) =>
+            {
+                return b =>
+                {
+                    builder(b);
+                    b.RegisterInstance(DockerClient)
+                        .As<IDockerClient>()
+                        .SingleInstance()
+                        .OnlyIf(registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(IDockerClient))));
+                };
+            });
+        
+        return ContainerBuilder;
+    }
+
+    /// <summary>
+    /// Creates substitute for docker client.
+    /// </summary>
+    private static IDockerClient CreateDockerSubstitute()
+    {
+        var dockerClient = Substitute.For<IDockerClient>();
         dockerClient.Containers
             .CreateContainerAsync(default)
             .ReturnsForAnyArgs(Task.FromResult(new CreateContainerResponse {ID = "containerId"}));
@@ -93,7 +122,7 @@ public abstract class BaseTests
             .StartAndAttachContainerExecAsync(default, default)
             .ReturnsForAnyArgs(Task.FromResult(new MultiplexedStream(new MemoryStream(), false)));
 
-        return ContainerBuilder;
+        return dockerClient;
     }
 
     /// <summary>
@@ -122,7 +151,7 @@ public abstract class BaseTests
         where TService : class
     {
         var mock = Substitute.For<T>();
-        GetContainerBuilder().RegisterInstance(mock).As<TService>().SingleInstance();
+        GetContainerBuilder().RegisterInstance(mock).As<TService>();
         return mock;
     }
 

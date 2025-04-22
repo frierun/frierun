@@ -60,7 +60,6 @@ public class AutofacModule : Module
 
         // Services
         builder.RegisterType<ContractRegistry>().AsSelf().SingleInstance();
-        builder.RegisterType<DockerService>().AsSelf().SingleInstance();
         builder.RegisterType<ExecutionService>().AsSelf().SingleInstance();
         builder.RegisterType<InstallService>().AsSelf().SingleInstance();
         builder.RegisterType<PackageRegistry>().AsSelf().SingleInstance();
@@ -68,11 +67,14 @@ public class AutofacModule : Module
         builder.RegisterType<StateManager>().AsSelf().SingleInstance();
         builder.RegisterType<UninstallService>().AsSelf().SingleInstance();
 
+        // Docker
+        builder.RegisterType<DockerService>().AsSelf().SingleInstance();
         builder.Register<IDockerClient>(
                 //_ => new DockerClientConfiguration(new Uri("npipe://./pipe/podman-machine-default")).CreateClient()
                 _ => new DockerClientConfiguration().CreateClient()
             )
             .SingleInstance();
+        
 
         // Services/Serialization
         builder.Register<string>(_ => Path.Combine(Storage.DirectoryName, "state.json"))
