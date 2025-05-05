@@ -203,6 +203,22 @@ public class InstallerRegistryTests : BaseTests
         Assert.NotNull(result);
         Assert.IsType(installerType, result);
     }
+    
+    [Theory]
+    [InlineData(typeof(Application), typeof(PackageInstaller))]
+    [InlineData(typeof(ResolvedParameter), typeof(ParameterInstaller))]
+    [InlineData(typeof(GeneratedPassword), typeof(PasswordInstaller))]
+    [InlineData(typeof(GenericHttpEndpoint), typeof(PortHttpEndpointInstaller))]
+    public void GetHandler_StaticInstaller_ReturnsUninstaller(Type resourceType, Type installerType)
+    {
+        var registry = Resolve<InstallerRegistry>();
+
+        var result = registry.GetHandler(new InstallerDefinition(installerType.Name));
+
+        Assert.NotNull(result);
+        Assert.IsType(installerType, result);
+    }
+    
 
     [Fact]
     public void GetUninstaller_WrongResource_ReturnsNull()
@@ -213,18 +229,27 @@ public class InstallerRegistryTests : BaseTests
 
         Assert.Null(result);
     }
+    
+    [Fact]
+    public void GetHandler_WrongResource_ReturnsNull()
+    {
+        var registry = Resolve<InstallerRegistry>();
+
+        var result = registry.GetHandler(new InstallerDefinition("WrongType"));
+
+        Assert.Null(result);
+    }
 
     public static IEnumerable<object[]> PackagesWithUninstallers()
     {
-        yield return ["traefik", typeof(GenericHttpEndpoint)];
-        yield return ["mysql", typeof(MysqlDatabase)];
-        yield return ["mariadb", typeof(MysqlDatabase)];
-        yield return ["postgresql", typeof(PostgresqlDatabase)];
+        yield return ["mysql", typeof(MysqlDatabase), typeof(MysqlInstaller)];
+        yield return ["mariadb", typeof(MysqlDatabase), typeof(MysqlInstaller)];
+        yield return ["postgresql", typeof(PostgresqlDatabase), typeof(PostgresqlInstaller)];
     }
 
     [Theory]
     [MemberData(nameof(PackagesWithUninstallers))]
-    public void GetUninstaller_InstallPackage_AddsInstaller(string packageName, Type resourceType)
+    public void GetUninstaller_InstallPackage_AddsInstaller(string packageName, Type resourceType, Type _)
     {
         var installerRegistry = Resolve<InstallerRegistry>();
         Assert.Null(installerRegistry.GetUninstaller(resourceType));
@@ -234,10 +259,24 @@ public class InstallerRegistryTests : BaseTests
         Assert.NotNull(application);
         Assert.NotNull(installerRegistry.GetUninstaller(resourceType));
     }
-
+    
     [Theory]
     [MemberData(nameof(PackagesWithUninstallers))]
-    public void GetUninstaller_UninstallPackage_RemovesInstaller(string packageName, Type resourceType)
+    public void GetHandler_InstallPackage_AddsHandler(string packageName, Type _, Type handlerType)
+    {
+        var installerRegistry = Resolve<InstallerRegistry>();
+        var definition = new InstallerDefinition(handlerType.Name, packageName);
+        Assert.Null(installerRegistry.GetHandler(definition));
+
+        var application = InstallPackage(packageName);
+
+        Assert.NotNull(application);
+        Assert.NotNull(installerRegistry.GetHandler(definition));
+    }
+    
+    [Theory]
+    [MemberData(nameof(PackagesWithUninstallers))]
+    public void GetUninstaller_UninstallPackage_RemovesInstaller(string packageName, Type resourceType, Type _)
     {
         var installerRegistry = Resolve<InstallerRegistry>();
         var application = InstallPackage(packageName);
@@ -247,4 +286,18 @@ public class InstallerRegistryTests : BaseTests
 
         Assert.Null(installerRegistry.GetUninstaller(resourceType));
     }
+    
+    [Theory]
+    [MemberData(nameof(PackagesWithUninstallers))]
+    public void GetHandler_UninstallPackage_RemovesHandler(string packageName, Type _, Type handlerType)
+    {
+        var installerRegistry = Resolve<InstallerRegistry>();
+        var application = InstallPackage(packageName);
+        Assert.NotNull(application);
+        var definition = new InstallerDefinition(handlerType.Name, packageName);
+
+        Resolve<UninstallService>().Handle(application);
+
+        Assert.Null(installerRegistry.GetHandler(definition));
+    }    
 }

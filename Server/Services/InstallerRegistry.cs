@@ -14,6 +14,7 @@ public class InstallerRegistry : IDisposable
     private readonly Dictionary<Application, IList<IInstaller>> _applicationInstallers = new();
     private readonly Dictionary<Type, IList<IInstaller>> _installers = new();
     private readonly Dictionary<Type, IUninstaller> _uninstallers = new();
+    private readonly Dictionary<InstallerDefinition, IUninstaller> _handlers = new();
 
     public InstallerRegistry(
         State state,
@@ -47,7 +48,7 @@ public class InstallerRegistry : IDisposable
         {
             applicationScope.Dispose();
         }
-        
+
         _baseScope.Dispose();
     }
 
@@ -66,12 +67,12 @@ public class InstallerRegistry : IDisposable
         {
             return;
         }
-        
+
         if (_applicationInstallers.ContainsKey(application))
         {
             throw new Exception("Application already added to the registry");
         }
-        
+
         var scope = _container.BeginLifetimeScope(
             _scopeBuilders[packageName],
             builder =>
@@ -110,13 +111,15 @@ public class InstallerRegistry : IDisposable
                 .Where(pair => pair.Value == installer)
                 .ToList()
                 .ForEach(pair => _uninstallers.Remove(pair.Key));
+            
+            _handlers.Remove(new InstallerDefinition(installer.GetType().Name, application.Name));
 
             _installers
                 .Values
                 .ToList()
                 .ForEach(list => list.Remove(installer));
         }
-        
+
         _applicationScopes[application].Dispose();
         _applicationScopes.Remove(application);
     }
@@ -124,7 +127,7 @@ public class InstallerRegistry : IDisposable
     /// <summary>
     /// Adds object to the registry, checking all its interfaces for installers and uninstallers.
     /// </summary>
-    private void AddInstaller(object installer)
+    private void AddInstaller(IInstaller installer)
     {
         installer.GetType().GetInterfaces()
             .Where(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IUninstaller<>))
@@ -134,6 +137,9 @@ public class InstallerRegistry : IDisposable
                 {
                     var resourceType = type.GetGenericArguments()[0];
                     _uninstallers[resourceType] = (IUninstaller)installer;
+
+                    var definition = new InstallerDefinition(installer.GetType().Name, installer.Application?.Name);
+                    _handlers[definition] = (IUninstaller)installer;
                 }
             );
 
@@ -151,11 +157,11 @@ public class InstallerRegistry : IDisposable
                     }
 
                     // Add the installer to the beginning of the list so that it is used first
-                    _installers[contractType].Insert(0, (IInstaller)installer);
+                    _installers[contractType].Insert(0, installer);
                 }
             );
     }
-    
+
     /// <summary>
     /// Gets possible installers for the resource type
     /// </summary>
@@ -172,21 +178,26 @@ public class InstallerRegistry : IDisposable
             {
                 continue;
             }
-            
+
             if (definition?.ApplicationName != null && installer.Application?.Name != definition.ApplicationName)
             {
                 continue;
             }
-            
+
             yield return installer;
         }
     }
-    
+
     /// <summary>
     /// Gets uninstaller for the resource type.
     /// </summary>
     public IUninstaller? GetUninstaller(Type resourceType)
     {
         return _uninstallers.GetValueOrDefault(resourceType);
+    }
+
+    public IUninstaller? GetHandler(InstallerDefinition definition)
+    {
+        return _handlers.GetValueOrDefault(definition);
     }
 }
