@@ -1,3 +1,6 @@
 ﻿namespace Frierun.Server.Data;
 
-public record RedisDatabase(string Host) : Resource;
+public class RedisDatabase : Resource
+{
+    public required string Host { get; init; }
+}

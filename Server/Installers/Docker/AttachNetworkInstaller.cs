@@ -7,7 +7,7 @@ public class AttachNetworkInstaller(DockerService dockerService, State state)
 {
     /// <inheritdoc />
     public Application? Application => null;
-    
+
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<ConnectExternalContainer>.Initialize(
         ConnectExternalContainer contract,
@@ -44,7 +44,11 @@ public class AttachNetworkInstaller(DockerService dockerService, State state)
             dockerService.AttachNetwork(network.Name, contract.ContainerName).Wait();
         }
 
-        return new DockerAttachedNetwork(ContainerName: contract.ContainerName, NetworkName: network.Name);
+        return new DockerAttachedNetwork
+        {
+            ContainerName = contract.ContainerName,
+            NetworkName = network.Name
+        };
     }
 
     /// <inheritdoc />

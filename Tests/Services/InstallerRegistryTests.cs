@@ -216,7 +216,7 @@ public class InstallerRegistryTests : BaseTests
 
     public static IEnumerable<object[]> PackagesWithUninstallers()
     {
-        yield return ["traefik", typeof(TraefikHttpEndpoint)];
+        yield return ["traefik", typeof(GenericHttpEndpoint)];
         yield return ["mysql", typeof(MysqlDatabase)];
         yield return ["mariadb", typeof(MysqlDatabase)];
         yield return ["postgresql", typeof(PostgresqlDatabase)];

@@ -1,3 +1,6 @@
 ﻿namespace Frierun.Server.Data;
 
-public record GeneratedPassword(string Value) : Resource;
+public class GeneratedPassword : Resource
+{
+    public required string Value { get; init; }
+}

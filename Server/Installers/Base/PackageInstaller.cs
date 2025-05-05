@@ -45,11 +45,11 @@ public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
     /// <inheritdoc />
     Resource IInstaller<Package>.Install(Package package, ExecutionPlan plan)
     {
-        return new Application(
-            Name: package.Prefix!,
-            Package: package,
-            Url: package.ApplicationUrl,
-            Description: package.ApplicationDescription
-        );
+        return new Application{
+            Name = package.Prefix!,
+            Package = package,
+            Url = package.ApplicationUrl,
+            Description = package.ApplicationDescription
+        };
     }
 }

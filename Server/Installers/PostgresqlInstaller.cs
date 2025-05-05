@@ -14,8 +14,8 @@ public class PostgresqlInstaller(
     private readonly string _rootPassword = application.Resources.OfType<GeneratedPassword>().First().Value;
 
     /// <inheritdoc />
-    public Application? Application => application;
-    
+    public Application Application => application;
+
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Postgresql>.Initialize(
         Postgresql contract,
@@ -37,7 +37,7 @@ public class PostgresqlInstaller(
             contract with
             {
                 DatabaseName = name,
-                DependsOn = contract.DependsOn.Append(connectExternalContainer),
+                DependsOn = contract.DependsOn.Append(connectExternalContainer)
             },
             [connectExternalContainer]
         );
@@ -48,12 +48,12 @@ public class PostgresqlInstaller(
     {
         if (contract.Admin)
         {
-            return new PostgresqlDatabase(
-                User: "postgres",
-                Password: _rootPassword,
-                Database: "",
-                Host: _container.Name
-            );
+            return new PostgresqlDatabase
+            {
+                User = "postgres",
+                Password = _rootPassword,
+                Host = _container.Name
+            };
         }
 
         var name = contract.DatabaseName;
@@ -76,7 +76,13 @@ public class PostgresqlInstaller(
         );
 
 
-        return new PostgresqlDatabase(name, password, name, _container.Name);
+        return new PostgresqlDatabase
+        {
+            User = name,
+            Password = password,
+            Database = name,
+            Host = _container.Name
+        };
     }
 
     /// <inheritdoc />

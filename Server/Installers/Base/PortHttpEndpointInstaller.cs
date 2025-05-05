@@ -31,6 +31,6 @@ public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>, IUninstaller<
         );
 
         var url = new Uri($"http://{portEndpoint.Ip}:{portEndpoint.Port}");
-        return new GenericHttpEndpoint(url);
+        return new GenericHttpEndpoint{Url = url};
     }
 }

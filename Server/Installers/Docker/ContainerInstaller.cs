@@ -3,11 +3,12 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class ContainerInstaller(DockerService dockerService, State state) : IInstaller<Container>, IUninstaller<DockerContainer>
+public class ContainerInstaller(DockerService dockerService, State state)
+    : IInstaller<Container>, IUninstaller<DockerContainer>
 {
     /// <inheritdoc />
     public Application? Application => null;
-    
+
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Container>.Initialize(Container contract, string prefix)
     {
@@ -52,7 +53,7 @@ public class ContainerInstaller(DockerService dockerService, State state) : IIns
             Name = contract.ContainerName!,
             NetworkingConfig = new NetworkingConfig()
             {
-                EndpointsConfig  = new Dictionary<string, EndpointSettings>
+                EndpointsConfig = new Dictionary<string, EndpointSettings>
                 {
                     {
                         network.Name, new EndpointSettings
@@ -88,7 +89,7 @@ public class ContainerInstaller(DockerService dockerService, State state) : IIns
             throw new Exception("Failed to start container");
         }
 
-        return new DockerContainer(Name: contract.ContainerName!, NetworkName: network.Name);
+        return new DockerContainer { Name = contract.ContainerName!, NetworkName = network.Name };
     }
 
     /// <inheritdoc />

@@ -31,7 +31,7 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
 
         Assert.NotNull(application);
         var resources = application.Resources.ToList();
-        var endpointIndex = resources.FindIndex(r => r is TraefikHttpEndpoint);
+        var endpointIndex = resources.FindIndex(r => r is GenericHttpEndpoint);
         var containerIndex = resources.FindIndex(r => r is DockerContainer);
         Assert.NotEqual(-1, endpointIndex);
         Assert.NotEqual(-1, containerIndex);
@@ -48,7 +48,7 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
         var application = InstallPackage(package);
 
         Assert.NotNull(application);
-        var endpointContract = application.Resources.OfType<TraefikHttpEndpoint>().First();
+        var endpointContract = application.Resources.OfType<GenericHttpEndpoint>().First();
         Assert.Equal(80, endpointContract.Port);
         Assert.False(endpointContract.Ssl);
         Assert.StartsWith("http://", endpointContract.Url.ToString());
@@ -67,7 +67,7 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
         var application = InstallPackage(package);
 
         Assert.NotNull(application);
-        var endpointContract = application.Resources.OfType<TraefikHttpEndpoint>().First();
+        var endpointContract = application.Resources.OfType<GenericHttpEndpoint>().First();
         Assert.Equal(443, endpointContract.Port);
         Assert.True(endpointContract.Ssl);
         Assert.StartsWith("https://", endpointContract.Url.ToString());
@@ -92,7 +92,7 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
         var application = InstallPackage(package);
 
         Assert.NotNull(application);
-        var endpointContract = application.Resources.OfType<TraefikHttpEndpoint>().First();
+        var endpointContract = application.Resources.OfType<GenericHttpEndpoint>().First();
         Assert.Equal(81, endpointContract.Port);
         Assert.False(endpointContract.Ssl);
         Assert.StartsWith("http://", endpointContract.Url.ToString());

@@ -10,7 +10,7 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
     private readonly string _rootPassword = application.Resources.OfType<GeneratedPassword>().First().Value;
 
     /// <inheritdoc />
-    public Application? Application => application;
+    public Application Application => application;
 
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Mysql>.Initialize(Mysql contract, string prefix)
@@ -30,7 +30,7 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
             contract with
             {
                 DatabaseName = name,
-                DependsOn = contract.DependsOn.Append(connectExternalContainer),
+                DependsOn = contract.DependsOn.Append(connectExternalContainer)
             },
             [connectExternalContainer]
         );
@@ -41,12 +41,12 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
     {
         if (contract.Admin)
         {
-            return new MysqlDatabase(
-                User: "root",
-                Password: _rootPassword,
-                Database: "",
-                Host: _container.Name
-            );
+            return new MysqlDatabase
+            {
+                User = "root",
+                Password = _rootPassword,
+                Host = _container.Name
+            };
         }
 
         var name = contract.DatabaseName;
@@ -70,7 +70,13 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
         );
 
 
-        return new MysqlDatabase(name, password, name, _container.Name);
+        return new MysqlDatabase
+        {
+            User = name,
+            Password = password,
+            Database = name,
+            Host = _container.Name
+        };
     }
 
     /// <inheritdoc />

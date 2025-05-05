@@ -1,6 +1,8 @@
 ﻿namespace Frierun.Server.Data;
 
-public record DockerAttachedNetwork(
-    string ContainerName,
-    string NetworkName
-) : Resource;
+public class DockerAttachedNetwork(
+) : Resource
+{
+    public required string ContainerName { get; init; }
+    public required  string NetworkName { get; init; }
+}

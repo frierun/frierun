@@ -7,7 +7,7 @@ public class PasswordInstaller : IInstaller<Password>, IUninstaller<GeneratedPas
 {
     /// <inheritdoc />
     public Application? Application => null;
-    
+
     /// <inheritdoc />
     Resource IInstaller<Password>.Install(Password contract, ExecutionPlan plan)
     {
@@ -15,6 +15,6 @@ public class PasswordInstaller : IInstaller<Password>, IUninstaller<GeneratedPas
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
             16
         );
-        return new GeneratedPassword(password);
+        return new GeneratedPassword { Value = password };
     }
 }

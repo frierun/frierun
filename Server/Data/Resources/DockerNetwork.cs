@@ -1,5 +1,6 @@
 ﻿namespace Frierun.Server.Data;
 
-public record DockerNetwork(
-    string Name
-) : Resource;
+public class DockerNetwork : Resource
+{
+    public required string Name { get; init; }
+}

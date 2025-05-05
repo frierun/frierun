@@ -37,6 +37,7 @@ public class MysqlInstallerTests : BaseTests
         Assert.Equal("db-client", database.Database);
         Assert.Equal(packageName, database.Host);
         Assert.NotEmpty(database.Password);
+        Assert.NotNull(database.Database);
 
         // try to connect to the database from the client
         var dockerService = Services.GetRequiredService<DockerService>();
@@ -91,7 +92,7 @@ public class MysqlInstallerTests : BaseTests
         var container = application.Resources.OfType<DockerContainer>().First();
         var database = application.Resources.OfType<MysqlDatabase>().First();
         Assert.Equal("root", database.User);
-        Assert.Empty(database.Database);
+        Assert.Null(database.Database);
         Assert.Equal(packageName, database.Host);
         Assert.NotEmpty(database.Password);
 

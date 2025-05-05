@@ -45,7 +45,7 @@ public class UninstallServiceTests : BaseTests
         
         Assert.NotNull(traefik);
         Assert.NotNull(application);
-        Assert.Single(application.Resources.OfType<TraefikHttpEndpoint>());
+        Assert.Single(application.Resources.OfType<GenericHttpEndpoint>());
         
         Assert.Throws<Exception>(() => Resolve<UninstallService>().Handle(traefik));
     }

@@ -6,7 +6,7 @@ public class VolumeInstaller(DockerService dockerService, State state) : IInstal
 {
     /// <inheritdoc />
     public Application? Application => null;
-    
+
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Volume>.Initialize(Volume contract, string prefix)
     {
@@ -39,7 +39,7 @@ public class VolumeInstaller(DockerService dockerService, State state) : IInstal
     {
         if (contract.Path != null)
         {
-            return new LocalPath(contract.Path);
+            return new LocalPath{Path = contract.Path};
         }
 
         var volumeName = contract.VolumeName!;
@@ -49,7 +49,7 @@ public class VolumeInstaller(DockerService dockerService, State state) : IInstal
             dockerService.CreateVolume(volumeName).Wait();
         }
 
-        return new DockerVolume(volumeName);
+        return new DockerVolume { Name = volumeName };
     }
 
     /// <inheritdoc />
@@ -59,7 +59,7 @@ public class VolumeInstaller(DockerService dockerService, State state) : IInstal
         {
             return;
         }
-        
+
         dockerService.RemoveVolume(resource.Name).Wait();
     }
 }

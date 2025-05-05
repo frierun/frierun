@@ -6,7 +6,7 @@ public class ParameterInstaller : IInstaller<Parameter>, IUninstaller<ResolvedPa
 {
     /// <inheritdoc />
     public Application? Application => null;
-    
+
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Parameter>.Initialize(Parameter contract, string prefix)
     {
@@ -20,6 +20,6 @@ public class ParameterInstaller : IInstaller<Parameter>, IUninstaller<ResolvedPa
     /// <inheritdoc />
     Resource IInstaller<Parameter>.Install(Parameter contract, ExecutionPlan plan)
     {
-        return new ResolvedParameter(contract.Name, contract.Value);
+        return new ResolvedParameter { Name = contract.Name, Value = contract.Value };
     }
 }

@@ -5,11 +5,18 @@ namespace Frierun.Server.Installers;
 public class StaticDomainInstaller(State state, Application application)
     : IInstaller<Domain>, IUninstaller<ResolvedDomain>
 {
-    private readonly string _domainName = application.Resources.OfType<ResolvedParameter>().First().Value ?? "";
-    private readonly bool _isInternal = application.Resources.OfType<ResolvedSelector>().First().Value == "Yes";
+    private readonly string _domainName = application.Resources
+        .OfType<ResolvedParameter>()
+        .First(parameter => parameter.Name == "Domain")
+        .Value ?? "";
+
+    private readonly bool _isInternal = application.Resources
+        .OfType<ResolvedParameter>()
+        .First(parameter => parameter.Name == "Internal")
+        .Value == "Yes";
 
     /// <inheritdoc />
-    public Application? Application => application;
+    public Application Application => application;
 
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Domain>.Initialize(Domain contract, string prefix)
@@ -48,11 +55,11 @@ public class StaticDomainInstaller(State state, Application application)
     }
 
     /// <inheritdoc />
-    Resource? IInstaller<Domain>.Install(Domain contract, ExecutionPlan plan)
+    Resource IInstaller<Domain>.Install(Domain contract, ExecutionPlan plan)
     {
         var domain = string.IsNullOrEmpty(contract.Subdomain)
             ? _domainName
             : $"{contract.Subdomain}.{_domainName}";
-        return new ResolvedDomain(domain, _isInternal);
+        return new ResolvedDomain { Value = domain, IsInternal = _isInternal };
     }
 }

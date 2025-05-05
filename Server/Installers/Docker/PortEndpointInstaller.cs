@@ -7,7 +7,7 @@ public class PortEndpointInstaller(State state) : IInstaller<PortEndpoint>, IUni
 {
     /// <inheritdoc />
     public Application? Application => null;
-    
+
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<PortEndpoint>.Initialize(PortEndpoint contract, string prefix)
     {
@@ -31,7 +31,7 @@ public class PortEndpointInstaller(State state) : IInstaller<PortEndpoint>, IUni
             }
         );
     }
-    
+
     /// <inheritdoc />
     Resource IInstaller<PortEndpoint>.Install(PortEndpoint contract, ExecutionPlan plan)
     {
@@ -44,9 +44,6 @@ public class PortEndpointInstaller(State state) : IInstaller<PortEndpoint>, IUni
 
         var externalPort = contract.DestinationPort;
         var internalPort = contract.Port;
-
-        // TODO: fill the correct ip of the host
-        var endpoint = new DockerPortEndpoint(contract.Name, "127.0.0.1", externalPort, contract.Protocol);
 
         plan.UpdateContract(
             containerContract with
@@ -67,6 +64,13 @@ public class PortEndpointInstaller(State state) : IInstaller<PortEndpoint>, IUni
             }
         );
 
-        return endpoint;
+        // TODO: fill the correct ip of the host
+        return new DockerPortEndpoint
+        {
+            Name = contract.Name,
+            Ip = "127.0.0.1", 
+            Port = externalPort,
+            Protocol = contract.Protocol
+        };
     }
 }

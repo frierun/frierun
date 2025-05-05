@@ -1,6 +1,7 @@
 ﻿namespace Frierun.Server.Data;
 
-public record ResolvedDomain(
-    string Value,
-    bool IsInternal
-) : Resource;
+public class ResolvedDomain : Resource
+{
+    public required string Value { get; init; } 
+    public required bool IsInternal { get; init; }
+}

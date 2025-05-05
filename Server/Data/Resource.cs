@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace Frierun.Server.Data;
 
@@ -17,8 +18,4 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(RedisDatabase), nameof(RedisDatabase))]
 [JsonDerivedType(typeof(ResolvedDomain), nameof(ResolvedDomain))]
 [JsonDerivedType(typeof(ResolvedParameter), nameof(ResolvedParameter))]
-[JsonDerivedType(typeof(ResolvedSelector), nameof(ResolvedSelector))]
-[JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
-public abstract record Resource
-{
-}
+public abstract class Resource;

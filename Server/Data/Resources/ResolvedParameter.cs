@@ -1,6 +1,7 @@
 ﻿namespace Frierun.Server.Data;
 
-public record ResolvedParameter(
-    string Name,
-    string? Value = null
-) : Resource;
+public class ResolvedParameter : Resource
+{
+    public required string Name { get; init; }
+    public string? Value { get; init; }
+}

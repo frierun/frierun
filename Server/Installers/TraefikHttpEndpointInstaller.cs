@@ -3,7 +3,7 @@
 namespace Frierun.Server.Installers;
 
 public class TraefikHttpEndpointInstaller(Application application)
-    : IInstaller<HttpEndpoint>, IUninstaller<TraefikHttpEndpoint>
+    : IInstaller<HttpEndpoint>
 {
     private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
 
@@ -73,8 +73,13 @@ public class TraefikHttpEndpointInstaller(Application application)
             }
         );
 
-        return certResolver == null
-            ? new TraefikHttpEndpoint(domain, _webPort)
-            : new TraefikHttpEndpoint(domain, _webSecurePort, true);
+        var url = certResolver == null
+            ? new Uri($"http://{domain}:{_webPort}")
+            : new Uri($"https://{domain}:{_webSecurePort}");
+
+        return new GenericHttpEndpoint
+        {
+            Url = url
+        };
     }
 }

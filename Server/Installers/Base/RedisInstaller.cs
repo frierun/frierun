@@ -6,7 +6,7 @@ public class RedisInstaller : IInstaller<Redis>, IUninstaller<RedisDatabase>
 {
     /// <inheritdoc />
     public Application? Application => null;
-    
+
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Redis>.Initialize(Redis contract, string prefix)
     {
@@ -29,12 +29,12 @@ public class RedisInstaller : IInstaller<Redis>, IUninstaller<RedisDatabase>
             ]
         );
     }
-    
+
     /// <inheritdoc />
     Resource? IInstaller<Redis>.Install(Redis contract, ExecutionPlan plan)
     {
         var container = plan.GetResource<DockerContainer>(contract.ContainerId);
 
-        return new RedisDatabase(container.Name);
+        return new RedisDatabase { Host = container.Name };
     }
 }

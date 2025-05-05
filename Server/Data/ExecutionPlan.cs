@@ -108,8 +108,13 @@ public class ExecutionPlan : IExecutionPlan
         );
 
         var application = _resources.Values.OfType<Application>().First();
-        return application with
+        
+        return new Application
         {
+            Name = application.Name,
+            Package = application.Package,
+            Description = application.Description,
+            Url = application.Url,
             Resources = _resources.Values
                 .OfType<Resource>()
                 .Where(resource => resource is not Application)

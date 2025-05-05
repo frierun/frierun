@@ -36,7 +36,7 @@ public class NetworkInstaller(DockerService dockerService, State state) : IInsta
 
         dockerService.CreateNetwork(networkName).Wait();
         
-        return new DockerNetwork(networkName);
+        return new DockerNetwork{Name = networkName};
     }
 
     /// <inheritdoc />

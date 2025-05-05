@@ -9,7 +9,6 @@ public sealed class ApplicationFactory : Faker<Application>
     public ApplicationFactory(Faker<Package> packageFactory, Faker<DockerContainer> containerFactory)
     {
         StrictMode(true);
-        CustomInstantiator(_ => new Application(""));
         RuleFor(p => p.Name, f => f.Lorem.Word());
         RuleFor(p => p.Package, _ => packageFactory.Generate());
         RuleFor(p => p.Url, f => f.Internet.Url());

@@ -84,7 +84,7 @@ public class PostgresqlInstallerTests : BaseTests
         var container = application.Resources.OfType<DockerContainer>().First();
         var database = application.Resources.OfType<PostgresqlDatabase>().First();
         Assert.Equal("postgres", database.User);
-        Assert.Empty(database.Database);
+        Assert.Null(database.Database);
         Assert.Equal("postgresql", database.Host);
         Assert.NotEmpty(database.Password);
 
