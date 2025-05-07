@@ -4,19 +4,19 @@ using Frierun.Server.Installers;
 
 namespace Frierun.Server;
 
-public class LazyHandlerConverter(Lazy<InstallerRegistry> lazyInstallerRegistry) : JsonConverter<Lazy<IHandler?>>
+public class LazyHandlerConverter(Lazy<InstallerRegistry> lazyInstallerRegistry) : JsonConverter<Lazy<IHandler>>
 {
     /// <inheritdoc />
-    public override Lazy<IHandler?> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Lazy<IHandler> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         string typeName = string.Empty;
         string? applicationName = null;
-        
+
         if (reader.TokenType == JsonTokenType.Null)
         {
             throw new JsonException();
         }
-        
+
         if (reader.TokenType != JsonTokenType.StartObject)
         {
             throw new JsonException();
@@ -48,25 +48,23 @@ public class LazyHandlerConverter(Lazy<InstallerRegistry> lazyInstallerRegistry)
                     throw new JsonException();
             }
         }
-        
+
         if (typeName == string.Empty)
         {
             throw new JsonException();
         }
 
-        return new Lazy<IHandler?>(() => lazyInstallerRegistry.Value.GetHandler(typeName, applicationName));
+        return new Lazy<IHandler>(
+            () => lazyInstallerRegistry.Value.GetHandler(typeName, applicationName)
+                  ?? throw new Exception($"Handler with type name {typeName} not found")
+        );
     }
 
     /// <inheritdoc />
-    public override void Write(Utf8JsonWriter writer, Lazy<IHandler?> lazy, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Lazy<IHandler> lazy, JsonSerializerOptions options)
     {
         var value = lazy.Value;
-        if (value == null)
-        {
-            writer.WriteNullValue();
-            return;
-        }
-        
+
         writer.WriteStartObject();
         writer.WritePropertyName("TypeName");
         writer.WriteStringValue(value.GetType().Name);
@@ -75,6 +73,7 @@ public class LazyHandlerConverter(Lazy<InstallerRegistry> lazyInstallerRegistry)
             writer.WritePropertyName("ApplicationName");
             writer.WriteStringValue(value.Application.Name);
         }
+
         writer.WriteEndObject();
     }
 }

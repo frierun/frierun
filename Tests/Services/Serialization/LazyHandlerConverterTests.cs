@@ -29,14 +29,14 @@ public class LazyHandlerConverterTests : BaseTests
     }
 
     [Fact]
-    public void Read_WrongType_ReturnsNull()
+    public void Read_WrongType_ThrowsError()
     {
         var converter = new LazyHandlerConverter(Resolve<Lazy<InstallerRegistry>>());
         var typeName = "WrongType";
         var reader = new Utf8JsonReader(
             Encoding.UTF8.GetBytes(
                 $$"""
-                  {"TypeName":"{{typeName}}", "ApplicationName":null}
+                  {"TypeName":"{{typeName}}"}
                   """
             )
         );
@@ -44,7 +44,7 @@ public class LazyHandlerConverterTests : BaseTests
 
         var result = converter.Read(ref reader, typeof(IHandler), new JsonSerializerOptions());
 
-        Assert.Null(result.Value);
+        Assert.Throws<Exception>(() => result.Value);
     }
     
     
