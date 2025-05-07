@@ -3,9 +3,8 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers.Base;
 
-public class PasswordInstaller : IInstaller<Password>, IUninstaller<GeneratedPassword>
+public class PasswordInstaller : IInstaller<Password>
 {
-    /// <inheritdoc />
     public Application? Application => null;
 
     /// <inheritdoc />
@@ -15,6 +14,6 @@ public class PasswordInstaller : IInstaller<Password>, IUninstaller<GeneratedPas
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
             16
         );
-        return new GeneratedPassword { Value = password };
+        return new GeneratedPassword(new EmptyHandler()) { Value = password };
     }
 }

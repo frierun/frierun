@@ -13,7 +13,11 @@ public class PackageConverterTests : BaseTests
         var packageRegistry = Resolve<PackageRegistry>();
         packageRegistry.Load();
         var converter = new PackageConverter(packageRegistry);
-        var reader = new Utf8JsonReader("\"frierun\""u8);
+        var reader = new Utf8JsonReader(
+            """
+            "frierun"
+            """u8
+        );
         reader.Read();
         var options = new JsonSerializerOptions();
 
@@ -28,7 +32,11 @@ public class PackageConverterTests : BaseTests
     {
         var packageRegistry = Resolve<PackageRegistry>();
         var converter = new PackageConverter(packageRegistry);
-        var reader = new Utf8JsonReader("\"frierun\""u8);
+        var reader = new Utf8JsonReader(
+            """
+            "frierun"
+            """u8
+        );
         reader.Read();
         var options = new JsonSerializerOptions();
 
@@ -53,6 +61,11 @@ public class PackageConverterTests : BaseTests
         writer.Flush();
         var result = Encoding.UTF8.GetString(memoryStream.ToArray());
 
-        Assert.Equal("\"frierun\"", result);
+        Assert.Equal(
+            """
+            "frierun"
+            """,
+            result
+        );
     }
 }

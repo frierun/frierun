@@ -1,11 +1,11 @@
 ﻿using Docker.DotNet.Models;
 using Frierun.Server.Data;
+using Frierun.Server.Installers.Base;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class PortEndpointInstaller(State state) : IInstaller<PortEndpoint>, IUninstaller<DockerPortEndpoint>
+public class PortEndpointInstaller(State state) : IInstaller<PortEndpoint>
 {
-    /// <inheritdoc />
     public Application? Application => null;
 
     /// <inheritdoc />
@@ -65,10 +65,10 @@ public class PortEndpointInstaller(State state) : IInstaller<PortEndpoint>, IUni
         );
 
         // TODO: fill the correct ip of the host
-        return new DockerPortEndpoint
+        return new DockerPortEndpoint(new EmptyHandler())
         {
             Name = contract.Name,
-            Ip = "127.0.0.1", 
+            Ip = "127.0.0.1",
             Port = externalPort,
             Protocol = contract.Protocol
         };

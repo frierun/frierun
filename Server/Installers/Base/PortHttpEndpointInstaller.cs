@@ -2,9 +2,8 @@
 
 namespace Frierun.Server.Installers.Base;
 
-public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>, IUninstaller<GenericHttpEndpoint>
+public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>
 {
-    /// <inheritdoc />
     public Application? Application => null;
 
     /// <inheritdoc />
@@ -31,6 +30,6 @@ public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>, IUninstaller<
         );
 
         var url = new Uri($"http://{portEndpoint.Ip}:{portEndpoint.Port}");
-        return new GenericHttpEndpoint{Url = url};
+        return new GenericHttpEndpoint(new EmptyHandler()){Url = url};
     }
 }

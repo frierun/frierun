@@ -4,14 +4,18 @@ using File = System.IO.File;
 
 namespace Frierun.Server;
 
-public class StateSerializer(string path, PackageRegistry packageRegistry)
+public class StateSerializer(string path, PackageRegistry packageRegistry, Lazy<InstallerRegistry> lazyInstallerRegistry)
 {
     public string Path { get; } = path;
 
     private readonly JsonSerializerOptions _serializerOptions = new()
     {
         WriteIndented = true,
-        Converters = { new PackageConverter(packageRegistry) },
+        Converters =
+        {
+            new PackageConverter(packageRegistry),
+            new LazyHandlerConverter(lazyInstallerRegistry),
+        },
     };
 
     /// <summary>

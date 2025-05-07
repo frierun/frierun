@@ -3,9 +3,8 @@
 namespace Frierun.Server.Installers.Docker;
 
 public class AttachNetworkInstaller(DockerService dockerService, State state)
-    : IInstaller<ConnectExternalContainer>, IUninstaller<DockerAttachedNetwork>
+    : IInstaller<ConnectExternalContainer>, IHandler<DockerAttachedNetwork>
 {
-    /// <inheritdoc />
     public Application? Application => null;
 
     /// <inheritdoc />
@@ -44,7 +43,7 @@ public class AttachNetworkInstaller(DockerService dockerService, State state)
             dockerService.AttachNetwork(network.Name, contract.ContainerName).Wait();
         }
 
-        return new DockerAttachedNetwork
+        return new DockerAttachedNetwork(this)
         {
             ContainerName = contract.ContainerName,
             NetworkName = network.Name

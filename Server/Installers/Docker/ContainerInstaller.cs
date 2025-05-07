@@ -4,9 +4,8 @@ using Frierun.Server.Data;
 namespace Frierun.Server.Installers.Docker;
 
 public class ContainerInstaller(DockerService dockerService, State state)
-    : IInstaller<Container>, IUninstaller<DockerContainer>
+    : IInstaller<Container>, IHandler<DockerContainer>
 {
-    /// <inheritdoc />
     public Application? Application => null;
 
     /// <inheritdoc />
@@ -89,11 +88,11 @@ public class ContainerInstaller(DockerService dockerService, State state)
             throw new Exception("Failed to start container");
         }
 
-        return new DockerContainer { Name = contract.ContainerName!, NetworkName = network.Name };
+        return new DockerContainer(this) { Name = contract.ContainerName!, NetworkName = network.Name };
     }
 
     /// <inheritdoc />
-    void IUninstaller<DockerContainer>.Uninstall(DockerContainer resource)
+    void IHandler<DockerContainer>.Uninstall(DockerContainer resource)
     {
         dockerService.RemoveContainer(resource.Name).Wait();
     }

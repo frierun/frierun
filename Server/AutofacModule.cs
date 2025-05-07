@@ -33,27 +33,37 @@ public class AutofacModule : Module
 
         // Package specific installers
         builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder => builder.RegisterType<MysqlInstaller>().As<IInstaller>().SingleInstance()
+                static builder => builder.RegisterType<MysqlInstaller>()
+                    .AsImplementedInterfaces()
+                    .SingleInstance()
             )
             .Named<ProviderScopeBuilder>("mysql")
             .SingleInstance();
         builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder => builder.RegisterType<MysqlInstaller>().As<IInstaller>().SingleInstance()
+                static builder => builder.RegisterType<MysqlInstaller>()
+                    .AsImplementedInterfaces()
+                    .SingleInstance()
             )
             .Named<ProviderScopeBuilder>("mariadb")
             .SingleInstance();
         builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder => builder.RegisterType<PostgresqlInstaller>().As<IInstaller>().SingleInstance()
+                static builder => builder.RegisterType<PostgresqlInstaller>()
+                    .AsImplementedInterfaces()
+                    .SingleInstance()
             )
             .Named<ProviderScopeBuilder>("postgresql")
             .SingleInstance();
         builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder => builder.RegisterType<StaticDomainInstaller>().As<IInstaller>().SingleInstance()
+                static builder => builder.RegisterType<StaticDomainInstaller>()
+                    .AsImplementedInterfaces()
+                    .SingleInstance()
             )
             .Named<ProviderScopeBuilder>("static-domain")
             .SingleInstance();
         builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder => builder.RegisterType<TraefikHttpEndpointInstaller>().As<IInstaller>().SingleInstance()
+                static builder => builder.RegisterType<TraefikHttpEndpointInstaller>()
+                    .AsImplementedInterfaces()
+                    .SingleInstance()
             )
             .Named<ProviderScopeBuilder>("traefik")
             .SingleInstance();
@@ -74,7 +84,7 @@ public class AutofacModule : Module
                 _ => new DockerClientConfiguration().CreateClient()
             )
             .SingleInstance();
-        
+
 
         // Services/Serialization
         builder.Register<string>(_ => Path.Combine(Storage.DirectoryName, "state.json"))

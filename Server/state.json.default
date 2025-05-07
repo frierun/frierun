@@ -4,20 +4,29 @@
       "Name": "localhost domain",
       "Package": "static-domain",
       "Url": null,
-      "Description": "Default localhost domain",
+      "Description": "Domain: localhost",
       "Resources": [
         {
           "Type": "ResolvedParameter",
           "Name": "Domain",
-          "Value": "localhost"
+          "Value": "localhost",
+          "Handler": {
+            "TypeName": "EmptyHandler"
+          }
         },
         {
-          "Type": "ResolvedSelector",
+          "Type": "ResolvedParameter",
           "Name": "Internal",
-          "Value": "Yes"
+          "Value": "Yes",
+          "Handler": {
+            "TypeName": "EmptyHandler"
+          }
         }
       ],
-      "RequiredApplications": []
+      "RequiredApplications": [],
+      "Handler": {
+        "TypeName": "EmptyHandler"
+      }
     }
   ]
 }

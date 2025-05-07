@@ -4,7 +4,7 @@ using Frierun.Server.Data;
 namespace Frierun.Server.Installers;
 
 public class MysqlInstaller(DockerService dockerService, State state, Application application)
-    : IInstaller<Mysql>, IUninstaller<MysqlDatabase>
+    : IInstaller<Mysql>, IHandler<MysqlDatabase>
 {
     private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
     private readonly string _rootPassword = application.Resources.OfType<GeneratedPassword>().First().Value;
@@ -41,7 +41,7 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
     {
         if (contract.Admin)
         {
-            return new MysqlDatabase
+            return new MysqlDatabase(this)
             {
                 User = "root",
                 Password = _rootPassword,
@@ -70,7 +70,7 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
         );
 
 
-        return new MysqlDatabase
+        return new MysqlDatabase(this)
         {
             User = name,
             Password = password,
@@ -80,7 +80,7 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
     }
 
     /// <inheritdoc />
-    void IUninstaller<MysqlDatabase>.Uninstall(MysqlDatabase resource)
+    void IHandler<MysqlDatabase>.Uninstall(MysqlDatabase resource)
     {
         if (resource.User != "root")
         {

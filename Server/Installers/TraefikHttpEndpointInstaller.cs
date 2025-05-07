@@ -1,4 +1,5 @@
 ﻿using Frierun.Server.Data;
+using Frierun.Server.Installers.Base;
 
 namespace Frierun.Server.Installers;
 
@@ -13,7 +14,6 @@ public class TraefikHttpEndpointInstaller(Application application)
     private readonly int _webSecurePort = application.Resources.OfType<DockerPortEndpoint>()
         .FirstOrDefault(endpoint => endpoint.Name == "WebSecure")?.Port ?? 0;
 
-    /// <inheritdoc />
     public Application Application => application;
 
     /// <inheritdoc />
@@ -77,7 +77,7 @@ public class TraefikHttpEndpointInstaller(Application application)
             ? new Uri($"http://{domain}:{_webPort}")
             : new Uri($"https://{domain}:{_webSecurePort}");
 
-        return new GenericHttpEndpoint
+        return new GenericHttpEndpoint(new EmptyHandler())
         {
             Url = url
         };

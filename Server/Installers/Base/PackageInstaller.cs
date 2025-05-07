@@ -2,9 +2,8 @@
 
 namespace Frierun.Server.Installers.Base;
 
-public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
+public class PackageInstaller : IInstaller<Package>
 {
-    /// <inheritdoc />
     public Application? Application => null;
     
     /// <inheritdoc />
@@ -45,7 +44,7 @@ public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
     /// <inheritdoc />
     Resource IInstaller<Package>.Install(Package package, ExecutionPlan plan)
     {
-        return new Application{
+        return new Application(new EmptyHandler()){
             Name = package.Prefix!,
             Package = package,
             Url = package.ApplicationUrl,

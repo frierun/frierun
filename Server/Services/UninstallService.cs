@@ -5,8 +5,7 @@ namespace Frierun.Server;
 public class UninstallService(
     State state,
     StateSerializer stateSerializer,
-    StateManager stateManager,
-    InstallerRegistry installerRegistry)
+    StateManager stateManager)
 {
     public void Handle(Application application)
     {
@@ -32,10 +31,10 @@ public class UninstallService(
                     throw new Exception("Application cannot contain another application");
                 }
                 
-                UninstallResource(resource);
+                resource.Uninstall();
             }
 
-            UninstallResource(application);
+            application.Uninstall();
             state.RemoveApplication(application);
             
             stateSerializer.Save(state);
@@ -44,18 +43,5 @@ public class UninstallService(
         {
             stateManager.FinishTask();
         }
-    }
-
-    /// <summary>
-    /// Uninstalls a resource
-    /// </summary>
-    private void UninstallResource(Resource resource)
-    {
-        var uninstaller = installerRegistry.GetUninstaller(resource.GetType());
-        if (uninstaller == null)
-        {
-            throw new Exception($"Uninstaller not found for resource type {resource.GetType()}");
-        }
-        uninstaller.Uninstall(resource);
     }
 }

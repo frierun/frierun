@@ -13,8 +13,7 @@ public class InstallerRegistry : IDisposable
     private readonly Dictionary<Application, ILifetimeScope> _applicationScopes = new();
     private readonly Dictionary<Application, IList<IInstaller>> _applicationInstallers = new();
     private readonly Dictionary<Type, IList<IInstaller>> _installers = new();
-    private readonly Dictionary<Type, IUninstaller> _uninstallers = new();
-    private readonly Dictionary<InstallerDefinition, IUninstaller> _handlers = new();
+    private readonly Dictionary<InstallerDefinition, IHandler> _handlers = new();
 
     public InstallerRegistry(
         State state,
@@ -30,6 +29,11 @@ public class InstallerRegistry : IDisposable
         foreach (var installer in _baseScope.Resolve<IEnumerable<IInstaller>>())
         {
             AddInstaller(installer);
+        }
+
+        foreach (var handler in _baseScope.Resolve<IEnumerable<IHandler>>())
+        {
+            AddHandler(handler);
         }
 
         foreach (var application in state.Applications)
@@ -87,6 +91,11 @@ public class InstallerRegistry : IDisposable
         installers.ForEach(AddInstaller);
         _applicationInstallers[application] = installers;
         _applicationScopes[application] = scope;
+
+        foreach (var handler in scope.Resolve<IEnumerable<IHandler>>())
+        {
+            AddHandler(handler);
+        }
     }
 
     /// <summary>
@@ -107,11 +116,6 @@ public class InstallerRegistry : IDisposable
 
         foreach (var installer in installers)
         {
-            _uninstallers
-                .Where(pair => pair.Value == installer)
-                .ToList()
-                .ForEach(pair => _uninstallers.Remove(pair.Key));
-            
             _handlers.Remove(new InstallerDefinition(installer.GetType().Name, application.Name));
 
             _installers
@@ -125,24 +129,10 @@ public class InstallerRegistry : IDisposable
     }
 
     /// <summary>
-    /// Adds object to the registry, checking all its interfaces for installers and uninstallers.
+    /// Adds object to the registry, checking all its interfaces for installers
     /// </summary>
     private void AddInstaller(IInstaller installer)
     {
-        installer.GetType().GetInterfaces()
-            .Where(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IUninstaller<>))
-            .ToList()
-            .ForEach(
-                type =>
-                {
-                    var resourceType = type.GetGenericArguments()[0];
-                    _uninstallers[resourceType] = (IUninstaller)installer;
-
-                    var definition = new InstallerDefinition(installer.GetType().Name, installer.Application?.Name);
-                    _handlers[definition] = (IUninstaller)installer;
-                }
-            );
-
         installer.GetType().GetInterfaces()
             .Where(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IInstaller<>))
             .ToList()
@@ -160,6 +150,15 @@ public class InstallerRegistry : IDisposable
                     _installers[contractType].Insert(0, installer);
                 }
             );
+    }
+    
+    /// <summary>
+    /// Adds handler to the registry.
+    /// </summary>
+    private void AddHandler(IHandler handler)
+    {
+        var definition = new InstallerDefinition(handler.GetType().Name, handler.Application?.Name);
+        _handlers[definition] = handler;
     }
 
     /// <summary>
@@ -188,16 +187,9 @@ public class InstallerRegistry : IDisposable
         }
     }
 
-    /// <summary>
-    /// Gets uninstaller for the resource type.
-    /// </summary>
-    public IUninstaller? GetUninstaller(Type resourceType)
+    public IHandler? GetHandler(string typeName, string? applicationName = null)
     {
-        return _uninstallers.GetValueOrDefault(resourceType);
-    }
-
-    public IUninstaller? GetHandler(InstallerDefinition definition)
-    {
+        var definition = new InstallerDefinition(typeName, applicationName);
         return _handlers.GetValueOrDefault(definition);
     }
 }

@@ -109,7 +109,7 @@ public class ExecutionPlan : IExecutionPlan
 
         var application = _resources.Values.OfType<Application>().First();
         
-        return new Application
+        return new Application(application.Handler)
         {
             Name = application.Name,
             Package = application.Package,

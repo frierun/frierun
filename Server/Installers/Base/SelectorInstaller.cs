@@ -4,7 +4,6 @@ namespace Frierun.Server.Installers.Base;
 
 public class SelectorInstaller : IInstaller<Selector>
 {
-    /// <inheritdoc />
     public Application? Application => null;
 
     /// <inheritdoc />
@@ -31,6 +30,6 @@ public class SelectorInstaller : IInstaller<Selector>
     /// <inheritdoc />
     Resource? IInstaller<Selector>.Install(Selector contract, ExecutionPlan plan)
     {
-        return new ResolvedParameter { Name = contract.Name, Value = contract.SelectedOption };
+        return new ResolvedParameter(new EmptyHandler()) { Name = contract.Name, Value = contract.SelectedOption };
     }
 }

@@ -1,9 +1,10 @@
 ﻿using Frierun.Server.Data;
+using Frierun.Server.Installers.Base;
 
 namespace Frierun.Server.Installers;
 
 public class StaticDomainInstaller(State state, Application application)
-    : IInstaller<Domain>, IUninstaller<ResolvedDomain>
+    : IInstaller<Domain>
 {
     private readonly string _domainName = application.Resources
         .OfType<ResolvedParameter>()
@@ -15,7 +16,6 @@ public class StaticDomainInstaller(State state, Application application)
         .First(parameter => parameter.Name == "Internal")
         .Value == "Yes";
 
-    /// <inheritdoc />
     public Application Application => application;
 
     /// <inheritdoc />
@@ -60,6 +60,6 @@ public class StaticDomainInstaller(State state, Application application)
         var domain = string.IsNullOrEmpty(contract.Subdomain)
             ? _domainName
             : $"{contract.Subdomain}.{_domainName}";
-        return new ResolvedDomain { Value = domain, IsInternal = _isInternal };
+        return new ResolvedDomain(new EmptyHandler()) { Value = domain, IsInternal = _isInternal };
     }
 }

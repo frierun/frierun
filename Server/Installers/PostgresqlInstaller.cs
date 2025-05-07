@@ -8,12 +8,11 @@ public class PostgresqlInstaller(
     State state,
     Application application,
     ILogger<PostgresqlInstaller> logger)
-    : IInstaller<Postgresql>, IUninstaller<PostgresqlDatabase>
+    : IInstaller<Postgresql>, IHandler<PostgresqlDatabase>
 {
     private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
     private readonly string _rootPassword = application.Resources.OfType<GeneratedPassword>().First().Value;
 
-    /// <inheritdoc />
     public Application Application => application;
 
     /// <inheritdoc />
@@ -48,7 +47,7 @@ public class PostgresqlInstaller(
     {
         if (contract.Admin)
         {
-            return new PostgresqlDatabase
+            return new PostgresqlDatabase(this)
             {
                 User = "postgres",
                 Password = _rootPassword,
@@ -76,7 +75,7 @@ public class PostgresqlInstaller(
         );
 
 
-        return new PostgresqlDatabase
+        return new PostgresqlDatabase(this)
         {
             User = name,
             Password = password,
@@ -86,7 +85,7 @@ public class PostgresqlInstaller(
     }
 
     /// <inheritdoc />
-    void IUninstaller<PostgresqlDatabase>.Uninstall(PostgresqlDatabase resource)
+    void IHandler<PostgresqlDatabase>.Uninstall(PostgresqlDatabase resource)
     {
         if (resource.User != "postgres")
         {

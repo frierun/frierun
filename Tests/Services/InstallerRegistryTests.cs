@@ -188,95 +188,53 @@ public class InstallerRegistryTests : BaseTests
             )
         );
     }
-
+    
     [Theory]
-    [InlineData(typeof(Application), typeof(PackageInstaller))]
-    [InlineData(typeof(ResolvedParameter), typeof(ParameterInstaller))]
-    [InlineData(typeof(GeneratedPassword), typeof(PasswordInstaller))]
-    [InlineData(typeof(GenericHttpEndpoint), typeof(PortHttpEndpointInstaller))]
-    public void GetUninstaller_StaticInstaller_ReturnsUninstaller(Type resourceType, Type installerType)
+    [InlineData(typeof(EmptyHandler))]
+    public void GetHandler_StaticInstaller_ReturnsHandler(Type installerType)
     {
         var registry = Resolve<InstallerRegistry>();
 
-        var result = registry.GetUninstaller(resourceType);
+        var result = registry.GetHandler(installerType.Name);
 
         Assert.NotNull(result);
         Assert.IsType(installerType, result);
     }
     
-    [Theory]
-    [InlineData(typeof(Application), typeof(PackageInstaller))]
-    [InlineData(typeof(ResolvedParameter), typeof(ParameterInstaller))]
-    [InlineData(typeof(GeneratedPassword), typeof(PasswordInstaller))]
-    [InlineData(typeof(GenericHttpEndpoint), typeof(PortHttpEndpointInstaller))]
-    public void GetHandler_StaticInstaller_ReturnsUninstaller(Type resourceType, Type installerType)
-    {
-        var registry = Resolve<InstallerRegistry>();
-
-        var result = registry.GetHandler(new InstallerDefinition(installerType.Name));
-
-        Assert.NotNull(result);
-        Assert.IsType(installerType, result);
-    }
-    
-
-    [Fact]
-    public void GetUninstaller_WrongResource_ReturnsNull()
-    {
-        var registry = Resolve<InstallerRegistry>();
-
-        var result = registry.GetUninstaller(typeof(Package));
-
-        Assert.Null(result);
-    }
     
     [Fact]
     public void GetHandler_WrongResource_ReturnsNull()
     {
         var registry = Resolve<InstallerRegistry>();
 
-        var result = registry.GetHandler(new InstallerDefinition("WrongType"));
+        var result = registry.GetHandler("WrongType");
 
         Assert.Null(result);
     }
 
-    public static IEnumerable<object[]> PackagesWithUninstallers()
+    public static IEnumerable<object[]> PackagesWithHandlers()
     {
-        yield return ["mysql", typeof(MysqlDatabase), typeof(MysqlInstaller)];
-        yield return ["mariadb", typeof(MysqlDatabase), typeof(MysqlInstaller)];
-        yield return ["postgresql", typeof(PostgresqlDatabase), typeof(PostgresqlInstaller)];
+        yield return ["mysql", typeof(MysqlInstaller)];
+        yield return ["mariadb", typeof(MysqlInstaller)];
+        yield return ["postgresql", typeof(PostgresqlInstaller)];
     }
-
+    
     [Theory]
-    [MemberData(nameof(PackagesWithUninstallers))]
-    public void GetUninstaller_InstallPackage_AddsInstaller(string packageName, Type resourceType, Type _)
+    [MemberData(nameof(PackagesWithHandlers))]
+    public void GetHandler_InstallPackage_AddsHandler(string packageName, Type handlerType)
     {
         var installerRegistry = Resolve<InstallerRegistry>();
-        Assert.Null(installerRegistry.GetUninstaller(resourceType));
+        Assert.Null(installerRegistry.GetHandler(handlerType.Name, packageName));
 
         var application = InstallPackage(packageName);
 
         Assert.NotNull(application);
-        Assert.NotNull(installerRegistry.GetUninstaller(resourceType));
+        Assert.NotNull(installerRegistry.GetHandler(handlerType.Name, packageName));
     }
     
     [Theory]
-    [MemberData(nameof(PackagesWithUninstallers))]
-    public void GetHandler_InstallPackage_AddsHandler(string packageName, Type _, Type handlerType)
-    {
-        var installerRegistry = Resolve<InstallerRegistry>();
-        var definition = new InstallerDefinition(handlerType.Name, packageName);
-        Assert.Null(installerRegistry.GetHandler(definition));
-
-        var application = InstallPackage(packageName);
-
-        Assert.NotNull(application);
-        Assert.NotNull(installerRegistry.GetHandler(definition));
-    }
-    
-    [Theory]
-    [MemberData(nameof(PackagesWithUninstallers))]
-    public void GetUninstaller_UninstallPackage_RemovesInstaller(string packageName, Type resourceType, Type _)
+    [MemberData(nameof(PackagesWithHandlers))]
+    public void GetHandler_UninstallPackage_RemovesHandler(string packageName, Type handlerType)
     {
         var installerRegistry = Resolve<InstallerRegistry>();
         var application = InstallPackage(packageName);
@@ -284,20 +242,6 @@ public class InstallerRegistryTests : BaseTests
 
         Resolve<UninstallService>().Handle(application);
 
-        Assert.Null(installerRegistry.GetUninstaller(resourceType));
-    }
-    
-    [Theory]
-    [MemberData(nameof(PackagesWithUninstallers))]
-    public void GetHandler_UninstallPackage_RemovesHandler(string packageName, Type _, Type handlerType)
-    {
-        var installerRegistry = Resolve<InstallerRegistry>();
-        var application = InstallPackage(packageName);
-        Assert.NotNull(application);
-        var definition = new InstallerDefinition(handlerType.Name, packageName);
-
-        Resolve<UninstallService>().Handle(application);
-
-        Assert.Null(installerRegistry.GetHandler(definition));
+        Assert.Null(installerRegistry.GetHandler(handlerType.Name, packageName));
     }    
 }

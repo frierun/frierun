@@ -2,9 +2,8 @@
 
 namespace Frierun.Server.Installers.Base;
 
-public class RedisInstaller : IInstaller<Redis>, IUninstaller<RedisDatabase>
+public class RedisInstaller : IInstaller<Redis>
 {
-    /// <inheritdoc />
     public Application? Application => null;
 
     /// <inheritdoc />
@@ -31,10 +30,10 @@ public class RedisInstaller : IInstaller<Redis>, IUninstaller<RedisDatabase>
     }
 
     /// <inheritdoc />
-    Resource? IInstaller<Redis>.Install(Redis contract, ExecutionPlan plan)
+    Resource IInstaller<Redis>.Install(Redis contract, ExecutionPlan plan)
     {
         var container = plan.GetResource<DockerContainer>(contract.ContainerId);
 
-        return new RedisDatabase { Host = container.Name };
+        return new RedisDatabase(new EmptyHandler()) { Host = container.Name };
     }
 }

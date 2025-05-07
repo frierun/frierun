@@ -3,22 +3,21 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers;
 
-public interface IUninstaller<in TResource>: IUninstaller
+public interface IHandler<in TResource>: IHandler
     where TResource : Resource
 {
-    void Uninstall(TResource resource)
-    {
-        
-    }
+    void Uninstall(TResource resource);
 
     [DebuggerStepThrough]
-    void IUninstaller.Uninstall(Resource resource)
+    void IHandler.Uninstall(Resource resource)
     {
         Uninstall((TResource)resource);
     }
 }
 
-public interface IUninstaller
+public interface IHandler
 {
+    public Application? Application { get; }
+    
     void Uninstall(Resource resource);
 }

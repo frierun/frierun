@@ -1,10 +1,10 @@
 ﻿using Frierun.Server.Data;
+using Frierun.Server.Installers.Base;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class LocalPathInstaller : IInstaller<Volume>, IUninstaller<LocalPath>
+public class LocalPathInstaller : IInstaller<Volume>
 {
-    /// <inheritdoc />
     public Application? Application => null;
 
     /// <inheritdoc />
@@ -19,6 +19,6 @@ public class LocalPathInstaller : IInstaller<Volume>, IUninstaller<LocalPath>
     /// <inheritdoc />
     Resource IInstaller<Volume>.Install(Volume contract, ExecutionPlan plan)
     {
-        return new LocalPath { Path = contract.Path! };
+        return new LocalPath(new EmptyHandler()) { Path = contract.Path! };
     }
 }
