@@ -31,27 +31,33 @@ public class PostgresqlInstaller(
             name = $"{baseName}{count}";
         }
 
-        var connectExternalContainer = new ConnectExternalContainer(_container.Name, contract.NetworkName);
         yield return new InstallerInitializeResult(
             contract with
             {
                 DatabaseName = name,
-                DependsOn = contract.DependsOn.Append(connectExternalContainer)
-            },
-            [connectExternalContainer]
+                DependsOn = contract.DependsOn.Append(contract.NetworkId)
+            }
         );
     }
 
     /// <inheritdoc />
     Resource IInstaller<Postgresql>.Install(Postgresql contract, ExecutionPlan plan)
     {
+        var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
+
+        if (CountSameResources(network.Name, plan) == 0)
+        {
+            _container.AttachNetwork(network.Name);
+        }
+
         if (contract.Admin)
         {
             return new PostgresqlDatabase(this)
             {
                 User = "postgres",
                 Password = _rootPassword,
-                Host = _container.Name
+                Host = _container.Name,
+                NetworkName = network.Name
             };
         }
 
@@ -80,8 +86,22 @@ public class PostgresqlInstaller(
             User = name,
             Password = password,
             Database = name,
-            Host = _container.Name
+            Host = _container.Name,
+            NetworkName = network.Name
         };
+    }
+
+    /// <summary>
+    /// Counts the number of resources with the same network name and handler
+    /// </summary>
+    private int CountSameResources(string networkName, ExecutionPlan? plan = null)
+    {
+        return state.Resources
+            .Concat(plan?.Resources.Values ?? Array.Empty<Resource>())
+            .OfType<PostgresqlDatabase>()
+            .Count(
+                resource => !resource.Uninstalled && resource.NetworkName == networkName && resource.Handler == this
+            );
     }
 
     /// <inheritdoc />
@@ -95,6 +115,11 @@ public class PostgresqlInstaller(
                     $"DROP USER \"{resource.User}\""
                 ]
             );
+        }
+
+        if (CountSameResources(resource.NetworkName) <= 1)
+        {
+            _container.DetachNetwork(resource.NetworkName);
         }
     }
 

@@ -10,7 +10,7 @@ public class DockerPortEndpoint : Resource
     {
     }
 
-    public DockerPortEndpoint(IHandler handler) : this(new Lazy<IHandler>(handler))
+    public DockerPortEndpoint(IHandler handler) : base(handler)
     {
     }
     

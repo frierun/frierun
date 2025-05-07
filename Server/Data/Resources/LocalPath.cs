@@ -10,7 +10,7 @@ public class LocalPath : Resource
     {
     }
 
-    public LocalPath(IHandler handler) : this(new Lazy<IHandler>(handler))
+    public LocalPath(IHandler handler) : base(handler)
     {
     }
     

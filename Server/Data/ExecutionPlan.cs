@@ -11,6 +11,7 @@ public class ExecutionPlan : IExecutionPlan
     private readonly HashSet<Application> _requiredApplications = new();
 
     public IReadOnlyDictionary<ContractId, Contract> Contracts => _contracts;
+    public IReadOnlyDictionary<ContractId, Resource?> Resources => _resources;
 
     public ExecutionPlan(
         Dictionary<ContractId, Contract> contracts,

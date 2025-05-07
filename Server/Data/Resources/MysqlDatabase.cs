@@ -10,7 +10,7 @@ public class MysqlDatabase : Resource
     {
     }
 
-    public MysqlDatabase(IHandler handler) : this(new Lazy<IHandler>(handler))
+    public MysqlDatabase(IHandler handler) : base(handler)
     {
     }
     
@@ -18,4 +18,5 @@ public class MysqlDatabase : Resource
     public required string Password { get; init; }
     public required string Host { get; init; }
     public string? Database { get; init; }
+    public required string NetworkName { get; init; }
 }

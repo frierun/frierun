@@ -10,7 +10,7 @@ public class ResolvedParameter : Resource
     {
     }
 
-    public ResolvedParameter(IHandler handler) : this(new Lazy<IHandler>(handler))
+    public ResolvedParameter(IHandler handler) : base(handler)
     {
     }
     

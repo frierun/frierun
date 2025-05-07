@@ -82,7 +82,7 @@ public class LazyHandlerConverterTests : BaseTests
         var writer = new Utf8JsonWriter(memoryStream);
         var options = new JsonSerializerOptions();
 
-        converter.Write(writer, new Lazy<IHandler?>(handler), options);
+        converter.Write(writer, new Lazy<IHandler>(handler), options);
 
         writer.Flush();
         var result = Encoding.UTF8.GetString(memoryStream.ToArray());
@@ -109,7 +109,7 @@ public class LazyHandlerConverterTests : BaseTests
         var writer = new Utf8JsonWriter(memoryStream);
         var options = new JsonSerializerOptions();
 
-        converter.Write(writer, new Lazy<IHandler?>(handler), options);
+        converter.Write(writer, new Lazy<IHandler>(handler), options);
 
         writer.Flush();
         var result = Encoding.UTF8.GetString(memoryStream.ToArray());

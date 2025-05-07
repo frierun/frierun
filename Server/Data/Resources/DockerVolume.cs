@@ -10,7 +10,7 @@ public class DockerVolume : Resource
     {
     }
 
-    public DockerVolume(IHandler handler) : this(new Lazy<IHandler>(handler))
+    public DockerVolume(IHandler handler) : base(handler)
     {
     }
     

@@ -10,7 +10,7 @@ public class ResolvedDomain : Resource
     {
     }
 
-    public ResolvedDomain(IHandler handler) : this(new Lazy<IHandler>(handler))
+    public ResolvedDomain(IHandler handler) : base(handler)
     {
     }
     

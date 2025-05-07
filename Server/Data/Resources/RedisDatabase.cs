@@ -10,7 +10,7 @@ public class RedisDatabase : Resource
     {
     }
 
-    public RedisDatabase(IHandler handler) : this(new Lazy<IHandler>(handler))
+    public RedisDatabase(IHandler handler) : base(handler)
     {
     }
     

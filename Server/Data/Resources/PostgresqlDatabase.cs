@@ -10,7 +10,7 @@ public class PostgresqlDatabase : Resource
     {
     }
 
-    public PostgresqlDatabase(IHandler handler) : this(new Lazy<IHandler>(handler))
+    public PostgresqlDatabase(IHandler handler) : base(handler)
     {
     }
     
@@ -18,4 +18,5 @@ public class PostgresqlDatabase : Resource
     public required string Password { get; init; }
     public required string Host { get; init; }
     public string? Database { get; init; }
+    public required string NetworkName { get; init; }
 }

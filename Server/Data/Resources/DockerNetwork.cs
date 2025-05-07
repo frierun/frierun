@@ -10,7 +10,7 @@ public class DockerNetwork : Resource
     {
     }
 
-    public DockerNetwork(IHandler handler) : this(new Lazy<IHandler>(handler))
+    public DockerNetwork(IHandler handler) : base(handler)
     {
     }
     

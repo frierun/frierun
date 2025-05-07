@@ -10,7 +10,7 @@ public class GeneratedPassword : Resource
     {
     }
 
-    public GeneratedPassword(IHandler handler) : this(new Lazy<IHandler>(handler))
+    public GeneratedPassword(IHandler handler) : base(handler)
     {
     }
     

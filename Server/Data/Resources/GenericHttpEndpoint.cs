@@ -10,7 +10,7 @@ public class GenericHttpEndpoint : Resource
     {
     }
 
-    public GenericHttpEndpoint(IHandler handler) : this(new Lazy<IHandler>(handler))
+    public GenericHttpEndpoint(IHandler handler) : base(handler)
     {
     }
     

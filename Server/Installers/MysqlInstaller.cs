@@ -9,7 +9,6 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
     private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
     private readonly string _rootPassword = application.Resources.OfType<GeneratedPassword>().First().Value;
 
-    /// <inheritdoc />
     public Application Application => application;
 
     /// <inheritdoc />
@@ -25,27 +24,32 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
             name = $"{baseName}{count}";
         }
 
-        var connectExternalContainer = new ConnectExternalContainer(_container.Name, contract.NetworkName);
         yield return new InstallerInitializeResult(
             contract with
             {
                 DatabaseName = name,
-                DependsOn = contract.DependsOn.Append(connectExternalContainer)
-            },
-            [connectExternalContainer]
+                DependsOn = contract.DependsOn.Append(contract.NetworkId)
+            }
         );
     }
 
     /// <inheritdoc />
     Resource IInstaller<Mysql>.Install(Mysql contract, ExecutionPlan plan)
     {
+        var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
+        if (CountSameResources(network.Name, plan) == 0)
+        {
+            _container.AttachNetwork(network.Name);
+        }
+
         if (contract.Admin)
         {
             return new MysqlDatabase(this)
             {
                 User = "root",
                 Password = _rootPassword,
-                Host = _container.Name
+                Host = _container.Name,
+                NetworkName = network.Name
             };
         }
 
@@ -75,8 +79,22 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
             User = name,
             Password = password,
             Database = name,
-            Host = _container.Name
+            Host = _container.Name,
+            NetworkName = network.Name
         };
+    }
+
+    /// <summary>
+    /// Counts the number of resources with the same network name and handler
+    /// </summary>
+    private int CountSameResources(string networkName, ExecutionPlan? plan = null)
+    {
+        return state.Resources
+            .Concat(plan?.Resources.Values ?? Array.Empty<Resource>())
+            .OfType<MysqlDatabase>()
+            .Count(
+                resource => !resource.Uninstalled && resource.NetworkName == networkName && resource.Handler == this
+            );
     }
 
     /// <inheritdoc />
@@ -90,6 +108,11 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
                  DROP USER '{resource.User}';
                  """
             );
+        }
+
+        if (CountSameResources(resource.NetworkName) <= 1)
+        {
+            _container.DetachNetwork(resource.NetworkName);
         }
     }
 

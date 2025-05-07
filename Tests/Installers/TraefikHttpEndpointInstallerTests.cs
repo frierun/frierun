@@ -1,5 +1,8 @@
-﻿using Frierun.Server;
+﻿using Docker.DotNet.Models;
+using Frierun.Server;
 using Frierun.Server.Data;
+using Frierun.Server.Installers;
+using NSubstitute;
 
 namespace Frierun.Tests.Installers;
 
@@ -83,8 +86,8 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
         InstallPackage(
             "traefik",
             [
-                new PortEndpoint( Protocol.Tcp, 80, Name: "Web", DestinationPort: 81),
-                new PortEndpoint( Protocol.Tcp, 443, Name: "WebSecure", DestinationPort: 444),
+                new PortEndpoint(Protocol.Tcp, 80, Name: "Web", DestinationPort: 81),
+                new PortEndpoint(Protocol.Tcp, 443, Name: "WebSecure", DestinationPort: 444),
             ]
         );
         var package = Factory<Package>().Generate() with { Contracts = [Factory<HttpEndpoint>().Generate()] };
@@ -96,5 +99,48 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
         Assert.Equal(81, endpointContract.Port);
         Assert.False(endpointContract.Ssl);
         Assert.StartsWith("http://", endpointContract.Url.ToString());
+    }
+
+    [Fact]
+    public void Install_PackageWithTwoContracts_OnlyOneNetworkAttached()
+    {
+        InstallPackage(
+            "static-domain",
+            [new Selector("Internal", SelectedOption: "No")]
+        );
+        InstallPackage("traefik");
+        var package = Factory<Package>().Generate() with { Contracts = Factory<HttpEndpoint>().Generate(2) };
+        
+        var application = InstallPackage(package);
+
+        Assert.NotNull(application);
+        var resources = application.Resources.OfType<TraefikHttpEndpoint>().ToList();
+        Assert.Equal(2, resources.Count);
+        Assert.Equal(application.Name, resources[0].NetworkName);
+        Assert.Equal(application.Name, resources[1].NetworkName);
+        DockerClient.Networks.Received(1).ConnectNetworkAsync(
+            application.Name,
+            Arg.Any<NetworkConnectParameters>()
+        );
+    }
+
+    [Fact]
+    public void Uninstall_PackageWithTwoContracts_OnlyOneNetworkDetached()
+    {
+        InstallPackage(
+            "static-domain",
+            [new Selector("Internal", SelectedOption: "No")]
+        );
+        InstallPackage("traefik");
+        var package = Factory<Package>().Generate() with { Contracts = Factory<HttpEndpoint>().Generate(2) };
+        var application = InstallPackage(package);
+        Assert.NotNull(application);
+
+        Resolve<UninstallService>().Handle(application);
+
+        DockerClient.Networks.Received(1).DisconnectNetworkAsync(
+            application.Name,
+            Arg.Any<NetworkDisconnectParameters>()
+        );
     }
 }

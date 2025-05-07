@@ -1,5 +1,4 @@
-﻿using Docker.DotNet;
-using Docker.DotNet.Models;
+﻿using Docker.DotNet.Models;
 using Frierun.Server;
 using Frierun.Server.Data;
 using NSubstitute;

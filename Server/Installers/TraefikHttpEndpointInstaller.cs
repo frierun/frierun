@@ -3,8 +3,8 @@ using Frierun.Server.Installers.Base;
 
 namespace Frierun.Server.Installers;
 
-public class TraefikHttpEndpointInstaller(Application application)
-    : IInstaller<HttpEndpoint>
+public class TraefikHttpEndpointInstaller(Application application, State state)
+    : IInstaller<HttpEndpoint>, IHandler<TraefikHttpEndpoint>
 {
     private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
 
@@ -19,14 +19,12 @@ public class TraefikHttpEndpointInstaller(Application application)
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix)
     {
-        var connectExternalContainer = new ConnectExternalContainer(_container.Name);
         yield return new InstallerInitializeResult(
             contract with
             {
-                DependsOn = contract.DependsOn.Append(connectExternalContainer).Append(contract.DomainId),
+                DependsOn = contract.DependsOn.Append(new Network("")).Append(contract.DomainId),
                 DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
-            },
-            [connectExternalContainer]
+            }
         );
     }
 
@@ -38,6 +36,12 @@ public class TraefikHttpEndpointInstaller(Application application)
         var subdomain = domain.Split('.')[0];
 
         var containerContract = plan.GetContract(contract.ContainerId);
+        var network = plan.GetResource<DockerNetwork>(containerContract.NetworkId);
+        
+        if (CountSameResources(network.Name, plan) == 0)
+        {
+            _container.AttachNetwork(network.Name);
+        }
 
         string? certResolver = null;
         if (!domainResource.IsInternal)
@@ -77,9 +81,32 @@ public class TraefikHttpEndpointInstaller(Application application)
             ? new Uri($"http://{domain}:{_webPort}")
             : new Uri($"https://{domain}:{_webSecurePort}");
 
-        return new GenericHttpEndpoint(new EmptyHandler())
+        return new TraefikHttpEndpoint(this)
         {
-            Url = url
+            Url = url,
+            NetworkName = network.Name
         };
+    }
+    
+    /// <summary>
+    /// Counts the number of resources with the same network name and handler
+    /// </summary>
+    private int CountSameResources(string networkName, ExecutionPlan? plan = null)
+    {
+        return state.Resources
+            .Concat(plan?.Resources.Values ?? Array.Empty<Resource>())
+            .OfType<TraefikHttpEndpoint>()
+            .Count(
+                resource => !resource.Uninstalled && resource.NetworkName == networkName && resource.Handler == this
+            );
+    }
+
+    /// <inheritdoc />
+    void IHandler<TraefikHttpEndpoint>.Uninstall(TraefikHttpEndpoint resource)
+    {
+        if (CountSameResources(resource.NetworkName) <= 1)
+        {
+            _container.DetachNetwork(resource.NetworkName);
+        }
     }
 }

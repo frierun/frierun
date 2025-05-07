@@ -10,8 +10,22 @@ public class DockerContainer : Resource
     {
     }
 
-    public DockerContainer(IHandler handler) : this(new Lazy<IHandler>(handler))
+    public DockerContainer(IContainerHandler handler) : base(handler)
     {
+    }
+
+    /// <inheritdoc />
+    [JsonIgnore]
+    public override IContainerHandler Handler => (IContainerHandler)base.Handler;
+    
+    public void AttachNetwork(string networkName)
+    {
+        Handler.AttachNetwork(this, networkName);
+    }
+    
+    public void DetachNetwork(string networkName)
+    {
+        Handler.DetachNetwork(this, networkName);
     }
 
     public required string Name { get; init; }

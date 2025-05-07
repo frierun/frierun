@@ -21,5 +21,6 @@ public sealed class ApplicationFactory : Faker<Application>
         RuleFor(p => p.Resources, _ => Array.Empty<Resource>());
         RuleFor(p => p.RequiredApplications, _ => Array.Empty<string>());
         Ignore(p => p.Name);
+        Ignore(p => p.Uninstalled);
     }
 }

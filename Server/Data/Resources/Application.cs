@@ -11,7 +11,7 @@ public class Application : Resource
     {
     }
     
-    public Application(IHandler handler) : this(new Lazy<IHandler>(handler))
+    public Application(IHandler handler) : base(handler)
     {
     }
 

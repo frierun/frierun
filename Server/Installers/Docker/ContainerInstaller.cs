@@ -4,7 +4,7 @@ using Frierun.Server.Data;
 namespace Frierun.Server.Installers.Docker;
 
 public class ContainerInstaller(DockerService dockerService, State state)
-    : IInstaller<Container>, IHandler<DockerContainer>
+    : IInstaller<Container>, IContainerHandler
 {
     public Application? Application => null;
 
@@ -95,5 +95,17 @@ public class ContainerInstaller(DockerService dockerService, State state)
     void IHandler<DockerContainer>.Uninstall(DockerContainer resource)
     {
         dockerService.RemoveContainer(resource.Name).Wait();
+    }
+
+    /// <inheritdoc />
+    public void AttachNetwork(DockerContainer container, string networkName)
+    {
+        dockerService.AttachNetwork(networkName, container.Name).Wait();
+    }
+
+    /// <inheritdoc />
+    public void DetachNetwork(DockerContainer container, string networkName)
+    {
+        dockerService.DetachNetwork(networkName, container.Name).Wait();
     }
 }
