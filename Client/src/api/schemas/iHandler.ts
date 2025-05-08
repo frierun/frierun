@@ -5,7 +5,8 @@
  * OpenAPI spec version: 1.0
  */
 
-export type ConnectExternalContainerAllOf = {
-  containerName: string;
-  networkName: string;
-};
+export interface IHandler {
+  TypeName: string;
+  /** @nullable */
+  ApplicationName?: string | null;
+}

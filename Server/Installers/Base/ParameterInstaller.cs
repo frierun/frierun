@@ -2,12 +2,10 @@
 
 namespace Frierun.Server.Installers.Base;
 
-public class ParameterInstaller : IInstaller<Parameter>, IUninstaller<ResolvedParameter>
+public class ParameterInstaller : IInstaller<Parameter>
 {
-    /// <inheritdoc />
     public Application? Application => null;
-    
-    /// <inheritdoc />
+
     IEnumerable<InstallerInitializeResult> IInstaller<Parameter>.Initialize(Parameter contract, string prefix)
     {
         var value = contract.Value ?? contract.DefaultValue;
@@ -17,9 +15,8 @@ public class ParameterInstaller : IInstaller<Parameter>, IUninstaller<ResolvedPa
         );
     }
 
-    /// <inheritdoc />
     Resource IInstaller<Parameter>.Install(Parameter contract, ExecutionPlan plan)
     {
-        return new ResolvedParameter(contract.Name, contract.Value);
+        return new ResolvedParameter(new EmptyHandler()) { Name = contract.Name, Value = contract.Value };
     }
 }

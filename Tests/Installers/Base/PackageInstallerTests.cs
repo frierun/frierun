@@ -4,6 +4,11 @@ namespace Frierun.Tests.Installers.Base;
 
 public class PackageInstallerTests : BaseTests
 {
+    public PackageInstallerTests()
+    {
+        InstallPackage("docker");
+    }
+
     [Fact]
     public void ApplicationUrl_Complete_ApplicationUrlHasPriority()
     {
@@ -22,7 +27,6 @@ public class PackageInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         Assert.Equal(package.ApplicationUrl, application.Url);
     }
     
@@ -44,7 +48,6 @@ public class PackageInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         Assert.Equal("http://127.0.0.1/", application.Url);
     }
     
@@ -65,7 +68,6 @@ public class PackageInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         Assert.Equal("tcp://127.0.0.1:2222", application.Url);
     }    
 }

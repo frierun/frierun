@@ -11,6 +11,7 @@ public class ExecutionPlan : IExecutionPlan
     private readonly HashSet<Application> _requiredApplications = new();
 
     public IReadOnlyDictionary<ContractId, Contract> Contracts => _contracts;
+    public IReadOnlyDictionary<ContractId, Resource?> Resources => _resources;
 
     public ExecutionPlan(
         Dictionary<ContractId, Contract> contracts,
@@ -108,8 +109,13 @@ public class ExecutionPlan : IExecutionPlan
         );
 
         var application = _resources.Values.OfType<Application>().First();
-        return application with
+        
+        return new Application(application.Handler)
         {
+            Name = application.Name,
+            Package = application.Package,
+            Description = application.Description,
+            Url = application.Url,
             Resources = _resources.Values
                 .OfType<Resource>()
                 .Where(resource => resource is not Application)

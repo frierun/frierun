@@ -1,27 +1,39 @@
-﻿using Autofac.Features.Indexed;
+﻿using Autofac;
+using Autofac.Features.Indexed;
 using Frierun.Server.Data;
 using Frierun.Server.Installers;
 
 namespace Frierun.Server;
 
-public class InstallerRegistry
+public class InstallerRegistry : IDisposable
 {
-    private readonly IIndex<string, IEnumerable<Func<Application, IInstaller>>> _installerFactories;
+    private readonly IIndex<string, ProviderScopeBuilder> _scopeBuilders;
+    private readonly ILifetimeScope _container;
+    private readonly ILifetimeScope _baseScope;
+    private readonly Dictionary<Application, ILifetimeScope> _applicationScopes = new();
     private readonly Dictionary<Application, IList<IInstaller>> _applicationInstallers = new();
     private readonly Dictionary<Type, IList<IInstaller>> _installers = new();
-    private readonly Dictionary<Type, IUninstaller> _uninstallers = new();
+    private readonly Dictionary<InstallerDefinition, IHandler> _handlers = new();
 
     public InstallerRegistry(
         State state,
-        IEnumerable<IInstaller> staticInstallers,
-        IIndex<string, IEnumerable<Func<Application, IInstaller>>> installerFactories
+        IIndex<string, ProviderScopeBuilder> scopeBuilders,
+        ILifetimeScope container
     )
     {
-        _installerFactories = installerFactories;
+        _scopeBuilders = scopeBuilders;
+        _container = container;
 
-        foreach (var installer in staticInstallers)
+        var baseBuilder = _scopeBuilders["base"];
+        _baseScope = container.BeginLifetimeScope(builder => baseBuilder(builder));
+        foreach (var installer in _baseScope.Resolve<IEnumerable<IInstaller>>())
         {
             AddInstaller(installer);
+        }
+
+        foreach (var handler in _baseScope.Resolve<IEnumerable<IHandler>>())
+        {
+            AddHandler(handler);
         }
 
         foreach (var application in state.Applications)
@@ -31,6 +43,16 @@ public class InstallerRegistry
 
         state.ApplicationAdded += AddApplication;
         state.ApplicationRemoved += RemoveApplication;
+    }
+
+    public void Dispose()
+    {
+        foreach (var applicationScope in _applicationScopes.Values)
+        {
+            applicationScope.Dispose();
+        }
+
+        _baseScope.Dispose();
     }
 
     /// <summary>
@@ -44,17 +66,35 @@ public class InstallerRegistry
             return;
         }
 
+        if (_scopeBuilders.TryGetValue(packageName, out var scopeBuilder) == false)
+        {
+            return;
+        }
+
         if (_applicationInstallers.ContainsKey(application))
         {
             throw new Exception("Application already added to the registry");
         }
 
-        var installers = _installerFactories[packageName]
-            .Select(installerFactory => installerFactory(application))
-            .ToList();
+        var scope = _container.BeginLifetimeScope(
+            _scopeBuilders[packageName],
+            builder =>
+            {
+                builder.RegisterInstance(application).AsSelf().SingleInstance();
+                scopeBuilder(builder);
+            }
+        );
+
+        var installers = scope.Resolve<IEnumerable<IInstaller>>().ToList();
 
         installers.ForEach(AddInstaller);
         _applicationInstallers[application] = installers;
+        _applicationScopes[application] = scope;
+
+        foreach (var handler in scope.Resolve<IEnumerable<IHandler>>())
+        {
+            AddHandler(handler);
+        }
     }
 
     /// <summary>
@@ -68,41 +108,30 @@ public class InstallerRegistry
             return;
         }
 
-        if (!_applicationInstallers.TryGetValue(application, out var installers))
+        if (!_applicationInstallers.Remove(application, out var installers))
         {
             return;
         }
 
         foreach (var installer in installers)
         {
-            _uninstallers
-                .Where(pair => pair.Value == installer)
-                .ToList()
-                .ForEach(pair => _uninstallers.Remove(pair.Key));
+            _handlers.Remove(new InstallerDefinition(installer.GetType().Name, application.Name));
 
             _installers
                 .Values
                 .ToList()
                 .ForEach(list => list.Remove(installer));
         }
+
+        _applicationScopes[application].Dispose();
+        _applicationScopes.Remove(application);
     }
 
     /// <summary>
-    /// Adds object to the registry, checking all its interfaces for installers and uninstallers.
+    /// Adds object to the registry, checking all its interfaces for installers
     /// </summary>
-    private void AddInstaller(object installer)
+    private void AddInstaller(IInstaller installer)
     {
-        installer.GetType().GetInterfaces()
-            .Where(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IUninstaller<>))
-            .ToList()
-            .ForEach(
-                type =>
-                {
-                    var resourceType = type.GetGenericArguments()[0];
-                    _uninstallers[resourceType] = (IUninstaller)installer;
-                }
-            );
-
         installer.GetType().GetInterfaces()
             .Where(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IInstaller<>))
             .ToList()
@@ -117,11 +146,20 @@ public class InstallerRegistry
                     }
 
                     // Add the installer to the beginning of the list so that it is used first
-                    _installers[contractType].Insert(0, (IInstaller)installer);
+                    _installers[contractType].Insert(0, installer);
                 }
             );
     }
     
+    /// <summary>
+    /// Adds handler to the registry.
+    /// </summary>
+    private void AddHandler(IHandler handler)
+    {
+        var definition = new InstallerDefinition(handler.GetType().Name, handler.Application?.Name);
+        _handlers[definition] = handler;
+    }
+
     /// <summary>
     /// Gets possible installers for the resource type
     /// </summary>
@@ -138,21 +176,19 @@ public class InstallerRegistry
             {
                 continue;
             }
-            
+
             if (definition?.ApplicationName != null && installer.Application?.Name != definition.ApplicationName)
             {
                 continue;
             }
-            
+
             yield return installer;
         }
     }
-    
-    /// <summary>
-    /// Gets uninstaller for the resource type.
-    /// </summary>
-    public IUninstaller? GetUninstaller(Type resourceType)
+
+    public IHandler? GetHandler(string typeName, string? applicationName = null)
     {
-        return _uninstallers.GetValueOrDefault(resourceType);
+        var definition = new InstallerDefinition(typeName, applicationName);
+        return _handlers.GetValueOrDefault(definition);
     }
 }

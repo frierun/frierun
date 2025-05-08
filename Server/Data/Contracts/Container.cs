@@ -26,7 +26,6 @@ public record Container(
     [JsonIgnore] public ContractId<Network> NetworkId => new(NetworkName);
 
 
-    /// <inheritdoc />
     Contract IHasStrings.ApplyStringDecorator(Func<string, string> decorator)
     {
         return this with

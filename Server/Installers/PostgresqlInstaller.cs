@@ -4,19 +4,16 @@ using Frierun.Server.Data;
 namespace Frierun.Server.Installers;
 
 public class PostgresqlInstaller(
-    DockerService dockerService,
-    State state,
     Application application,
+    State state,
     ILogger<PostgresqlInstaller> logger)
-    : IInstaller<Postgresql>, IUninstaller<PostgresqlDatabase>
+    : IInstaller<Postgresql>, IHandler<PostgresqlDatabase>
 {
     private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
     private readonly string _rootPassword = application.Resources.OfType<GeneratedPassword>().First().Value;
 
-    /// <inheritdoc />
-    public Application? Application => application;
-    
-    /// <inheritdoc />
+    public Application Application => application;
+
     IEnumerable<InstallerInitializeResult> IInstaller<Postgresql>.Initialize(
         Postgresql contract,
         string prefix
@@ -32,28 +29,33 @@ public class PostgresqlInstaller(
             name = $"{baseName}{count}";
         }
 
-        var connectExternalContainer = new ConnectExternalContainer(_container.Name, contract.NetworkName);
         yield return new InstallerInitializeResult(
             contract with
             {
                 DatabaseName = name,
-                DependsOn = contract.DependsOn.Append(connectExternalContainer),
-            },
-            [connectExternalContainer]
+                DependsOn = contract.DependsOn.Append(contract.NetworkId)
+            }
         );
     }
 
-    /// <inheritdoc />
     Resource IInstaller<Postgresql>.Install(Postgresql contract, ExecutionPlan plan)
     {
+        var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
+
+        if (CountSameResources(network.Name, plan) == 0)
+        {
+            _container.AttachNetwork(network.Name);
+        }
+
         if (contract.Admin)
         {
-            return new PostgresqlDatabase(
-                User: "postgres",
-                Password: _rootPassword,
-                Database: "",
-                Host: _container.Name
-            );
+            return new PostgresqlDatabase(this)
+            {
+                User = "postgres",
+                Password = _rootPassword,
+                Host = _container.Name,
+                NetworkName = network.Name
+            };
         }
 
         var name = contract.DatabaseName;
@@ -75,12 +77,30 @@ public class PostgresqlInstaller(
             ]
         );
 
-
-        return new PostgresqlDatabase(name, password, name, _container.Name);
+        return new PostgresqlDatabase(this)
+        {
+            User = name,
+            Password = password,
+            Database = name,
+            Host = _container.Name,
+            NetworkName = network.Name
+        };
     }
 
-    /// <inheritdoc />
-    void IUninstaller<PostgresqlDatabase>.Uninstall(PostgresqlDatabase resource)
+    /// <summary>
+    /// Counts the number of resources with the same network name and handler
+    /// </summary>
+    private int CountSameResources(string networkName, ExecutionPlan? plan = null)
+    {
+        return state.Resources
+            .Concat(plan?.Resources.Values ?? Array.Empty<Resource>())
+            .OfType<PostgresqlDatabase>()
+            .Count(
+                resource => !resource.Uninstalled && resource.NetworkName == networkName && resource.Handler == this
+            );
+    }
+
+    void IHandler<PostgresqlDatabase>.Uninstall(PostgresqlDatabase resource)
     {
         if (resource.User != "postgres")
         {
@@ -90,6 +110,11 @@ public class PostgresqlInstaller(
                     $"DROP USER \"{resource.User}\""
                 ]
             );
+        }
+
+        if (CountSameResources(resource.NetworkName) <= 1)
+        {
+            _container.DetachNetwork(resource.NetworkName);
         }
     }
 
@@ -101,10 +126,7 @@ public class PostgresqlInstaller(
         var command = new List<string> { "psql", "-U", "postgres" };
         command.AddRange(sqlList.SelectMany(sql => new[] { "-c", sql }));
 
-        var result = dockerService.ExecInContainer(
-            _container.Name,
-            command
-        ).Result;
+        var result = _container.ExecInContainer(command).Result;
 
         logger.LogDebug(
             "Executed sql: {Sql}\nStdout: {Stdout}\nStderr: {Stderr}",

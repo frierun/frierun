@@ -7,6 +7,7 @@
 import type { Protocol } from "./protocol";
 
 export type DockerPortEndpointAllOf = {
+  name: string;
   ip: string;
   port: number;
   protocol: Protocol;

@@ -4,7 +4,6 @@ using Frierun.Server.Installers;
 namespace Frierun.Server.Data;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
-[JsonDerivedType(typeof(ConnectExternalContainer), nameof(ConnectExternalContainer))]
 [JsonDerivedType(typeof(Container), nameof(Container))]
 [JsonDerivedType(typeof(Dependency), nameof(Dependency))]
 [JsonDerivedType(typeof(Domain), nameof(Domain))]

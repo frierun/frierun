@@ -4,7 +4,9 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { IHandlerLazy } from "./iHandlerLazy";
 
 export interface Resource {
   Type: string;
+  Handler: IHandlerLazy;
 }

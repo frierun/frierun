@@ -14,7 +14,13 @@ public class ContractIdConverterTests : BaseTests
         var contractRegistry = Resolve<ContractRegistry>();
         var converter = new ContractIdConverter(contractRegistry);
         var name = Resolve<Faker>().Lorem.Word();
-        var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes($"\"Container:{name}\""));
+        var reader = new Utf8JsonReader(
+            Encoding.UTF8.GetBytes(
+                $"""
+                 "Container:{name}"
+                 """
+            )
+        );
         reader.Read();
         var options = new JsonSerializerOptions();
 
@@ -24,13 +30,17 @@ public class ContractIdConverterTests : BaseTests
         Assert.Equal(typeof(Container), result.Type);
         Assert.Equal(name, result.Name);
     }
-    
+
     [Fact]
     public void Read_ContainerWithoutName_ReturnsContractId()
     {
         var contractRegistry = Resolve<ContractRegistry>();
         var converter = new ContractIdConverter(contractRegistry);
-        var reader = new Utf8JsonReader("\"Container\""u8);
+        var reader = new Utf8JsonReader(
+            """
+            "Container"
+            """u8
+        );
         reader.Read();
         var options = new JsonSerializerOptions();
 
@@ -39,5 +49,5 @@ public class ContractIdConverterTests : BaseTests
         Assert.NotNull(result);
         Assert.Equal(typeof(Container), result.Type);
         Assert.Equal("", result.Name);
-    }    
+    }
 }

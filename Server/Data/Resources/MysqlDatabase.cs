@@ -1,8 +1,22 @@
-﻿namespace Frierun.Server.Data;
+﻿using System.Text.Json.Serialization;
+using Frierun.Server.Installers;
 
-public record MysqlDatabase(
-    string User,
-    string Password,
-    string Database,
-    string Host
-) : Resource;
+namespace Frierun.Server.Data;
+
+public class MysqlDatabase : Resource
+{
+    [JsonConstructor]
+    protected MysqlDatabase(Lazy<IHandler> lazyHandler) : base(lazyHandler)
+    {
+    }
+
+    public MysqlDatabase(IHandler handler) : base(handler)
+    {
+    }
+    
+    public required string User { get; init; }
+    public required string Password { get; init; }
+    public required string Host { get; init; }
+    public string? Database { get; init; }
+    public required string NetworkName { get; init; }
+}

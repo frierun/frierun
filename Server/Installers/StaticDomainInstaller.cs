@@ -1,17 +1,23 @@
 ﻿using Frierun.Server.Data;
+using Frierun.Server.Installers.Base;
 
 namespace Frierun.Server.Installers;
 
 public class StaticDomainInstaller(State state, Application application)
-    : IInstaller<Domain>, IUninstaller<ResolvedDomain>
+    : IInstaller<Domain>
 {
-    private readonly string _domainName = application.Resources.OfType<ResolvedParameter>().First().Value ?? "";
-    private readonly bool _isInternal = application.Resources.OfType<ResolvedSelector>().First().Value == "Yes";
+    private readonly string _domainName = application.Resources
+        .OfType<ResolvedParameter>()
+        .First(parameter => parameter.Name == "Domain")
+        .Value ?? "";
 
-    /// <inheritdoc />
-    public Application? Application => application;
+    private readonly bool _isInternal = application.Resources
+        .OfType<ResolvedParameter>()
+        .First(parameter => parameter.Name == "Internal")
+        .Value == "Yes";
 
-    /// <inheritdoc />
+    public Application Application => application;
+
     IEnumerable<InstallerInitializeResult> IInstaller<Domain>.Initialize(Domain contract, string prefix)
     {
         if (contract.Subdomain != null && !IsSubdomainExist(contract.Subdomain))
@@ -47,12 +53,11 @@ public class StaticDomainInstaller(State state, Application application)
         return state.Resources.OfType<ResolvedDomain>().Any(c => c.Value == fullDomain);
     }
 
-    /// <inheritdoc />
-    Resource? IInstaller<Domain>.Install(Domain contract, ExecutionPlan plan)
+    Resource IInstaller<Domain>.Install(Domain contract, ExecutionPlan plan)
     {
         var domain = string.IsNullOrEmpty(contract.Subdomain)
             ? _domainName
             : $"{contract.Subdomain}.{_domainName}";
-        return new ResolvedDomain(domain, _isInternal);
+        return new ResolvedDomain(new EmptyHandler()) { Value = domain, IsInternal = _isInternal };
     }
 }

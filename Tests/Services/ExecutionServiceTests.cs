@@ -4,7 +4,7 @@ using Frierun.Server.Installers;
 using NSubstitute;
 using Substitute = NSubstitute.Substitute;
 
-namespace Frierun.Tests.Services;
+namespace Frierun.Tests;
 
 public class ExecutionServiceTests : BaseTests
 {

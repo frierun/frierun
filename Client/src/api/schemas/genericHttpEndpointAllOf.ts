@@ -8,4 +8,6 @@
 export type GenericHttpEndpointAllOf = {
   url: string;
   readonly host: string;
+  readonly port: number;
+  readonly ssl: boolean;
 };

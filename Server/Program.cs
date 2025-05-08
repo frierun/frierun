@@ -22,6 +22,8 @@ builder.Services.AddSwaggerGen(
         options.UseOneOfForPolymorphism();
         options.UseAllOfForInheritance();
         options.EnableAnnotations(true, true);
+        
+        options.SchemaFilter<LazyHandlerSchemaFilter>();
     }
 );
 builder.Services.AddAntiforgery(

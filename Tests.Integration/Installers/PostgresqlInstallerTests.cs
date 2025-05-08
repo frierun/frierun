@@ -4,19 +4,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Tests.Integration.Installers;
 
-public class PostgresqlInstallerTests : BaseTests
+public class PostgresqlInstallerTests : TestWithDocker
 {
     [Fact]
     public async Task Install_PostgresqlContract_CredentialsAreCorrect()
     {
-        var state = Services.GetRequiredService<State>();
-        Assert.Empty(state.Applications);
-
         var dbPackage = Services.GetRequiredService<PackageRegistry>().Find("postgresql");
         Assert.NotNull(dbPackage);
 
         var dbApplication = InstallPackage(dbPackage);
-        Assert.NotNull(dbApplication);
 
         // wait for database to start
         Thread.Sleep(15000);
@@ -27,7 +23,6 @@ public class PostgresqlInstallerTests : BaseTests
             Contracts = dbPackage.Contracts.Append(new Postgresql())
         };
         var application = InstallPackage(package);
-        Assert.NotNull(application);
 
         var container = application.Resources.OfType<DockerContainer>().First();
         var database = application.Resources.OfType<PostgresqlDatabase>().First();
@@ -37,10 +32,9 @@ public class PostgresqlInstallerTests : BaseTests
         Assert.NotEmpty(database.Password);
 
         // try to connect to the database from the client
-        var dockerService = Services.GetRequiredService<DockerService>();
         var sql =
             "CREATE TABLE Test (col int);INSERT INTO Test VALUES (123);UPDATE Test SET col = 2*col;SELECT * FROM Test;";
-        var result = await dockerService.ExecInContainer(
+        var result = await DockerService.ExecInContainer(
             container.Name,
             [
                 "psql",
@@ -54,21 +48,15 @@ public class PostgresqlInstallerTests : BaseTests
         // clean up
         UninstallApplication(application);
         UninstallApplication(dbApplication);
-
-        Assert.Empty(state.Applications);
     }
 
     [Fact]
     public async Task Install_PostgresqlAdminContract_CredentialsAreCorrect()
     {
-        var state = Services.GetRequiredService<State>();
-        Assert.Empty(state.Applications);
-
         var dbPackage = Services.GetRequiredService<PackageRegistry>().Find("postgresql");
         Assert.NotNull(dbPackage);
 
         var dbApplication = InstallPackage(dbPackage);
-        Assert.NotNull(dbApplication);
 
         // wait for database to start
         Thread.Sleep(15000);
@@ -79,20 +67,18 @@ public class PostgresqlInstallerTests : BaseTests
             Contracts = dbPackage.Contracts.Append(new Postgresql(Admin: true))
         };
         var application = InstallPackage(package);
-        Assert.NotNull(application);
 
         var container = application.Resources.OfType<DockerContainer>().First();
         var database = application.Resources.OfType<PostgresqlDatabase>().First();
         Assert.Equal("postgres", database.User);
-        Assert.Empty(database.Database);
+        Assert.Null(database.Database);
         Assert.Equal("postgresql", database.Host);
         Assert.NotEmpty(database.Password);
 
         // try to connect to the database from the client
-        var dockerService = Services.GetRequiredService<DockerService>();
         var sql =
             "SELECT CASE WHEN rolsuper='t' THEN 123+123 ELSE 123 END FROM pg_authid WHERE rolname=CURRENT_USER;";
-        var (stdout, _) = await dockerService.ExecInContainer(
+        var (stdout, _) = await DockerService.ExecInContainer(
             container.Name,
             [
                 "psql",
@@ -106,7 +92,5 @@ public class PostgresqlInstallerTests : BaseTests
         // clean up
         UninstallApplication(application);
         UninstallApplication(dbApplication);
-
-        Assert.Empty(state.Applications);
     }
 }

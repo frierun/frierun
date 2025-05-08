@@ -5,7 +5,8 @@
  * OpenAPI spec version: 1.0
  */
 
-export type DockerAttachedNetworkAllOf = {
-  containerName: string;
-  networkName: string;
-};
+export interface IHandlerLazy {
+  TypeName: string;
+  /** @nullable */
+  ApplicationName?: string | null;
+}

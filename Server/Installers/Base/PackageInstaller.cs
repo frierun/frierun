@@ -2,12 +2,10 @@
 
 namespace Frierun.Server.Installers.Base;
 
-public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
+public class PackageInstaller : IInstaller<Package>
 {
-    /// <inheritdoc />
     public Application? Application => null;
     
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Package>.Initialize(Package package, string prefix)
     {
         var applicationUrl = package.ApplicationUrl;
@@ -42,14 +40,13 @@ public class PackageInstaller : IInstaller<Package>, IUninstaller<Application>
         );
     }
 
-    /// <inheritdoc />
     Resource IInstaller<Package>.Install(Package package, ExecutionPlan plan)
     {
-        return new Application(
-            Name: package.Prefix!,
-            Package: package,
-            Url: package.ApplicationUrl,
-            Description: package.ApplicationDescription
-        );
+        return new Application(new EmptyHandler()){
+            Name = package.Prefix!,
+            Package = package,
+            Url = package.ApplicationUrl,
+            Description = package.ApplicationDescription
+        };
     }
 }

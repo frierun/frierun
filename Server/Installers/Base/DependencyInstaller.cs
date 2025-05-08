@@ -4,10 +4,8 @@ namespace Frierun.Server.Installers.Base;
 
 public class DependencyInstaller : IInstaller<Dependency>
 {
-    /// <inheritdoc />
     public Application? Application => null;
 
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Dependency>.Initialize(Dependency contract, string prefix)
     {
         yield return new InstallerInitializeResult(

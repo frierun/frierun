@@ -1,15 +1,12 @@
-﻿using Frierun.Server;
-using Frierun.Server.Data;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Frierun.Server.Data;
 using File = Frierun.Server.Data.File;
 
 namespace Tests.Integration.Installers.Docker;
 
-public class FileInstallerTests : BaseTests
+public class FileInstallerTests : TestWithDocker
 {
     private async Task InstallAndCheck(File contract, Func<string, Task> checkContainer)
     {
-        var state = Services.GetRequiredService<State>();
         var package = new Package(
             Name: "test-package",
             Contracts:
@@ -25,7 +22,6 @@ public class FileInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         var volume = application.Resources.OfType<DockerVolume>().FirstOrDefault();
         Assert.NotNull(volume);
         var container = application.Resources.OfType<DockerContainer>().First();
@@ -33,7 +29,6 @@ public class FileInstallerTests : BaseTests
         await checkContainer(container.Name);
 
         UninstallApplication(application);
-        Assert.Empty(state.Applications);
     }
 
     [Fact]
@@ -46,8 +41,7 @@ public class FileInstallerTests : BaseTests
             ),
             async containerName =>
             {
-                var dockerService = Services.GetRequiredService<DockerService>();
-                var (stdout, _) = await dockerService.ExecInContainer(
+                var (stdout, _) = await DockerService.ExecInContainer(
                     containerName,
                     [
                         "cat",
@@ -70,8 +64,7 @@ public class FileInstallerTests : BaseTests
             ),
             async containerName =>
             {
-                var dockerService = Services.GetRequiredService<DockerService>();
-                var (stdout, _) = await dockerService.ExecInContainer(
+                var (stdout, _) = await DockerService.ExecInContainer(
                     containerName,
                     [
                         "stat",
@@ -96,8 +89,7 @@ public class FileInstallerTests : BaseTests
             ),
             async containerName =>
             {
-                var dockerService = Services.GetRequiredService<DockerService>();
-                var (stdout, _) = await dockerService.ExecInContainer(
+                var (stdout, _) = await DockerService.ExecInContainer(
                     containerName,
                     [
                         "stat",
@@ -122,8 +114,7 @@ public class FileInstallerTests : BaseTests
             ),
             async containerName =>
             {
-                var dockerService = Services.GetRequiredService<DockerService>();
-                var (stdout, _) = await dockerService.ExecInContainer(
+                var (stdout, _) = await DockerService.ExecInContainer(
                     containerName,
                     [
                         "stat",
@@ -140,7 +131,6 @@ public class FileInstallerTests : BaseTests
     [Fact]
     public void Install_LocalPath_PutsFile()
     {
-        var state = Services.GetRequiredService<State>();
         var directory = Directory.CreateTempSubdirectory();
         var fileName = "test-file.txt";
         var filePath = Path.Combine(directory.FullName, fileName);
@@ -163,15 +153,11 @@ public class FileInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.NotNull(application);
-        
-        
         Assert.True(System.IO.File.Exists(filePath));
         Assert.Equal("test-text", System.IO.File.ReadAllText(filePath));
-        
+
         UninstallApplication(application);
-        Assert.Empty(state.Applications);
-        
+
         directory.Delete(true);
     }
 }

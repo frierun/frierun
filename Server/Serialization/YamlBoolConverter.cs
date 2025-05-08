@@ -21,7 +21,6 @@ public class YamlBoolConverter : JsonConverter<bool>
         "0"
     };
     
-    /// <inheritdoc />
     public override bool Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         var value = reader.GetString();
@@ -43,7 +42,6 @@ public class YamlBoolConverter : JsonConverter<bool>
         throw new Exception($"Invalid boolean value: {value}");
     }
 
-    /// <inheritdoc />
     public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options)
     {
         throw new NotSupportedException();

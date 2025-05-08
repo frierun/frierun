@@ -3,16 +3,14 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers;
 
-public class MysqlInstaller(DockerService dockerService, State state, Application application)
-    : IInstaller<Mysql>, IUninstaller<MysqlDatabase>
+public class MysqlInstaller(Application application, State state)
+    : IInstaller<Mysql>, IHandler<MysqlDatabase>
 {
     private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
     private readonly string _rootPassword = application.Resources.OfType<GeneratedPassword>().First().Value;
 
-    /// <inheritdoc />
-    public Application? Application => application;
+    public Application Application => application;
 
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Mysql>.Initialize(Mysql contract, string prefix)
     {
         var baseName = contract.DatabaseName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
@@ -25,28 +23,32 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
             name = $"{baseName}{count}";
         }
 
-        var connectExternalContainer = new ConnectExternalContainer(_container.Name, contract.NetworkName);
         yield return new InstallerInitializeResult(
             contract with
             {
                 DatabaseName = name,
-                DependsOn = contract.DependsOn.Append(connectExternalContainer),
-            },
-            [connectExternalContainer]
+                DependsOn = contract.DependsOn.Append(contract.NetworkId)
+            }
         );
     }
 
-    /// <inheritdoc />
     Resource IInstaller<Mysql>.Install(Mysql contract, ExecutionPlan plan)
     {
+        var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
+        if (CountSameResources(network.Name, plan) == 0)
+        {
+            _container.AttachNetwork(network.Name);
+        }
+
         if (contract.Admin)
         {
-            return new MysqlDatabase(
-                User: "root",
-                Password: _rootPassword,
-                Database: "",
-                Host: _container.Name
-            );
+            return new MysqlDatabase(this)
+            {
+                User = "root",
+                Password = _rootPassword,
+                Host = _container.Name,
+                NetworkName = network.Name
+            };
         }
 
         var name = contract.DatabaseName;
@@ -70,11 +72,30 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
         );
 
 
-        return new MysqlDatabase(name, password, name, _container.Name);
+        return new MysqlDatabase(this)
+        {
+            User = name,
+            Password = password,
+            Database = name,
+            Host = _container.Name,
+            NetworkName = network.Name
+        };
     }
 
-    /// <inheritdoc />
-    void IUninstaller<MysqlDatabase>.Uninstall(MysqlDatabase resource)
+    /// <summary>
+    /// Counts the number of resources with the same network name and handler
+    /// </summary>
+    private int CountSameResources(string networkName, ExecutionPlan? plan = null)
+    {
+        return state.Resources
+            .Concat(plan?.Resources.Values ?? Array.Empty<Resource>())
+            .OfType<MysqlDatabase>()
+            .Count(
+                resource => !resource.Uninstalled && resource.NetworkName == networkName && resource.Handler == this
+            );
+    }
+
+    void IHandler<MysqlDatabase>.Uninstall(MysqlDatabase resource)
     {
         if (resource.User != "root")
         {
@@ -85,6 +106,11 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
                  """
             );
         }
+
+        if (CountSameResources(resource.NetworkName) <= 1)
+        {
+            _container.DetachNetwork(resource.NetworkName);
+        }
     }
 
     /// <summary>
@@ -92,9 +118,6 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
     /// </summary>
     private void RunSql(string sql)
     {
-        dockerService.ExecInContainer(
-            _container.Name,
-            ["mysql", "-u", "root", $"-p{_rootPassword}", "-e", sql]
-        ).Wait();
+        _container.ExecInContainer(["mysql", "-u", "root", $"-p{_rootPassword}", "-e", sql]).Wait();
     }
 }
