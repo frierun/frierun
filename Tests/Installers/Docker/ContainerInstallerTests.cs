@@ -7,15 +7,14 @@ public class ContainerInstallerTests : BaseTests
     [Fact]
     public void Install_Container_CreatesNetwork()
     {
-        TryInstallPackage("docker");
+        InstallPackage("docker");
         var package = Factory<Package>().Generate() with
         {
             Contracts = [Factory<Container>().Generate()]
         };
         
-        var application = TryInstallPackage(package);
+        var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         Assert.Single(application.Resources.OfType<DockerNetwork>());
     }
 }

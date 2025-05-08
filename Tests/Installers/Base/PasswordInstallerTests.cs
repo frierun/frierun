@@ -12,9 +12,8 @@ public class PasswordInstallerTests : BaseTests
             Contracts = [new Password()]
         };
 
-        var application = TryInstallPackage(package);
+        var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         var password = application.Resources.OfType<GeneratedPassword>().FirstOrDefault();
         Assert.NotNull(password);
         Assert.NotNull(password.Value);
@@ -29,9 +28,8 @@ public class PasswordInstallerTests : BaseTests
             Contracts = [new Password()]
         };
 
-        var application = TryInstallPackage(package);
+        var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         var password = application.Resources.OfType<GeneratedPassword>().FirstOrDefault();
         Assert.NotNull(password);
         Assert.Equal(application.Description, $"GeneratedPassword: {password.Value}");

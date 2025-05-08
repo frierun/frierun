@@ -160,34 +160,6 @@ public abstract class BaseTests
     /// </summary>
     protected Application InstallPackage(string name, IEnumerable<Contract>? overrides = null)
     {
-        var application = TryInstallPackage(name, overrides);
-        if (application == null)
-        {
-            throw new Exception($"Failed to install package {name}");
-        }
-
-        return application;
-    }
-    
-    /// <summary>
-    /// Installs package by name and returns application. Throws exception if installation fails.
-    /// </summary>
-    protected Application InstallPackage(Package package)
-    {
-        var application = TryInstallPackage(package);
-        if (application == null)
-        {
-            throw new Exception($"Failed to install package {package.Name}");
-        }
-
-        return application;
-    }
-
-    /// <summary>
-    /// Installs package by name and returns application
-    /// </summary>
-    protected Application? TryInstallPackage(string name, IEnumerable<Contract>? overrides = null)
-    {
         Resolve<PackageRegistry>().Load();
         var package = Resolve<PackageRegistry>().Find(name)
                       ?? throw new Exception($"Package {name} not found");
@@ -198,17 +170,17 @@ public abstract class BaseTests
             package = (Package)package.With(overridePackage);
         }
         
-        return TryInstallPackage(package);
+        return InstallPackage(package);
     }
-
+    
     /// <summary>
-    /// Installs package and returns application.
+    /// Installs package by name and returns application. Throws exception if installation fails.
     /// </summary>
-    protected Application? TryInstallPackage(Package package)
+    protected Application InstallPackage(Package package)
     {
         var executionService = Resolve<ExecutionService>();
         var installService = Resolve<InstallService>();
         var plan = executionService.Create(package);
-        return installService.Handle(plan);
+        return installService.Handle(plan) ?? throw new Exception($"Failed to install package {package.Name}");
     }
 }

@@ -6,7 +6,7 @@ public class PackageInstallerTests : BaseTests
 {
     public PackageInstallerTests()
     {
-        TryInstallPackage("docker");
+        InstallPackage("docker");
     }
 
     [Fact]
@@ -25,9 +25,8 @@ public class PackageInstallerTests : BaseTests
         };
         Assert.NotNull(package.ApplicationUrl);
 
-        var application = TryInstallPackage(package);
+        var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         Assert.Equal(package.ApplicationUrl, application.Url);
     }
     
@@ -47,9 +46,8 @@ public class PackageInstallerTests : BaseTests
             }
         };
 
-        var application = TryInstallPackage(package);
+        var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         Assert.Equal("http://127.0.0.1/", application.Url);
     }
     
@@ -68,9 +66,8 @@ public class PackageInstallerTests : BaseTests
             }
         };
 
-        var application = TryInstallPackage(package);
+        var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         Assert.Equal("tcp://127.0.0.1:2222", application.Url);
     }    
 }

@@ -19,9 +19,8 @@ public class DependencyInstallerTests : BaseTests
             ]
         };
 
-        var application = TryInstallPackage(package);
+        var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         var installedContracts = application.Resources.OfType<ResolvedParameter>();
         Assert.Equal(
             [contracts[0].Name, contracts[1].Name],

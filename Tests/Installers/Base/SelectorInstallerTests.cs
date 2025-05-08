@@ -63,9 +63,8 @@ public class SelectorInstallerTests : BaseTests
         );
         var package = Factory<Package>().Generate() with { Contracts = new List<Contract> { selector } };
 
-        var application = TryInstallPackage(package);
+        var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         var resolvedParameter = application.Resources.OfType<ResolvedParameter>().First(p => p.Name == contract.Name);
         Assert.Equal(contract.Value, resolvedParameter.Value);
     }

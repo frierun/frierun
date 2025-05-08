@@ -52,8 +52,7 @@ public class LazyHandlerConverterTests : BaseTests
     [Fact]
     public void Read_InstalledApplication_ReturnsHandler()
     {
-        var application = TryInstallPackage("docker");
-        Assert.NotNull(application);
+        var application = InstallPackage("docker");
         var type = typeof(ContainerInstaller);
         var converter = new LazyHandlerConverter(Resolve<Lazy<InstallerRegistry>>());
         var reader = new Utf8JsonReader(
@@ -99,8 +98,7 @@ public class LazyHandlerConverterTests : BaseTests
     [Fact]
     public void Write_InstalledApplication_WritesApplicationName()
     {
-        var application = TryInstallPackage("docker");
-        Assert.NotNull(application);
+        var application = InstallPackage("docker");
         var installerRegistry = Resolve<InstallerRegistry>();
         var type = typeof(ContainerInstaller);
         var handler = installerRegistry.GetHandler(type.Name, application.Name);

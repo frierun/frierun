@@ -9,7 +9,7 @@ public class VolumeInstallerTests : BaseTests
 {
     public VolumeInstallerTests()
     {
-        TryInstallPackage("docker");
+        InstallPackage("docker");
     }
 
     [Fact]
@@ -26,11 +26,9 @@ public class VolumeInstallerTests : BaseTests
             Contracts = [volume]
         };
 
-        var application1 = TryInstallPackage(package1);
-        var application2 = TryInstallPackage(package2);
+        var application1 = InstallPackage(package1);
+        var application2 = InstallPackage(package2);
 
-        Assert.NotNull(application1);
-        Assert.NotNull(application2);
         var volume1 = application1.Resources.OfType<DockerVolume>().First();
         var volume2 = application2.Resources.OfType<DockerVolume>().First();
         Assert.NotSame(volume1, volume2);
@@ -53,10 +51,8 @@ public class VolumeInstallerTests : BaseTests
             Contracts = [volume]
         };
 
-        var application1 = TryInstallPackage(package1);
-        var application2 = TryInstallPackage(package2);
-        Assert.NotNull(application1);
-        Assert.NotNull(application2);
+        var application1 = InstallPackage(package1);
+        var application2 = InstallPackage(package2);
         uninstallService.Handle(application1);
         uninstallService.Handle(application2);
 

@@ -11,10 +11,8 @@ public class PostgresqlInstallerTests : BaseTests
     
     public PostgresqlInstallerTests()
     {
-        TryInstallPackage("docker");
-        _providerApplication = TryInstallPackage("postgresql")
-                               ?? throw new Exception("Postgresql application not installed");
-        
+        InstallPackage("docker");
+        _providerApplication = InstallPackage("postgresql");
     }
 
     [Fact]
@@ -28,9 +26,8 @@ public class PostgresqlInstallerTests : BaseTests
             ]
         };
 
-        var application = TryInstallPackage(package);
+        var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         var database = application.Resources.OfType<PostgresqlDatabase>().First();
         Assert.Equal(package.Name, database.User);
         Assert.Equal(package.Name, database.Database);
@@ -55,9 +52,8 @@ public class PostgresqlInstallerTests : BaseTests
             ]
         };
 
-        var application = TryInstallPackage(package);
+        var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         Assert.Equal(2, application.Resources.OfType<PostgresqlDatabase>().Count());
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
             application.Name, 
@@ -76,8 +72,7 @@ public class PostgresqlInstallerTests : BaseTests
                 new Postgresql("second"),
             ]
         };
-        var application = TryInstallPackage(package);
-        Assert.NotNull(application);
+        var application = InstallPackage(package);
         
         Resolve<UninstallService>().Handle(application);
 

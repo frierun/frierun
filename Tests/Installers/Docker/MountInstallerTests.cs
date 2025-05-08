@@ -8,7 +8,7 @@ public class MountInstallerTests : BaseTests
     [Fact]
     public void Install_ContainerWithMount_CreatesVolume()
     {
-        TryInstallPackage("docker");
+        InstallPackage("docker");
         var container = Factory<Container>().Generate();
         var package = Factory<Package>().Generate() with
         {
@@ -18,9 +18,8 @@ public class MountInstallerTests : BaseTests
             ]
         };
         
-        var application = TryInstallPackage(package);
+        var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         Assert.Single(application.Resources.OfType<DockerVolume>());
     }
 }
