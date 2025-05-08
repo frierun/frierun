@@ -37,7 +37,8 @@ public class InstallerRegistryTests : BaseTests
     [Fact]
     public void GetInstaller_HasTraefik_ReturnsBothInstallers()
     {
-        InstallPackage("traefik");
+        TryInstallPackage("docker");
+        TryInstallPackage("traefik");
         var registry = Resolve<InstallerRegistry>();
 
         var result = registry.GetInstallers(typeof(HttpEndpoint)).ToList();
@@ -51,7 +52,8 @@ public class InstallerRegistryTests : BaseTests
     public void GetInstaller_AddTraefik_ReturnsBothInstallers()
     {
         var registry = Resolve<InstallerRegistry>();
-        InstallPackage("traefik");
+        TryInstallPackage("docker");
+        TryInstallPackage("traefik");
 
         var result = registry.GetInstallers(typeof(HttpEndpoint)).ToList();
 
@@ -63,7 +65,8 @@ public class InstallerRegistryTests : BaseTests
     [Fact]
     public void GetInstaller_RemoveTraefik_ReturnsDefaultInstaller()
     {
-        var application = InstallPackage("traefik") ?? throw new Exception("Application not found");
+        TryInstallPackage("docker");
+        var application = TryInstallPackage("traefik") ?? throw new Exception("Application not found");
         var registry = Resolve<InstallerRegistry>();
         Resolve<State>().RemoveApplication(application);
 
@@ -78,10 +81,11 @@ public class InstallerRegistryTests : BaseTests
     {
         var registry = Resolve<InstallerRegistry>();
         var uninstallService = Resolve<UninstallService>();
-        var application = InstallPackage("traefik");
+        TryInstallPackage("docker");
+        var application = TryInstallPackage("traefik");
         Assert.NotNull(application);
         uninstallService.Handle(application);
-        var application2 = InstallPackage("traefik");
+        var application2 = TryInstallPackage("traefik");
 
         var result = registry.GetInstallers(typeof(HttpEndpoint)).ToList();
 
@@ -95,8 +99,9 @@ public class InstallerRegistryTests : BaseTests
     [Fact]
     public void GetInstaller_TwoTraefik_FilteredByInstallerDefinition()
     {
-        var application1 = InstallPackage("traefik") ?? throw new Exception("Application not found");
-        var application2 = InstallPackage("traefik") ?? throw new Exception("Application not found");
+        TryInstallPackage("docker");
+        var application1 = TryInstallPackage("traefik") ?? throw new Exception("Application not found");
+        var application2 = TryInstallPackage("traefik") ?? throw new Exception("Application not found");
         var registry = Resolve<InstallerRegistry>();
 
         Assert.Equal(3, registry.GetInstallers(typeof(HttpEndpoint)).Count());
@@ -147,6 +152,7 @@ public class InstallerRegistryTests : BaseTests
     [MemberData(nameof(PackagesWithInstallers))]
     public void GetInstaller_InstallPackage_AddsInstaller(string packageName, Type installerType, Type contractType)
     {
+        TryInstallPackage("docker");
         var installerRegistry = Resolve<InstallerRegistry>();
         Assert.Empty(
             installerRegistry.GetInstallers(
@@ -155,7 +161,7 @@ public class InstallerRegistryTests : BaseTests
             )
         );
 
-        var application = InstallPackage(packageName);
+        var application = TryInstallPackage(packageName);
 
         Assert.NotNull(application);
         Assert.Equal(application.Name, packageName);
@@ -175,8 +181,9 @@ public class InstallerRegistryTests : BaseTests
         Type contractType
     )
     {
+        TryInstallPackage("docker");
         var installerRegistry = Resolve<InstallerRegistry>();
-        var application = InstallPackage(packageName);
+        var application = TryInstallPackage(packageName);
         Assert.NotNull(application);
 
         Resolve<UninstallService>().Handle(application);
@@ -223,10 +230,11 @@ public class InstallerRegistryTests : BaseTests
     [MemberData(nameof(PackagesWithHandlers))]
     public void GetHandler_InstallPackage_AddsHandler(string packageName, Type handlerType)
     {
+        TryInstallPackage("docker");
         var installerRegistry = Resolve<InstallerRegistry>();
         Assert.Null(installerRegistry.GetHandler(handlerType.Name, packageName));
 
-        var application = InstallPackage(packageName);
+        var application = TryInstallPackage(packageName);
 
         Assert.NotNull(application);
         Assert.NotNull(installerRegistry.GetHandler(handlerType.Name, packageName));
@@ -236,8 +244,9 @@ public class InstallerRegistryTests : BaseTests
     [MemberData(nameof(PackagesWithHandlers))]
     public void GetHandler_UninstallPackage_RemovesHandler(string packageName, Type handlerType)
     {
+        TryInstallPackage("docker");
         var installerRegistry = Resolve<InstallerRegistry>();
-        var application = InstallPackage(packageName);
+        var application = TryInstallPackage(packageName);
         Assert.NotNull(application);
 
         Resolve<UninstallService>().Handle(application);

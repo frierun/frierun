@@ -1,0 +1,15 @@
+﻿Name: "docker"
+ShortDescription: "Docker API socket"
+FullDescription: "Link to your Docker API socket. Allows to use Docker containers as a service."
+Tags: [ "provider" ]
+Contracts:
+  - Type: "Parameter"
+    Name: "Path"
+    DefaultValue: null
+    
+  - Type: "Selector"
+    Name: "Podman"
+    Options:
+      - Name: "No"
+      - Name: "Yes"
+        

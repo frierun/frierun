@@ -7,9 +7,10 @@ public class RedisInstallerTests : BaseTests
     [Fact]
     public void Install_PackageWithContract_CreatesDatabase()
     {
+        TryInstallPackage("docker");
         var package = Factory<Package>().Generate() with { Contracts = [new Redis()] };
 
-        var application = InstallPackage(package);
+        var application = TryInstallPackage(package);
 
         Assert.NotNull(application);
         Assert.Single(application.Resources.OfType<RedisDatabase>());

@@ -7,6 +7,11 @@ namespace Frierun.Tests.Installers.Docker;
 
 public class VolumeInstallerTests : BaseTests
 {
+    public VolumeInstallerTests()
+    {
+        TryInstallPackage("docker");
+    }
+
     [Fact]
     public void Install_TwoApplicationsWithSameVolume_AddsVolumeOnce()
     {
@@ -21,8 +26,8 @@ public class VolumeInstallerTests : BaseTests
             Contracts = [volume]
         };
 
-        var application1 = InstallPackage(package1);
-        var application2 = InstallPackage(package2);
+        var application1 = TryInstallPackage(package1);
+        var application2 = TryInstallPackage(package2);
 
         Assert.NotNull(application1);
         Assert.NotNull(application2);
@@ -48,8 +53,8 @@ public class VolumeInstallerTests : BaseTests
             Contracts = [volume]
         };
 
-        var application1 = InstallPackage(package1);
-        var application2 = InstallPackage(package2);
+        var application1 = TryInstallPackage(package1);
+        var application2 = TryInstallPackage(package2);
         Assert.NotNull(application1);
         Assert.NotNull(application2);
         uninstallService.Handle(application1);

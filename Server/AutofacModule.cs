@@ -4,7 +4,6 @@ using Docker.DotNet;
 using Frierun.Server.Data;
 using Frierun.Server.Installers;
 using Module = Autofac.Module;
-using ResolvedParameter = Autofac.Core.ResolvedParameter;
 
 namespace Frierun.Server;
 
@@ -22,24 +21,43 @@ public class AutofacModule : Module
                         .Where(type => type.Namespace?.StartsWith("Frierun.Server.Installers.Base") == true)
                         .AsImplementedInterfaces()
                         .SingleInstance();
-                    builder.RegisterAssemblyTypes(assembly)
-                        .Where(type => type.Namespace?.StartsWith("Frierun.Server.Installers.Docker") == true)
-                        .AsImplementedInterfaces()
-                        .SingleInstance();
-                    
-                    // Docker
-                    builder.RegisterType<DockerService>().AsSelf().SingleInstance();
-                    builder.Register<IDockerClient>(
-                            //_ => new DockerClientConfiguration(new Uri("npipe://./pipe/podman-machine-default")).CreateClient()
-                            _ => new DockerClientConfiguration().CreateClient()
-                        )
-                        .SingleInstance();
                 }
             )
             .Named<ProviderScopeBuilder>("base")
             .SingleInstance();
 
         // Package specific installers
+        builder.RegisterInstance<ProviderScopeBuilder>(
+                static builder =>
+                {
+                    var assembly = Assembly.GetExecutingAssembly();
+                    builder.RegisterAssemblyTypes(assembly)
+                        .Where(type => type.Namespace?.StartsWith("Frierun.Server.Installers.Docker") == true)
+                        .AsImplementedInterfaces()
+                        .SingleInstance();
+                    
+                    builder.RegisterType<DockerService>().AsSelf().SingleInstance();
+                    builder.Register<IDockerClient>(
+                            context =>
+                            {
+                                var application = context.Resolve<Application>();
+                                var parameter = application.Resources
+                                    .OfType<ResolvedParameter>()
+                                    .First(parameter => parameter.Name == "Path");
+                                
+                                var configuration = parameter.Value == null 
+                                    ? new DockerClientConfiguration() 
+                                    : new DockerClientConfiguration(new Uri(parameter.Value));
+                                
+                                return configuration.CreateClient();
+                            }
+                        )
+                        .SingleInstance();
+                }
+            )
+            .Named<ProviderScopeBuilder>("docker")
+            .SingleInstance();
+        
         builder.RegisterInstance<ProviderScopeBuilder>(
                 static builder => builder.RegisterType<MysqlInstaller>()
                     .AsImplementedInterfaces()
@@ -92,7 +110,7 @@ public class AutofacModule : Module
 
         builder.RegisterType<StateSerializer>()
             .SingleInstance()
-            .WithParameter(ResolvedParameter.ForNamed<string>("stateFilePath"));
+            .WithParameter(Autofac.Core.ResolvedParameter.ForNamed<string>("stateFilePath"));
         builder.RegisterType<PackageSerializer>().SingleInstance();
 
 

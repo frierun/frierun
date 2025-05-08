@@ -3,9 +3,9 @@ using Frierun.Server.Installers.Base;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class LocalPathInstaller : IInstaller<Volume>
+public class LocalPathInstaller(Application application) : IInstaller<Volume>
 {
-    public Application? Application => null;
+    public Application Application => application;
 
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Volume>.Initialize(Volume contract, string prefix)

@@ -7,10 +7,10 @@ public class StaticDomainInstallerTests : BaseTests
     [Fact]
     public void Install_InternalDomainPackage_InstallInternalDomain()
     {
-        InstallPackage("static-domain");
+        TryInstallPackage("static-domain");
         var package = Factory<Package>().Generate() with { Contracts = [new Domain()] };
 
-        var application = InstallPackage(package);
+        var application = TryInstallPackage(package);
 
         Assert.NotNull(application);
         var domain = application.Resources.OfType<ResolvedDomain>().First();
@@ -20,13 +20,13 @@ public class StaticDomainInstallerTests : BaseTests
     [Fact]
     public void Install_ExternalDomainPackage_InstallExternalDomain()
     {
-        InstallPackage(
+        TryInstallPackage(
             "static-domain",
             [new Selector("Internal", SelectedOption: "No")]
         );
         var package = Factory<Package>().Generate() with { Contracts = [new Domain()] };
 
-        var application = InstallPackage(package);
+        var application = TryInstallPackage(package);
 
         Assert.NotNull(application);
         var domain = application.Resources.OfType<ResolvedDomain>().First();

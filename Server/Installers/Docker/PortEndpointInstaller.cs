@@ -4,9 +4,9 @@ using Frierun.Server.Installers.Base;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class PortEndpointInstaller(State state) : IInstaller<PortEndpoint>
+public class PortEndpointInstaller(Application application, State state) : IInstaller<PortEndpoint>
 {
-    public Application? Application => null;
+    public Application Application => application;
 
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<PortEndpoint>.Initialize(PortEndpoint contract, string prefix)

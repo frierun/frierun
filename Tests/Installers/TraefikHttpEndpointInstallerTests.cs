@@ -1,13 +1,17 @@
 ﻿using Docker.DotNet.Models;
 using Frierun.Server;
 using Frierun.Server.Data;
-using Frierun.Server.Installers;
 using NSubstitute;
 
 namespace Frierun.Tests.Installers;
 
 public class TraefikHttpEndpointInstallerTests : BaseTests
 {
+    public TraefikHttpEndpointInstallerTests()
+    {
+        InstallPackage("docker");
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -15,7 +19,6 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
     {
         InstallPackage("static-domain");
         var providerApplication = InstallPackage("traefik");
-        Assert.NotNull(providerApplication);
 
         var container = Factory<Container>().Generate();
         List<Contract> contracts =
@@ -32,7 +35,6 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         var resources = application.Resources.ToList();
         var endpointIndex = resources.FindIndex(r => r is GenericHttpEndpoint);
         var containerIndex = resources.FindIndex(r => r is DockerContainer);
@@ -50,7 +52,6 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         var endpointContract = application.Resources.OfType<GenericHttpEndpoint>().First();
         Assert.Equal(80, endpointContract.Port);
         Assert.False(endpointContract.Ssl);
@@ -69,7 +70,6 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         var endpointContract = application.Resources.OfType<GenericHttpEndpoint>().First();
         Assert.Equal(443, endpointContract.Port);
         Assert.True(endpointContract.Ssl);
@@ -94,7 +94,6 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         var endpointContract = application.Resources.OfType<GenericHttpEndpoint>().First();
         Assert.Equal(81, endpointContract.Port);
         Assert.False(endpointContract.Ssl);
@@ -113,7 +112,6 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
         
         var application = InstallPackage(package);
 
-        Assert.NotNull(application);
         var resources = application.Resources.OfType<TraefikHttpEndpoint>().ToList();
         Assert.Equal(2, resources.Count);
         Assert.Equal(application.Name, resources[0].NetworkName);
@@ -134,7 +132,6 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
         InstallPackage("traefik");
         var package = Factory<Package>().Generate() with { Contracts = Factory<HttpEndpoint>().Generate(2) };
         var application = InstallPackage(package);
-        Assert.NotNull(application);
 
         Resolve<UninstallService>().Handle(application);
 

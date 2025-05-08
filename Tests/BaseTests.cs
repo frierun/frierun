@@ -156,9 +156,37 @@ public abstract class BaseTests
     }
 
     /// <summary>
+    /// Installs package by name and returns application. Throws exception if installation fails.
+    /// </summary>
+    protected Application InstallPackage(string name, IEnumerable<Contract>? overrides = null)
+    {
+        var application = TryInstallPackage(name, overrides);
+        if (application == null)
+        {
+            throw new Exception($"Failed to install package {name}");
+        }
+
+        return application;
+    }
+    
+    /// <summary>
+    /// Installs package by name and returns application. Throws exception if installation fails.
+    /// </summary>
+    protected Application InstallPackage(Package package)
+    {
+        var application = TryInstallPackage(package);
+        if (application == null)
+        {
+            throw new Exception($"Failed to install package {package.Name}");
+        }
+
+        return application;
+    }
+
+    /// <summary>
     /// Installs package by name and returns application
     /// </summary>
-    protected Application? InstallPackage(string name, IEnumerable<Contract>? overrides = null)
+    protected Application? TryInstallPackage(string name, IEnumerable<Contract>? overrides = null)
     {
         Resolve<PackageRegistry>().Load();
         var package = Resolve<PackageRegistry>().Find(name)
@@ -170,13 +198,13 @@ public abstract class BaseTests
             package = (Package)package.With(overridePackage);
         }
         
-        return InstallPackage(package);
+        return TryInstallPackage(package);
     }
 
     /// <summary>
     /// Installs package and returns application.
     /// </summary>
-    protected Application? InstallPackage(Package package)
+    protected Application? TryInstallPackage(Package package)
     {
         var executionService = Resolve<ExecutionService>();
         var installService = Resolve<InstallService>();

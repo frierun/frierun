@@ -7,32 +7,25 @@ public class DependencyInstallerTests : BaseTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void Install_TwoContainerWithDependency_CorrectOrder(bool reverseOrder)
+    public void Install_TwoContactsWithDependency_CorrectOrder(bool reverseOrder)
     {
-        var containers = Factory<Container>().Generate(2);
-        List<Contract> contracts =
-        [
-            containers[0],
-            containers[1],
-            new Dependency(containers[0].Id, containers[1].Id)
-        ];
-        if (reverseOrder)
-        {
-            contracts.Reverse();
-        }
-
+        var contracts = Factory<Parameter>().Generate(2);
         var package = Factory<Package>().Generate() with
         {
-            Contracts = contracts
+            Contracts = [
+                reverseOrder ? contracts[1] : contracts[0],
+                reverseOrder ? contracts[0] : contracts[1],
+                new Dependency(contracts[0].Id, contracts[1].Id)
+            ]
         };
 
-        var application = InstallPackage(package);
+        var application = TryInstallPackage(package);
 
         Assert.NotNull(application);
-        var installedContainers = application.Resources.OfType<DockerContainer>();
+        var installedContracts = application.Resources.OfType<ResolvedParameter>();
         Assert.Equal(
-            [containers[0].ContainerName, containers[1].ContainerName],
-            installedContainers.Select(c => c.Name)
+            [contracts[0].Name, contracts[1].Name],
+            installedContracts.Select(c => c.Name)
         );
     }
 }

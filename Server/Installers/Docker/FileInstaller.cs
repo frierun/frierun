@@ -5,10 +5,10 @@ using Mount = Docker.DotNet.Models.Mount;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class FileInstaller(DockerService dockerService) : IInstaller<File>
+public class FileInstaller(Application application, DockerService dockerService) : IInstaller<File>
 {
     /// <inheritdoc />
-    public Application? Application => null;
+    public Application? Application => application;
     
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<File>.Initialize(File contract, string prefix)

@@ -3,10 +3,9 @@ using Mount = Frierun.Server.Data.Mount;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class MountInstaller : IInstaller<Mount>
+public class MountInstaller(Application application) : IInstaller<Mount>
 {
-    /// <inheritdoc />
-    public Application? Application => null;
+    public Application Application => application;
     
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Mount>.Initialize(Mount contract, string prefix)

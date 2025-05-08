@@ -3,6 +3,7 @@ using System.Text.Json;
 using Frierun.Server;
 using Frierun.Server.Installers;
 using Frierun.Server.Installers.Base;
+using Frierun.Server.Installers.Docker;
 
 namespace Frierun.Tests;
 
@@ -51,14 +52,14 @@ public class LazyHandlerConverterTests : BaseTests
     [Fact]
     public void Read_InstalledApplication_ReturnsHandler()
     {
-        var application = InstallPackage("mysql");
+        var application = TryInstallPackage("docker");
         Assert.NotNull(application);
-        var typeName = nameof(MysqlInstaller);
+        var type = typeof(ContainerInstaller);
         var converter = new LazyHandlerConverter(Resolve<Lazy<InstallerRegistry>>());
         var reader = new Utf8JsonReader(
             Encoding.UTF8.GetBytes(
                 $$"""
-                  {"TypeName":"{{typeName}}", "ApplicationName":"{{application.Name}}"}
+                  {"TypeName":"{{type.Name}}", "ApplicationName":"{{application.Name}}"}
                   """
             )
         );
@@ -67,7 +68,7 @@ public class LazyHandlerConverterTests : BaseTests
         var result = converter.Read(ref reader, typeof(IHandler), new JsonSerializerOptions());
 
         Assert.NotNull(result.Value);
-        Assert.IsType<MysqlInstaller>(result.Value);
+        Assert.IsType(type, result.Value);
     }
     
     [Fact]
@@ -98,11 +99,11 @@ public class LazyHandlerConverterTests : BaseTests
     [Fact]
     public void Write_InstalledApplication_WritesApplicationName()
     {
-        var application = InstallPackage("mysql");
+        var application = TryInstallPackage("docker");
         Assert.NotNull(application);
         var installerRegistry = Resolve<InstallerRegistry>();
-        var typeName = nameof(MysqlInstaller);
-        var handler = installerRegistry.GetHandler(typeName, application.Name);
+        var type = typeof(ContainerInstaller);
+        var handler = installerRegistry.GetHandler(type.Name, application.Name);
         Assert.NotNull(handler);
         var converter = new LazyHandlerConverter(Resolve<Lazy<InstallerRegistry>>());
         var memoryStream = new MemoryStream();
@@ -116,7 +117,7 @@ public class LazyHandlerConverterTests : BaseTests
 
         Assert.Equal(
             $$"""
-              {"TypeName":"{{typeName}}","ApplicationName":"{{application.Name}}"}
+              {"TypeName":"{{type.Name}}","ApplicationName":"{{application.Name}}"}
               """,
             result
         );

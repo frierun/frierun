@@ -3,10 +3,10 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class ContainerInstaller(DockerService dockerService, State state)
+public class ContainerInstaller(Application application, DockerService dockerService, State state)
     : IInstaller<Container>, IContainerHandler
 {
-    public Application? Application => null;
+    public Application Application => application;
 
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Container>.Initialize(Container contract, string prefix)

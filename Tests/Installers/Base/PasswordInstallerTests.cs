@@ -12,7 +12,7 @@ public class PasswordInstallerTests : BaseTests
             Contracts = [new Password()]
         };
 
-        var application = InstallPackage(package);
+        var application = TryInstallPackage(package);
 
         Assert.NotNull(application);
         var password = application.Resources.OfType<GeneratedPassword>().FirstOrDefault();
@@ -29,7 +29,7 @@ public class PasswordInstallerTests : BaseTests
             Contracts = [new Password()]
         };
 
-        var application = InstallPackage(package);
+        var application = TryInstallPackage(package);
 
         Assert.NotNull(application);
         var password = application.Resources.OfType<GeneratedPassword>().FirstOrDefault();

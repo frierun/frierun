@@ -3,9 +3,9 @@ using Frierun.Server.Installers.Base;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class VolumeInstaller(DockerService dockerService, State state) : IInstaller<Volume>, IHandler<DockerVolume>
+public class VolumeInstaller(Application application, DockerService dockerService, State state) : IInstaller<Volume>, IHandler<DockerVolume>
 {
-    public Application? Application => null;
+    public Application Application => application;
 
     /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Volume>.Initialize(Volume contract, string prefix)

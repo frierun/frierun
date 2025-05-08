@@ -9,6 +9,7 @@ public class PortHttpEndpointInstallerTests : BaseTests
     [InlineData(true)]
     public void Install_ContainerWithHttpEndpoint_InstallEndpointFirst(bool reverseOrder)
     {
+        TryInstallPackage("docker");
         var container = Factory<Container>().Generate();
         List<Contract> contracts =
         [
@@ -21,7 +22,7 @@ public class PortHttpEndpointInstallerTests : BaseTests
         }
         var package = Factory<Package>().Generate() with { Contracts = contracts };
 
-        var application = InstallPackage(package);
+        var application = TryInstallPackage(package);
 
         Assert.NotNull(application);
         var resources = application.Resources.ToList();

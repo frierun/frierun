@@ -27,6 +27,34 @@
       "Handler": {
         "TypeName": "EmptyHandler"
       }
-    }
+    },
+    {
+      "Name": "local docker",
+      "Package": "docker",
+      "Url": null,
+      "Description": null,
+      "Resources": [
+        {
+          "Type": "ResolvedParameter",
+          "Name": "Path",
+          "Value": null,
+          "Handler": {
+            "TypeName": "EmptyHandler"
+          }
+        },
+        {
+          "Type": "ResolvedParameter",
+          "Name": "Podman",
+          "Value": "No",
+          "Handler": {
+            "TypeName": "EmptyHandler"
+          }
+        }
+      ],
+      "RequiredApplications": [],
+      "Handler": {
+        "TypeName": "EmptyHandler"
+      }
+    }    
   ]
 }

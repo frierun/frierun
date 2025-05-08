@@ -8,23 +8,30 @@ namespace Frierun.Tests.Installers;
 
 public class MysqlInstallerTests : BaseTests
 {
+    private readonly Application _providerApplication;
+    
+    public MysqlInstallerTests()
+    {
+        TryInstallPackage("docker");
+        _providerApplication = TryInstallPackage("mysql")
+            ?? throw new Exception("Mysql application not installed");
+    }
+
     [Fact]
     public void Install_PackageWithContract_CreatesDatabase()
     {
-        var providerApplication = InstallPackage("mysql")
-                                  ?? throw new Exception("Mysql application not installed");
         var package = Factory<Package>().Generate() with { Contracts = [new Mysql()] };
 
-        var application = InstallPackage(package);
+        var application = TryInstallPackage(package);
 
         Assert.NotNull(application);
         var database = application.Resources.OfType<MysqlDatabase>().First();
         Assert.Equal(package.Name, database.User);
         Assert.Equal(package.Name, database.Database);
-        Assert.Equal([providerApplication.Name], application.RequiredApplications);
+        Assert.Contains(_providerApplication.Name, application.RequiredApplications);
         Assert.Equal(application.Name, database.NetworkName);
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
-            database.NetworkName, 
+            database.NetworkName,
             Arg.Any<NetworkConnectParameters>()
         );
     }
@@ -32,8 +39,6 @@ public class MysqlInstallerTests : BaseTests
     [Fact]
     public void Install_PackageWithTwoContracts_OnlyOneNetworkAttached()
     {
-        InstallPackage("mysql");
-
         var package = Factory<Package>().Generate() with
         {
             Contracts =
@@ -43,7 +48,7 @@ public class MysqlInstallerTests : BaseTests
             ]
         };
 
-        var application = InstallPackage(package);
+        var application = TryInstallPackage(package);
 
         Assert.NotNull(application);
         Assert.Equal(2, application.Resources.OfType<MysqlDatabase>().Count());
@@ -52,11 +57,10 @@ public class MysqlInstallerTests : BaseTests
             Arg.Any<NetworkConnectParameters>()
         );
     }
-    
+
     [Fact]
     public void Uninstall_PackageWithTwoContracts_OnlyOneNetworkDetached()
     {
-        InstallPackage("mysql");
         var package = Factory<Package>().Generate() with
         {
             Contracts =
@@ -65,14 +69,14 @@ public class MysqlInstallerTests : BaseTests
                 new Mysql("second"),
             ]
         };
-        var application = InstallPackage(package);
+        var application = TryInstallPackage(package);
         Assert.NotNull(application);
-        
+
         Resolve<UninstallService>().Handle(application);
 
         DockerClient.Networks.Received(1).DisconnectNetworkAsync(
             application.Name,
             Arg.Any<NetworkDisconnectParameters>()
         );
-    }    
+    }
 }
