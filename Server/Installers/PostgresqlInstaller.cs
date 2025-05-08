@@ -4,9 +4,8 @@ using Frierun.Server.Data;
 namespace Frierun.Server.Installers;
 
 public class PostgresqlInstaller(
-    DockerService dockerService,
-    State state,
     Application application,
+    State state,
     ILogger<PostgresqlInstaller> logger)
     : IInstaller<Postgresql>, IHandler<PostgresqlDatabase>
 {
@@ -80,7 +79,6 @@ public class PostgresqlInstaller(
             ]
         );
 
-
         return new PostgresqlDatabase(this)
         {
             User = name,
@@ -131,10 +129,7 @@ public class PostgresqlInstaller(
         var command = new List<string> { "psql", "-U", "postgres" };
         command.AddRange(sqlList.SelectMany(sql => new[] { "-c", sql }));
 
-        var result = dockerService.ExecInContainer(
-            _container.Name,
-            command
-        ).Result;
+        var result = _container.ExecInContainer(command).Result;
 
         logger.LogDebug(
             "Executed sql: {Sql}\nStdout: {Stdout}\nStderr: {Stderr}",

@@ -108,4 +108,10 @@ public class ContainerInstaller(DockerService dockerService, State state)
     {
         dockerService.DetachNetwork(networkName, container.Name).Wait();
     }
+
+    /// <inheritdoc />
+    public Task<(string stdout, string stderr)> ExecInContainer(DockerContainer container, IList<string> command)
+    {
+        return dockerService.ExecInContainer(container.Name, command);
+    }
 }

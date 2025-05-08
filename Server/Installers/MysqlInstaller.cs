@@ -3,7 +3,7 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers;
 
-public class MysqlInstaller(DockerService dockerService, State state, Application application)
+public class MysqlInstaller(Application application, State state)
     : IInstaller<Mysql>, IHandler<MysqlDatabase>
 {
     private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
@@ -121,9 +121,6 @@ public class MysqlInstaller(DockerService dockerService, State state, Applicatio
     /// </summary>
     private void RunSql(string sql)
     {
-        dockerService.ExecInContainer(
-            _container.Name,
-            ["mysql", "-u", "root", $"-p{_rootPassword}", "-e", sql]
-        ).Wait();
+        _container.ExecInContainer(["mysql", "-u", "root", $"-p{_rootPassword}", "-e", sql]).Wait();
     }
 }

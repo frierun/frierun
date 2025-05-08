@@ -27,6 +27,11 @@ public class DockerContainer : Resource
     {
         Handler.DetachNetwork(this, networkName);
     }
+    
+    public Task<(string stdout, string stderr)> ExecInContainer(IList<string> command)
+    {
+        return Handler.ExecInContainer(this, command);
+    }
 
     public required string Name { get; init; }
     public required string NetworkName { get; init; }
