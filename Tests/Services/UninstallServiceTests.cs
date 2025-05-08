@@ -1,7 +1,7 @@
 ﻿using Frierun.Server;
 using Frierun.Server.Data;
 
-namespace Frierun.Tests.Services;
+namespace Frierun.Tests;
 
 public class UninstallServiceTests : BaseTests
 {

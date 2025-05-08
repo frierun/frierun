@@ -4,7 +4,7 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Substitute = NSubstitute.Substitute;
 
-namespace Frierun.Tests.Services;
+namespace Frierun.Tests;
 
 public class InstallServiceTests : BaseTests
 {

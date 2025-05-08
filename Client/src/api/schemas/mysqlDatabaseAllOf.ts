@@ -8,6 +8,8 @@
 export type MysqlDatabaseAllOf = {
   user: string;
   password: string;
-  database: string;
   host: string;
+  /** @nullable */
+  database?: string | null;
+  networkName: string;
 };

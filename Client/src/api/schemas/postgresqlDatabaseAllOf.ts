@@ -8,6 +8,8 @@
 export type PostgresqlDatabaseAllOf = {
   user: string;
   password: string;
-  database: string;
   host: string;
+  /** @nullable */
+  database?: string | null;
+  networkName: string;
 };

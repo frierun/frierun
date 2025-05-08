@@ -3,7 +3,7 @@ using Frierun.Server.Data;
 using Frierun.Server.Installers;
 using Frierun.Server.Installers.Base;
 
-namespace Frierun.Tests.Services;
+namespace Frierun.Tests;
 
 public class InstallerRegistryTests : BaseTests
 {
