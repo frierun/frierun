@@ -26,6 +26,14 @@ public class AutofacModule : Module
                         .Where(type => type.Namespace?.StartsWith("Frierun.Server.Installers.Docker") == true)
                         .AsImplementedInterfaces()
                         .SingleInstance();
+                    
+                    // Docker
+                    builder.RegisterType<DockerService>().AsSelf().SingleInstance();
+                    builder.Register<IDockerClient>(
+                            //_ => new DockerClientConfiguration(new Uri("npipe://./pipe/podman-machine-default")).CreateClient()
+                            _ => new DockerClientConfiguration().CreateClient()
+                        )
+                        .SingleInstance();
                 }
             )
             .Named<ProviderScopeBuilder>("base")
@@ -76,17 +84,8 @@ public class AutofacModule : Module
         builder.RegisterType<InstallerRegistry>().AsSelf().SingleInstance();
         builder.RegisterType<StateManager>().AsSelf().SingleInstance();
         builder.RegisterType<UninstallService>().AsSelf().SingleInstance();
-
-        // Docker
-        builder.RegisterType<DockerService>().AsSelf().SingleInstance();
-        builder.Register<IDockerClient>(
-                //_ => new DockerClientConfiguration(new Uri("npipe://./pipe/podman-machine-default")).CreateClient()
-                _ => new DockerClientConfiguration().CreateClient()
-            )
-            .SingleInstance();
-
-
-        // Services/Serialization
+        
+        // Serialization
         builder.Register<string>(_ => Path.Combine(Storage.DirectoryName, "state.json"))
             .Named<string>("stateFilePath")
             .SingleInstance();
