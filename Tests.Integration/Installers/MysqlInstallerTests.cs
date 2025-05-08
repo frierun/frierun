@@ -35,10 +35,9 @@ public class MysqlInstallerTests : TestWithDocker
         Assert.NotNull(database.Database);
 
         // try to connect to the database from the client
-        var dockerService = Services.GetRequiredService<DockerService>();
         var query =
             "CREATE TABLE Test (ID int);INSERT INTO Test VALUES (123);UPDATE Test SET ID = 2*ID;SELECT * FROM Test;";
-        var result = await dockerService.ExecInContainer(
+        var result = await DockerService.ExecInContainer(
             container.Name,
             [
                 "mysql",
@@ -85,10 +84,9 @@ public class MysqlInstallerTests : TestWithDocker
         Assert.NotEmpty(database.Password);
 
         // try to connect to the database from the client
-        var dockerService = Services.GetRequiredService<DockerService>();
         var query =
             "SHOW GRANTS";
-        var result = await dockerService.ExecInContainer(
+        var result = await DockerService.ExecInContainer(
             container.Name,
             [
                 "mysql",

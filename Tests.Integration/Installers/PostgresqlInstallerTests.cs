@@ -32,10 +32,9 @@ public class PostgresqlInstallerTests : TestWithDocker
         Assert.NotEmpty(database.Password);
 
         // try to connect to the database from the client
-        var dockerService = Services.GetRequiredService<DockerService>();
         var sql =
             "CREATE TABLE Test (col int);INSERT INTO Test VALUES (123);UPDATE Test SET col = 2*col;SELECT * FROM Test;";
-        var result = await dockerService.ExecInContainer(
+        var result = await DockerService.ExecInContainer(
             container.Name,
             [
                 "psql",
@@ -77,10 +76,9 @@ public class PostgresqlInstallerTests : TestWithDocker
         Assert.NotEmpty(database.Password);
 
         // try to connect to the database from the client
-        var dockerService = Services.GetRequiredService<DockerService>();
         var sql =
             "SELECT CASE WHEN rolsuper='t' THEN 123+123 ELSE 123 END FROM pg_authid WHERE rolname=CURRENT_USER;";
-        var (stdout, _) = await dockerService.ExecInContainer(
+        var (stdout, _) = await DockerService.ExecInContainer(
             container.Name,
             [
                 "psql",

@@ -27,8 +27,6 @@ public class RedisInstallerTests : TestWithDocker
         Assert.Equal("redis-client-redis", database.Host);
         
         // try to connect to the database from the client
-        var dockerService = Services.GetRequiredService<DockerService>();
-
         var queries = new[]{
                 "SET test_key 123",
                 "INCRBY test_key 123",
@@ -44,7 +42,7 @@ public class RedisInstallerTests : TestWithDocker
                 "-h", database.Host,
             };
             command.AddRange(query.Split(" "));
-            (stdout, _) = await dockerService.ExecInContainer(
+            (stdout, _) = await DockerService.ExecInContainer(
                 container.Name,
                 command
             );
