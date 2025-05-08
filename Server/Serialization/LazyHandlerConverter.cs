@@ -6,7 +6,6 @@ namespace Frierun.Server;
 
 public class LazyHandlerConverter(Lazy<InstallerRegistry> lazyInstallerRegistry) : JsonConverter<Lazy<IHandler>>
 {
-    /// <inheritdoc />
     public override Lazy<IHandler> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         string typeName = string.Empty;
@@ -60,7 +59,6 @@ public class LazyHandlerConverter(Lazy<InstallerRegistry> lazyInstallerRegistry)
         );
     }
 
-    /// <inheritdoc />
     public override void Write(Utf8JsonWriter writer, Lazy<IHandler> lazy, JsonSerializerOptions options)
     {
         var value = lazy.Value;

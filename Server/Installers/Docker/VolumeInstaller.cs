@@ -7,7 +7,6 @@ public class VolumeInstaller(Application application, DockerService dockerServic
 {
     public Application Application => application;
 
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Volume>.Initialize(Volume contract, string prefix)
     {
         if (contract.VolumeName != null || contract.Path != null)
@@ -34,7 +33,6 @@ public class VolumeInstaller(Application application, DockerService dockerServic
         );
     }
 
-    /// <inheritdoc />
     Resource IInstaller<Volume>.Install(Volume contract, ExecutionPlan plan)
     {
         if (contract.Path != null)
@@ -52,7 +50,6 @@ public class VolumeInstaller(Application application, DockerService dockerServic
         return new DockerVolume(this) { Name = volumeName };
     }
 
-    /// <inheritdoc />
     void IHandler<DockerVolume>.Uninstall(DockerVolume resource)
     {
         if (state.Resources.OfType<DockerVolume>().Count(dockerVolume => dockerVolume.Name == resource.Name) > 1)

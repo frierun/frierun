@@ -8,7 +8,6 @@ public class ContainerInstaller(Application application, DockerService dockerSer
 {
     public Application Application => application;
 
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Container>.Initialize(Container contract, string prefix)
     {
         var baseName = contract.ContainerName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
@@ -30,7 +29,6 @@ public class ContainerInstaller(Application application, DockerService dockerSer
         );
     }
 
-    /// <inheritdoc />
     Resource IInstaller<Container>.Install(Container contract, ExecutionPlan plan)
     {
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
@@ -91,25 +89,21 @@ public class ContainerInstaller(Application application, DockerService dockerSer
         return new DockerContainer(this) { Name = contract.ContainerName!, NetworkName = network.Name };
     }
 
-    /// <inheritdoc />
     void IHandler<DockerContainer>.Uninstall(DockerContainer resource)
     {
         dockerService.RemoveContainer(resource.Name).Wait();
     }
 
-    /// <inheritdoc />
     public void AttachNetwork(DockerContainer container, string networkName)
     {
         dockerService.AttachNetwork(networkName, container.Name).Wait();
     }
 
-    /// <inheritdoc />
     public void DetachNetwork(DockerContainer container, string networkName)
     {
         dockerService.DetachNetwork(networkName, container.Name).Wait();
     }
 
-    /// <inheritdoc />
     public Task<(string stdout, string stderr)> ExecInContainer(DockerContainer container, IList<string> command)
     {
         return dockerService.ExecInContainer(container.Name, command);

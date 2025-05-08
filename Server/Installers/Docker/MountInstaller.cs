@@ -7,7 +7,6 @@ public class MountInstaller(Application application) : IInstaller<Mount>
 {
     public Application Application => application;
     
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Mount>.Initialize(Mount contract, string prefix)
     {
         yield return new InstallerInitializeResult(
@@ -19,7 +18,6 @@ public class MountInstaller(Application application) : IInstaller<Mount>
         );
     }
     
-    /// <inheritdoc />
     Resource? IInstaller<Mount>.Install(Mount contract, ExecutionPlan plan)
     {
         var containerContract = plan.GetContract(contract.ContainerId);

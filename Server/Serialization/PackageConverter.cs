@@ -6,7 +6,6 @@ namespace Frierun.Server;
 
 public class PackageConverter(PackageRegistry packageRegistry) : JsonConverter<Package>
 {
-    /// <inheritdoc />
     public override Package? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         var name = reader.GetString();
@@ -17,7 +16,6 @@ public class PackageConverter(PackageRegistry packageRegistry) : JsonConverter<P
         return packageRegistry.Find(name);
     }
 
-    /// <inheritdoc />
     public override void Write(Utf8JsonWriter writer, Package value, JsonSerializerOptions options)
     {
         writer.WriteStringValue(value.Name);

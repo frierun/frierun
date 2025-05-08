@@ -45,7 +45,6 @@ public class InstallerRegistry : IDisposable
         state.ApplicationRemoved += RemoveApplication;
     }
 
-    /// <inheritdoc />
     public void Dispose()
     {
         foreach (var applicationScope in _applicationScopes.Values)

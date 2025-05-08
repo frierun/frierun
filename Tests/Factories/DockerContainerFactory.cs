@@ -5,7 +5,6 @@ namespace Frierun.Tests.Factories;
 
 public sealed class DockerContainerFactory : Faker<DockerContainer>
 {
-    /// <inheritdoc />
     public DockerContainerFactory()
     {
         StrictMode(true);

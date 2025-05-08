@@ -13,7 +13,6 @@ public record PortEndpoint(
     public string ContainerName { get; init; } = ContainerName ?? "";
     [JsonIgnore] public ContractId<Container> ContainerId => new (ContainerName);
 
-    /// <inheritdoc />
     public override Contract With(Contract other)
     {
         if (other is not PortEndpoint endpoint || other.Id != Id)

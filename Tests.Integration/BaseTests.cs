@@ -15,7 +15,6 @@ public class BaseTests : IDisposable
         ClearState();
     }
 
-    /// <inheritdoc />
     public void Dispose()
     {
         var dockerService = Services.GetRequiredService<DockerService>();

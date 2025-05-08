@@ -9,7 +9,6 @@ namespace Frierun.Server;
 
 public class AutofacModule : Module
 {
-    /// <inheritdoc />
     protected override void Load(ContainerBuilder builder)
     {
         // Installers

@@ -14,7 +14,6 @@ public class PostgresqlInstaller(
 
     public Application Application => application;
 
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Postgresql>.Initialize(
         Postgresql contract,
         string prefix
@@ -39,7 +38,6 @@ public class PostgresqlInstaller(
         );
     }
 
-    /// <inheritdoc />
     Resource IInstaller<Postgresql>.Install(Postgresql contract, ExecutionPlan plan)
     {
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
@@ -102,7 +100,6 @@ public class PostgresqlInstaller(
             );
     }
 
-    /// <inheritdoc />
     void IHandler<PostgresqlDatabase>.Uninstall(PostgresqlDatabase resource)
     {
         if (resource.User != "postgres")

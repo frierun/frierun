@@ -14,7 +14,6 @@ public class DockerContainer : Resource
     {
     }
 
-    /// <inheritdoc />
     [JsonIgnore]
     public override IContainerHandler Handler => (IContainerHandler)base.Handler;
     

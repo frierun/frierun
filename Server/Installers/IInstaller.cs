@@ -17,7 +17,6 @@ public interface IInstaller<in TContract> : IInstaller
         return null;
     }
 
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller.Initialize(Contract contract, string prefix)
     {
         foreach (var result in Initialize((TContract)contract, prefix))
@@ -69,7 +68,6 @@ public interface IInstaller<in TContract> : IInstaller
         }
     }
 
-    /// <inheritdoc />
     [DebuggerStepThrough]
     Resource? IInstaller.Install(Contract contract, ExecutionPlan plan)
     {

@@ -8,7 +8,6 @@ public class NetworkInstaller(Application application, DockerService dockerServi
 {
     public Application Application => application;
 
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Network>.Initialize(Network contract, string prefix)
     {
         var baseName = contract.NetworkName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
@@ -29,7 +28,6 @@ public class NetworkInstaller(Application application, DockerService dockerServi
         );
     }
 
-    /// <inheritdoc />
     Resource IInstaller<Network>.Install(Network contract, ExecutionPlan plan)
     {
         var networkName = contract.NetworkName!;
@@ -39,7 +37,6 @@ public class NetworkInstaller(Application application, DockerService dockerServi
         return new DockerNetwork(this) { Name = networkName };
     }
 
-    /// <inheritdoc />
     void IHandler<DockerNetwork>.Uninstall(DockerNetwork resource)
     {
         dockerService.RemoveNetwork(resource.Name).Wait();

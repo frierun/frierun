@@ -6,7 +6,6 @@ public class RedisInstaller : IInstaller<Redis>
 {
     public Application? Application => null;
 
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Redis>.Initialize(Redis contract, string prefix)
     {
         yield return new InstallerInitializeResult(
@@ -29,7 +28,6 @@ public class RedisInstaller : IInstaller<Redis>
         );
     }
 
-    /// <inheritdoc />
     Resource IInstaller<Redis>.Install(Redis contract, ExecutionPlan plan)
     {
         var container = plan.GetResource<DockerContainer>(contract.ContainerId);

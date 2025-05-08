@@ -6,7 +6,6 @@ public class SelectorInstaller : IInstaller<Selector>
 {
     public Application? Application => null;
 
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Selector>.Initialize(Selector contract, string prefix)
     {
         if (contract.SelectedOption != null)
@@ -27,8 +26,7 @@ public class SelectorInstaller : IInstaller<Selector>
         }
     }
 
-    /// <inheritdoc />
-    Resource? IInstaller<Selector>.Install(Selector contract, ExecutionPlan plan)
+    Resource IInstaller<Selector>.Install(Selector contract, ExecutionPlan plan)
     {
         return new ResolvedParameter(new EmptyHandler()) { Name = contract.Name, Value = contract.SelectedOption };
     }

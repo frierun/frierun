@@ -16,7 +16,6 @@ public class TraefikHttpEndpointInstaller(Application application, State state)
 
     public Application Application => application;
 
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix)
     {
         yield return new InstallerInitializeResult(
@@ -28,7 +27,6 @@ public class TraefikHttpEndpointInstaller(Application application, State state)
         );
     }
 
-    /// <inheritdoc />
     Resource IInstaller<HttpEndpoint>.Install(HttpEndpoint contract, ExecutionPlan plan)
     {
         var domainResource = plan.GetResource<ResolvedDomain>(contract.DomainId);
@@ -101,7 +99,6 @@ public class TraefikHttpEndpointInstaller(Application application, State state)
             );
     }
 
-    /// <inheritdoc />
     void IHandler<TraefikHttpEndpoint>.Uninstall(TraefikHttpEndpoint resource)
     {
         if (CountSameResources(resource.NetworkName) <= 1)

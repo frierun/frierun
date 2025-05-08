@@ -15,7 +15,6 @@ public record Package(
     public IReadOnlyList<string> Tags { get; init; } = Tags ?? Array.Empty<string>();
     public IEnumerable<Contract> Contracts { get; init; } = Contracts ?? Array.Empty<Contract>();
 
-    /// <inheritdoc />
     public Contract ApplyStringDecorator(Func<string, string> decorator)
     {
         return this with
@@ -25,7 +24,6 @@ public record Package(
         };
     }
 
-    /// <inheritdoc />
     public override Contract With(Contract other)
     {
         if (other is not Package package || other.Id != Id)

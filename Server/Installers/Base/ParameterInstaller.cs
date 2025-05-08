@@ -6,7 +6,6 @@ public class ParameterInstaller : IInstaller<Parameter>
 {
     public Application? Application => null;
 
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Parameter>.Initialize(Parameter contract, string prefix)
     {
         var value = contract.Value ?? contract.DefaultValue;
@@ -16,7 +15,6 @@ public class ParameterInstaller : IInstaller<Parameter>
         );
     }
 
-    /// <inheritdoc />
     Resource IInstaller<Parameter>.Install(Parameter contract, ExecutionPlan plan)
     {
         return new ResolvedParameter(new EmptyHandler()) { Name = contract.Name, Value = contract.Value };

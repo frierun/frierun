@@ -12,7 +12,6 @@ public record HttpEndpoint(
     [JsonIgnore] public ContractId<Container> ContainerId => new(ContainerName);
     [JsonIgnore] public ContractId<Domain> DomainId => new(Name);
 
-    /// <inheritdoc />
     public override Contract With(Contract other)
     {
         if (other is not HttpEndpoint endpoint || other.Id != Id)

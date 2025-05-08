@@ -6,7 +6,6 @@ public class PackageInstaller : IInstaller<Package>
 {
     public Application? Application => null;
     
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Package>.Initialize(Package package, string prefix)
     {
         var applicationUrl = package.ApplicationUrl;
@@ -41,7 +40,6 @@ public class PackageInstaller : IInstaller<Package>
         );
     }
 
-    /// <inheritdoc />
     Resource IInstaller<Package>.Install(Package package, ExecutionPlan plan)
     {
         return new Application(new EmptyHandler()){

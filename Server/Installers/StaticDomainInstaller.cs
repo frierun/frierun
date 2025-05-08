@@ -18,7 +18,6 @@ public class StaticDomainInstaller(State state, Application application)
 
     public Application Application => application;
 
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Domain>.Initialize(Domain contract, string prefix)
     {
         if (contract.Subdomain != null && !IsSubdomainExist(contract.Subdomain))
@@ -54,7 +53,6 @@ public class StaticDomainInstaller(State state, Application application)
         return state.Resources.OfType<ResolvedDomain>().Any(c => c.Value == fullDomain);
     }
 
-    /// <inheritdoc />
     Resource IInstaller<Domain>.Install(Domain contract, ExecutionPlan plan)
     {
         var domain = string.IsNullOrEmpty(contract.Subdomain)

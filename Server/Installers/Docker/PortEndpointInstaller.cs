@@ -8,7 +8,6 @@ public class PortEndpointInstaller(Application application, State state) : IInst
 {
     public Application Application => application;
 
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<PortEndpoint>.Initialize(PortEndpoint contract, string prefix)
     {
         int port = contract.DestinationPort == 0 ? contract.Port : contract.DestinationPort;
@@ -32,7 +31,6 @@ public class PortEndpointInstaller(Application application, State state) : IInst
         );
     }
 
-    /// <inheritdoc />
     Resource IInstaller<PortEndpoint>.Install(PortEndpoint contract, ExecutionPlan plan)
     {
         var containerContract = plan.GetContract(contract.ContainerId);

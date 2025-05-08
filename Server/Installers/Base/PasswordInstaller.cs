@@ -7,7 +7,6 @@ public class PasswordInstaller : IInstaller<Password>
 {
     public Application? Application => null;
 
-    /// <inheritdoc />
     Resource IInstaller<Password>.Install(Password contract, ExecutionPlan plan)
     {
         var password = RandomNumberGenerator.GetString(

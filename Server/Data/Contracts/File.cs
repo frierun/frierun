@@ -14,7 +14,6 @@ public record File(
     public string VolumeName { get; } = VolumeName ?? "";
     [JsonIgnore] public ContractId<Volume> VolumeId => new(VolumeName);
     
-    /// <inheritdoc />
     Contract IHasStrings.ApplyStringDecorator(Func<string, string> decorator)
     {
         return this with

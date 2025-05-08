@@ -7,7 +7,6 @@ public record ContractId<TContract>(
 ) : ContractId(typeof(TContract), Name)
     where TContract : Contract
 {
-    /// <inheritdoc />
     public override string ToString()
     {
         return $"{Type.Name}:{Name}";
@@ -19,7 +18,6 @@ public abstract record ContractId(
     string Name
 )
 {
-    /// <inheritdoc />
     public virtual bool Equals(ContractId? other)
     {
         if (other is null)
@@ -35,7 +33,6 @@ public abstract record ContractId(
         return Type == other.Type && Name == other.Name;
     }
 
-    /// <inheritdoc />
     public override int GetHashCode()
     {
         return HashCode.Combine(Type, Name);

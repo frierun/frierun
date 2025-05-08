@@ -6,7 +6,6 @@ public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>
 {
     public Application? Application => null;
 
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix)
     {
         var portEndpoint = new PortEndpoint(
@@ -22,7 +21,6 @@ public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>
         );
     }
 
-    /// <inheritdoc />
     Resource IInstaller<HttpEndpoint>.Install(HttpEndpoint contract, ExecutionPlan plan)
     {
         var portEndpoint = plan.GetResource<DockerPortEndpoint>(

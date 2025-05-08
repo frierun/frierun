@@ -6,7 +6,6 @@ namespace Frierun.Tests.Factories;
 
 public sealed class ApplicationFactory : Faker<Application>
 {
-    /// <inheritdoc />
     public ApplicationFactory(Faker<Package> packageFactory)
     {
         StrictMode(true);

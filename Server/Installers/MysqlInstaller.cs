@@ -11,7 +11,6 @@ public class MysqlInstaller(Application application, State state)
 
     public Application Application => application;
 
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Mysql>.Initialize(Mysql contract, string prefix)
     {
         var baseName = contract.DatabaseName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
@@ -33,7 +32,6 @@ public class MysqlInstaller(Application application, State state)
         );
     }
 
-    /// <inheritdoc />
     Resource IInstaller<Mysql>.Install(Mysql contract, ExecutionPlan plan)
     {
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
@@ -97,7 +95,6 @@ public class MysqlInstaller(Application application, State state)
             );
     }
 
-    /// <inheritdoc />
     void IHandler<MysqlDatabase>.Uninstall(MysqlDatabase resource)
     {
         if (resource.User != "root")
