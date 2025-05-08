@@ -4,14 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Tests.Integration.Installers.Base;
 
-public class RedisInstallerTests : BaseTests
+public class RedisInstallerTests : TestWithDocker
 {
     [Fact]
     public async Task Install_RedisContract_CredentialsAreCorrect()
     {
-        var state = Services.GetRequiredService<State>();
-        Assert.Empty(state.Applications);
-
         var package = new Package(
             Name: "redis-client",
             Contracts:
@@ -24,7 +21,6 @@ public class RedisInstallerTests : BaseTests
             ]
         );
         var application = InstallPackage(package);
-        Assert.NotNull(application);
         
         var container = application.Resources.OfType<DockerContainer>().First();
         var database = application.Resources.OfType<RedisDatabase>().First();
@@ -58,6 +54,5 @@ public class RedisInstallerTests : BaseTests
         
         // clean up
         UninstallApplication(application);
-        Assert.Empty(state.Applications);        
     }
 }

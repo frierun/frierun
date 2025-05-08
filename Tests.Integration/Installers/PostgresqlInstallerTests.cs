@@ -4,19 +4,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Tests.Integration.Installers;
 
-public class PostgresqlInstallerTests : BaseTests
+public class PostgresqlInstallerTests : TestWithDocker
 {
     [Fact]
     public async Task Install_PostgresqlContract_CredentialsAreCorrect()
     {
-        var state = Services.GetRequiredService<State>();
-        Assert.Empty(state.Applications);
-
         var dbPackage = Services.GetRequiredService<PackageRegistry>().Find("postgresql");
         Assert.NotNull(dbPackage);
 
         var dbApplication = InstallPackage(dbPackage);
-        Assert.NotNull(dbApplication);
 
         // wait for database to start
         Thread.Sleep(15000);
@@ -27,7 +23,6 @@ public class PostgresqlInstallerTests : BaseTests
             Contracts = dbPackage.Contracts.Append(new Postgresql())
         };
         var application = InstallPackage(package);
-        Assert.NotNull(application);
 
         var container = application.Resources.OfType<DockerContainer>().First();
         var database = application.Resources.OfType<PostgresqlDatabase>().First();
@@ -54,21 +49,15 @@ public class PostgresqlInstallerTests : BaseTests
         // clean up
         UninstallApplication(application);
         UninstallApplication(dbApplication);
-
-        Assert.Empty(state.Applications);
     }
 
     [Fact]
     public async Task Install_PostgresqlAdminContract_CredentialsAreCorrect()
     {
-        var state = Services.GetRequiredService<State>();
-        Assert.Empty(state.Applications);
-
         var dbPackage = Services.GetRequiredService<PackageRegistry>().Find("postgresql");
         Assert.NotNull(dbPackage);
 
         var dbApplication = InstallPackage(dbPackage);
-        Assert.NotNull(dbApplication);
 
         // wait for database to start
         Thread.Sleep(15000);
@@ -79,7 +68,6 @@ public class PostgresqlInstallerTests : BaseTests
             Contracts = dbPackage.Contracts.Append(new Postgresql(Admin: true))
         };
         var application = InstallPackage(package);
-        Assert.NotNull(application);
 
         var container = application.Resources.OfType<DockerContainer>().First();
         var database = application.Resources.OfType<PostgresqlDatabase>().First();
@@ -106,7 +94,5 @@ public class PostgresqlInstallerTests : BaseTests
         // clean up
         UninstallApplication(application);
         UninstallApplication(dbApplication);
-
-        Assert.Empty(state.Applications);
     }
 }

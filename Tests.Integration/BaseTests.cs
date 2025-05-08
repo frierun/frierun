@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Tests.Integration;
 
-public class BaseTests : IDisposable
+public abstract class BaseTests
 {
     private readonly WebApplicationFactory<Program> _factory = new();
     protected IServiceProvider Services => _factory.Services;
@@ -13,12 +13,6 @@ public class BaseTests : IDisposable
     protected BaseTests()
     {
         ClearState();
-    }
-
-    public void Dispose()
-    {
-        var dockerService = Services.GetRequiredService<DockerService>();
-        dockerService.Prune().Wait();
     }
 
     protected HttpClient CreateClient()
@@ -34,11 +28,11 @@ public class BaseTests : IDisposable
             state.RemoveApplication(application);
         }
     }
-    
+
     /// <summary>
     /// Installs package by name and returns application
     /// </summary>
-    protected Application? InstallPackage(string name)
+    protected Application InstallPackage(string name)
     {
         Services.GetRequiredService<PackageRegistry>().Load();
         var package = Services.GetRequiredService<PackageRegistry>().Find(name)
@@ -47,12 +41,13 @@ public class BaseTests : IDisposable
         return InstallPackage(package);
     }
 
-    protected Application? InstallPackage(Package package)
+    protected Application InstallPackage(Package package)
     {
         var plan = Services.GetRequiredService<ExecutionService>().Create(package);
-        return Services.GetRequiredService<InstallService>().Handle(plan);
+        return Services.GetRequiredService<InstallService>().Handle(plan) ??
+               throw new Exception($"Package {package.Name} not installed");
     }
-    
+
     protected void UninstallApplication(Application application)
     {
         Services.GetRequiredService<UninstallService>().Handle(application);
