@@ -15,5 +15,5 @@ public class ResolvedParameter : Resource
     }
     
     public required string Name { get; init; }
-    public string? Value { get; init; }
+    public required string Value { get; init; }
 }

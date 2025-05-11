@@ -44,7 +44,7 @@ public class AutofacModule : Module
                                     .OfType<ResolvedParameter>()
                                     .First(parameter => parameter.Name == "Path");
                                 
-                                var configuration = parameter.Value == null 
+                                var configuration = parameter.Value == "" 
                                     ? new DockerClientConfiguration() 
                                     : new DockerClientConfiguration(new Uri(parameter.Value));
                                 

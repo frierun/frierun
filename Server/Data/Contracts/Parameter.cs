@@ -2,8 +2,8 @@
 
 public record Parameter(
     string Name,
-    string? Value = null,
-    string? DefaultValue = null
+    string? DefaultValue = null,
+    string? Value = null
 ) : Contract(Name)
 {
     public override Contract With(Contract other)
