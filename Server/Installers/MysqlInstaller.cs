@@ -35,10 +35,7 @@ public class MysqlInstaller(Application application, State state)
     Resource IInstaller<Mysql>.Install(Mysql contract, ExecutionPlan plan)
     {
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
-        if (CountSameResources(network.Name, plan) == 0)
-        {
-            _container.AttachNetwork(network.Name);
-        }
+        _container.AttachNetwork(network.Name);
 
         if (contract.Admin)
         {
@@ -81,20 +78,7 @@ public class MysqlInstaller(Application application, State state)
             NetworkName = network.Name
         };
     }
-
-    /// <summary>
-    /// Counts the number of resources with the same network name and handler
-    /// </summary>
-    private int CountSameResources(string networkName, ExecutionPlan? plan = null)
-    {
-        return state.Resources
-            .Concat(plan?.Resources.Values ?? Array.Empty<Resource>())
-            .OfType<MysqlDatabase>()
-            .Count(
-                resource => !resource.Uninstalled && resource.NetworkName == networkName && resource.Handler == this
-            );
-    }
-
+    
     void IHandler<MysqlDatabase>.Uninstall(MysqlDatabase resource)
     {
         if (resource.User != "root")
@@ -107,10 +91,7 @@ public class MysqlInstaller(Application application, State state)
             );
         }
 
-        if (CountSameResources(resource.NetworkName) <= 1)
-        {
-            _container.DetachNetwork(resource.NetworkName);
-        }
+        _container.DetachNetwork(resource.NetworkName);
     }
 
     /// <summary>

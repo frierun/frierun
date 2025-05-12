@@ -35,11 +35,8 @@ public class TraefikHttpEndpointInstaller(Application application, State state)
 
         var containerContract = plan.GetContract(contract.ContainerId);
         var network = plan.GetResource<DockerNetwork>(containerContract.NetworkId);
-        
-        if (CountSameResources(network.Name, plan) == 0)
-        {
-            _container.AttachNetwork(network.Name);
-        }
+
+        _container.AttachNetwork(network.Name);
 
         string? certResolver = null;
         if (!domainResource.IsInternal)
@@ -85,25 +82,9 @@ public class TraefikHttpEndpointInstaller(Application application, State state)
             NetworkName = network.Name
         };
     }
-    
-    /// <summary>
-    /// Counts the number of resources with the same network name and handler
-    /// </summary>
-    private int CountSameResources(string networkName, ExecutionPlan? plan = null)
-    {
-        return state.Resources
-            .Concat(plan?.Resources.Values ?? Array.Empty<Resource>())
-            .OfType<TraefikHttpEndpoint>()
-            .Count(
-                resource => !resource.Uninstalled && resource.NetworkName == networkName && resource.Handler == this
-            );
-    }
 
     void IHandler<TraefikHttpEndpoint>.Uninstall(TraefikHttpEndpoint resource)
     {
-        if (CountSameResources(resource.NetworkName) <= 1)
-        {
-            _container.DetachNetwork(resource.NetworkName);
-        }
+        _container.DetachNetwork(resource.NetworkName);
     }
 }

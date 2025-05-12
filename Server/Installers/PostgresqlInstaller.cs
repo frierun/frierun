@@ -42,10 +42,7 @@ public class PostgresqlInstaller(
     {
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
 
-        if (CountSameResources(network.Name, plan) == 0)
-        {
-            _container.AttachNetwork(network.Name);
-        }
+        _container.AttachNetwork(network.Name);
 
         if (contract.Admin)
         {
@@ -87,19 +84,6 @@ public class PostgresqlInstaller(
         };
     }
 
-    /// <summary>
-    /// Counts the number of resources with the same network name and handler
-    /// </summary>
-    private int CountSameResources(string networkName, ExecutionPlan? plan = null)
-    {
-        return state.Resources
-            .Concat(plan?.Resources.Values ?? Array.Empty<Resource>())
-            .OfType<PostgresqlDatabase>()
-            .Count(
-                resource => !resource.Uninstalled && resource.NetworkName == networkName && resource.Handler == this
-            );
-    }
-
     void IHandler<PostgresqlDatabase>.Uninstall(PostgresqlDatabase resource)
     {
         if (resource.User != "postgres")
@@ -112,10 +96,7 @@ public class PostgresqlInstaller(
             );
         }
 
-        if (CountSameResources(resource.NetworkName) <= 1)
-        {
-            _container.DetachNetwork(resource.NetworkName);
-        }
+        _container.DetachNetwork(resource.NetworkName);
     }
 
     /// <summary>
