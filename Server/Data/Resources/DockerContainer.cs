@@ -20,10 +20,15 @@ public class DockerContainer : Resource
     [JsonInclude]
     private IDictionary<string, int> ConnectedNetworks { get; init; } = new Dictionary<string, int>();
     public required string Name { get; init; }
-    public required string NetworkName { get; init; }    
+    public required string NetworkName { get; init; }
     
     public void AttachNetwork(string networkName)
     {
+        if (networkName == NetworkName)
+        {
+            return;
+        }
+        
         if (ConnectedNetworks.TryGetValue(networkName, out var count))
         {
             ConnectedNetworks[networkName] = count + 1;
@@ -37,6 +42,11 @@ public class DockerContainer : Resource
     
     public void DetachNetwork(string networkName)
     {
+        if (networkName == NetworkName)
+        {
+            return;
+        }
+        
         if (ConnectedNetworks.TryGetValue(networkName, out var count))
         {
             if (count > 1)

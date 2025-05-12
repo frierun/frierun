@@ -3,7 +3,7 @@ using Frierun.Server.Installers.Base;
 
 namespace Frierun.Server.Installers;
 
-public class TraefikHttpEndpointInstaller(Application application, State state)
+public class TraefikHttpEndpointInstaller(Application application)
     : IInstaller<HttpEndpoint>, IHandler<TraefikHttpEndpoint>
 {
     private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
