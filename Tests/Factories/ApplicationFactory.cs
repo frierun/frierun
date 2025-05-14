@@ -8,7 +8,6 @@ public sealed class ApplicationFactory : Faker<Application>
 {
     public ApplicationFactory(Faker<Package> packageFactory)
     {
-        StrictMode(true);
         CustomInstantiator(f => new Application(NSubstitute.Substitute.For<IHandler>())
             {
                 Name = f.Lorem.Word()
@@ -19,7 +18,5 @@ public sealed class ApplicationFactory : Faker<Application>
         RuleFor(p => p.Description, f => f.Lorem.Sentence());
         RuleFor(p => p.Resources, _ => Array.Empty<Resource>());
         RuleFor(p => p.RequiredApplications, _ => Array.Empty<string>());
-        Ignore(p => p.Name);
-        Ignore(p => p.Uninstalled);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Installers;
+﻿using System.Diagnostics;
+using Frierun.Server.Installers;
 
 namespace Frierun.Server.Data;
 
@@ -6,12 +7,10 @@ public class ExecutionPlan : IExecutionPlan
 {
     private readonly InstallerRegistry _installerRegistry;
     private readonly Dictionary<ContractId, Contract> _contracts;
-    private readonly OrderedDictionary<ContractId, Resource?> _resources = new();
     private readonly DirectedAcyclicGraph<ContractId> _graph = new();
-    private readonly HashSet<Application> _requiredApplications = new();
+    private readonly HashSet<Application> _requiredApplications = [];
 
     public IReadOnlyDictionary<ContractId, Contract> Contracts => _contracts;
-    public IReadOnlyDictionary<ContractId, Resource?> Resources => _resources;
 
     public ExecutionPlan(
         Dictionary<ContractId, Contract> contracts,
@@ -23,7 +22,7 @@ public class ExecutionPlan : IExecutionPlan
 
         BuildGraph();
     }
-    
+
     /// <summary>
     /// Builds the graph of contracts.
     /// </summary>
@@ -61,10 +60,8 @@ public class ExecutionPlan : IExecutionPlan
     /// </summary>
     public Contract GetContract(ContractId contractId)
     {
-        if (_resources.ContainsKey(contractId))
-        {
-            throw new Exception($"Resource {contractId} already installed");
-        }
+        var contract = _contracts[contractId];
+        Debug.Assert(!contract.Installed);
 
         return _contracts[contractId];
     }
@@ -77,30 +74,40 @@ public class ExecutionPlan : IExecutionPlan
 
     public void UpdateContract(Contract contract)
     {
-        if (_resources.ContainsKey(contract))
-        {
-            throw new Exception($"Resource {contract.Id} already installed");
-        }
+        Debug.Assert(
+            !_contracts.TryGetValue(contract, out var existing) || !existing.Installed,
+            $"Contract is already installed"
+        );
 
         _contracts[contract] = contract;
     }
-    
+
     /// <summary>
     /// Installs all contracts in the execution plan.
     /// </summary>
     public Application Install()
     {
+        var installedContracts = new List<Contract>();
         _graph.RunDfs(
             contractId =>
             {
                 var contract = GetContract(contractId);
-                if (_resources.ContainsKey(contractId))
-                {
-                    throw new Exception($"Resource {contractId} already installed");
-                }
+                Debug.Assert(!contract.Installed);
+
                 var installer = GetInstaller(contract);
-                var resource = installer.Install(contract, this);
-                _resources[contract] = resource;
+                var installedContract = installer.Install(contract, this) with { Installed = true };
+                
+                Debug.Assert(installedContract.Id == contractId);
+                Debug.Assert(
+                    installedContract is not IHasResult { Result: null },
+                    "Result must be set for installed contract"
+                );
+
+                if (installedContract is not Package)
+                {
+                    installedContracts.Add(installedContract);
+                }
+                _contracts[contractId] = installedContract;
                 if (installer.Application != null)
                 {
                     _requiredApplications.Add(installer.Application);
@@ -108,41 +115,35 @@ public class ExecutionPlan : IExecutionPlan
             }
         );
 
-        var application = _resources.Values.OfType<Application>().First();
-        
+        var application = _contracts.Values.OfType<Package>().First().Result;
+        Debug.Assert(application != null);
+
         return new Application(application.Handler)
         {
             Name = application.Name,
             Package = application.Package,
             Description = application.Description,
             Url = application.Url,
-            Resources = _resources.Values
-                .OfType<Resource>()
-                .Where(resource => resource is not Application)
-                .ToList(),
+            Contracts = installedContracts,
             RequiredApplications = _requiredApplications.Select(app => app.Name).ToList()
         };
     }
 
-    public Resource? GetResource(ContractId contractId)
+    public Resource GetResource(ContractId contractId)
     {
-        if (!_resources.TryGetValue(contractId, out var resource))
-        {
-            throw new Exception($"Contract {contractId} not installed");
-        }
-
-        return resource;
+        return GetResource<Resource>(contractId);
     }
 
     public T GetResource<T>(ContractId contractId)
         where T : Resource
     {
-        var resource = GetResource(contractId);
-        if (resource == null)
-        {
-            throw new Exception($"Contract {contractId} didn't install resource");
-        }
+        var contract = _contracts[contractId];
+        Debug.Assert(contract.Installed, $"Contract is not installed");
+        Debug.Assert(contract is IHasResult, $"Contract does not have a result");
 
-        return (T)resource;
+        var result = ((IHasResult)contract).Result;
+        Debug.Assert(result is T, $"Contract result is of wrong type");
+
+        return (T)result;
     }
 }

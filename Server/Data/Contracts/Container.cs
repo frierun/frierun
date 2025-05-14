@@ -11,8 +11,9 @@ public record Container(
     string? NetworkName = null,
     IReadOnlyList<string>? Command = null,
     IReadOnlyDictionary<string, string>? Env = null,
-    IEnumerable<Action<CreateContainerParameters>>? Configure = null
-) : Contract(Name ?? ""), IHasStrings
+    IEnumerable<Action<CreateContainerParameters>>? Configure = null,
+    DockerContainer? Result = null
+) : Contract(Name ?? ""), IHasStrings, IHasResult<DockerContainer>
 {
     public IReadOnlyList<string> Command { get; init; } = Command ?? Array.Empty<string>();
     public IReadOnlyDictionary<string, string> Env { get; init; } = Env ?? new Dictionary<string, string>();
@@ -24,8 +25,7 @@ public record Container(
 
     public string NetworkName { get; init; } = NetworkName ?? "";
     [JsonIgnore] public ContractId<Network> NetworkId => new(NetworkName);
-
-
+    
     Contract IHasStrings.ApplyStringDecorator(Func<string, string> decorator)
     {
         return this with

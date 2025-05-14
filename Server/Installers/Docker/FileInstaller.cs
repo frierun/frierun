@@ -19,7 +19,7 @@ public class FileInstaller(Application application, DockerService dockerService)
         );
     }
 
-    Resource? IInstaller<File>.Install(File contract, ExecutionPlan plan)
+    File IInstaller<File>.Install(File contract, ExecutionPlan plan)
     {
         var volume = plan.GetResource(contract.VolumeId);
         Mount? mount = null;
@@ -83,6 +83,6 @@ public class FileInstaller(Application application, DockerService dockerService)
 
         dockerService.RemoveContainer(containerId).Wait();
 
-        return null;
+        return contract;
     }
 }

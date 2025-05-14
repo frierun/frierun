@@ -3,6 +3,9 @@ using Frierun.Server.Installers;
 
 namespace Frierun.Server.Data;
 
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
+[JsonDerivedType(typeof(GenericHttpEndpoint), nameof(GenericHttpEndpoint))]
+[JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
 public class GenericHttpEndpoint : Resource
 {
     [JsonConstructor]
@@ -14,7 +17,7 @@ public class GenericHttpEndpoint : Resource
     {
     }
     
-    public virtual required Uri Url { get; init; }
+    public required Uri Url { get; init; }
     public string Host => Url.Host;
     public int Port => Url.Port;
     public bool Ssl => Url.Scheme == "https";

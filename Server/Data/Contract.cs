@@ -23,6 +23,7 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
 public abstract record Contract(
     string Name,
+    bool Installed = false,
     InstallerDefinition? Installer = null,
     IEnumerable<ContractId>? DependsOn = null,
     IEnumerable<ContractId>? DependencyOf = null

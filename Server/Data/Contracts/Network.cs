@@ -2,5 +2,6 @@
 
 public record Network(
     string Name,
-    string? NetworkName = null
-) : Contract(Name);
+    string? NetworkName = null,
+    DockerNetwork? Result = null
+) : Contract(Name), IHasResult<DockerNetwork>;

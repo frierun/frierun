@@ -5,8 +5,9 @@ namespace Frierun.Server.Data;
 public record HttpEndpoint(
     string? Name = null,
     int Port = 0,
-    string? ContainerName = null
-) : Contract(Name ?? $"{Port}{(ContainerName != null ? $" at {ContainerName}" : "")}")
+    string? ContainerName = null,
+    GenericHttpEndpoint? Result = null
+) : Contract(Name ?? $"{Port}{(ContainerName != null ? $" at {ContainerName}" : "")}"), IHasResult<GenericHttpEndpoint>
 {
     public string ContainerName { get; init; } = ContainerName ?? "";
     [JsonIgnore] public ContractId<Container> ContainerId => new(ContainerName);

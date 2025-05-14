@@ -39,7 +39,7 @@ public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller
         );
     }
 
-    Resource? IInstaller<Substitute>.Install(Substitute contract, ExecutionPlan plan)
+    Substitute IInstaller<Substitute>.Install(Substitute contract, ExecutionPlan plan)
     {
         var original = plan.GetContract(contract.OriginalId);
         if (original is not IHasStrings hasStrings)
@@ -66,7 +66,7 @@ public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller
         );
         plan.UpdateContract(changedContract);
 
-        return null;
+        return contract;
     }
 
     /// <summary>

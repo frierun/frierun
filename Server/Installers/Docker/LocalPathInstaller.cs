@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Data;
+﻿using System.Diagnostics;
+using Frierun.Server.Data;
 using Frierun.Server.Installers.Base;
 
 namespace Frierun.Server.Installers.Docker;
@@ -15,8 +16,13 @@ public class LocalPathInstaller(Application application) : IInstaller<Volume>
         }
     }
 
-    Resource IInstaller<Volume>.Install(Volume contract, ExecutionPlan plan)
+    Volume IInstaller<Volume>.Install(Volume contract, ExecutionPlan plan)
     {
-        return new LocalPath(new EmptyHandler()) { Path = contract.Path! };
+        Debug.Assert(contract.Path != null, "Path should not be null");
+        
+        return contract with
+        {
+            Result = new LocalPath(new EmptyHandler()) { Path = contract.Path }
+        };
     }
 }

@@ -19,6 +19,10 @@ public class Application : Resource
     public Package? Package { get; init; }
     public string? Url { get; init; }
     public string? Description { get; init; }
-    public IReadOnlyList<Resource> Resources { get; init; } = Array.Empty<Resource>();
+    public IReadOnlyList<Contract> Contracts { get; init; } = Array.Empty<Contract>();
+    [JsonIgnore] public IEnumerable<Resource> Resources => Contracts
+        .OfType<IHasResult>()
+        .Select(contract => contract.Result)
+        .OfType<Resource>();
     public IReadOnlyList<string> RequiredApplications { get; init; } = Array.Empty<string>();
 }

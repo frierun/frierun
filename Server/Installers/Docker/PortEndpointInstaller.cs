@@ -31,14 +31,9 @@ public class PortEndpointInstaller(Application application, State state) : IInst
         );
     }
 
-    Resource IInstaller<PortEndpoint>.Install(PortEndpoint contract, ExecutionPlan plan)
+    PortEndpoint IInstaller<PortEndpoint>.Install(PortEndpoint contract, ExecutionPlan plan)
     {
         var containerContract = plan.GetContract(contract.ContainerId);
-
-        if (containerContract == null)
-        {
-            throw new Exception("Container not found");
-        }
 
         var externalPort = contract.DestinationPort;
         var internalPort = contract.Port;
@@ -63,12 +58,15 @@ public class PortEndpointInstaller(Application application, State state) : IInst
         );
 
         // TODO: fill the correct ip of the host
-        return new DockerPortEndpoint(new EmptyHandler())
+        return contract with
         {
-            Name = contract.Name,
-            Ip = "127.0.0.1",
-            Port = externalPort,
-            Protocol = contract.Protocol
+            Result = new DockerPortEndpoint(new EmptyHandler())
+            {
+                Name = contract.Name,
+                Ip = "127.0.0.1",
+                Port = externalPort,
+                Protocol = contract.Protocol
+            }
         };
     }
 }

@@ -53,11 +53,15 @@ public class StaticDomainInstaller(State state, Application application)
         return state.Resources.OfType<ResolvedDomain>().Any(c => c.Value == fullDomain);
     }
 
-    Resource IInstaller<Domain>.Install(Domain contract, ExecutionPlan plan)
+    Domain IInstaller<Domain>.Install(Domain contract, ExecutionPlan plan)
     {
         var domain = string.IsNullOrEmpty(contract.Subdomain)
             ? _domainName
             : $"{contract.Subdomain}.{_domainName}";
-        return new ResolvedDomain(new EmptyHandler()) { Value = domain, IsInternal = _isInternal };
+        
+        return contract with
+        {
+            Result = new ResolvedDomain(new EmptyHandler()) { Value = domain, IsInternal = _isInternal }
+        };
     }
 }

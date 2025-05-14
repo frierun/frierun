@@ -9,8 +9,9 @@ public record Package(
     string? ShortDescription = null,
     string? FullDescription = null,
     IReadOnlyList<string>? Tags = null,
-    IEnumerable<Contract>? Contracts = null
-) : Contract(Name), IHasStrings
+    IEnumerable<Contract>? Contracts = null,
+    Application? Result = null
+) : Contract(Name), IHasStrings, IHasResult<Application>
 {
     public IReadOnlyList<string> Tags { get; init; } = Tags ?? Array.Empty<string>();
     public IEnumerable<Contract> Contracts { get; init; } = Contracts ?? Array.Empty<Contract>();

@@ -29,7 +29,7 @@ public class ContainerInstaller(Application application, DockerService dockerSer
         );
     }
 
-    Resource IInstaller<Container>.Install(Container contract, ExecutionPlan plan)
+    Container IInstaller<Container>.Install(Container contract, ExecutionPlan plan)
     {
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
         var dockerParameters = new CreateContainerParameters
@@ -86,7 +86,10 @@ public class ContainerInstaller(Application application, DockerService dockerSer
             throw new Exception("Failed to start container");
         }
 
-        return new DockerContainer(this) { Name = contract.ContainerName!, NetworkName = network.Name };
+        return contract with
+        {
+            Result = new DockerContainer(this) { Name = contract.ContainerName!, NetworkName = network.Name }
+        };
     }
 
     void IHandler<DockerContainer>.Uninstall(DockerContainer resource)

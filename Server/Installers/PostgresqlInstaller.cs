@@ -38,7 +38,7 @@ public class PostgresqlInstaller(
         );
     }
 
-    Resource IInstaller<Postgresql>.Install(Postgresql contract, ExecutionPlan plan)
+    Postgresql IInstaller<Postgresql>.Install(Postgresql contract, ExecutionPlan plan)
     {
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
 
@@ -46,12 +46,15 @@ public class PostgresqlInstaller(
 
         if (contract.Admin)
         {
-            return new PostgresqlDatabase(this)
+            return contract with
             {
-                User = "postgres",
-                Password = _rootPassword,
-                Host = _container.Name,
-                NetworkName = network.Name
+                Result = new PostgresqlDatabase(this)
+                {
+                    User = "postgres",
+                    Password = _rootPassword,
+                    Host = _container.Name,
+                    NetworkName = network.Name
+                }
             };
         }
 
@@ -74,13 +77,16 @@ public class PostgresqlInstaller(
             ]
         );
 
-        return new PostgresqlDatabase(this)
+        return contract with
         {
-            User = name,
-            Password = password,
-            Database = name,
-            Host = _container.Name,
-            NetworkName = network.Name
+            Result = new PostgresqlDatabase(this)
+            {
+                User = name,
+                Password = password,
+                Database = name,
+                Host = _container.Name,
+                NetworkName = network.Name
+            }
         };
     }
 

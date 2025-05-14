@@ -3,7 +3,8 @@ using Frierun.Server.Installers.Base;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class VolumeInstaller(Application application, DockerService dockerService, State state) : IInstaller<Volume>, IHandler<DockerVolume>
+public class VolumeInstaller(Application application, DockerService dockerService, State state)
+    : IInstaller<Volume>, IHandler<DockerVolume>
 {
     public Application Application => application;
 
@@ -33,11 +34,14 @@ public class VolumeInstaller(Application application, DockerService dockerServic
         );
     }
 
-    Resource IInstaller<Volume>.Install(Volume contract, ExecutionPlan plan)
+    Volume IInstaller<Volume>.Install(Volume contract, ExecutionPlan plan)
     {
         if (contract.Path != null)
         {
-            return new LocalPath(new EmptyHandler()) { Path = contract.Path };
+            return contract with
+            {
+                Result = new LocalPath(new EmptyHandler()) { Path = contract.Path }
+            };
         }
 
         var volumeName = contract.VolumeName!;
@@ -47,7 +51,10 @@ public class VolumeInstaller(Application application, DockerService dockerServic
             dockerService.CreateVolume(volumeName).Wait();
         }
 
-        return new DockerVolume(this) { Name = volumeName };
+        return contract with
+        {
+            Result = new DockerVolume(this) { Name = volumeName }
+        };
     }
 
     void IHandler<DockerVolume>.Uninstall(DockerVolume resource)

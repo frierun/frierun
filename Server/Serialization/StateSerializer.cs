@@ -4,7 +4,12 @@ using File = System.IO.File;
 
 namespace Frierun.Server;
 
-public class StateSerializer(string path, PackageRegistry packageRegistry, Lazy<InstallerRegistry> lazyInstallerRegistry)
+public class StateSerializer(
+    string path,
+    PackageRegistry packageRegistry,
+    ContractRegistry contractRegistry,
+    Lazy<InstallerRegistry> lazyInstallerRegistry
+)
 {
     public string Path { get; } = path;
 
@@ -14,7 +19,8 @@ public class StateSerializer(string path, PackageRegistry packageRegistry, Lazy<
         Converters =
         {
             new PackageConverter(packageRegistry),
-            new LazyHandlerConverter(lazyInstallerRegistry),
+            new ContractIdConverter(contractRegistry),
+            new LazyHandlerConverter(lazyInstallerRegistry)
         },
     };
 

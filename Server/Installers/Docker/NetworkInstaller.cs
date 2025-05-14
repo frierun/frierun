@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Data;
+﻿using System.Diagnostics;
+using Frierun.Server.Data;
 using Network = Frierun.Server.Data.Network;
 
 namespace Frierun.Server.Installers.Docker;
@@ -28,13 +29,17 @@ public class NetworkInstaller(Application application, DockerService dockerServi
         );
     }
 
-    Resource IInstaller<Network>.Install(Network contract, ExecutionPlan plan)
+    Network IInstaller<Network>.Install(Network contract, ExecutionPlan plan)
     {
-        var networkName = contract.NetworkName!;
+        var networkName = contract.NetworkName;
+        Debug.Assert(networkName != null, "Network name cannot be null.");
 
         dockerService.CreateNetwork(networkName).Wait();
 
-        return new DockerNetwork(this) { Name = networkName };
+        return contract with
+        {
+            Result = new DockerNetwork(this) { Name = networkName }
+        };
     }
 
     void IHandler<DockerNetwork>.Uninstall(DockerNetwork resource)

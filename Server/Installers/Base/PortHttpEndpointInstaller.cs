@@ -21,13 +21,17 @@ public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>
         );
     }
 
-    Resource IInstaller<HttpEndpoint>.Install(HttpEndpoint contract, ExecutionPlan plan)
+    HttpEndpoint IInstaller<HttpEndpoint>.Install(HttpEndpoint contract, ExecutionPlan plan)
     {
         var portEndpoint = plan.GetResource<DockerPortEndpoint>(
             new PortEndpoint(Protocol.Tcp, contract.Port, ContainerName: contract.ContainerName, DestinationPort: 80)
         );
 
         var url = new Uri($"http://{portEndpoint.Ip}:{portEndpoint.Port}");
-        return new GenericHttpEndpoint(new EmptyHandler()){Url = url};
+
+        return contract with
+        {
+            Result = new GenericHttpEndpoint(new EmptyHandler()) { Url = url }
+        };
     }
 }

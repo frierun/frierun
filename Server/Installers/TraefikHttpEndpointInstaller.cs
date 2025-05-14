@@ -1,5 +1,4 @@
 ﻿using Frierun.Server.Data;
-using Frierun.Server.Installers.Base;
 
 namespace Frierun.Server.Installers;
 
@@ -27,7 +26,7 @@ public class TraefikHttpEndpointInstaller(Application application)
         );
     }
 
-    Resource IInstaller<HttpEndpoint>.Install(HttpEndpoint contract, ExecutionPlan plan)
+    HttpEndpoint IInstaller<HttpEndpoint>.Install(HttpEndpoint contract, ExecutionPlan plan)
     {
         var domainResource = plan.GetResource<ResolvedDomain>(contract.DomainId);
         var domain = domainResource.Value;
@@ -76,10 +75,13 @@ public class TraefikHttpEndpointInstaller(Application application)
             ? new Uri($"http://{domain}:{_webPort}")
             : new Uri($"https://{domain}:{_webSecurePort}");
 
-        return new TraefikHttpEndpoint(this)
+        return contract with
         {
-            Url = url,
-            NetworkName = network.Name
+            Result = new TraefikHttpEndpoint(this)
+            {
+                Url = url,
+                NetworkName = network.Name
+            }
         };
     }
 

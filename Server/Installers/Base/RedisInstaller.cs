@@ -28,10 +28,13 @@ public class RedisInstaller : IInstaller<Redis>
         );
     }
 
-    Resource IInstaller<Redis>.Install(Redis contract, ExecutionPlan plan)
+    Redis IInstaller<Redis>.Install(Redis contract, ExecutionPlan plan)
     {
         var container = plan.GetResource<DockerContainer>(contract.ContainerId);
 
-        return new RedisDatabase(new EmptyHandler()) { Host = container.Name };
+        return contract with
+        {
+            Result = new RedisDatabase(new EmptyHandler()) { Host = container.Name }
+        };
     }
 }

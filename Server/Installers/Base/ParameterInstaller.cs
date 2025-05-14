@@ -15,8 +15,11 @@ public class ParameterInstaller : IInstaller<Parameter>
         );
     }
 
-    Resource IInstaller<Parameter>.Install(Parameter contract, ExecutionPlan plan)
+    Parameter IInstaller<Parameter>.Install(Parameter contract, ExecutionPlan plan)
     {
-        return new ResolvedParameter(new EmptyHandler()) { Name = contract.Name, Value = contract.Value ?? "" };
+        return contract with
+        {
+            Result = new ResolvedParameter(new EmptyHandler()) { Name = contract.Name, Value = contract.Value ?? "" }
+        };
     }
 }

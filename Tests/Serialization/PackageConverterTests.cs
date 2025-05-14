@@ -3,7 +3,7 @@ using System.Text.Json;
 using Frierun.Server;
 using Frierun.Server.Data;
 
-namespace Frierun.Tests.Services;
+namespace Frierun.Tests;
 
 public class PackageConverterTests : BaseTests
 {

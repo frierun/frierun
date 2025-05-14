@@ -30,12 +30,8 @@ public abstract class Resource(Lazy<IHandler> lazyHandler)
     [JsonIgnore]
     public virtual IHandler Handler => LazyHandler.Value;
     
-    [JsonIgnore]
-    public bool Uninstalled { get; private set; }
-
     public void Uninstall()
     {
         Handler.Uninstall(this);
-        Uninstalled = true;
     }
 }

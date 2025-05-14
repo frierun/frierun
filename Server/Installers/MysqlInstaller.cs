@@ -32,19 +32,22 @@ public class MysqlInstaller(Application application, State state)
         );
     }
 
-    Resource IInstaller<Mysql>.Install(Mysql contract, ExecutionPlan plan)
+    Mysql IInstaller<Mysql>.Install(Mysql contract, ExecutionPlan plan)
     {
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
         _container.AttachNetwork(network.Name);
 
         if (contract.Admin)
         {
-            return new MysqlDatabase(this)
+            return contract with
             {
-                User = "root",
-                Password = _rootPassword,
-                Host = _container.Name,
-                NetworkName = network.Name
+                Result = new MysqlDatabase(this)
+                {
+                    User = "root",
+                    Password = _rootPassword,
+                    Host = _container.Name,
+                    NetworkName = network.Name
+                }
             };
         }
 
@@ -69,16 +72,19 @@ public class MysqlInstaller(Application application, State state)
         );
 
 
-        return new MysqlDatabase(this)
+        return contract with
         {
-            User = name,
-            Password = password,
-            Database = name,
-            Host = _container.Name,
-            NetworkName = network.Name
+            Result = new MysqlDatabase(this)
+            {
+                User = name,
+                Password = password,
+                Database = name,
+                Host = _container.Name,
+                NetworkName = network.Name
+            }
         };
     }
-    
+
     void IHandler<MysqlDatabase>.Uninstall(MysqlDatabase resource)
     {
         if (resource.User != "root")

@@ -26,13 +26,16 @@ public class SelectorInstaller : IInstaller<Selector>
         }
     }
 
-    Resource IInstaller<Selector>.Install(Selector contract, ExecutionPlan plan)
+    Selector IInstaller<Selector>.Install(Selector contract, ExecutionPlan plan)
     {
         if (contract.SelectedOption == null)
         {
             throw new Exception("No option selected");
         }
-        
-        return new ResolvedParameter(new EmptyHandler()) { Name = contract.Name, Value = contract.SelectedOption };
+
+        return contract with
+        {
+            Result = new ResolvedParameter(new EmptyHandler()) { Name = contract.Name, Value = contract.SelectedOption }
+        };
     }
 }

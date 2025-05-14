@@ -5,11 +5,11 @@ namespace Frierun.Server.Installers.Base;
 public class PackageInstaller : IInstaller<Package>
 {
     public Application? Application => null;
-    
+
     IEnumerable<InstallerInitializeResult> IInstaller<Package>.Initialize(Package package, string prefix)
     {
         var applicationUrl = package.ApplicationUrl;
-        
+
         // auto-detect application URL
         if (applicationUrl == null)
         {
@@ -19,7 +19,7 @@ public class PackageInstaller : IInstaller<Package>
                 applicationUrl = $"{{{{{httpEndpoint.Id}:Url}}}}";
             }
         }
-        
+
         // use the first endpoint if not found any other
         if (applicationUrl == null)
         {
@@ -29,7 +29,7 @@ public class PackageInstaller : IInstaller<Package>
                 applicationUrl = $"{{{{{endpoint.Id}:Url}}}}";
             }
         }
-        
+
         yield return new InstallerInitializeResult(
             package with
             {
@@ -40,13 +40,17 @@ public class PackageInstaller : IInstaller<Package>
         );
     }
 
-    Resource IInstaller<Package>.Install(Package package, ExecutionPlan plan)
+    Package IInstaller<Package>.Install(Package package, ExecutionPlan plan)
     {
-        return new Application(new EmptyHandler()){
-            Name = package.Prefix!,
-            Package = package,
-            Url = package.ApplicationUrl,
-            Description = package.ApplicationDescription
+        return package with
+        {
+            Result = new Application(new EmptyHandler())
+            {
+                Name = package.Prefix!,
+                Package = package,
+                Url = package.ApplicationUrl,
+                Description = package.ApplicationDescription
+            }
         };
     }
 }
