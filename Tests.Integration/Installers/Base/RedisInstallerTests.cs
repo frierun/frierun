@@ -21,19 +21,23 @@ public class RedisInstallerTests : TestWithDocker
             ]
         );
         var application = InstallPackage(package);
-        
-        var container = application.Contracts.OfType<Container>().Single().Result;
+
+        var container = application.Contracts
+            .OfType<Container>()
+            .Single(container => container.Name == "redis-client")
+            .Result;
         var database = application.Contracts.OfType<Redis>().Single().Result;
         Assert.NotNull(container);
         Assert.NotNull(database);
         Assert.Equal("redis-client-redis", database.Host);
-        
+
         // try to connect to the database from the client
-        var queries = new[]{
-                "SET test_key 123",
-                "INCRBY test_key 123",
-                "GET test_key"
-            };
+        var queries = new[]
+        {
+            "SET test_key 123",
+            "INCRBY test_key 123",
+            "GET test_key"
+        };
 
         string stdout = "";
         foreach (var query in queries)
@@ -49,9 +53,9 @@ public class RedisInstallerTests : TestWithDocker
                 command
             );
         }
-        
+
         Assert.Contains("246", stdout);
-        
+
         // clean up
         UninstallApplication(application);
     }
