@@ -4,11 +4,11 @@ using Frierun.Server.Installers.Base;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class PortEndpointInstaller(Application application, State state) : IInstaller<PortEndpoint>
+public class PortEndpointInstaller(Application application, State state) : IHandler<PortEndpoint>
 {
     public Application Application => application;
 
-    IEnumerable<InstallerInitializeResult> IInstaller<PortEndpoint>.Initialize(PortEndpoint contract, string prefix)
+    public IEnumerable<InstallerInitializeResult> Initialize(PortEndpoint contract, string prefix)
     {
         int port = contract.DestinationPort == 0 ? contract.Port : contract.DestinationPort;
 
@@ -25,13 +25,14 @@ public class PortEndpointInstaller(Application application, State state) : IInst
         yield return new InstallerInitializeResult(
             contract with
             {
+                Handler = this,
                 DestinationPort = port,
                 DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
             }
         );
     }
 
-    PortEndpoint IInstaller<PortEndpoint>.Install(PortEndpoint contract, ExecutionPlan plan)
+    public PortEndpoint Install(PortEndpoint contract, ExecutionPlan plan)
     {
         var containerContract = plan.GetContract(contract.ContainerId);
 
@@ -60,7 +61,7 @@ public class PortEndpointInstaller(Application application, State state) : IInst
         // TODO: fill the correct ip of the host
         return contract with
         {
-            Result = new DockerPortEndpoint(new EmptyHandler())
+            Result = new DockerPortEndpoint
             {
                 Name = contract.Name,
                 Ip = "127.0.0.1",

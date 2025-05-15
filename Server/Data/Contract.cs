@@ -24,9 +24,9 @@ namespace Frierun.Server.Data;
 public abstract record Contract(
     string Name,
     bool Installed = false,
-    InstallerDefinition? Installer = null,
     IEnumerable<ContractId>? DependsOn = null,
-    IEnumerable<ContractId>? DependencyOf = null
+    IEnumerable<ContractId>? DependencyOf = null,
+    Lazy<IHandler?>? LazyHandler = null
 )
 {
     [JsonIgnore] public ContractId Id => ContractId.Create(GetType(), Name);
@@ -34,10 +34,36 @@ public abstract record Contract(
     [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = DependsOn ?? Array.Empty<ContractId>();
     [JsonIgnore] public IEnumerable<ContractId> DependencyOf { get; init; } = DependencyOf ?? Array.Empty<ContractId>();
 
+    [JsonPropertyName("Handler")]
+    [JsonInclude]
+    protected Lazy<IHandler?> LazyHandler { get; init; } = LazyHandler ?? new Lazy<IHandler?>((IHandler?)null);
+
+    [JsonIgnore]
+    public IHandler? Handler
+    {
+        get => LazyHandler.Value;
+        init => LazyHandler = new Lazy<IHandler?>(value);
+    }
+
     public virtual Contract With(Contract other)
     {
         throw new Exception("Not implemented");
     }
 
     public static implicit operator ContractId(Contract contract) => contract.Id;
+
+    public Contract Install(ExecutionPlan plan)
+    {
+        if (Handler == null)
+        {
+            throw new Exception($"No handler for {Name}");
+        }
+
+        return Handler.Install(this, plan) with {Installed = true};
+    }
+    
+    public void Uninstall()
+    {
+        Handler?.Uninstall(this);
+    }    
 }

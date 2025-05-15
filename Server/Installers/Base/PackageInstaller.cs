@@ -2,11 +2,9 @@
 
 namespace Frierun.Server.Installers.Base;
 
-public class PackageInstaller : IInstaller<Package>
+public class PackageInstaller : IHandler<Package>
 {
-    public Application? Application => null;
-
-    IEnumerable<InstallerInitializeResult> IInstaller<Package>.Initialize(Package package, string prefix)
+    public IEnumerable<InstallerInitializeResult> Initialize(Package package, string prefix)
     {
         var applicationUrl = package.ApplicationUrl;
 
@@ -35,16 +33,17 @@ public class PackageInstaller : IInstaller<Package>
             {
                 Prefix = prefix,
                 ApplicationUrl = applicationUrl,
+                Handler = this
             },
             package.Contracts
         );
     }
 
-    Package IInstaller<Package>.Install(Package package, ExecutionPlan plan)
+    public Package Install(Package package, ExecutionPlan plan)
     {
         return package with
         {
-            Result = new Application(new EmptyHandler())
+            Result = new Application
             {
                 Name = package.Prefix!,
                 Package = package,

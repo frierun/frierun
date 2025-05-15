@@ -29,15 +29,9 @@ public class UninstallService(
             {
                 Debug.Assert(contract is not Package);
                 
-                if (contract is IHasResult hasResult)
-                {
-                    Debug.Assert(hasResult.Result != null);
-                    
-                    hasResult.Result.Uninstall();
-                }
+                contract.Uninstall();
             }
 
-            application.Uninstall();
             state.RemoveApplication(application);
             
             stateSerializer.Save(state);

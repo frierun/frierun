@@ -1,18 +1,18 @@
-﻿using Frierun.Server.Data;
-using Frierun.Server.Installers.Base;
+﻿using System.Diagnostics;
+using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers.Docker;
 
 public class VolumeInstaller(Application application, DockerService dockerService, State state)
-    : IInstaller<Volume>, IHandler<DockerVolume>
+    : IHandler<Volume>
 {
     public Application Application => application;
 
-    IEnumerable<InstallerInitializeResult> IInstaller<Volume>.Initialize(Volume contract, string prefix)
+    public IEnumerable<InstallerInitializeResult> Initialize(Volume contract, string prefix)
     {
         if (contract.VolumeName != null || contract.Path != null)
         {
-            yield return new InstallerInitializeResult(contract);
+            yield return new InstallerInitializeResult(contract with { Handler = this });
             yield break;
         }
 
@@ -34,18 +34,19 @@ public class VolumeInstaller(Application application, DockerService dockerServic
         yield return new InstallerInitializeResult(
             contract with
             {
+                Handler = this,
                 VolumeName = name
             }
         );
     }
 
-    Volume IInstaller<Volume>.Install(Volume contract, ExecutionPlan plan)
+    public Volume Install(Volume contract, ExecutionPlan plan)
     {
         if (contract.Path != null)
         {
             return contract with
             {
-                Result = new LocalPath(new EmptyHandler()) { Path = contract.Path }
+                Result = new LocalPath { Path = contract.Path }
             };
         }
 
@@ -63,23 +64,26 @@ public class VolumeInstaller(Application application, DockerService dockerServic
 
         return contract with
         {
-            Result = new DockerVolume(this) { Name = volumeName }
+            Result = new DockerVolume { Name = volumeName }
         };
     }
 
-    void IHandler<DockerVolume>.Uninstall(DockerVolume resource)
+    public void Uninstall(Volume contract)
     {
+        var installedVolume = contract.Result as DockerVolume;
+        Debug.Assert(installedVolume != null);
+
         var volumeUsed = state.Contracts
             .OfType<Volume>()
             .Select(volume => volume.Result)
             .OfType<DockerVolume>()
-            .Count(dockerVolume => dockerVolume.Name == resource.Name);
-        
+            .Count(dockerVolume => dockerVolume.Name == installedVolume.Name);
+
         if (volumeUsed > 1)
         {
             return;
         }
 
-        dockerService.RemoveVolume(resource.Name).Wait();
+        dockerService.RemoveVolume(installedVolume.Name).Wait();
     }
 }

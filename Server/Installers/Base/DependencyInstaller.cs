@@ -2,17 +2,16 @@
 
 namespace Frierun.Server.Installers.Base;
 
-public class DependencyInstaller : IInstaller<Dependency>
+public class DependencyInstaller : IHandler<Dependency>
 {
-    public Application? Application => null;
-
-    IEnumerable<InstallerInitializeResult> IInstaller<Dependency>.Initialize(Dependency contract, string prefix)
+    public IEnumerable<InstallerInitializeResult> Initialize(Dependency contract, string prefix)
     {
         yield return new InstallerInitializeResult(
             contract with
             {
                 DependsOn = [contract.Preceding],
-                DependencyOf = [contract.Following]
+                DependencyOf = [contract.Following],
+                Handler = this
             }
         );
     }

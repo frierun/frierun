@@ -1,10 +1,9 @@
 ﻿using Frierun.Server.Data;
-using Frierun.Server.Installers.Base;
 
 namespace Frierun.Server.Installers;
 
 public class StaticDomainInstaller(State state, Application application)
-    : IInstaller<Domain>
+    : IHandler<Domain>
 {
     private readonly string _domainName = application.Contracts
         .OfType<Parameter>()
@@ -20,11 +19,11 @@ public class StaticDomainInstaller(State state, Application application)
 
     public Application Application => application;
 
-    IEnumerable<InstallerInitializeResult> IInstaller<Domain>.Initialize(Domain contract, string prefix)
+    public IEnumerable<InstallerInitializeResult> Initialize(Domain contract, string prefix)
     {
         if (contract.Subdomain != null && !IsSubdomainExist(contract.Subdomain))
         {
-            yield return new InstallerInitializeResult(contract);
+            yield return new InstallerInitializeResult(contract with { Handler = this });
             yield break;
         }
 
@@ -42,7 +41,7 @@ public class StaticDomainInstaller(State state, Application application)
         }
 
         yield return new InstallerInitializeResult(
-            contract with { Subdomain = subdomain }
+            contract with { Handler = this, Subdomain = subdomain }
         );
     }
 
@@ -55,15 +54,15 @@ public class StaticDomainInstaller(State state, Application application)
         return state.Contracts.OfType<Domain>().Any(c => c.Result?.Value == fullDomain);
     }
 
-    Domain IInstaller<Domain>.Install(Domain contract, ExecutionPlan plan)
+    public Domain Install(Domain contract, ExecutionPlan plan)
     {
         var domain = string.IsNullOrEmpty(contract.Subdomain)
             ? _domainName
             : $"{contract.Subdomain}.{_domainName}";
-        
+
         return contract with
         {
-            Result = new ResolvedDomain(new EmptyHandler()) { Value = domain, IsInternal = _isInternal }
+            Result = new ResolvedDomain { Value = domain, IsInternal = _isInternal }
         };
     }
 }

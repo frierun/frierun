@@ -18,7 +18,7 @@ public class InstallerRegistryTests : BaseTests
     {
         var registry = Resolve<InstallerRegistry>();
 
-        var result = registry.GetInstallers(contractType).ToList();
+        var result = registry.GetHandlers(contractType).ToList();
 
         Assert.Single(result);
         Assert.IsType(installerType, result[0]);
@@ -29,7 +29,7 @@ public class InstallerRegistryTests : BaseTests
     {
         var registry = Resolve<InstallerRegistry>();
 
-        var result = registry.GetInstallers(typeof(Application));
+        var result = registry.GetHandlers(typeof(Application));
 
         Assert.Empty(result);
     }
@@ -41,7 +41,7 @@ public class InstallerRegistryTests : BaseTests
         InstallPackage("traefik");
         var registry = Resolve<InstallerRegistry>();
 
-        var result = registry.GetInstallers(typeof(HttpEndpoint)).ToList();
+        var result = registry.GetHandlers(typeof(HttpEndpoint)).ToList();
 
         Assert.Equal(2, result.Count);
         Assert.IsType<TraefikHttpEndpointInstaller>(result[0]);
@@ -55,7 +55,7 @@ public class InstallerRegistryTests : BaseTests
         InstallPackage("docker");
         InstallPackage("traefik");
 
-        var result = registry.GetInstallers(typeof(HttpEndpoint)).ToList();
+        var result = registry.GetHandlers(typeof(HttpEndpoint)).ToList();
 
         Assert.Equal(2, result.Count);
         Assert.IsType<TraefikHttpEndpointInstaller>(result[0]);
@@ -70,12 +70,12 @@ public class InstallerRegistryTests : BaseTests
         var registry = Resolve<InstallerRegistry>();
         Resolve<State>().RemoveApplication(application);
 
-        var result = registry.GetInstallers(typeof(HttpEndpoint)).ToList();
+        var result = registry.GetHandlers(typeof(HttpEndpoint)).ToList();
 
         Assert.Single(result);
         Assert.IsType<PortHttpEndpointInstaller>(result[0]);
     }
-    
+
     [Fact]
     public void GetInstaller_AddTraefikSeveralTimes_ReturnsBothInstallers()
     {
@@ -86,57 +86,12 @@ public class InstallerRegistryTests : BaseTests
         uninstallService.Handle(application);
         var application2 = InstallPackage("traefik");
 
-        var result = registry.GetInstallers(typeof(HttpEndpoint)).ToList();
+        var result = registry.GetHandlers(typeof(HttpEndpoint)).ToList();
 
         Assert.NotEqual(application, application2);
         Assert.Equal(2, result.Count);
         Assert.IsType<TraefikHttpEndpointInstaller>(result[0]);
         Assert.IsType<PortHttpEndpointInstaller>(result[1]);
-    }
-    
-
-    [Fact]
-    public void GetInstaller_TwoTraefik_FilteredByInstallerDefinition()
-    {
-        InstallPackage("docker");
-        var application1 = InstallPackage("traefik");
-        var application2 = InstallPackage("traefik");
-        var registry = Resolve<InstallerRegistry>();
-
-        Assert.Equal(3, registry.GetInstallers(typeof(HttpEndpoint)).Count());
-        Assert.Equal(
-            2,
-            registry
-                .GetInstallers(typeof(HttpEndpoint), new InstallerDefinition(nameof(TraefikHttpEndpointInstaller)))
-                .Count()
-        );
-        Assert.Equal(
-            2,
-            registry
-                .GetInstallers(typeof(HttpEndpoint), new InstallerDefinition(nameof(TraefikHttpEndpointInstaller)))
-                .Count()
-        );
-        Assert.Single(
-            registry
-                .GetInstallers(
-                    typeof(HttpEndpoint),
-                    new InstallerDefinition(nameof(TraefikHttpEndpointInstaller), application1.Name)
-                )
-        );
-        Assert.Single(
-            registry
-                .GetInstallers(
-                    typeof(HttpEndpoint),
-                    new InstallerDefinition(nameof(TraefikHttpEndpointInstaller), application2.Name)
-                )
-        );
-        Assert.Empty(
-            registry
-                .GetInstallers(
-                    typeof(HttpEndpoint),
-                    new InstallerDefinition(nameof(TraefikHttpEndpointInstaller), "unknown application")
-                )
-        );
     }
 
     public static IEnumerable<object[]> PackagesWithInstallers()
@@ -153,29 +108,19 @@ public class InstallerRegistryTests : BaseTests
     {
         InstallPackage("docker");
         var installerRegistry = Resolve<InstallerRegistry>();
-        Assert.Empty(
-            installerRegistry.GetInstallers(
-                contractType,
-                new InstallerDefinition(installerType.Name, packageName)
-            )
-        );
 
         var application = InstallPackage(packageName);
 
         Assert.Equal(application.Name, packageName);
-        Assert.Single(
-            installerRegistry.GetInstallers(
-                contractType,
-                new InstallerDefinition(installerType.Name, packageName)
-            )
-        );
+        var handler = installerRegistry.GetHandlers(contractType).Single(handler => handler.Application == application);
+        Assert.IsType(installerType, handler);
     }
 
     [Theory]
     [MemberData(nameof(PackagesWithInstallers))]
     public void GetInstaller_UninstallPackage_RemovesInstaller(
         string packageName,
-        Type installerType,
+        Type _,
         Type contractType
     )
     {
@@ -185,16 +130,14 @@ public class InstallerRegistryTests : BaseTests
 
         Resolve<UninstallService>().Handle(application);
 
-        Assert.Empty(
-            installerRegistry.GetInstallers(
-                contractType,
-                new InstallerDefinition(installerType.Name, application.Name)
-            )
+        Assert.DoesNotContain(
+            installerRegistry.GetHandlers(contractType),
+            handler => handler.Application == application
         );
     }
-    
+
     [Theory]
-    [InlineData(typeof(EmptyHandler))]
+    [InlineData(typeof(PackageInstaller))]
     public void GetHandler_StaticInstaller_ReturnsHandler(Type installerType)
     {
         var registry = Resolve<InstallerRegistry>();
@@ -204,8 +147,8 @@ public class InstallerRegistryTests : BaseTests
         Assert.NotNull(result);
         Assert.IsType(installerType, result);
     }
-    
-    
+
+
     [Fact]
     public void GetHandler_WrongResource_ReturnsNull()
     {
@@ -222,7 +165,7 @@ public class InstallerRegistryTests : BaseTests
         yield return ["mariadb", typeof(MysqlInstaller)];
         yield return ["postgresql", typeof(PostgresqlInstaller)];
     }
-    
+
     [Theory]
     [MemberData(nameof(PackagesWithHandlers))]
     public void GetHandler_InstallPackage_AddsHandler(string packageName, Type handlerType)
@@ -235,7 +178,7 @@ public class InstallerRegistryTests : BaseTests
 
         Assert.NotNull(installerRegistry.GetHandler(handlerType.Name, packageName));
     }
-    
+
     [Theory]
     [MemberData(nameof(PackagesWithHandlers))]
     public void GetHandler_UninstallPackage_RemovesHandler(string packageName, Type handlerType)
@@ -247,5 +190,5 @@ public class InstallerRegistryTests : BaseTests
         Resolve<UninstallService>().Handle(application);
 
         Assert.Null(installerRegistry.GetHandler(handlerType.Name, packageName));
-    }    
+    }
 }

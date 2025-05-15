@@ -1,11 +1,9 @@
 ﻿using System.Diagnostics;
-using Frierun.Server.Installers;
 
 namespace Frierun.Server.Data;
 
 public class ExecutionPlan : IExecutionPlan
 {
-    private readonly InstallerRegistry _installerRegistry;
     private readonly Dictionary<ContractId, Contract> _contracts;
     private readonly DirectedAcyclicGraph<ContractId> _graph = new();
     private readonly HashSet<Application> _requiredApplications = [];
@@ -13,12 +11,10 @@ public class ExecutionPlan : IExecutionPlan
     public IReadOnlyDictionary<ContractId, Contract> Contracts => _contracts;
 
     public ExecutionPlan(
-        Dictionary<ContractId, Contract> contracts,
-        InstallerRegistry installerRegistry
+        Dictionary<ContractId, Contract> contracts
     )
     {
         _contracts = contracts;
-        _installerRegistry = installerRegistry;
 
         BuildGraph();
     }
@@ -45,14 +41,6 @@ public class ExecutionPlan : IExecutionPlan
                 _graph.AddEdge(contract, dependency);
             }
         }
-    }
-
-    /// <summary>
-    /// Gets installer for the contract.
-    /// </summary>
-    private IInstaller GetInstaller(Contract contract)
-    {
-        return _installerRegistry.GetInstallers(contract.GetType(), contract.Installer).First();
     }
 
     /// <summary>
@@ -94,8 +82,7 @@ public class ExecutionPlan : IExecutionPlan
                 var contract = GetContract(contractId);
                 Debug.Assert(!contract.Installed);
 
-                var installer = GetInstaller(contract);
-                var installedContract = installer.Install(contract, this) with { Installed = true };
+                var installedContract = contract.Install(this);
                 
                 Debug.Assert(installedContract.Id == contractId);
                 Debug.Assert(
@@ -108,9 +95,11 @@ public class ExecutionPlan : IExecutionPlan
                     installedContracts.Add(installedContract);
                 }
                 _contracts[contractId] = installedContract;
-                if (installer.Application != null)
+
+                var handlerApplication = installedContract.Handler?.Application;
+                if (handlerApplication != null)
                 {
-                    _requiredApplications.Add(installer.Application);
+                    _requiredApplications.Add(handlerApplication);
                 }
             }
         );
@@ -118,7 +107,7 @@ public class ExecutionPlan : IExecutionPlan
         var application = _contracts.Values.OfType<Package>().First().Result;
         Debug.Assert(application != null);
 
-        return new Application(application.Handler)
+        return new Application
         {
             Name = application.Name,
             Package = application.Package,

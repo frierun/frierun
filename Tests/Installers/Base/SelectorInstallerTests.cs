@@ -15,9 +15,9 @@ public class SelectorInstallerTests : BaseTests
                 new SelectorOption("option2", [new Container("container2")])
             ], "option2"
         );
-        IInstaller installer = new SelectorInstaller();
+        var handler = new SelectorInstaller();
 
-        var result = installer.Initialize(selector, "prefix").ToList();
+        var result = handler.Initialize(selector, "prefix").ToList();
 
         // Assert
         Assert.Single(result);
@@ -36,9 +36,9 @@ public class SelectorInstallerTests : BaseTests
                 new SelectorOption("option2", [new Container("container2")])
             ]
         );
-        IInstaller installer = new SelectorInstaller();
+        var handler = new SelectorInstaller();
 
-        var result = installer.Initialize(selector, "prefix").ToList();
+        var result = handler.Initialize(selector, "prefix").ToList();
 
         Assert.Equal(2, result.Count);
         var resolvedContract1 = (Selector)result[0].Contract;

@@ -2,16 +2,14 @@
 
 namespace Frierun.Server.Installers.Base;
 
-public class SelectorInstaller : IInstaller<Selector>
+public class SelectorInstaller : IHandler<Selector>
 {
-    public Application? Application => null;
-
-    IEnumerable<InstallerInitializeResult> IInstaller<Selector>.Initialize(Selector contract, string prefix)
+    public IEnumerable<InstallerInitializeResult> Initialize(Selector contract, string prefix)
     {
         if (contract.SelectedOption != null)
         {
             yield return new InstallerInitializeResult(
-                contract,
+                contract with { Handler = this },
                 contract.Options.First(option => option.Name == contract.SelectedOption).Contracts
             );
             yield break;
@@ -20,13 +18,13 @@ public class SelectorInstaller : IInstaller<Selector>
         foreach (var (name, contracts) in contract.Options)
         {
             yield return new InstallerInitializeResult(
-                contract with { SelectedOption = name },
+                contract with { SelectedOption = name, Handler = this },
                 contracts
             );
         }
     }
 
-    Selector IInstaller<Selector>.Install(Selector contract, ExecutionPlan plan)
+    public Selector Install(Selector contract, ExecutionPlan plan)
     {
         if (contract.SelectedOption == null)
         {
@@ -35,7 +33,7 @@ public class SelectorInstaller : IInstaller<Selector>
 
         return contract with
         {
-            Result = new ResolvedParameter(new EmptyHandler()) { Name = contract.Name, Value = contract.SelectedOption }
+            Result = new ResolvedParameter { Name = contract.Name, Value = contract.SelectedOption }
         };
     }
 }

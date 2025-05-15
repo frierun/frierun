@@ -1,20 +1,20 @@
-﻿using System.Security.Cryptography;
+﻿using System.Diagnostics;
+using System.Security.Cryptography;
 using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers;
 
 public class MysqlInstaller(Application application, State state)
-    : IInstaller<Mysql>, IHandler<MysqlDatabase>
+    : IHandler<Mysql>
 {
-    private readonly DockerContainer _container = application.Contracts.OfType<Container>().First().Result ??
-                                                  throw new Exception("Container not found");
+    private readonly Container _container = application.Contracts.OfType<Container>().First();
 
     private readonly string _rootPassword = application.Contracts.OfType<Password>().First().Result?.Value ??
                                             throw new Exception("Root password not found");
 
     public Application Application => application;
 
-    IEnumerable<InstallerInitializeResult> IInstaller<Mysql>.Initialize(Mysql contract, string prefix)
+    public IEnumerable<InstallerInitializeResult> Initialize(Mysql contract, string prefix)
     {
         var baseName = contract.DatabaseName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
 
@@ -29,13 +29,14 @@ public class MysqlInstaller(Application application, State state)
         yield return new InstallerInitializeResult(
             contract with
             {
+                Handler = this,
                 DatabaseName = name,
                 DependsOn = contract.DependsOn.Append(contract.NetworkId)
             }
         );
     }
 
-    Mysql IInstaller<Mysql>.Install(Mysql contract, ExecutionPlan plan)
+    public Mysql Install(Mysql contract, ExecutionPlan plan)
     {
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
         _container.AttachNetwork(network.Name);
@@ -44,7 +45,7 @@ public class MysqlInstaller(Application application, State state)
         {
             return contract with
             {
-                Result = new MysqlDatabase(this)
+                Result = new MysqlDatabase
                 {
                     User = "root",
                     Password = _rootPassword,
@@ -77,7 +78,7 @@ public class MysqlInstaller(Application application, State state)
 
         return contract with
         {
-            Result = new MysqlDatabase(this)
+            Result = new MysqlDatabase
             {
                 User = name,
                 Password = password,
@@ -88,8 +89,11 @@ public class MysqlInstaller(Application application, State state)
         };
     }
 
-    void IHandler<MysqlDatabase>.Uninstall(MysqlDatabase resource)
+    void IHandler<Mysql>.Uninstall(Mysql contract)
     {
+        var resource = contract.Result;
+        Debug.Assert(resource != null);
+        
         if (resource.User != "root")
         {
             RunSql(

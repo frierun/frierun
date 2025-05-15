@@ -5,15 +5,6 @@ namespace Frierun.Server.Data;
 
 public class PostgresqlDatabase : Resource
 {
-    [JsonConstructor]
-    protected PostgresqlDatabase(Lazy<IHandler> lazyHandler) : base(lazyHandler)
-    {
-    }
-
-    public PostgresqlDatabase(IHandler handler) : base(handler)
-    {
-    }
-    
     public required string User { get; init; }
     public required string Password { get; init; }
     public required string Host { get; init; }

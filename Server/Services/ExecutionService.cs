@@ -16,12 +16,9 @@ public class ExecutionService(
     public ExecutionPlan Create(Package package)
     {
         var contracts = DiscoverContracts(package);
-        return new ExecutionPlan(
-            contracts,
-            installerRegistry
-        );
+        return new ExecutionPlan(contracts);
     }
-    
+
     /// <summary>
     /// Gets the application name from the package.
     /// </summary>
@@ -36,7 +33,7 @@ public class ExecutionService(
 
             return package.Prefix;
         }
-        
+
         var count = 1;
         var applicationName = package.Name;
         while (state.Applications.Any(application => application.Name == applicationName))
@@ -59,7 +56,7 @@ public class ExecutionService(
 
         ContractId? nextId = package.Id;
         Contract? nextContract = package;
-        
+
         while (nextId != null)
         {
             nextContract ??= contractRegistry.CreateContract(nextId);
@@ -95,8 +92,13 @@ public class ExecutionService(
     /// </summary>
     private IEnumerable<InstallerInitializeResult> DiscoverContract(Contract contract, string? prefix = null)
     {
+        if (contract.Handler != null)
+        {
+            return contract.Handler.Initialize(contract, prefix ?? "");
+        }
+        
         return installerRegistry
-            .GetInstallers(contract.GetType(), contract.Installer)
+            .GetHandlers(contract.GetType())
             .SelectMany(installer => installer.Initialize(contract, prefix ?? ""));
     }
 }

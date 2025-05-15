@@ -15,7 +15,7 @@ public class DomainsController : ControllerBase
     [HttpGet]
     public IEnumerable<DomainInstaller> List(InstallerRegistry registry)
     {
-        return registry.GetInstallers(typeof(Domain))
+        return registry.GetHandlers(typeof(Domain))
             .Select(
                 installer => new DomainInstaller(
                     installer.GetType().Name,

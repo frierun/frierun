@@ -3,22 +3,23 @@ using Mount = Frierun.Server.Data.Mount;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class MountInstaller(Application application) : IInstaller<Mount>
+public class MountInstaller(Application application) : IHandler<Mount>
 {
     public Application Application => application;
     
-    IEnumerable<InstallerInitializeResult> IInstaller<Mount>.Initialize(Mount contract, string prefix)
+    public IEnumerable<InstallerInitializeResult> Initialize(Mount contract, string prefix)
     {
         yield return new InstallerInitializeResult(
             contract with
             {
+                Handler = this,
                 DependsOn = contract.DependsOn.Append(contract.VolumeId),
                 DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
             }
         );
     }
     
-    Mount IInstaller<Mount>.Install(Mount contract, ExecutionPlan plan)
+    public Mount Install(Mount contract, ExecutionPlan plan)
     {
         var containerContract = plan.GetContract(contract.ContainerId);
         var volume = plan.GetResource(contract.VolumeId);
@@ -41,7 +42,7 @@ public class MountInstaller(Application application) : IInstaller<Mount>
                                 }
                             );
                         }
-                    ),
+                    )
                 }
             );
 

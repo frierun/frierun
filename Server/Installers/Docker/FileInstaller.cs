@@ -5,21 +5,22 @@ using Mount = Docker.DotNet.Models.Mount;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class FileInstaller(Application application, DockerService dockerService) : IInstaller<File>
+public class FileInstaller(Application application, DockerService dockerService) : IHandler<File>
 {
     public Application Application => application;
     
-    IEnumerable<InstallerInitializeResult> IInstaller<File>.Initialize(File contract, string prefix)
+    public IEnumerable<InstallerInitializeResult> Initialize(File contract, string prefix)
     {
         yield return new InstallerInitializeResult(
             contract with
             {
-                DependsOn = contract.DependsOn.Append(contract.VolumeId),
+                Handler = this,
+                DependsOn = contract.DependsOn.Append(contract.VolumeId)
             }
         );
     }
 
-    File IInstaller<File>.Install(File contract, ExecutionPlan plan)
+    public File Install(File contract, ExecutionPlan plan)
     {
         var volume = plan.GetResource(contract.VolumeId);
         Mount? mount = null;
@@ -44,7 +45,7 @@ public class FileInstaller(Application application, DockerService dockerService)
 
         if (mount == null)
         {
-            throw new Exception("Unknown volume type: " + volume?.GetType().Name);
+            throw new Exception("Unknown volume type: " + volume.GetType().Name);
         }
 
         var containerId = dockerService.StartContainer(

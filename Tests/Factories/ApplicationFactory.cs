@@ -8,11 +8,6 @@ public sealed class ApplicationFactory : Faker<Application>
 {
     public ApplicationFactory(Faker<Package> packageFactory)
     {
-        CustomInstantiator(f => new Application(NSubstitute.Substitute.For<IHandler>())
-            {
-                Name = f.Lorem.Word()
-            }
-        );
         RuleFor(p => p.Package, _ => packageFactory.Generate());
         RuleFor(p => p.Url, f => f.Internet.Url());
         RuleFor(p => p.Description, f => f.Lorem.Sentence());

@@ -2,11 +2,9 @@
 
 namespace Frierun.Server.Installers.Base;
 
-public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>
+public class PortHttpEndpointInstaller : IHandler<HttpEndpoint>
 {
-    public Application? Application => null;
-
-    IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix)
+    public IEnumerable<InstallerInitializeResult> Initialize(HttpEndpoint contract, string prefix)
     {
         var portEndpoint = new PortEndpoint(
             Protocol.Tcp, contract.Port, ContainerName: contract.ContainerName, DestinationPort: 80
@@ -14,6 +12,7 @@ public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>
         yield return new InstallerInitializeResult(
             contract with
             {
+                Handler = this,
                 DependsOn = contract.DependsOn.Append(portEndpoint),
                 DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
             },
@@ -21,7 +20,7 @@ public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>
         );
     }
 
-    HttpEndpoint IInstaller<HttpEndpoint>.Install(HttpEndpoint contract, ExecutionPlan plan)
+    public HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
     {
         var portEndpoint = plan.GetResource<DockerPortEndpoint>(
             new PortEndpoint(Protocol.Tcp, contract.Port, ContainerName: contract.ContainerName, DestinationPort: 80)
@@ -31,7 +30,7 @@ public class PortHttpEndpointInstaller : IInstaller<HttpEndpoint>
 
         return contract with
         {
-            Result = new GenericHttpEndpoint(new EmptyHandler()) { Url = url }
+            Result = new GenericHttpEndpoint { Url = url }
         };
     }
 }

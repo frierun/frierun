@@ -5,11 +5,11 @@ using Network = Frierun.Server.Data.Network;
 namespace Frierun.Server.Installers.Docker;
 
 public class NetworkInstaller(Application application, DockerService dockerService, State state)
-    : IInstaller<Network>, IHandler<DockerNetwork>
+    : IHandler<Network>
 {
     public Application Application => application;
 
-    IEnumerable<InstallerInitializeResult> IInstaller<Network>.Initialize(Network contract, string prefix)
+    public IEnumerable<InstallerInitializeResult> Initialize(Network contract, string prefix)
     {
         var baseName = contract.NetworkName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
 
@@ -24,12 +24,13 @@ public class NetworkInstaller(Application application, DockerService dockerServi
         yield return new InstallerInitializeResult(
             contract with
             {
+                Handler = this,
                 NetworkName = name
             }
         );
     }
 
-    Network IInstaller<Network>.Install(Network contract, ExecutionPlan plan)
+    public Network Install(Network contract, ExecutionPlan plan)
     {
         var networkName = contract.NetworkName;
         Debug.Assert(networkName != null, "Network name cannot be null.");
@@ -38,12 +39,13 @@ public class NetworkInstaller(Application application, DockerService dockerServi
 
         return contract with
         {
-            Result = new DockerNetwork(this) { Name = networkName }
+            Result = new DockerNetwork { Name = networkName }
         };
     }
 
-    void IHandler<DockerNetwork>.Uninstall(DockerNetwork resource)
+    public void Uninstall(Network contract)
     {
-        dockerService.RemoveNetwork(resource.Name).Wait();
+        Debug.Assert(contract.Result != null);
+        dockerService.RemoveNetwork(contract.Result.Name).Wait();
     }
 }

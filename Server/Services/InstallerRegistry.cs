@@ -11,8 +11,8 @@ public class InstallerRegistry : IDisposable
     private readonly ILifetimeScope _container;
     private readonly ILifetimeScope _baseScope;
     private readonly Dictionary<Application, ILifetimeScope> _applicationScopes = new();
-    private readonly Dictionary<Application, IList<IInstaller>> _applicationInstallers = new();
-    private readonly Dictionary<Type, IList<IInstaller>> _installers = new();
+    private readonly Dictionary<Application, IList<IHandler>> _handlerPerApplication = new();
+    private readonly Dictionary<Type, IList<IHandler>> _handlerPerType = new();
     private readonly Dictionary<InstallerDefinition, IHandler> _handlers = new();
 
     public InstallerRegistry(
@@ -26,11 +26,6 @@ public class InstallerRegistry : IDisposable
 
         var baseBuilder = _scopeBuilders["base"];
         _baseScope = container.BeginLifetimeScope(builder => baseBuilder(builder));
-        foreach (var installer in _baseScope.Resolve<IEnumerable<IInstaller>>())
-        {
-            AddInstaller(installer);
-        }
-
         foreach (var handler in _baseScope.Resolve<IEnumerable<IHandler>>())
         {
             AddHandler(handler);
@@ -71,7 +66,7 @@ public class InstallerRegistry : IDisposable
             return;
         }
 
-        if (_applicationInstallers.ContainsKey(application))
+        if (_handlerPerApplication.ContainsKey(application))
         {
             throw new Exception("Application already added to the registry");
         }
@@ -85,16 +80,11 @@ public class InstallerRegistry : IDisposable
             }
         );
 
-        var installers = scope.Resolve<IEnumerable<IInstaller>>().ToList();
+        var handlers = scope.Resolve<IEnumerable<IHandler>>().ToList();
 
-        installers.ForEach(AddInstaller);
-        _applicationInstallers[application] = installers;
+        handlers.ForEach(AddHandler);
+        _handlerPerApplication[application] = handlers;
         _applicationScopes[application] = scope;
-
-        foreach (var handler in scope.Resolve<IEnumerable<IHandler>>())
-        {
-            AddHandler(handler);
-        }
     }
 
     /// <summary>
@@ -108,47 +98,23 @@ public class InstallerRegistry : IDisposable
             return;
         }
 
-        if (!_applicationInstallers.Remove(application, out var installers))
+        if (!_handlerPerApplication.Remove(application, out var handlers))
         {
             return;
         }
 
-        foreach (var installer in installers)
+        foreach (var handler in handlers)
         {
-            _handlers.Remove(new InstallerDefinition(installer.GetType().Name, application.Name));
+            _handlers.Remove(new InstallerDefinition(handler.GetType().Name, application.Name));
 
-            _installers
+            _handlerPerType
                 .Values
                 .ToList()
-                .ForEach(list => list.Remove(installer));
+                .ForEach(list => list.Remove(handler));
         }
 
         _applicationScopes[application].Dispose();
         _applicationScopes.Remove(application);
-    }
-
-    /// <summary>
-    /// Adds object to the registry, checking all its interfaces for installers
-    /// </summary>
-    private void AddInstaller(IInstaller installer)
-    {
-        installer.GetType().GetInterfaces()
-            .Where(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IInstaller<>))
-            .ToList()
-            .ForEach(
-                type =>
-                {
-                    var contractType = type.GetGenericArguments()[0];
-
-                    if (!_installers.ContainsKey(contractType))
-                    {
-                        _installers[contractType] = new List<IInstaller>();
-                    }
-
-                    // Add the installer to the beginning of the list so that it is used first
-                    _installers[contractType].Insert(0, installer);
-                }
-            );
     }
     
     /// <summary>
@@ -158,32 +124,34 @@ public class InstallerRegistry : IDisposable
     {
         var definition = new InstallerDefinition(handler.GetType().Name, handler.Application?.Name);
         _handlers[definition] = handler;
+
+        var handlerType = handler
+            .GetType()
+            .GetInterfaces()
+            .Single(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IHandler<>));
+        
+        var contractType = handlerType.GetGenericArguments()[0];
+
+        if (!_handlerPerType.ContainsKey(contractType))
+        {
+            _handlerPerType[contractType] = new List<IHandler>();
+        }
+
+        // Add the handler to the beginning of the list so that it is used first
+        _handlerPerType[contractType].Insert(0, handler);
     }
 
     /// <summary>
-    /// Gets possible installers for the resource type
+    /// Gets possible handlers for the resource type
     /// </summary>
-    public IEnumerable<IInstaller> GetInstallers(Type contractType, InstallerDefinition? definition = null)
+    public IEnumerable<IHandler> GetHandlers(Type contractType)
     {
-        if (!_installers.TryGetValue(contractType, out var installers))
+        if (!_handlerPerType.TryGetValue(contractType, out var handlers))
         {
-            yield break;
+            return Array.Empty<IHandler>();
         }
 
-        foreach (var installer in installers)
-        {
-            if (definition != null && definition.TypeName != installer.GetType().Name)
-            {
-                continue;
-            }
-
-            if (definition?.ApplicationName != null && installer.Application?.Name != definition.ApplicationName)
-            {
-                continue;
-            }
-
-            yield return installer;
-        }
+        return handlers;
     }
 
     public IHandler? GetHandler(string typeName, string? applicationName = null)

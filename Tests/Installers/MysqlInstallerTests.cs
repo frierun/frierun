@@ -71,7 +71,7 @@ public class MysqlInstallerTests : BaseTests
 
         Resolve<UninstallService>().Handle(application);
 
-        DockerClient.Networks.Received(1).DisconnectNetworkAsync(
+         DockerClient.Networks.Received(1).DisconnectNetworkAsync(
             application.Name,
             Arg.Any<NetworkDisconnectParameters>()
         );

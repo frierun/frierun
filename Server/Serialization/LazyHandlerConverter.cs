@@ -4,16 +4,16 @@ using Frierun.Server.Installers;
 
 namespace Frierun.Server;
 
-public class LazyHandlerConverter(Lazy<InstallerRegistry> lazyInstallerRegistry) : JsonConverter<Lazy<IHandler>>
+public class LazyHandlerConverter(Lazy<InstallerRegistry> lazyInstallerRegistry) : JsonConverter<Lazy<IHandler?>>
 {
-    public override Lazy<IHandler> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Lazy<IHandler?> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         string typeName = string.Empty;
         string? applicationName = null;
 
         if (reader.TokenType == JsonTokenType.Null)
         {
-            throw new JsonException();
+            return new Lazy<IHandler?>((IHandler?)null);
         }
 
         if (reader.TokenType != JsonTokenType.StartObject)
@@ -53,16 +53,21 @@ public class LazyHandlerConverter(Lazy<InstallerRegistry> lazyInstallerRegistry)
             throw new JsonException();
         }
 
-        return new Lazy<IHandler>(
+        return new Lazy<IHandler?>(
             () => lazyInstallerRegistry.Value.GetHandler(typeName, applicationName)
-                  ?? throw new Exception($"Handler with type name {typeName} not found")
         );
     }
 
-    public override void Write(Utf8JsonWriter writer, Lazy<IHandler> lazy, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Lazy<IHandler?> lazy, JsonSerializerOptions options)
     {
         var value = lazy.Value;
 
+        if (value == null)
+        {
+            writer.WriteNullValue();
+            return;
+        }
+        
         writer.WriteStartObject();
         writer.WritePropertyName("TypeName");
         writer.WriteStringValue(value.GetType().Name);

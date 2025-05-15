@@ -22,7 +22,7 @@ public record HttpEndpoint(
 
         return this with
         {
-            Installer = endpoint.Installer ?? Installer,
+            Handler = endpoint.Handler,
         };
     }
 }

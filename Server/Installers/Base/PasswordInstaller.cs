@@ -3,11 +3,9 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers.Base;
 
-public class PasswordInstaller : IInstaller<Password>
+public class PasswordInstaller : IHandler<Password>
 {
-    public Application? Application => null;
-
-    Password IInstaller<Password>.Install(Password contract, ExecutionPlan plan)
+    public Password Install(Password contract, ExecutionPlan plan)
     {
         var password = RandomNumberGenerator.GetString(
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
@@ -16,7 +14,7 @@ public class PasswordInstaller : IInstaller<Password>
 
         return contract with
         {
-            Result = new GeneratedPassword(new EmptyHandler()) { Value = password }
+            Result = new GeneratedPassword { Value = password }
         };
     }
 }

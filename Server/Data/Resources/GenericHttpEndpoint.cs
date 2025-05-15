@@ -8,15 +8,6 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
 public class GenericHttpEndpoint : Resource
 {
-    [JsonConstructor]
-    protected GenericHttpEndpoint(Lazy<IHandler> lazyHandler) : base(lazyHandler)
-    {
-    }
-
-    public GenericHttpEndpoint(IHandler handler) : base(handler)
-    {
-    }
-    
     public required Uri Url { get; init; }
     public string Host => Url.Host;
     public int Port => Url.Port;

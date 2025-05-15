@@ -3,11 +3,9 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers.Base;
 
-public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller<Substitute>
+public class SubstituteInstaller(ContractRegistry contractRegistry) : IHandler<Substitute>
 {
-    public Application? Application => null;
-    
-    IEnumerable<InstallerInitializeResult> IInstaller<Substitute>.Initialize(Substitute contract, string prefix)
+    public IEnumerable<InstallerInitializeResult> Initialize(Substitute contract, string prefix)
     {
         var contractIds = contract.Matches
             .SelectMany(pair => pair.Value)
@@ -33,13 +31,14 @@ public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller
         yield return new InstallerInitializeResult(
             contract with
             {
+                Handler = this,
                 DependsOn = contract.DependsOn.Concat(contractIds),
                 DependencyOf = contract.DependencyOf.Append(contract.OriginalId)
             }
         );
     }
 
-    Substitute IInstaller<Substitute>.Install(Substitute contract, ExecutionPlan plan)
+    public Substitute Install(Substitute contract, ExecutionPlan plan)
     {
         var original = plan.GetContract(contract.OriginalId);
         if (original is not IHasStrings hasStrings)

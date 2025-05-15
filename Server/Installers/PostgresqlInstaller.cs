@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Diagnostics;
+using System.Security.Cryptography;
 using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers;
@@ -7,17 +8,16 @@ public class PostgresqlInstaller(
     Application application,
     State state,
     ILogger<PostgresqlInstaller> logger)
-    : IInstaller<Postgresql>, IHandler<PostgresqlDatabase>
+    : IHandler<Postgresql>
 {
-    private readonly DockerContainer _container = application.Contracts.OfType<Container>().First().Result ??
-                                                  throw new Exception("Container not found");
+    private readonly Container _container = application.Contracts.OfType<Container>().First();
 
     private readonly string _rootPassword = application.Contracts.OfType<Password>().First().Result?.Value ??
                                             throw new Exception("Root password not found");
     
     public Application Application => application;
 
-    IEnumerable<InstallerInitializeResult> IInstaller<Postgresql>.Initialize(
+    public IEnumerable<InstallerInitializeResult> Initialize(
         Postgresql contract,
         string prefix
     )
@@ -35,13 +35,14 @@ public class PostgresqlInstaller(
         yield return new InstallerInitializeResult(
             contract with
             {
+                Handler = this,
                 DatabaseName = name,
                 DependsOn = contract.DependsOn.Append(contract.NetworkId)
             }
         );
     }
 
-    Postgresql IInstaller<Postgresql>.Install(Postgresql contract, ExecutionPlan plan)
+    public Postgresql Install(Postgresql contract, ExecutionPlan plan)
     {
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
 
@@ -51,7 +52,7 @@ public class PostgresqlInstaller(
         {
             return contract with
             {
-                Result = new PostgresqlDatabase(this)
+                Result = new PostgresqlDatabase
                 {
                     User = "postgres",
                     Password = _rootPassword,
@@ -82,7 +83,7 @@ public class PostgresqlInstaller(
 
         return contract with
         {
-            Result = new PostgresqlDatabase(this)
+            Result = new PostgresqlDatabase
             {
                 User = name,
                 Password = password,
@@ -93,8 +94,11 @@ public class PostgresqlInstaller(
         };
     }
 
-    void IHandler<PostgresqlDatabase>.Uninstall(PostgresqlDatabase resource)
+    void IHandler<Postgresql>.Uninstall(Postgresql contract)
     {
+        var resource = contract.Result;
+        Debug.Assert(resource != null);
+        
         if (resource.User != "postgres")
         {
             RunSql(

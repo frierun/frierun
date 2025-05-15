@@ -13,7 +13,7 @@ public class LazyHandlerConverterTests : BaseTests
     public void Read_StaticHandler_ReturnsHandler()
     {
         var converter = new LazyHandlerConverter(Resolve<Lazy<InstallerRegistry>>());
-        var typeName = nameof(EmptyHandler);
+        var typeName = nameof(PackageInstaller);
         var reader = new Utf8JsonReader(
             Encoding.UTF8.GetBytes(
                 $$"""
@@ -26,11 +26,11 @@ public class LazyHandlerConverterTests : BaseTests
         var result = converter.Read(ref reader, typeof(IHandler), new JsonSerializerOptions());
 
         Assert.NotNull(result.Value);
-        Assert.IsType<EmptyHandler>(result.Value);
+        Assert.IsType<PackageInstaller>(result.Value);
     }
 
     [Fact]
-    public void Read_WrongType_ThrowsError()
+    public void Read_WrongType_ReturnsLazyNull()
     {
         var converter = new LazyHandlerConverter(Resolve<Lazy<InstallerRegistry>>());
         var typeName = "WrongType";
@@ -45,9 +45,26 @@ public class LazyHandlerConverterTests : BaseTests
 
         var result = converter.Read(ref reader, typeof(IHandler), new JsonSerializerOptions());
 
-        Assert.Throws<Exception>(() => result.Value);
+        Assert.Null(result.Value);
     }
-    
+
+    [Fact]
+    public void Read_Null_ReturnsLazyNull()
+    {
+        var converter = new LazyHandlerConverter(Resolve<Lazy<InstallerRegistry>>());
+        var reader = new Utf8JsonReader(
+            Encoding.UTF8.GetBytes(
+                $$"""
+                  null
+                  """
+            )
+        );
+        reader.Read();
+
+        var result = converter.Read(ref reader, typeof(IHandler), new JsonSerializerOptions());
+
+        Assert.Null(result.Value);
+    }
     
     [Fact]
     public void Read_InstalledApplication_ReturnsHandler()
@@ -74,7 +91,7 @@ public class LazyHandlerConverterTests : BaseTests
     public void Write_StaticHandler_WritesNullApplicationName()
     {
         var installerRegistry = Resolve<InstallerRegistry>();
-        var typeName = nameof(EmptyHandler);
+        var typeName = nameof(PackageInstaller);
         var handler = installerRegistry.GetHandler(typeName);
         Assert.NotNull(handler);
         var converter = new LazyHandlerConverter(Resolve<Lazy<InstallerRegistry>>());
@@ -82,7 +99,7 @@ public class LazyHandlerConverterTests : BaseTests
         var writer = new Utf8JsonWriter(memoryStream);
         var options = new JsonSerializerOptions();
 
-        converter.Write(writer, new Lazy<IHandler>(handler), options);
+        converter.Write(writer, new Lazy<IHandler?>(handler), options);
 
         writer.Flush();
         var result = Encoding.UTF8.GetString(memoryStream.ToArray());
@@ -108,7 +125,7 @@ public class LazyHandlerConverterTests : BaseTests
         var writer = new Utf8JsonWriter(memoryStream);
         var options = new JsonSerializerOptions();
 
-        converter.Write(writer, new Lazy<IHandler>(handler), options);
+        converter.Write(writer, new Lazy<IHandler?>(handler), options);
 
         writer.Flush();
         var result = Encoding.UTF8.GetString(memoryStream.ToArray());
@@ -119,5 +136,27 @@ public class LazyHandlerConverterTests : BaseTests
               """,
             result
         );
-    }    
+    }
+    
+    [Fact]
+    public void Write_Null_WritesNull()
+    {
+        var converter = new LazyHandlerConverter(Resolve<Lazy<InstallerRegistry>>());
+        var memoryStream = new MemoryStream();
+        var writer = new Utf8JsonWriter(memoryStream);
+        var options = new JsonSerializerOptions();
+
+        converter.Write(writer, new Lazy<IHandler?>((IHandler?)null), options);
+
+        writer.Flush();
+        var result = Encoding.UTF8.GetString(memoryStream.ToArray());
+
+        Assert.Equal(
+            $$"""
+              null
+              """,
+            result
+        );
+    }
+    
 }

@@ -1,12 +1,12 @@
-﻿using Frierun.Server.Data;
+﻿using System.Diagnostics;
+using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers;
 
 public class TraefikHttpEndpointInstaller(Application application)
-    : IInstaller<HttpEndpoint>, IHandler<TraefikHttpEndpoint>
+    : IHandler<HttpEndpoint>
 {
-    private readonly DockerContainer _container = application.Contracts.OfType<Container>().First().Result ??
-                                                  throw new Exception("Container not found");    
+    private readonly Container _container = application.Contracts.OfType<Container>().First();    
 
     private readonly int _webPort = application.Contracts
         .OfType<PortEndpoint>()
@@ -22,18 +22,19 @@ public class TraefikHttpEndpointInstaller(Application application)
 
     public Application Application => application;
 
-    IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix)
+    public IEnumerable<InstallerInitializeResult> Initialize(HttpEndpoint contract, string prefix)
     {
         yield return new InstallerInitializeResult(
             contract with
             {
+                Handler = this,
                 DependsOn = contract.DependsOn.Append(new Network("")).Append(contract.DomainId),
                 DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
             }
         );
     }
 
-    HttpEndpoint IInstaller<HttpEndpoint>.Install(HttpEndpoint contract, ExecutionPlan plan)
+    public HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
     {
         var domainResource = plan.GetResource<ResolvedDomain>(contract.DomainId);
         var domain = domainResource.Value;
@@ -84,7 +85,7 @@ public class TraefikHttpEndpointInstaller(Application application)
 
         return contract with
         {
-            Result = new TraefikHttpEndpoint(this)
+            Result = new TraefikHttpEndpoint
             {
                 Url = url,
                 NetworkName = network.Name
@@ -92,8 +93,11 @@ public class TraefikHttpEndpointInstaller(Application application)
         };
     }
 
-    void IHandler<TraefikHttpEndpoint>.Uninstall(TraefikHttpEndpoint resource)
+    void IHandler<HttpEndpoint>.Uninstall(HttpEndpoint contract)
     {
+        var resource = contract.Result as TraefikHttpEndpoint;
+        Debug.Assert(resource != null);
+        
         _container.DetachNetwork(resource.NetworkName);
     }
 }

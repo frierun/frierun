@@ -1,14 +1,15 @@
-﻿using Docker.DotNet.Models;
+﻿using System.Diagnostics;
+using Docker.DotNet.Models;
 using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers.Docker;
 
 public class ContainerInstaller(Application application, DockerService dockerService, State state)
-    : IInstaller<Container>, IContainerHandler
+    : IContainerHandler
 {
     public Application Application => application;
 
-    IEnumerable<InstallerInitializeResult> IInstaller<Container>.Initialize(Container contract, string prefix)
+    public IEnumerable<InstallerInitializeResult> Initialize(Container contract, string prefix)
     {
         var baseName = contract.ContainerName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
 
@@ -25,11 +26,12 @@ public class ContainerInstaller(Application application, DockerService dockerSer
             {
                 ContainerName = name,
                 DependsOn = contract.DependsOn.Append(contract.NetworkId),
+                Handler = this
             }
         );
     }
 
-    Container IInstaller<Container>.Install(Container contract, ExecutionPlan plan)
+    public Container Install(Container contract, ExecutionPlan plan)
     {
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
         var dockerParameters = new CreateContainerParameters
@@ -88,27 +90,31 @@ public class ContainerInstaller(Application application, DockerService dockerSer
 
         return contract with
         {
-            Result = new DockerContainer(this) { Name = contract.ContainerName!, NetworkName = network.Name }
+            Result = new DockerContainer { Name = contract.ContainerName!, NetworkName = network.Name }
         };
     }
 
-    void IHandler<DockerContainer>.Uninstall(DockerContainer resource)
+    void IHandler<Container>.Uninstall(Container container)
     {
-        dockerService.RemoveContainer(resource.Name).Wait();
+        Debug.Assert(container.Result != null);
+        dockerService.RemoveContainer(container.Result.Name).Wait();
     }
 
-    public void AttachNetwork(DockerContainer container, string networkName)
+    public void AttachNetwork(Container container, string networkName)
     {
-        dockerService.AttachNetwork(networkName, container.Name).Wait();
+        Debug.Assert(container.Result != null);
+        dockerService.AttachNetwork(networkName, container.Result.Name).Wait();
     }
 
-    public void DetachNetwork(DockerContainer container, string networkName)
+    public void DetachNetwork(Container container, string networkName)
     {
-        dockerService.DetachNetwork(networkName, container.Name).Wait();
+        Debug.Assert(container.Result != null);
+        dockerService.DetachNetwork(networkName, container.Result.Name).Wait();
     }
 
-    public Task<(string stdout, string stderr)> ExecInContainer(DockerContainer container, IList<string> command)
+    public Task<(string stdout, string stderr)> ExecInContainer(Container container, IList<string> command)
     {
-        return dockerService.ExecInContainer(container.Name, command);
+        Debug.Assert(container.Result != null);
+        return dockerService.ExecInContainer(container.Result.Name, command);
     }
 }
