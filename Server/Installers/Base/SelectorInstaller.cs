@@ -2,12 +2,10 @@
 
 namespace Frierun.Server.Installers.Base;
 
-public class SelectorInstaller : IInstaller<Selector>, IUninstaller<ResolvedSelector>
+public class SelectorInstaller : IInstaller<Selector>
 {
-    /// <inheritdoc />
     public Application? Application => null;
-    
-    /// <inheritdoc />
+
     IEnumerable<InstallerInitializeResult> IInstaller<Selector>.Initialize(Selector contract, string prefix)
     {
         if (contract.SelectedOption != null)
@@ -28,9 +26,16 @@ public class SelectorInstaller : IInstaller<Selector>, IUninstaller<ResolvedSele
         }
     }
 
-    /// <inheritdoc />
-    Resource? IInstaller<Selector>.Install(Selector contract, ExecutionPlan plan)
+    Selector IInstaller<Selector>.Install(Selector contract, ExecutionPlan plan)
     {
-        return new ResolvedSelector(contract.Name, contract.SelectedOption);
+        if (contract.SelectedOption == null)
+        {
+            throw new Exception("No option selected");
+        }
+
+        return contract with
+        {
+            Result = new ResolvedParameter(new EmptyHandler()) { Name = contract.Name, Value = contract.SelectedOption }
+        };
     }
 }

@@ -3,41 +3,46 @@
 namespace Frierun.Server.Installers;
 
 public class TraefikHttpEndpointInstaller(Application application)
-    : IInstaller<HttpEndpoint>, IUninstaller<TraefikHttpEndpoint>
+    : IInstaller<HttpEndpoint>, IHandler<TraefikHttpEndpoint>
 {
-    private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
+    private readonly DockerContainer _container = application.Contracts.OfType<Container>().First().Result ??
+                                                  throw new Exception("Container not found");    
 
-    private readonly int _webPort = application.Resources.OfType<DockerPortEndpoint>()
-        .FirstOrDefault(endpoint => endpoint.Name == "Web")?.Port ?? 0;
+    private readonly int _webPort = application.Contracts
+        .OfType<PortEndpoint>()
+        .FirstOrDefault(endpoint => endpoint.Name == "Web")
+        ?.Result
+        ?.Port ?? 0;
 
-    private readonly int _webSecurePort = application.Resources.OfType<DockerPortEndpoint>()
-        .FirstOrDefault(endpoint => endpoint.Name == "WebSecure")?.Port ?? 0;
+    private readonly int _webSecurePort = application.Contracts
+        .OfType<PortEndpoint>()
+        .FirstOrDefault(endpoint => endpoint.Name == "WebSecure")
+        ?.Result
+        ?.Port ?? 0;
 
-    /// <inheritdoc />
     public Application Application => application;
 
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<HttpEndpoint>.Initialize(HttpEndpoint contract, string prefix)
     {
-        var connectExternalContainer = new ConnectExternalContainer(_container.Name);
         yield return new InstallerInitializeResult(
             contract with
             {
-                DependsOn = contract.DependsOn.Append(connectExternalContainer).Append(contract.DomainId),
+                DependsOn = contract.DependsOn.Append(new Network("")).Append(contract.DomainId),
                 DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
-            },
-            [connectExternalContainer]
+            }
         );
     }
 
-    /// <inheritdoc />
-    Resource IInstaller<HttpEndpoint>.Install(HttpEndpoint contract, ExecutionPlan plan)
+    HttpEndpoint IInstaller<HttpEndpoint>.Install(HttpEndpoint contract, ExecutionPlan plan)
     {
         var domainResource = plan.GetResource<ResolvedDomain>(contract.DomainId);
         var domain = domainResource.Value;
         var subdomain = domain.Split('.')[0];
 
         var containerContract = plan.GetContract(contract.ContainerId);
+        var network = plan.GetResource<DockerNetwork>(containerContract.NetworkId);
+
+        _container.AttachNetwork(network.Name);
 
         string? certResolver = null;
         if (!domainResource.IsInternal)
@@ -73,8 +78,22 @@ public class TraefikHttpEndpointInstaller(Application application)
             }
         );
 
-        return certResolver == null
-            ? new TraefikHttpEndpoint(domain, _webPort)
-            : new TraefikHttpEndpoint(domain, _webSecurePort, true);
+        var url = certResolver == null
+            ? new Uri($"http://{domain}:{_webPort}")
+            : new Uri($"https://{domain}:{_webSecurePort}");
+
+        return contract with
+        {
+            Result = new TraefikHttpEndpoint(this)
+            {
+                Url = url,
+                NetworkName = network.Name
+            }
+        };
+    }
+
+    void IHandler<TraefikHttpEndpoint>.Uninstall(TraefikHttpEndpoint resource)
+    {
+        _container.DetachNetwork(resource.NetworkName);
     }
 }

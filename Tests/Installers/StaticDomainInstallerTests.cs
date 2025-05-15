@@ -12,8 +12,8 @@ public class StaticDomainInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.NotNull(application);
-        var domain = application.Resources.OfType<ResolvedDomain>().First();
+        var domain = application.Contracts.OfType<Domain>().Single().Result;
+        Assert.NotNull(domain);
         Assert.True(domain.IsInternal);
     }
 
@@ -28,8 +28,8 @@ public class StaticDomainInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.NotNull(application);
-        var domain = application.Resources.OfType<ResolvedDomain>().First();
+        var domain = application.Contracts.OfType<Domain>().Single().Result;
+        Assert.NotNull(domain);
         Assert.False(domain.IsInternal);
     }
 }

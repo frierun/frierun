@@ -2,12 +2,10 @@
 
 namespace Frierun.Server.Installers.Base;
 
-public class RedisInstaller : IInstaller<Redis>, IUninstaller<RedisDatabase>
+public class RedisInstaller : IInstaller<Redis>
 {
-    /// <inheritdoc />
     public Application? Application => null;
-    
-    /// <inheritdoc />
+
     IEnumerable<InstallerInitializeResult> IInstaller<Redis>.Initialize(Redis contract, string prefix)
     {
         yield return new InstallerInitializeResult(
@@ -29,12 +27,14 @@ public class RedisInstaller : IInstaller<Redis>, IUninstaller<RedisDatabase>
             ]
         );
     }
-    
-    /// <inheritdoc />
-    Resource? IInstaller<Redis>.Install(Redis contract, ExecutionPlan plan)
+
+    Redis IInstaller<Redis>.Install(Redis contract, ExecutionPlan plan)
     {
         var container = plan.GetResource<DockerContainer>(contract.ContainerId);
 
-        return new RedisDatabase(container.Name);
+        return contract with
+        {
+            Result = new RedisDatabase(new EmptyHandler()) { Host = container.Name }
+        };
     }
 }

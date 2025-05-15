@@ -5,8 +5,9 @@ public record SelectorOption(string Name, List<Contract> Contracts);
 public record Selector(
     string Name,
     IList<SelectorOption>? Options = null,
-    string? SelectedOption = null
-) : Contract(Name ?? "")
+    string? SelectedOption = null,
+    ResolvedParameter? Result = null
+) : Contract(Name ?? ""), IHasResult<ResolvedParameter>
 {
     public IList<SelectorOption> Options { get; init; } = Options ?? new List<SelectorOption>();
     

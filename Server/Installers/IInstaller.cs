@@ -4,7 +4,7 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers;
 
-public interface IInstaller<in TContract> : IInstaller
+public interface IInstaller<TContract> : IInstaller
     where TContract : Contract
 {
     public IEnumerable<InstallerInitializeResult> Initialize(TContract contract, string prefix)
@@ -12,12 +12,11 @@ public interface IInstaller<in TContract> : IInstaller
         yield return new InstallerInitializeResult(contract);
     }
 
-    public Resource? Install(TContract contract, ExecutionPlan plan)
+    public TContract Install(TContract contract, ExecutionPlan plan)
     {
-        return null;
+        return contract;
     }
 
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller.Initialize(Contract contract, string prefix)
     {
         foreach (var result in Initialize((TContract)contract, prefix))
@@ -69,9 +68,8 @@ public interface IInstaller<in TContract> : IInstaller
         }
     }
 
-    /// <inheritdoc />
     [DebuggerStepThrough]
-    Resource? IInstaller.Install(Contract contract, ExecutionPlan plan)
+    Contract IInstaller.Install(Contract contract, ExecutionPlan plan)
     {
         return Install((TContract)contract, plan);
     }
@@ -89,5 +87,5 @@ public interface IInstaller
     /// <summary>
     /// Installs the contract
     /// </summary>
-    public Resource? Install(Contract contract, ExecutionPlan plan);
+    public Contract Install(Contract contract, ExecutionPlan plan);
 }

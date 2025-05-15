@@ -6,6 +6,5 @@
  */
 
 export type TraefikHttpEndpointAllOf = {
-  domain: string;
-  port: number;
+  networkName: string;
 };

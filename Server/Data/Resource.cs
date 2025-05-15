@@ -1,10 +1,10 @@
 ﻿using System.Text.Json.Serialization;
+using Frierun.Server.Installers;
 
 namespace Frierun.Server.Data;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
 [JsonDerivedType(typeof(Application), nameof(Application))]
-[JsonDerivedType(typeof(DockerAttachedNetwork), nameof(DockerAttachedNetwork))]
 [JsonDerivedType(typeof(DockerContainer), nameof(DockerContainer))]
 [JsonDerivedType(typeof(DockerNetwork), nameof(DockerNetwork))]
 [JsonDerivedType(typeof(DockerPortEndpoint), nameof(DockerPortEndpoint))]
@@ -17,8 +17,21 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(RedisDatabase), nameof(RedisDatabase))]
 [JsonDerivedType(typeof(ResolvedDomain), nameof(ResolvedDomain))]
 [JsonDerivedType(typeof(ResolvedParameter), nameof(ResolvedParameter))]
-[JsonDerivedType(typeof(ResolvedSelector), nameof(ResolvedSelector))]
 [JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
-public abstract record Resource
+public abstract class Resource(Lazy<IHandler> lazyHandler)
 {
+    protected Resource(IHandler handler) : this(new Lazy<IHandler>(handler))
+    {
+    }
+
+    [JsonPropertyName("Handler")]
+    public Lazy<IHandler> LazyHandler => lazyHandler;
+    
+    [JsonIgnore]
+    public virtual IHandler Handler => LazyHandler.Value;
+    
+    public void Uninstall()
+    {
+        Handler.Uninstall(this);
+    }
 }

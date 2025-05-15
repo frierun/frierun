@@ -7,16 +7,16 @@ public class RedisInstallerTests : BaseTests
     [Fact]
     public void Install_PackageWithContract_CreatesDatabase()
     {
+        InstallPackage("docker");
         var package = Factory<Package>().Generate() with { Contracts = [new Redis()] };
 
         var application = InstallPackage(package);
 
-        Assert.NotNull(application);
-        Assert.Single(application.Resources.OfType<RedisDatabase>());
-        var database = application.Resources.OfType<RedisDatabase>().First();
+        var database = application.Contracts.OfType<Redis>().Single().Result;
+        Assert.NotNull(database);
 
-        Assert.Single(application.Resources.OfType<DockerContainer>());
-        var dbContainer = application.Resources.OfType<DockerContainer>().First();
+        var dbContainer = application.Contracts.OfType<Container>().Single().Result;
+        Assert.NotNull(dbContainer);
         Assert.Equal(database.Host, dbContainer.Name);
     }
 }

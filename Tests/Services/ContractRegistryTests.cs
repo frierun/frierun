@@ -1,9 +1,8 @@
 ﻿using Bogus;
 using Frierun.Server;
 using Frierun.Server.Data;
-using File = Frierun.Server.Data.File;
 
-namespace Frierun.Tests.Services;
+namespace Frierun.Tests;
 
 public class ContractRegistryTests : BaseTests
 {

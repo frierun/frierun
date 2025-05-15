@@ -1,12 +1,11 @@
 ﻿using System.Reflection;
-using Docker.DotNet;
 using Docker.DotNet.Models;
 using Frierun.Server.Data;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Tests.Integration;
 
-public class PackageTests : BaseTests
+public class PackageTests : TestWithDocker
 {
     public static IEnumerable<object[]> Packages()
     {
@@ -18,6 +17,7 @@ public class PackageTests : BaseTests
         [
             // internal
             "static-domain",
+            "docker",
             
             // skip due to port 53 already in use
             "adguard",
@@ -30,7 +30,7 @@ public class PackageTests : BaseTests
             // require postgresql
             "authentik",
             "miniflux",
-            "pgadmin",
+            "pgadmin"
         ];
         
         foreach (var fileName in Directory.EnumerateFiles(packagesDirectory, "*.yaml"))
@@ -50,14 +50,12 @@ public class PackageTests : BaseTests
     public async Task InstallingUninstalling_Package_ShouldCreateDockerContainer(string packageName)
     {
         var state = Services.GetRequiredService<State>();        
-        var dockerClient = new DockerClientConfiguration().CreateClient();
-
+        
         // install package
         var application = InstallPackage(packageName);
 
-        Assert.NotNull(application);
         Assert.NotNull(state.Applications.FirstOrDefault(app => app.Name == packageName));
-        var containers = await dockerClient.Containers.ListContainersAsync(new ContainersListParameters());
+        var containers = await DockerClient.Containers.ListContainersAsync(new ContainersListParameters());
         Assert.NotEmpty(containers);
         Assert.All(
             containers, container =>
@@ -70,8 +68,7 @@ public class PackageTests : BaseTests
         // uninstall package
         UninstallApplication(application);
 
-        Assert.Empty(state.Applications);
-        containers = await dockerClient.Containers.ListContainersAsync(new ContainersListParameters());
+        containers = await DockerClient.Containers.ListContainersAsync(new ContainersListParameters());
         Assert.Empty(containers);
     }
 }

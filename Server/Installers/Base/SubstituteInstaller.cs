@@ -5,10 +5,8 @@ namespace Frierun.Server.Installers.Base;
 
 public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller<Substitute>
 {
-    /// <inheritdoc />
     public Application? Application => null;
     
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Substitute>.Initialize(Substitute contract, string prefix)
     {
         var contractIds = contract.Matches
@@ -41,8 +39,7 @@ public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller
         );
     }
 
-    /// <inheritdoc />
-    Resource? IInstaller<Substitute>.Install(Substitute contract, ExecutionPlan plan)
+    Substitute IInstaller<Substitute>.Install(Substitute contract, ExecutionPlan plan)
     {
         var original = plan.GetContract(contract.OriginalId);
         if (original is not IHasStrings hasStrings)
@@ -69,7 +66,7 @@ public class SubstituteInstaller(ContractRegistry contractRegistry) : IInstaller
         );
         plan.UpdateContract(changedContract);
 
-        return null;
+        return contract;
     }
 
     /// <summary>

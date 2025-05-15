@@ -5,7 +5,6 @@
  * OpenAPI spec version: 1.0
  */
 import type { Application } from "./application";
-import type { DockerAttachedNetwork } from "./dockerAttachedNetwork";
 import type { DockerContainer } from "./dockerContainer";
 import type { DockerNetwork } from "./dockerNetwork";
 import type { DockerPortEndpoint } from "./dockerPortEndpoint";
@@ -22,7 +21,6 @@ import type { TraefikHttpEndpoint } from "./traefikHttpEndpoint";
 
 export type ApplicationAllOfResourcesItem =
   | Application
-  | DockerAttachedNetwork
   | DockerContainer
   | DockerNetwork
   | DockerPortEndpoint

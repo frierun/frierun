@@ -4,7 +4,7 @@ using Frierun.Server.Installers;
 using NSubstitute;
 using Substitute = NSubstitute.Substitute;
 
-namespace Frierun.Tests.Services;
+namespace Frierun.Tests;
 
 public class ExecutionServiceTests : BaseTests
 {
@@ -27,7 +27,7 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_WithoutInstaller_ThrowsException()
     {
-        var contract = Substitute.For<Contract>("", null, null, null);
+        var contract = Substitute.For<Contract>("", false, null, null, null);
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
 

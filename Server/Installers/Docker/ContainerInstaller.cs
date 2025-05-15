@@ -3,19 +3,18 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class ContainerInstaller(DockerService dockerService, State state) : IInstaller<Container>, IUninstaller<DockerContainer>
+public class ContainerInstaller(Application application, DockerService dockerService, State state)
+    : IInstaller<Container>, IContainerHandler
 {
-    /// <inheritdoc />
-    public Application? Application => null;
-    
-    /// <inheritdoc />
+    public Application Application => application;
+
     IEnumerable<InstallerInitializeResult> IInstaller<Container>.Initialize(Container contract, string prefix)
     {
         var baseName = contract.ContainerName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
 
         var count = 1;
         var name = baseName;
-        while (state.Resources.OfType<DockerContainer>().Any(c => c.Name == name))
+        while (state.Contracts.OfType<Container>().Any(c => c.Result?.Name == name))
         {
             count++;
             name = $"{baseName}{count}";
@@ -30,8 +29,7 @@ public class ContainerInstaller(DockerService dockerService, State state) : IIns
         );
     }
 
-    /// <inheritdoc />
-    Resource IInstaller<Container>.Install(Container contract, ExecutionPlan plan)
+    Container IInstaller<Container>.Install(Container contract, ExecutionPlan plan)
     {
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
         var dockerParameters = new CreateContainerParameters
@@ -52,7 +50,7 @@ public class ContainerInstaller(DockerService dockerService, State state) : IIns
             Name = contract.ContainerName!,
             NetworkingConfig = new NetworkingConfig()
             {
-                EndpointsConfig  = new Dictionary<string, EndpointSettings>
+                EndpointsConfig = new Dictionary<string, EndpointSettings>
                 {
                     {
                         network.Name, new EndpointSettings
@@ -88,12 +86,29 @@ public class ContainerInstaller(DockerService dockerService, State state) : IIns
             throw new Exception("Failed to start container");
         }
 
-        return new DockerContainer(Name: contract.ContainerName!, NetworkName: network.Name);
+        return contract with
+        {
+            Result = new DockerContainer(this) { Name = contract.ContainerName!, NetworkName = network.Name }
+        };
     }
 
-    /// <inheritdoc />
-    void IUninstaller<DockerContainer>.Uninstall(DockerContainer resource)
+    void IHandler<DockerContainer>.Uninstall(DockerContainer resource)
     {
         dockerService.RemoveContainer(resource.Name).Wait();
+    }
+
+    public void AttachNetwork(DockerContainer container, string networkName)
+    {
+        dockerService.AttachNetwork(networkName, container.Name).Wait();
+    }
+
+    public void DetachNetwork(DockerContainer container, string networkName)
+    {
+        dockerService.DetachNetwork(networkName, container.Name).Wait();
+    }
+
+    public Task<(string stdout, string stderr)> ExecInContainer(DockerContainer container, IList<string> command)
+    {
+        return dockerService.ExecInContainer(container.Name, command);
     }
 }

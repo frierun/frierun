@@ -1,20 +1,21 @@
 ﻿using Frierun.Server;
 using Frierun.Server.Data;
 
-namespace Frierun.Tests.Services;
+namespace Frierun.Tests;
 
 public class UninstallServiceTests : BaseTests
 {
     [Fact]
     public void Handle_FrierunApplication_ClearsState()
     {
-        var application = InstallPackage("frierun");
+        var docker = InstallPackage("docker");
+        var frierun = InstallPackage("frierun");
         var state = Resolve<State>();
-        Assert.NotNull(application);
-        Assert.Single(state.Applications);
+        Assert.Equal(2, state.Applications.Count());
         var uninstallService = Resolve<UninstallService>();
         
-        uninstallService.Handle(application);
+        uninstallService.Handle(frierun);
+        uninstallService.Handle(docker);
 
         Assert.Empty(state.Applications);
     }
@@ -22,16 +23,16 @@ public class UninstallServiceTests : BaseTests
     [Fact]
     public void Handle_DependentApplication_WorksProperlyOnCorrectOrder()
     {
+        var docker = InstallPackage("docker");
         var traefik = InstallPackage("traefik");
         var frierun = InstallPackage("frierun");
         var state = Resolve<State>();
-        Assert.Equal(2, state.Applications.Count());
-        Assert.NotNull(traefik);
-        Assert.NotNull(frierun);
+        Assert.Equal(3, state.Applications.Count());
         var uninstallService = Resolve<UninstallService>();
         
         uninstallService.Handle(frierun);
         uninstallService.Handle(traefik);
+        uninstallService.Handle(docker);
         
         Assert.Empty(state.Applications);
     }    
@@ -39,13 +40,12 @@ public class UninstallServiceTests : BaseTests
     [Fact]
     public void Handle_DependentApplication_ThrowsExceptionOnWrongOrder()
     {
+        InstallPackage("docker");
         InstallPackage("static-domain");
         var traefik = InstallPackage("traefik");
         var application = InstallPackage("frierun");
         
-        Assert.NotNull(traefik);
-        Assert.NotNull(application);
-        Assert.Single(application.Resources.OfType<TraefikHttpEndpoint>());
+        Assert.Single(application.Contracts.OfType<HttpEndpoint>());
         
         Assert.Throws<Exception>(() => Resolve<UninstallService>().Handle(traefik));
     }

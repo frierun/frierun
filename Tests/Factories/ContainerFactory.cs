@@ -8,7 +8,6 @@ public sealed class ContainerFactory: Faker<Container>
 {
     public ContainerFactory()
     {
-        StrictMode(true);
         CustomInstantiator(_ => new Container(""));
         RuleFor(p => p.Name, f => f.Lorem.Word());
         RuleFor(p => p.ContainerName, f => f.Lorem.Word());
@@ -18,8 +17,5 @@ public sealed class ContainerFactory: Faker<Container>
         RuleFor(p => p.Command, f => new List<string>(f.Lorem.Words()));
         RuleFor(p => p.Env, f => new Dictionary<string, string>());
         RuleFor(p => p.Configure, _ => Array.Empty<Action<CreateContainerParameters>>());
-        Ignore(p => p.Installer);
-        Ignore(p => p.DependsOn);
-        Ignore(p => p.DependencyOf);
     }
 }

@@ -9,7 +9,7 @@ public class State
     public event Action<Application> ApplicationRemoved = _ => { }; 
 
     [JsonIgnore]
-    public IEnumerable<Resource> Resources => _applications.SelectMany(application => application.Resources);
+    public IEnumerable<Contract> Contracts => _applications.SelectMany(application => application.Contracts);
     
     public IEnumerable<Application> Applications
     {

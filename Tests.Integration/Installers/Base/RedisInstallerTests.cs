@@ -4,14 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Tests.Integration.Installers.Base;
 
-public class RedisInstallerTests : BaseTests
+public class RedisInstallerTests : TestWithDocker
 {
     [Fact]
     public async Task Install_RedisContract_CredentialsAreCorrect()
     {
-        var state = Services.GetRequiredService<State>();
-        Assert.Empty(state.Applications);
-
         var package = new Package(
             Name: "redis-client",
             Contracts:
@@ -24,20 +21,23 @@ public class RedisInstallerTests : BaseTests
             ]
         );
         var application = InstallPackage(package);
-        Assert.NotNull(application);
-        
-        var container = application.Resources.OfType<DockerContainer>().First();
-        var database = application.Resources.OfType<RedisDatabase>().First();
-        Assert.Equal("redis-client-redis", database.Host);
-        
-        // try to connect to the database from the client
-        var dockerService = Services.GetRequiredService<DockerService>();
 
-        var queries = new[]{
-                "SET test_key 123",
-                "INCRBY test_key 123",
-                "GET test_key"
-            };
+        var container = application.Contracts
+            .OfType<Container>()
+            .Single(container => container.Name == "redis-client")
+            .Result;
+        var database = application.Contracts.OfType<Redis>().Single().Result;
+        Assert.NotNull(container);
+        Assert.NotNull(database);
+        Assert.Equal("redis-client-redis", database.Host);
+
+        // try to connect to the database from the client
+        var queries = new[]
+        {
+            "SET test_key 123",
+            "INCRBY test_key 123",
+            "GET test_key"
+        };
 
         string stdout = "";
         foreach (var query in queries)
@@ -48,16 +48,15 @@ public class RedisInstallerTests : BaseTests
                 "-h", database.Host,
             };
             command.AddRange(query.Split(" "));
-            (stdout, _) = await dockerService.ExecInContainer(
+            (stdout, _) = await DockerService.ExecInContainer(
                 container.Name,
                 command
             );
         }
-        
+
         Assert.Contains("246", stdout);
-        
+
         // clean up
         UninstallApplication(application);
-        Assert.Empty(state.Applications);        
     }
 }

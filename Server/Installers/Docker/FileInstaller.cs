@@ -5,12 +5,10 @@ using Mount = Docker.DotNet.Models.Mount;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class FileInstaller(DockerService dockerService) : IInstaller<File>
+public class FileInstaller(Application application, DockerService dockerService) : IInstaller<File>
 {
-    /// <inheritdoc />
-    public Application? Application => null;
+    public Application Application => application;
     
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<File>.Initialize(File contract, string prefix)
     {
         yield return new InstallerInitializeResult(
@@ -21,8 +19,7 @@ public class FileInstaller(DockerService dockerService) : IInstaller<File>
         );
     }
 
-    /// <inheritdoc />
-    Resource? IInstaller<File>.Install(File contract, ExecutionPlan plan)
+    File IInstaller<File>.Install(File contract, ExecutionPlan plan)
     {
         var volume = plan.GetResource(contract.VolumeId);
         Mount? mount = null;
@@ -86,6 +83,6 @@ public class FileInstaller(DockerService dockerService) : IInstaller<File>
 
         dockerService.RemoveContainer(containerId).Wait();
 
-        return null;
+        return contract;
     }
 }

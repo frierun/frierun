@@ -3,8 +3,9 @@
 public record Volume(
     string Name,
     string? VolumeName = null,
-    string? Path = null
-) : Contract(Name)
+    string? Path = null,
+    Resource? Result = null
+) : Contract(Name), IHasResult<Resource>
 {
     public override Contract With(Contract other) 
     {

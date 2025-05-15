@@ -4,7 +4,6 @@ using Frierun.Server.Installers;
 namespace Frierun.Server.Data;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
-[JsonDerivedType(typeof(ConnectExternalContainer), nameof(ConnectExternalContainer))]
 [JsonDerivedType(typeof(Container), nameof(Container))]
 [JsonDerivedType(typeof(Dependency), nameof(Dependency))]
 [JsonDerivedType(typeof(Domain), nameof(Domain))]
@@ -24,6 +23,7 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
 public abstract record Contract(
     string Name,
+    bool Installed = false,
     InstallerDefinition? Installer = null,
     IEnumerable<ContractId>? DependsOn = null,
     IEnumerable<ContractId>? DependencyOf = null

@@ -2,9 +2,10 @@
 
 public record Parameter(
     string Name,
+    string? DefaultValue = null,
     string? Value = null,
-    string? DefaultValue = null
-) : Contract(Name)
+    ResolvedParameter? Result = null 
+) : Contract(Name), IHasResult<ResolvedParameter>
 {
     public override Contract With(Contract other)
     {

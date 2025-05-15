@@ -3,12 +3,10 @@ using Mount = Frierun.Server.Data.Mount;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class MountInstaller : IInstaller<Mount>
+public class MountInstaller(Application application) : IInstaller<Mount>
 {
-    /// <inheritdoc />
-    public Application? Application => null;
+    public Application Application => application;
     
-    /// <inheritdoc />
     IEnumerable<InstallerInitializeResult> IInstaller<Mount>.Initialize(Mount contract, string prefix)
     {
         yield return new InstallerInitializeResult(
@@ -20,16 +18,9 @@ public class MountInstaller : IInstaller<Mount>
         );
     }
     
-    /// <inheritdoc />
-    Resource? IInstaller<Mount>.Install(Mount contract, ExecutionPlan plan)
+    Mount IInstaller<Mount>.Install(Mount contract, ExecutionPlan plan)
     {
         var containerContract = plan.GetContract(contract.ContainerId);
-
-        if (containerContract == null)
-        {
-            throw new Exception("Container not found");
-        }
-
         var volume = plan.GetResource(contract.VolumeId);
 
         if (volume is DockerVolume dockerVolume)
@@ -54,7 +45,7 @@ public class MountInstaller : IInstaller<Mount>
                 }
             );
 
-            return null;
+            return contract;
         }
 
         if (volume is LocalPath localPath)
@@ -79,9 +70,9 @@ public class MountInstaller : IInstaller<Mount>
                 }
             );
 
-            return null;
+            return contract;
         }
         
-        throw new Exception("Unknown volume type: " + volume?.GetType().Name);
+        throw new Exception("Unknown volume type: " + volume.GetType().Name);
     }
 }

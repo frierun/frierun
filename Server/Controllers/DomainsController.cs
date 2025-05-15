@@ -15,10 +15,13 @@ public class DomainsController : ControllerBase
     [HttpGet]
     public IEnumerable<DomainInstaller> List(InstallerRegistry registry)
     {
-        return registry.GetInstallers(typeof(Domain)).Select(installer => new DomainInstaller(
-            installer.GetType().Name,
-            installer.Application?.Name,
-            installer.Application?.Resources.OfType<ResolvedParameter>().FirstOrDefault()?.Value
-        ));
+        return registry.GetInstallers(typeof(Domain))
+            .Select(
+                installer => new DomainInstaller(
+                    installer.GetType().Name,
+                    installer.Application?.Name,
+                    installer.Application?.Contracts.OfType<Parameter>().FirstOrDefault()?.Result?.Value
+                )
+            );
     }
 }

@@ -7,4 +7,5 @@
 
 export type ResolvedDomainAllOf = {
   value: string;
+  isInternal: boolean;
 };

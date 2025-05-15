@@ -4,19 +4,19 @@ using Frierun.Server.Data;
 namespace Frierun.Server.Installers;
 
 public class PostgresqlInstaller(
-    DockerService dockerService,
-    State state,
     Application application,
+    State state,
     ILogger<PostgresqlInstaller> logger)
-    : IInstaller<Postgresql>, IUninstaller<PostgresqlDatabase>
+    : IInstaller<Postgresql>, IHandler<PostgresqlDatabase>
 {
-    private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
-    private readonly string _rootPassword = application.Resources.OfType<GeneratedPassword>().First().Value;
+    private readonly DockerContainer _container = application.Contracts.OfType<Container>().First().Result ??
+                                                  throw new Exception("Container not found");
 
-    /// <inheritdoc />
-    public Application? Application => application;
+    private readonly string _rootPassword = application.Contracts.OfType<Password>().First().Result?.Value ??
+                                            throw new Exception("Root password not found");
     
-    /// <inheritdoc />
+    public Application Application => application;
+
     IEnumerable<InstallerInitializeResult> IInstaller<Postgresql>.Initialize(
         Postgresql contract,
         string prefix
@@ -26,34 +26,39 @@ public class PostgresqlInstaller(
 
         var count = 1;
         var name = baseName;
-        while (state.Resources.OfType<PostgresqlDatabase>().Any(c => c.Database == name))
+        while (state.Contracts.OfType<Postgresql>().Any(c => c.Result?.Database == name))
         {
             count++;
             name = $"{baseName}{count}";
         }
 
-        var connectExternalContainer = new ConnectExternalContainer(_container.Name, contract.NetworkName);
         yield return new InstallerInitializeResult(
             contract with
             {
                 DatabaseName = name,
-                DependsOn = contract.DependsOn.Append(connectExternalContainer),
-            },
-            [connectExternalContainer]
+                DependsOn = contract.DependsOn.Append(contract.NetworkId)
+            }
         );
     }
 
-    /// <inheritdoc />
-    Resource IInstaller<Postgresql>.Install(Postgresql contract, ExecutionPlan plan)
+    Postgresql IInstaller<Postgresql>.Install(Postgresql contract, ExecutionPlan plan)
     {
+        var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
+
+        _container.AttachNetwork(network.Name);
+
         if (contract.Admin)
         {
-            return new PostgresqlDatabase(
-                User: "postgres",
-                Password: _rootPassword,
-                Database: "",
-                Host: _container.Name
-            );
+            return contract with
+            {
+                Result = new PostgresqlDatabase(this)
+                {
+                    User = "postgres",
+                    Password = _rootPassword,
+                    Host = _container.Name,
+                    NetworkName = network.Name
+                }
+            };
         }
 
         var name = contract.DatabaseName;
@@ -75,12 +80,20 @@ public class PostgresqlInstaller(
             ]
         );
 
-
-        return new PostgresqlDatabase(name, password, name, _container.Name);
+        return contract with
+        {
+            Result = new PostgresqlDatabase(this)
+            {
+                User = name,
+                Password = password,
+                Database = name,
+                Host = _container.Name,
+                NetworkName = network.Name
+            }
+        };
     }
 
-    /// <inheritdoc />
-    void IUninstaller<PostgresqlDatabase>.Uninstall(PostgresqlDatabase resource)
+    void IHandler<PostgresqlDatabase>.Uninstall(PostgresqlDatabase resource)
     {
         if (resource.User != "postgres")
         {
@@ -91,6 +104,8 @@ public class PostgresqlInstaller(
                 ]
             );
         }
+
+        _container.DetachNetwork(resource.NetworkName);
     }
 
     /// <summary>
@@ -101,10 +116,7 @@ public class PostgresqlInstaller(
         var command = new List<string> { "psql", "-U", "postgres" };
         command.AddRange(sqlList.SelectMany(sql => new[] { "-c", sql }));
 
-        var result = dockerService.ExecInContainer(
-            _container.Name,
-            command
-        ).Result;
+        var result = _container.ExecInContainer(command).Result;
 
         logger.LogDebug(
             "Executed sql: {Sql}\nStdout: {Stdout}\nStderr: {Stderr}",

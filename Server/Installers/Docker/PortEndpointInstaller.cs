@@ -1,19 +1,18 @@
 ﻿using Docker.DotNet.Models;
 using Frierun.Server.Data;
+using Frierun.Server.Installers.Base;
 
 namespace Frierun.Server.Installers.Docker;
 
-public class PortEndpointInstaller(State state) : IInstaller<PortEndpoint>, IUninstaller<DockerPortEndpoint>
+public class PortEndpointInstaller(Application application, State state) : IInstaller<PortEndpoint>
 {
-    /// <inheritdoc />
-    public Application? Application => null;
-    
-    /// <inheritdoc />
+    public Application Application => application;
+
     IEnumerable<InstallerInitializeResult> IInstaller<PortEndpoint>.Initialize(PortEndpoint contract, string prefix)
     {
         int port = contract.DestinationPort == 0 ? contract.Port : contract.DestinationPort;
 
-        while (state.Resources.OfType<DockerPortEndpoint>()
+        while (state.Contracts.OfType<PortEndpoint>()
                .Any(endpoint => endpoint.Port == port && endpoint.Protocol == contract.Protocol))
         {
             port += 1000;
@@ -31,22 +30,13 @@ public class PortEndpointInstaller(State state) : IInstaller<PortEndpoint>, IUni
             }
         );
     }
-    
-    /// <inheritdoc />
-    Resource IInstaller<PortEndpoint>.Install(PortEndpoint contract, ExecutionPlan plan)
+
+    PortEndpoint IInstaller<PortEndpoint>.Install(PortEndpoint contract, ExecutionPlan plan)
     {
         var containerContract = plan.GetContract(contract.ContainerId);
 
-        if (containerContract == null)
-        {
-            throw new Exception("Container not found");
-        }
-
         var externalPort = contract.DestinationPort;
         var internalPort = contract.Port;
-
-        // TODO: fill the correct ip of the host
-        var endpoint = new DockerPortEndpoint(contract.Name, "127.0.0.1", externalPort, contract.Protocol);
 
         plan.UpdateContract(
             containerContract with
@@ -67,6 +57,16 @@ public class PortEndpointInstaller(State state) : IInstaller<PortEndpoint>, IUni
             }
         );
 
-        return endpoint;
+        // TODO: fill the correct ip of the host
+        return contract with
+        {
+            Result = new DockerPortEndpoint(new EmptyHandler())
+            {
+                Name = contract.Name,
+                Ip = "127.0.0.1",
+                Port = externalPort,
+                Protocol = contract.Protocol
+            }
+        };
     }
 }

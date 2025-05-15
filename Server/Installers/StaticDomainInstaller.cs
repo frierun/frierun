@@ -1,17 +1,25 @@
 ﻿using Frierun.Server.Data;
+using Frierun.Server.Installers.Base;
 
 namespace Frierun.Server.Installers;
 
 public class StaticDomainInstaller(State state, Application application)
-    : IInstaller<Domain>, IUninstaller<ResolvedDomain>
+    : IInstaller<Domain>
 {
-    private readonly string _domainName = application.Resources.OfType<ResolvedParameter>().First().Value ?? "";
-    private readonly bool _isInternal = application.Resources.OfType<ResolvedSelector>().First().Value == "Yes";
+    private readonly string _domainName = application.Contracts
+        .OfType<Parameter>()
+        .First(parameter => parameter.Name == "Domain")
+        .Result
+        ?.Value ?? "";
 
-    /// <inheritdoc />
-    public Application? Application => application;
+    private readonly bool _isInternal = application.Contracts
+        .OfType<Selector>()
+        .First(parameter => parameter.Name == "Internal")
+        .Result
+        ?.Value == "Yes";
 
-    /// <inheritdoc />
+    public Application Application => application;
+
     IEnumerable<InstallerInitializeResult> IInstaller<Domain>.Initialize(Domain contract, string prefix)
     {
         if (contract.Subdomain != null && !IsSubdomainExist(contract.Subdomain))
@@ -44,15 +52,18 @@ public class StaticDomainInstaller(State state, Application application)
     private bool IsSubdomainExist(string subdomain)
     {
         var fullDomain = subdomain == "" ? _domainName : $"{subdomain}.{_domainName}";
-        return state.Resources.OfType<ResolvedDomain>().Any(c => c.Value == fullDomain);
+        return state.Contracts.OfType<Domain>().Any(c => c.Result?.Value == fullDomain);
     }
 
-    /// <inheritdoc />
-    Resource? IInstaller<Domain>.Install(Domain contract, ExecutionPlan plan)
+    Domain IInstaller<Domain>.Install(Domain contract, ExecutionPlan plan)
     {
         var domain = string.IsNullOrEmpty(contract.Subdomain)
             ? _domainName
             : $"{contract.Subdomain}.{_domainName}";
-        return new ResolvedDomain(domain, _isInternal);
+        
+        return contract with
+        {
+            Result = new ResolvedDomain(new EmptyHandler()) { Value = domain, IsInternal = _isInternal }
+        };
     }
 }
