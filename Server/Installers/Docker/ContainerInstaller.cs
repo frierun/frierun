@@ -14,7 +14,7 @@ public class ContainerInstaller(Application application, DockerService dockerSer
 
         var count = 1;
         var name = baseName;
-        while (state.Resources.OfType<DockerContainer>().Any(c => c.Name == name))
+        while (state.Contracts.OfType<Container>().Any(c => c.Result?.Name == name))
         {
             count++;
             name = $"{baseName}{count}";

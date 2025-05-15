@@ -23,7 +23,8 @@ public class MysqlInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var database = application.Resources.OfType<MysqlDatabase>().First();
+        var database = application.Contracts.OfType<Mysql>().Single().Result;
+        Assert.NotNull(database);
         Assert.Equal(package.Name, database.User);
         Assert.Equal(package.Name, database.Database);
         Assert.Contains(_providerApplication.Name, application.RequiredApplications);
@@ -48,7 +49,7 @@ public class MysqlInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.Equal(2, application.Resources.OfType<MysqlDatabase>().Count());
+        Assert.Equal(2, application.Contracts.OfType<Mysql>().Count());
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
             application.Name,
             Arg.Any<NetworkConnectParameters>()

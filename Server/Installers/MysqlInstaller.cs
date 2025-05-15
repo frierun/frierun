@@ -6,8 +6,11 @@ namespace Frierun.Server.Installers;
 public class MysqlInstaller(Application application, State state)
     : IInstaller<Mysql>, IHandler<MysqlDatabase>
 {
-    private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
-    private readonly string _rootPassword = application.Resources.OfType<GeneratedPassword>().First().Value;
+    private readonly DockerContainer _container = application.Contracts.OfType<Container>().First().Result ??
+                                                  throw new Exception("Container not found");
+
+    private readonly string _rootPassword = application.Contracts.OfType<Password>().First().Result?.Value ??
+                                            throw new Exception("Root password not found");
 
     public Application Application => application;
 
@@ -17,7 +20,7 @@ public class MysqlInstaller(Application application, State state)
 
         var count = 1;
         var name = baseName;
-        while (state.Resources.OfType<MysqlDatabase>().Any(c => c.Database == name))
+        while (state.Contracts.OfType<Mysql>().Any(c => c.Result?.Database == name))
         {
             count++;
             name = $"{baseName}{count}";

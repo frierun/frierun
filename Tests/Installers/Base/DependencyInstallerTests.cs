@@ -21,7 +21,7 @@ public class DependencyInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var installedContracts = application.Resources.OfType<ResolvedParameter>();
+        var installedContracts = application.Contracts.OfType<Parameter>();
         Assert.Equal(
             [contracts[0].Name, contracts[1].Name],
             installedContracts.Select(c => c.Name)

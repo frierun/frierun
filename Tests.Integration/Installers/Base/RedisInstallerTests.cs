@@ -22,8 +22,10 @@ public class RedisInstallerTests : TestWithDocker
         );
         var application = InstallPackage(package);
         
-        var container = application.Resources.OfType<DockerContainer>().First();
-        var database = application.Resources.OfType<RedisDatabase>().First();
+        var container = application.Contracts.OfType<Container>().Single().Result;
+        var database = application.Contracts.OfType<Redis>().Single().Result;
+        Assert.NotNull(container);
+        Assert.NotNull(database);
         Assert.Equal("redis-client-redis", database.Host);
         
         // try to connect to the database from the client

@@ -28,7 +28,8 @@ public class PostgresqlInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var database = application.Resources.OfType<PostgresqlDatabase>().First();
+        var database = application.Contracts.OfType<Postgresql>().Single().Result;
+        Assert.NotNull(database);
         Assert.Equal(package.Name, database.User);
         Assert.Equal(package.Name, database.Database);
         Assert.Contains(_providerApplication.Name, application.RequiredApplications);
@@ -54,7 +55,7 @@ public class PostgresqlInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.Equal(2, application.Resources.OfType<PostgresqlDatabase>().Count());
+        Assert.Equal(2, application.Contracts.OfType<Postgresql>().Count());
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
             application.Name, 
             Arg.Any<NetworkConnectParameters>()

@@ -12,11 +12,11 @@ public class RedisInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.Single(application.Resources.OfType<RedisDatabase>());
-        var database = application.Resources.OfType<RedisDatabase>().First();
+        var database = application.Contracts.OfType<Redis>().Single().Result;
+        Assert.NotNull(database);
 
-        Assert.Single(application.Resources.OfType<DockerContainer>());
-        var dbContainer = application.Resources.OfType<DockerContainer>().First();
+        var dbContainer = application.Contracts.OfType<Container>().Single().Result;
+        Assert.NotNull(dbContainer);
         Assert.Equal(database.Host, dbContainer.Name);
     }
 }

@@ -24,8 +24,10 @@ public class PostgresqlInstallerTests : TestWithDocker
         };
         var application = InstallPackage(package);
 
-        var container = application.Resources.OfType<DockerContainer>().First();
-        var database = application.Resources.OfType<PostgresqlDatabase>().First();
+        var container = application.Contracts.OfType<Container>().Single().Result;
+        Assert.NotNull(container);
+        var database = application.Contracts.OfType<Postgresql>().Single().Result;
+        Assert.NotNull(database);
         Assert.Equal("db-client", database.User);
         Assert.Equal("db-client", database.Database);
         Assert.Equal("postgresql", database.Host);
@@ -68,8 +70,10 @@ public class PostgresqlInstallerTests : TestWithDocker
         };
         var application = InstallPackage(package);
 
-        var container = application.Resources.OfType<DockerContainer>().First();
-        var database = application.Resources.OfType<PostgresqlDatabase>().First();
+        var container = application.Contracts.OfType<Container>().Single().Result;
+        Assert.NotNull(container);
+        var database = application.Contracts.OfType<Postgresql>().Single().Result;
+        Assert.NotNull(database);
         Assert.Equal("postgres", database.User);
         Assert.Null(database.Database);
         Assert.Equal("postgresql", database.Host);

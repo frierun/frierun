@@ -35,9 +35,9 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var resources = application.Resources.ToList();
-        var endpointIndex = resources.FindIndex(r => r is GenericHttpEndpoint);
-        var containerIndex = resources.FindIndex(r => r is DockerContainer);
+        var installedContracts = application.Contracts.ToList();
+        var endpointIndex = installedContracts.FindIndex(r => r is HttpEndpoint);
+        var containerIndex = installedContracts.FindIndex(r => r is Container);
         Assert.NotEqual(-1, endpointIndex);
         Assert.NotEqual(-1, containerIndex);
         Assert.True(endpointIndex < containerIndex);
@@ -52,7 +52,8 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var endpointContract = application.Resources.OfType<GenericHttpEndpoint>().First();
+        var endpointContract = application.Contracts.OfType<HttpEndpoint>().Single().Result;
+        Assert.NotNull(endpointContract);
         Assert.Equal(80, endpointContract.Port);
         Assert.False(endpointContract.Ssl);
         Assert.StartsWith("http://", endpointContract.Url.ToString());
@@ -70,7 +71,8 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var endpointContract = application.Resources.OfType<GenericHttpEndpoint>().First();
+        var endpointContract = application.Contracts.OfType<HttpEndpoint>().Single().Result;
+        Assert.NotNull(endpointContract);
         Assert.Equal(443, endpointContract.Port);
         Assert.True(endpointContract.Ssl);
         Assert.StartsWith("https://", endpointContract.Url.ToString());
@@ -94,7 +96,8 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var endpointContract = application.Resources.OfType<GenericHttpEndpoint>().First();
+        var endpointContract = application.Contracts.OfType<HttpEndpoint>().Single().Result;
+        Assert.NotNull(endpointContract);
         Assert.Equal(81, endpointContract.Port);
         Assert.False(endpointContract.Ssl);
         Assert.StartsWith("http://", endpointContract.Url.ToString());
@@ -112,10 +115,15 @@ public class TraefikHttpEndpointInstallerTests : BaseTests
         
         var application = InstallPackage(package);
 
-        var resources = application.Resources.OfType<TraefikHttpEndpoint>().ToList();
-        Assert.Equal(2, resources.Count);
-        Assert.Equal(application.Name, resources[0].NetworkName);
-        Assert.Equal(application.Name, resources[1].NetworkName);
+        var installedContracts = application.Contracts.OfType<HttpEndpoint>().ToList();
+        Assert.Equal(2, installedContracts.Count);
+        for (var i = 0; i < 2; i++)
+        {
+            var contractResult = installedContracts[i].Result;
+            Assert.NotNull(contractResult);
+            var traefikContractResult = (TraefikHttpEndpoint)contractResult;
+            Assert.Equal(application.Name, traefikContractResult.NetworkName);
+        }
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
             application.Name,
             Arg.Any<NetworkConnectParameters>()

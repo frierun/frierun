@@ -9,9 +9,12 @@ public class PostgresqlInstaller(
     ILogger<PostgresqlInstaller> logger)
     : IInstaller<Postgresql>, IHandler<PostgresqlDatabase>
 {
-    private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
-    private readonly string _rootPassword = application.Resources.OfType<GeneratedPassword>().First().Value;
+    private readonly DockerContainer _container = application.Contracts.OfType<Container>().First().Result ??
+                                                  throw new Exception("Container not found");
 
+    private readonly string _rootPassword = application.Contracts.OfType<Password>().First().Result?.Value ??
+                                            throw new Exception("Root password not found");
+    
     public Application Application => application;
 
     IEnumerable<InstallerInitializeResult> IInstaller<Postgresql>.Initialize(
@@ -23,7 +26,7 @@ public class PostgresqlInstaller(
 
         var count = 1;
         var name = baseName;
-        while (state.Resources.OfType<PostgresqlDatabase>().Any(c => c.Database == name))
+        while (state.Contracts.OfType<Postgresql>().Any(c => c.Result?.Database == name))
         {
             count++;
             name = $"{baseName}{count}";

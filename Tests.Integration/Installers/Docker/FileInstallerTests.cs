@@ -22,9 +22,11 @@ public class FileInstallerTests : TestWithDocker
 
         var application = InstallPackage(package);
 
-        var volume = application.Resources.OfType<DockerVolume>().FirstOrDefault();
+        var volume = application.Contracts.OfType<Volume>().Single().Result;
         Assert.NotNull(volume);
-        var container = application.Resources.OfType<DockerContainer>().First();
+        Assert.IsType<DockerVolume>(volume);
+        var container = application.Contracts.OfType<Container>().Single().Result;
+        Assert.NotNull(container);
 
         await checkContainer(container.Name);
 

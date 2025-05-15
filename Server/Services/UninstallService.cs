@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Data;
+﻿using System.Diagnostics;
+using Frierun.Server.Data;
 
 namespace Frierun.Server;
 
@@ -24,14 +25,16 @@ public class UninstallService(
                 }
             }
             
-            foreach (var resource in application.Resources.Reverse())
+            foreach (var contract in application.Contracts.Reverse())
             {
-                if (resource is Application)
-                {
-                    throw new Exception("Application cannot contain another application");
-                }
+                Debug.Assert(contract is not Package);
                 
-                resource.Uninstall();
+                if (contract is IHasResult hasResult)
+                {
+                    Debug.Assert(hasResult.Result != null);
+                    
+                    hasResult.Result.Uninstall();
+                }
             }
 
             application.Uninstall();

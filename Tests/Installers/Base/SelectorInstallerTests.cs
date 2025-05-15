@@ -65,7 +65,8 @@ public class SelectorInstallerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var resolvedParameter = application.Resources.OfType<ResolvedParameter>().First(p => p.Name == contract.Name);
+        var resolvedParameter = application.Contracts.OfType<Parameter>().Single(p => p.Name == contract.Name).Result;
+        Assert.NotNull(resolvedParameter);
         Assert.Equal(contract.Value, resolvedParameter.Value);
     }
 }

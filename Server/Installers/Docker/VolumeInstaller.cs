@@ -20,7 +20,12 @@ public class VolumeInstaller(Application application, DockerService dockerServic
 
         var count = 0;
         var name = baseName;
-        while (state.Resources.OfType<DockerVolume>().Any(c => c.Name == name))
+        while (state.Contracts
+               .OfType<Volume>()
+               .Select(volume => volume.Result)
+               .OfType<DockerVolume>()
+               .Any(c => c.Name == name)
+              )
         {
             count++;
             name = $"{baseName}{count}";
@@ -46,7 +51,12 @@ public class VolumeInstaller(Application application, DockerService dockerServic
 
         var volumeName = contract.VolumeName!;
 
-        if (state.Resources.OfType<DockerVolume>().All(dockerVolume => dockerVolume.Name != volumeName))
+        if (state.Contracts
+            .OfType<Volume>()
+            .Select(volume => volume.Result)
+            .OfType<DockerVolume>()
+            .All(dockerVolume => dockerVolume.Name != volumeName)
+           )
         {
             dockerService.CreateVolume(volumeName).Wait();
         }
@@ -59,7 +69,13 @@ public class VolumeInstaller(Application application, DockerService dockerServic
 
     void IHandler<DockerVolume>.Uninstall(DockerVolume resource)
     {
-        if (state.Resources.OfType<DockerVolume>().Count(dockerVolume => dockerVolume.Name == resource.Name) > 1)
+        var volumeUsed = state.Contracts
+            .OfType<Volume>()
+            .Select(volume => volume.Result)
+            .OfType<DockerVolume>()
+            .Count(dockerVolume => dockerVolume.Name == resource.Name);
+        
+        if (volumeUsed > 1)
         {
             return;
         }

@@ -20,6 +20,6 @@ public class MountInstallerTests : BaseTests
         
         var application = InstallPackage(package);
 
-        Assert.Single(application.Resources.OfType<DockerVolume>());
+        Assert.True(application.Contracts.OfType<Volume>().Single().Installed);
     }
 }

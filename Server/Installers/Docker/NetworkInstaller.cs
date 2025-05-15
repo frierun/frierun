@@ -15,7 +15,7 @@ public class NetworkInstaller(Application application, DockerService dockerServi
 
         var count = 1;
         var name = baseName;
-        while (state.Resources.OfType<DockerNetwork>().Any(c => c.Name == name))
+        while (state.Contracts.OfType<Network>().Any(c => c.Result?.Name == name))
         {
             count++;
             name = $"{baseName}{count}";

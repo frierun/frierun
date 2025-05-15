@@ -26,8 +26,10 @@ public class MysqlInstallerTests : TestWithDocker
         };
         var application = InstallPackage(package);
 
-        var container = application.Resources.OfType<DockerContainer>().First();
-        var database = application.Resources.OfType<MysqlDatabase>().First();
+        var container = application.Contracts.OfType<Container>().Single().Result;
+        Assert.NotNull(container);
+        var database = application.Contracts.OfType<Mysql>().Single().Result;
+        Assert.NotNull(database);
         Assert.Equal("db-client", database.User);
         Assert.Equal("db-client", database.Database);
         Assert.Equal(packageName, database.Host);
@@ -76,8 +78,10 @@ public class MysqlInstallerTests : TestWithDocker
         };
         var application = InstallPackage(package);
 
-        var container = application.Resources.OfType<DockerContainer>().First();
-        var database = application.Resources.OfType<MysqlDatabase>().First();
+        var container = application.Contracts.OfType<Container>().Single().Result;
+        Assert.NotNull(container);
+        var database = application.Contracts.OfType<Mysql>().Single().Result;
+        Assert.NotNull(database);
         Assert.Equal("root", database.User);
         Assert.Null(database.Database);
         Assert.Equal(packageName, database.Host);

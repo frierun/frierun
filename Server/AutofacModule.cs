@@ -40,13 +40,15 @@ public class AutofacModule : Module
                             context =>
                             {
                                 var application = context.Resolve<Application>();
-                                var parameter = application.Resources
-                                    .OfType<ResolvedParameter>()
-                                    .First(parameter => parameter.Name == "Path");
+                                var path = application.Contracts
+                                    .OfType<Parameter>()
+                                    .First(parameter => parameter.Name == "Path")
+                                    .Result
+                                    ?.Value ?? "";
                                 
-                                var configuration = parameter.Value == "" 
+                                var configuration = path == "" 
                                     ? new DockerClientConfiguration() 
-                                    : new DockerClientConfiguration(new Uri(parameter.Value));
+                                    : new DockerClientConfiguration(new Uri(path));
                                 
                                 return configuration.CreateClient();
                             }

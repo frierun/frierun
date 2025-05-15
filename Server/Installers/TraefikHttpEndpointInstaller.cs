@@ -5,13 +5,20 @@ namespace Frierun.Server.Installers;
 public class TraefikHttpEndpointInstaller(Application application)
     : IInstaller<HttpEndpoint>, IHandler<TraefikHttpEndpoint>
 {
-    private readonly DockerContainer _container = application.Resources.OfType<DockerContainer>().First();
+    private readonly DockerContainer _container = application.Contracts.OfType<Container>().First().Result ??
+                                                  throw new Exception("Container not found");    
 
-    private readonly int _webPort = application.Resources.OfType<DockerPortEndpoint>()
-        .FirstOrDefault(endpoint => endpoint.Name == "Web")?.Port ?? 0;
+    private readonly int _webPort = application.Contracts
+        .OfType<PortEndpoint>()
+        .FirstOrDefault(endpoint => endpoint.Name == "Web")
+        ?.Result
+        ?.Port ?? 0;
 
-    private readonly int _webSecurePort = application.Resources.OfType<DockerPortEndpoint>()
-        .FirstOrDefault(endpoint => endpoint.Name == "WebSecure")?.Port ?? 0;
+    private readonly int _webSecurePort = application.Contracts
+        .OfType<PortEndpoint>()
+        .FirstOrDefault(endpoint => endpoint.Name == "WebSecure")
+        ?.Result
+        ?.Port ?? 0;
 
     public Application Application => application;
 

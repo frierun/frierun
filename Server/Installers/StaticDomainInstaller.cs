@@ -6,15 +6,17 @@ namespace Frierun.Server.Installers;
 public class StaticDomainInstaller(State state, Application application)
     : IInstaller<Domain>
 {
-    private readonly string _domainName = application.Resources
-        .OfType<ResolvedParameter>()
+    private readonly string _domainName = application.Contracts
+        .OfType<Parameter>()
         .First(parameter => parameter.Name == "Domain")
-        .Value ?? "";
+        .Result
+        ?.Value ?? "";
 
-    private readonly bool _isInternal = application.Resources
-        .OfType<ResolvedParameter>()
+    private readonly bool _isInternal = application.Contracts
+        .OfType<Selector>()
         .First(parameter => parameter.Name == "Internal")
-        .Value == "Yes";
+        .Result
+        ?.Value == "Yes";
 
     public Application Application => application;
 
@@ -50,7 +52,7 @@ public class StaticDomainInstaller(State state, Application application)
     private bool IsSubdomainExist(string subdomain)
     {
         var fullDomain = subdomain == "" ? _domainName : $"{subdomain}.{_domainName}";
-        return state.Resources.OfType<ResolvedDomain>().Any(c => c.Value == fullDomain);
+        return state.Contracts.OfType<Domain>().Any(c => c.Result?.Value == fullDomain);
     }
 
     Domain IInstaller<Domain>.Install(Domain contract, ExecutionPlan plan)

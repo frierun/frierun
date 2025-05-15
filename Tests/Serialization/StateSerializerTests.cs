@@ -88,12 +88,12 @@ public class StateSerializerTests : BaseTests
         var loadedState = stateManager.Load();
 
         Assert.NotEmpty(loadedState.Applications);
-        Assert.Single(state.Resources.OfType<TraefikHttpEndpoint>());
-        Assert.Single(loadedState.Resources.OfType<TraefikHttpEndpoint>());
+        Assert.IsType<TraefikHttpEndpoint>(state.Contracts.OfType<HttpEndpoint>().Single().Result);
+        Assert.IsType<TraefikHttpEndpoint>(loadedState.Contracts.OfType<HttpEndpoint>().Single().Result);
     }
 
     [Fact]
-    public void Load_FrierunWithDifferentVolumes_Serialized()
+    public void Load_FrierunWithDockerVolume_Serialized()
     {
         var stateManager = Resolve<StateSerializer>();
         var state = Resolve<State>();
@@ -102,16 +102,33 @@ public class StateSerializerTests : BaseTests
             "frierun",
             [
                 new Volume("config", VolumeName: "test"),
-                new Volume("config2", Path: "/test2")
             ]
         );
         
         var loadedState = stateManager.Load();
         
         Assert.NotEmpty(loadedState.Applications);
-        Assert.Single(state.Resources.OfType<DockerVolume>());
-        Assert.Single(loadedState.Resources.OfType<DockerVolume>());
-        Assert.Single(state.Resources.OfType<LocalPath>());
-        Assert.Single(loadedState.Resources.OfType<LocalPath>());
+        Assert.IsType<DockerVolume>(state.Contracts.OfType<Volume>().Single().Result);
+        Assert.IsType<DockerVolume>(loadedState.Contracts.OfType<Volume>().Single().Result);
+    }
+    
+    [Fact]
+    public void Load_FrierunWithLocalPath_Serialized()
+    {
+        var stateManager = Resolve<StateSerializer>();
+        var state = Resolve<State>();
+        InstallPackage("docker");
+        InstallPackage(
+            "frierun",
+            [
+                new Volume("config", Path: "/test"),
+            ]
+        );
+        
+        var loadedState = stateManager.Load();
+        
+        Assert.NotEmpty(loadedState.Applications);
+        Assert.IsType<LocalPath>(state.Contracts.OfType<Volume>().Single().Result);
+        Assert.IsType<LocalPath>(loadedState.Contracts.OfType<Volume>().Single().Result);
     }
 }
