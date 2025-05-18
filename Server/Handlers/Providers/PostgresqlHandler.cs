@@ -89,7 +89,7 @@ public class PostgresqlHandler(
                 User = name,
                 Password = password,
                 Database = name,
-                Host = _container.Name,
+                Host = _container.Result.Name,
                 NetworkName = network.Name
             }
         };
