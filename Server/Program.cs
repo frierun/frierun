@@ -48,7 +48,8 @@ builder.Services.AddDataProtection()
 
 
 // create web root path to remove warnings in dev environment
-var webRootPath = Path.Combine(builder.Environment.ContentRootPath, builder.Environment.WebRootPath);
+// ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract required for integration tests
+var webRootPath = Path.Combine(builder.Environment.ContentRootPath, builder.Environment.WebRootPath ?? "wwwroot");
 if (!Directory.Exists(webRootPath))
 {
     Directory.CreateDirectory(webRootPath);
