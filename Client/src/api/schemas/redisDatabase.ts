@@ -10,5 +10,5 @@ import type { RedisDatabaseType } from "./redisDatabaseType";
 
 export type RedisDatabase = Resource &
   RedisDatabaseAllOf & {
-    Type: RedisDatabaseType;
+    type: RedisDatabaseType;
   };

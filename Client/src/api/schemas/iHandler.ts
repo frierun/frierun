@@ -6,7 +6,7 @@
  */
 
 export interface IHandler {
-  TypeName: string;
+  typeName: string;
   /** @nullable */
-  ApplicationName?: string | null;
+  applicationName?: string | null;
 }

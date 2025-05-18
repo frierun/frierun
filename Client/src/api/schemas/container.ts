@@ -10,5 +10,5 @@ import type { ContainerType } from "./containerType";
 
 export type Container = Contract &
   ContainerAllOf & {
-    Type: ContainerType;
+    type: ContainerType;
   };

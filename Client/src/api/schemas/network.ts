@@ -10,5 +10,5 @@ import type { NetworkType } from "./networkType";
 
 export type Network = Contract &
   NetworkAllOf & {
-    Type: NetworkType;
+    type: NetworkType;
   };

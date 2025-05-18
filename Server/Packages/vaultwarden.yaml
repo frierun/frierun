@@ -1,15 +1,15 @@
-﻿Name: "vaultwarden"
-Url: "https://github.com/dani-garcia/vaultwarden/"
-ShortDescription: "Password manager"
-FullDescription: "Vaultwarden gives you power to create and manage unique passwords, so you can strengthen privacy and boost productivity online from any device or location."
-Tags: [ "security" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "vaultwarden/server:latest"
+﻿name: "vaultwarden"
+url: "https://github.com/dani-garcia/vaultwarden/"
+shortDescription: "Password manager"
+fullDescription: "Vaultwarden gives you power to create and manage unique passwords, so you can strengthen privacy and boost productivity online from any device or location."
+tags: [ "security" ]
+contracts:
+  - type: "Container"
+    imageName: "vaultwarden/server:latest"
     
-  - Type: "HttpEndpoint"
-    Port: 80
+  - type: "HttpEndpoint"
+    port: 80
     
-  - Type: "Mount"
-    VolumeName: "data"
-    Path: "/data"
+  - type: "Mount"
+    volumeName: "data"
+    path: "/data"

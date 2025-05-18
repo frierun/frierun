@@ -1,25 +1,25 @@
-﻿Name: "photoprism"
-Url: "https://docs.photoprism.app/getting-started/docker/"
-ApplicationDescription: "Login: admin\nPassword: {{Password::Value}}"
-ShortDescription: "Photo tagging"
-FullDescription: "PhotoPrism® is an AI-Powered Photos App for the Decentralized Web.
+﻿name: "photoprism"
+url: "https://docs.photoprism.app/getting-started/docker/"
+applicationDescription: "Login: admin\nPassword: {{Password::Value}}"
+shortDescription: "Photo tagging"
+fullDescription: "PhotoPrism® is an AI-Powered Photos App for the Decentralized Web.
   It makes use of the latest technologies to tag and find pictures automatically without getting in your way.
   You can run it at home, on a private server, or in the cloud."
-Tags: [ "storage" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "photoprism/photoprism:latest"
-    Env:
+tags: [ "storage" ]
+contracts:
+  - type: "Container"
+    imageName: "photoprism/photoprism:latest"
+    env:
       PHOTOPRISM_UPLOAD_NSFW: "true"
       PHOTOPRISM_ADMIN_PASSWORD: "{{Password::Value}}"
       
-  - Type: "HttpEndpoint"
-    Port: 2342
+  - type: "HttpEndpoint"
+    port: 2342
     
-  - Type: "Mount"
-    VolumeName: "originals"
-    Path: "/photoprism/originals"
+  - type: "Mount"
+    volumeName: "originals"
+    path: "/photoprism/originals"
     
-  - Type: "Mount"
-    VolumeName: "storage"
-    Path: "/photoprism/storage"
+  - type: "Mount"
+    volumeName: "storage"
+    path: "/photoprism/storage"

@@ -1,20 +1,20 @@
-﻿Name: "navidrome"
-Url: "https://www.navidrome.org/docs/installation/docker/"
-ShortDescription: "Standalone music server"
-FullDescription: "Navidrome can be used as a standalone server, that allows you to browse and listen to your music collection using a web browser.
+﻿name: "navidrome"
+url: "https://www.navidrome.org/docs/installation/docker/"
+shortDescription: "Standalone music server"
+fullDescription: "Navidrome can be used as a standalone server, that allows you to browse and listen to your music collection using a web browser.
   It can also work as a lightweight Subsonic-API compatible server, that can be used with any Subsonic compatible client."
-Tags: [ "storage" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "deluan/navidrome:latest"
+tags: [ "storage" ]
+contracts:
+  - type: "Container"
+    imageName: "deluan/navidrome:latest"
     
-  - Type: "HttpEndpoint"
-    Port: 4533
+  - type: "HttpEndpoint"
+    port: 4533
     
-  - Type: "Mount"
-    VolumeName: "data"
-    Path: "/data"
+  - type: "Mount"
+    volumeName: "data"
+    path: "/data"
     
-  - Type: "Mount"
-    VolumeName: "music"
-    Path: "/music"
+  - type: "Mount"
+    volumeName: "music"
+    path: "/music"

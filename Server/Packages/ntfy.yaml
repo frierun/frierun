@@ -1,13 +1,13 @@
-﻿Name: "ntfy"
-Url: "https://docs.ntfy.sh/install/#docker"
-ShortDescription: "Push notifications"
-FullDescription: "ntfy lets you send push notifications to your phone or desktop via scripts from any computer,
+﻿name: "ntfy"
+url: "https://docs.ntfy.sh/install/#docker"
+shortDescription: "Push notifications"
+fullDescription: "ntfy lets you send push notifications to your phone or desktop via scripts from any computer,
   using simple HTTP PUT or POST requests. I use it to notify myself when scripts fail, or long-running commands complete."
-Tags: [ "network" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "binwiederhier/ntfy:latest"
-    Command: [ "serve" ]
+tags: [ "network" ]
+contracts:
+  - type: "Container"
+    imageName: "binwiederhier/ntfy:latest"
+    command: [ "serve" ]
     
-  - Type: "HttpEndpoint"
-    Port: 80
+  - type: "HttpEndpoint"
+    port: 80

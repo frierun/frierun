@@ -16,14 +16,14 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { DomainInstaller } from "../schemas";
+import type { DomainVariant } from "../schemas";
 
 import { customFetch } from "../../custom-fetch";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 export type getDomainsResponse200 = {
-  data: DomainInstaller[];
+  data: DomainVariant[];
   status: 200;
 };
 

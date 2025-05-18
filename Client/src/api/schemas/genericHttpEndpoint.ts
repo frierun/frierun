@@ -10,5 +10,5 @@ import type { GenericHttpEndpointType } from "./genericHttpEndpointType";
 
 export type GenericHttpEndpoint = Resource &
   GenericHttpEndpointAllOf & {
-    Type: GenericHttpEndpointType;
+    type: GenericHttpEndpointType;
   };

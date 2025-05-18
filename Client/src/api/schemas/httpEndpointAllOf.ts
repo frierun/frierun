@@ -4,8 +4,11 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { HttpEndpointAllOfResult } from "./httpEndpointAllOfResult";
 
 export type HttpEndpointAllOf = {
   port: number;
+  /** @nullable */
+  result?: HttpEndpointAllOfResult;
   containerName: string;
 };

@@ -1,27 +1,27 @@
-﻿Name: "technitium"
-Url: "https://github.com/technitiumsoftware/dnsserver/"
-ApplicationDescription: "Login: admin\nPassword: {{Password::Value}}"
-ShortDescription: "DNS Server"
-FullDescription: "Technitium DNS Server is an open source authoritative as well as recursive DNS server
+﻿name: "technitium"
+url: "https://github.com/technitiumsoftware/dnsserver/"
+applicationDescription: "Login: admin\nPassword: {{Password::Value}}"
+shortDescription: "DNS Server"
+fullDescription: "Technitium DNS Server is an open source authoritative as well as recursive DNS server
   that can be used for self hosting a DNS server for privacy & security."
-Tags: [ "network", "dev" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "technitium/dns-server:latest"
-    Env:
+tags: [ "network", "dev" ]
+contracts:
+  - type: "Container"
+    imageName: "technitium/dns-server:latest"
+    env:
       DNS_SERVER_ADMIN_PASSWORD: "{{Password::Value}}"
       
-  - Type: "HttpEndpoint"
-    Port: 5380
+  - type: "HttpEndpoint"
+    port: 5380
     
-  - Type: "PortEndpoint"
-    Port: 53
-    Protocol: "tcp"
+  - type: "PortEndpoint"
+    port: 53
+    protocol: "tcp"
     
-  - Type: "PortEndpoint"
-    Port: 53
-    Protocol: "udp"
+  - type: "PortEndpoint"
+    port: 53
+    protocol: "udp"
     
-  - Type: "Mount"
-    VolumeName: "config"
-    Path: "/etc/dns"
+  - type: "Mount"
+    volumeName: "config"
+    path: "/etc/dns"

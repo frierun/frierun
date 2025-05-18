@@ -10,5 +10,5 @@ import type { HttpEndpointType } from "./httpEndpointType";
 
 export type HttpEndpoint = Contract &
   HttpEndpointAllOf & {
-    Type: HttpEndpointType;
+    type: HttpEndpointType;
   };

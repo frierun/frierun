@@ -1,9 +1,8 @@
 ﻿using System.Text.Json.Serialization;
-using Frierun.Server.Installers;
 
 namespace Frierun.Server.Data;
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(Application), nameof(Application))]
 [JsonDerivedType(typeof(DockerContainer), nameof(DockerContainer))]
 [JsonDerivedType(typeof(DockerNetwork), nameof(DockerNetwork))]

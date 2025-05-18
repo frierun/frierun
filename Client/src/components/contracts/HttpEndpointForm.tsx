@@ -12,18 +12,18 @@ type Props = {
 
 const findDomain = (contract: HttpEndpoint, contracts: GetPackagesIdPlan200Item[]) => {
     const domainContract = contracts
-        .filter(contract => contract.Type === 'Domain')
+        .filter(contract => contract.type === 'Domain')
         .find(domain => domain.name === contract.name);
-    
+
     if (!domainContract) {
         return {
             typeName: '',
         };
     }
-    
+
     return {
-        typeName: domainContract.installer?.typeName ?? '',
-        applicationName: domainContract.installer?.applicationName,
+        typeName: domainContract.handler?.typeName ?? '',
+        applicationName: domainContract.handler?.applicationName,
         subdomain: domainContract.subdomain
     }
 }
@@ -31,22 +31,23 @@ const findDomain = (contract: HttpEndpoint, contracts: GetPackagesIdPlan200Item[
 export default function HttpEndpointForm({contract, contracts, updateContracts}: Props) {
     const [domain, setDomain] = useState<Domain>({typeName: ''});
     const [port, setPort] = useState(0);
-    const hasTraefik = contract.installer?.typeName === 'TraefikHttpEndpointInstaller';
-    const [installerType, setInstallerType] = useState('');
+    const hasTraefik = contract.handler?.typeName === 'TraefikHttpEndpointHandler';
+    const traefikApplication = hasTraefik ? contract.handler?.applicationName : null;
+    const [handlerType, setHandlerType] = useState('');
 
     useEffect(() => {
         setDomain(findDomain(contract, contracts));
-        
+
         setPort(contracts
-            .filter(contract => contract.Type === 'PortEndpoint')
+            .filter(contract => contract.type === 'PortEndpoint')
             .find(port => port.containerName === contract.containerName && port.port === contract.port)
             ?.destinationPort ?? defaultPort)
-        setInstallerType(contract.installer?.typeName ?? 'PortHttpEndpointInstaller');
+        setHandlerType(contract.handler?.typeName ?? 'PortHttpEndpointHandler');
     }, [contract, contracts]);
 
-    const updateInstallerType = (installerType: string) => {
-        setInstallerType(installerType);
-        if (installerType === 'TraefikHttpEndpointInstaller') {
+    const updateHandlerType = (handlerType: string) => {
+        setHandlerType(handlerType);
+        if (handlerType === 'TraefikHttpEndpointHandler') {
             updateDomain(findDomain(contract, contracts));
         } else {
             updatePort(port.toString());
@@ -58,15 +59,16 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
         updateContracts([
             {
                 ...contract,
-                installer: {
-                    typeName: 'TraefikHttpEndpointInstaller'
+                handler: {
+                    typeName: 'TraefikHttpEndpointHandler',
+                    applicationName: traefikApplication
                 }
             },
             {
-                Type: 'Domain',
+                type: 'Domain',
                 name: contract.name,
                 subdomain: domain.subdomain,
-                installer: {
+                handler: {
                     typeName: domain.typeName,
                     applicationName: domain.applicationName
                 }
@@ -83,12 +85,12 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
         updateContracts([
             {
                 ...contract,
-                installer: {
-                    typeName: 'PortHttpEndpointInstaller'
+                handler: {
+                    typeName: 'PortHttpEndpointHandler'
                 },
             },
             {
-                Type: 'PortEndpoint',
+                type: 'PortEndpoint',
                 name: `${contract.containerName}:${contract.port.toString()}/tcp`,
                 protocol: 'Tcp',
                 containerName: contract.containerName,
@@ -109,37 +111,37 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
                     <div>
                         <input
                             type="radio"
-                            id={"TraefikHttpEndpointInstallerRadio"}
-                            value="TraefikHttpEndpointInstaller"
-                            checked={installerType === "TraefikHttpEndpointInstaller"}
+                            id={"TraefikHttpEndpointHandlerRadio"}
+                            value="TraefikHttpEndpointHandler"
+                            checked={handlerType === "TraefikHttpEndpointHandler"}
                             onChange={e => {
-                                updateInstallerType(e.target.value);
+                                updateHandlerType(e.target.value);
                             }}
                         >
                         </input>
-                        <label htmlFor={"TraefikHttpEndpointInstallerRadio"}>Traefik
+                        <label htmlFor={"TraefikHttpEndpointHandlerRadio"}>Traefik
                         </label>
                     </div>
                     <div>
                         <input
                             type="radio"
-                            id={"PortHttpEndpointInstallerRadio"}
-                            value="PortHttpEndpointInstaller"
-                            checked={installerType === "PortHttpEndpointInstaller"}
+                            id={"PortHttpEndpointHandlerRadio"}
+                            value="PortHttpEndpointHandler"
+                            checked={handlerType === "PortHttpEndpointHandler"}
                             onChange={e => {
-                                updateInstallerType(e.target.value);
+                                updateHandlerType(e.target.value);
                             }}
                         />
-                        <label htmlFor={"PortHttpEndpointInstallerRadio"}>
+                        <label htmlFor={"PortHttpEndpointHandlerRadio"}>
                             Port
                         </label>
                     </div>
                 </fieldset>
             )}
-            {installerType === 'TraefikHttpEndpointInstaller' && (
-                <DomainForm domain={domain} setDomain={updateDomain} />
+            {handlerType === 'TraefikHttpEndpointHandler' && (
+                <DomainForm domain={domain} setDomain={updateDomain}/>
             )}
-            {installerType === 'PortHttpEndpointInstaller' && (
+            {handlerType === 'PortHttpEndpointHandler' && (
                 <div>
                     <label className={"inline-block w-48"}>
                         Port:

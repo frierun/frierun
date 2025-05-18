@@ -4,6 +4,7 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { Application } from "./application";
 import type { PackageAllOfContractsItem } from "./packageAllOfContractsItem";
 
 export type PackageAllOf = {
@@ -19,6 +20,7 @@ export type PackageAllOf = {
   shortDescription?: string | null;
   /** @nullable */
   fullDescription?: string | null;
+  result?: Application;
   tags: string[];
   contracts: PackageAllOfContractsItem[];
 };

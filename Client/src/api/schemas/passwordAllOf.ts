@@ -4,5 +4,8 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { GeneratedPassword } from "./generatedPassword";
 
-export type PasswordAllOf = { [key: string]: unknown };
+export type PasswordAllOf = {
+  result?: GeneratedPassword;
+};

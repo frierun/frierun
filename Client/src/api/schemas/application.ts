@@ -10,5 +10,5 @@ import type { ApplicationType } from "./applicationType";
 
 export type Application = Resource &
   ApplicationAllOf & {
-    Type: ApplicationType;
+    type: ApplicationType;
   };

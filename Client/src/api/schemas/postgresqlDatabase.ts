@@ -10,5 +10,5 @@ import type { PostgresqlDatabaseType } from "./postgresqlDatabaseType";
 
 export type PostgresqlDatabase = Resource &
   PostgresqlDatabaseAllOf & {
-    Type: PostgresqlDatabaseType;
+    type: PostgresqlDatabaseType;
   };

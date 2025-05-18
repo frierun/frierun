@@ -10,5 +10,5 @@ import type { PackageType } from "./packageType";
 
 export type Package = Contract &
   PackageAllOf & {
-    Type: PackageType;
+    type: PackageType;
   };

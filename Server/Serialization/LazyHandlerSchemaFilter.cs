@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Installers;
+﻿using Frierun.Server.Data;
+using Frierun.Server.Handlers;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -10,7 +11,15 @@ public class LazyHandlerSchemaFilter : ISchemaFilter
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
     {
         var type = context.Type;
-        if (type != typeof(IHandler) && type != typeof(Lazy<IHandler>))
+        if (type == typeof(Contract))
+        {
+            // Handler can be nullable
+            schema.Required.Remove("handler");
+            schema.Required.Remove("installed");
+            return;
+        }
+        
+        if (type != typeof(IHandler) && type != typeof(Lazy<IHandler>) && type != typeof(Lazy<IHandler?>))
         {
             return;
         }
@@ -18,11 +27,11 @@ public class LazyHandlerSchemaFilter : ISchemaFilter
         schema.Type = "object";
         schema.Properties = new Dictionary<string, OpenApiSchema>
         {
-            ["TypeName"] = new()
+            ["typeName"] = new()
             {
                 Type = "string",
             },
-            ["ApplicationName"] = new()
+            ["applicationName"] = new()
             {
                 Type = "string",
                 Nullable = true
@@ -30,14 +39,14 @@ public class LazyHandlerSchemaFilter : ISchemaFilter
         };
         schema.Required = new HashSet<string>
         {
-            "TypeName"
+            "typeName"
         };
         
         schema.AdditionalPropertiesAllowed = false;
         schema.Example = new OpenApiObject
         {
-            ["TypeName"] = new OpenApiString(nameof(TraefikHttpEndpointInstaller)),
-            ["ApplicationName"] = new OpenApiString("Traefik"),
+            ["typeName"] = new OpenApiString(nameof(TraefikHttpEndpointHandler)),
+            ["applicationName"] = new OpenApiString("Traefik"),
         };
     }
 }

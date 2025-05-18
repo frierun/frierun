@@ -1,6 +1,5 @@
 ﻿using Bogus;
 using Frierun.Server.Data;
-using Frierun.Server.Installers;
 
 namespace Frierun.Tests.Factories;
 

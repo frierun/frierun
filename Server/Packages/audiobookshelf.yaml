@@ -1,27 +1,27 @@
-﻿Name: "audiobookshelf"
-Url: "https://www.audiobookshelf.org/docs"
-ShortDescription: "Audiobook and podcast server"
-FullDescription: "Audiobookshelf is an open-source self-hosted media server for your audiobooks and podcasts."
-Tags: [ "storage" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "ghcr.io/advplyr/audiobookshelf:latest"
+﻿name: "audiobookshelf"
+url: "https://www.audiobookshelf.org/docs"
+shortDescription: "Audiobook and podcast server"
+fullDescription: "Audiobookshelf is an open-source self-hosted media server for your audiobooks and podcasts."
+tags: [ "storage" ]
+contracts:
+  - type: "Container"
+    imageName: "ghcr.io/advplyr/audiobookshelf:latest"
     
-  - Type: "HttpEndpoint"
-    Port: 80
+  - type: "HttpEndpoint"
+    port: 80
     
-  - Type: "Mount"
-    VolumeName: "audiobooks"
-    Path: "/audiobooks"
+  - type: "Mount"
+    volumeName: "audiobooks"
+    path: "/audiobooks"
     
-  - Type: "Mount"
-    VolumeName: "podcasts"
-    Path: "/podcasts"
+  - type: "Mount"
+    volumeName: "podcasts"
+    path: "/podcasts"
     
-  - Type: "Mount"
-    VolumeName: "config"
-    Path: "/config"
+  - type: "Mount"
+    volumeName: "config"
+    path: "/config"
     
-  - Type: "Mount"
-    VolumeName: "metadata"
-    Path: "/metadata"
+  - type: "Mount"
+    volumeName: "metadata"
+    path: "/metadata"

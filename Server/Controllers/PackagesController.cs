@@ -32,7 +32,7 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
         {
             return Ok(executionService.Create(package).Contracts.Values);
         }
-        catch (InstallerNotFoundException e)
+        catch (HandlerNotFoundException e)
         {
             return new ConflictObjectResult(e.Contract)
             {
@@ -70,7 +70,7 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
             logger.LogInformation("Installing package {id}", id);
             Task.Run(() => installService.Handle(plan));
         }
-        catch (InstallerNotFoundException e)
+        catch (HandlerNotFoundException e)
         {
             return new ConflictObjectResult(e.Contract)
             {

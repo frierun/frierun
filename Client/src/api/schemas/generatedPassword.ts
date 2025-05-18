@@ -10,5 +10,5 @@ import type { GeneratedPasswordType } from "./generatedPasswordType";
 
 export type GeneratedPassword = Resource &
   GeneratedPasswordAllOf & {
-    Type: GeneratedPasswordType;
+    type: GeneratedPasswordType;
   };

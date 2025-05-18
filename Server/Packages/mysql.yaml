@@ -1,15 +1,15 @@
-﻿Name: "mysql"
-Url: "https://hub.docker.com/_/mysql"
-ApplicationDescription: "Root password: {{Password::Value}}"
-ShortDescription: "SQL database"
-FullDescription: "The world's most popular open source database"
-Tags: [ "storage", "provider" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "mysql:8"
-    Env:
+﻿name: "mysql"
+url: "https://hub.docker.com/_/mysql"
+applicationDescription: "Root password: {{Password::Value}}"
+shortDescription: "SQL database"
+fullDescription: "The world's most popular open source database"
+tags: [ "storage", "provider" ]
+contracts:
+  - type: "Container"
+    imageName: "mysql:8"
+    env:
       MYSQL_ROOT_PASSWORD: "{{Password::Value}}"
       
-  - Type: "Mount"
-    VolumeName: "data"
-    Path: "/var/lib/mysql"
+  - type: "Mount"
+    volumeName: "data"
+    path: "/var/lib/mysql"

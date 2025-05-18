@@ -10,5 +10,5 @@ import type { ResolvedParameterType } from "./resolvedParameterType";
 
 export type ResolvedParameter = Resource &
   ResolvedParameterAllOf & {
-    Type: ResolvedParameterType;
+    type: ResolvedParameterType;
   };

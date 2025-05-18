@@ -4,10 +4,12 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { ResolvedParameter } from "./resolvedParameter";
 
 export type ParameterAllOf = {
   /** @nullable */
-  value?: string | null;
-  /** @nullable */
   defaultValue?: string | null;
+  /** @nullable */
+  value?: string | null;
+  result?: ResolvedParameter;
 };

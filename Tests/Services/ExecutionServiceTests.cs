@@ -1,6 +1,6 @@
 ﻿using Frierun.Server;
 using Frierun.Server.Data;
-using Frierun.Server.Installers;
+using Frierun.Server.Handlers;
 using NSubstitute;
 using Substitute = NSubstitute.Substitute;
 
@@ -26,13 +26,13 @@ public class ExecutionServiceTests : BaseTests
     }
 
     [Fact]
-    public void Create_WithoutInstaller_ThrowsException()
+    public void Create_WithoutHandler_ThrowsException()
     {
         var contract = Substitute.For<Contract>("", false, null, null, null);
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
 
-        Assert.Throws<InstallerNotFoundException>(() => service.Create(package));
+        Assert.Throws<HandlerNotFoundException>(() => service.Create(package));
     }
 
     [Fact]
@@ -47,7 +47,7 @@ public class ExecutionServiceTests : BaseTests
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
             .Returns([]);
 
-        Assert.Throws<InstallerNotFoundException>(() => service.Create(package));
+        Assert.Throws<HandlerNotFoundException>(() => service.Create(package));
     }
 
     [Fact]
@@ -61,9 +61,9 @@ public class ExecutionServiceTests : BaseTests
         var service = Resolve<ExecutionService>();
         handler
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
-            .Returns([new InstallerInitializeResult(contract, [unknownContract])]);
+            .Returns([new ContractInitializeResult(contract, [unknownContract])]);
 
-        Assert.Throws<InstallerNotFoundException>(() => service.Create(package));
+        Assert.Throws<HandlerNotFoundException>(() => service.Create(package));
     }
 
     [Fact]
@@ -76,7 +76,7 @@ public class ExecutionServiceTests : BaseTests
         var service = Resolve<ExecutionService>();
         handler
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
-            .Returns([new InstallerInitializeResult(contract with { Handler = handler })]);
+            .Returns([new ContractInitializeResult(contract with { Handler = handler })]);
 
         var plan = service.Create(package);
 
@@ -97,7 +97,7 @@ public class ExecutionServiceTests : BaseTests
         var service = Resolve<ExecutionService>();
         handler
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
-            .Returns([new InstallerInitializeResult(contract with { Handler = handler }, [contract])]);
+            .Returns([new ContractInitializeResult(contract with { Handler = handler }, [contract])]);
 
         var plan = service.Create(package);
 
@@ -122,8 +122,8 @@ public class ExecutionServiceTests : BaseTests
             .Returns(
                 info =>
                 [
-                    new InstallerInitializeResult(info.Arg<Contract>() with { Handler = handler }, [unknownContract]),
-                    new InstallerInitializeResult(info.Arg<Contract>() with { Handler = handler }, [knownContract])
+                    new ContractInitializeResult(info.Arg<Contract>() with { Handler = handler }, [unknownContract]),
+                    new ContractInitializeResult(info.Arg<Contract>() with { Handler = handler }, [knownContract])
                 ]
             );
 
@@ -137,7 +137,7 @@ public class ExecutionServiceTests : BaseTests
     }
 
     [Fact]
-    public void Create_TwoInstallers_InitializesPlan()
+    public void Create_TwoHandlers_InitializesPlan()
     {
         var handler = Mock<IHandler<Contract1>, IHandler>();
         var handler2 = Mock<IHandler<Contract1>, IHandler>();
@@ -152,7 +152,7 @@ public class ExecutionServiceTests : BaseTests
             .Returns(
                 info =>
                 [
-                    new InstallerInitializeResult(info.Arg<Contract>() with { Handler = handler }, [unknownContract]),
+                    new ContractInitializeResult(info.Arg<Contract>() with { Handler = handler }, [unknownContract]),
                 ]
             );
         handler2
@@ -160,7 +160,7 @@ public class ExecutionServiceTests : BaseTests
             .Returns(
                 info =>
                 [
-                    new InstallerInitializeResult(info.Arg<Contract>() with { Handler = handler2 }, [knownContract])
+                    new ContractInitializeResult(info.Arg<Contract>() with { Handler = handler2 }, [knownContract])
                 ]
             );
 

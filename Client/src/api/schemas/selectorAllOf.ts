@@ -4,10 +4,12 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { ResolvedParameter } from "./resolvedParameter";
 import type { SelectorOption } from "./selectorOption";
 
 export type SelectorAllOf = {
   /** @nullable */
   selectedOption?: string | null;
+  result?: ResolvedParameter;
   options: SelectorOption[];
 };

@@ -10,5 +10,5 @@ import type { MysqlDatabaseType } from "./mysqlDatabaseType";
 
 export type MysqlDatabase = Resource &
   MysqlDatabaseAllOf & {
-    Type: MysqlDatabaseType;
+    type: MysqlDatabaseType;
   };

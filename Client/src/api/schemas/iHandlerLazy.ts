@@ -6,7 +6,7 @@
  */
 
 export interface IHandlerLazy {
-  TypeName: string;
+  typeName: string;
   /** @nullable */
-  ApplicationName?: string | null;
+  applicationName?: string | null;
 }

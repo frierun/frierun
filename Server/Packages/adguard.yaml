@@ -1,30 +1,30 @@
-﻿Name: "adguard"
-Url: "https://hub.docker.com/r/adguard/adguardhome"
-ShortDescription: "Blocking ads & tracking"
-FullDescription: "AdGuard Home is a network-wide software for blocking ads & tracking. 
+﻿name: "adguard"
+url: "https://hub.docker.com/r/adguard/adguardhome"
+shortDescription: "Blocking ads & tracking"
+fullDescription: "AdGuard Home is a network-wide software for blocking ads & tracking. 
   After you set it up, it’ll cover ALL your home devices, and you don’t need any client-side software for that. 
   With the rise of Internet-Of-Things and connected devices, it becomes more and more important to be able to control your whole network."
-Tags: [ "network" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "adguard/adguardhome:latest"
-    Command: [ "--web-addr", "0.0.0.0:80" ]
+tags: [ "network" ]
+contracts:
+  - type: "Container"
+    imageName: "adguard/adguardhome:latest"
+    command: [ "--web-addr", "0.0.0.0:80" ]
 
-  - Type: "HttpEndpoint"
-    Port: 80
+  - type: "HttpEndpoint"
+    port: 80
 
-  - Type: "PortEndpoint"
-    Port: 53
-    Protocol: "tcp"
+  - type: "PortEndpoint"
+    port: 53
+    protocol: "tcp"
 
-  - Type: "PortEndpoint"
-    Port: 53
-    Protocol: "udp"
+  - type: "PortEndpoint"
+    port: 53
+    protocol: "udp"
 
-  - Type: "Mount"
-    VolumeName: "data"
-    Path: "/opt/adguardhome/work"
+  - type: "Mount"
+    volumeName: "data"
+    path: "/opt/adguardhome/work"
 
-  - Type: "Mount"
-    VolumeName: "config"
-    Path: "/opt/adguardhome/conf"
+  - type: "Mount"
+    volumeName: "config"
+    path: "/opt/adguardhome/conf"

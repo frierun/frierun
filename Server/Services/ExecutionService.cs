@@ -1,10 +1,10 @@
 ﻿using Frierun.Server.Data;
-using Frierun.Server.Installers;
+using Frierun.Server.Handlers;
 
 namespace Frierun.Server;
 
 public class ExecutionService(
-    InstallerRegistry installerRegistry,
+    HandlerRegistry handlerRegistry,
     ContractRegistry contractRegistry,
     State state
 )
@@ -12,7 +12,7 @@ public class ExecutionService(
     /// <summary>
     /// Creates an execution plan for the given package.
     /// </summary>
-    /// <exception cref="InstallerNotFoundException"></exception>
+    /// <exception cref="HandlerNotFoundException"></exception>
     public ExecutionPlan Create(Package package)
     {
         var contracts = DiscoverContracts(package);
@@ -50,7 +50,7 @@ public class ExecutionService(
     /// </summary>
     private Dictionary<ContractId, Contract> DiscoverContracts(Package package)
     {
-        var branchesStack = new Stack<(DiscoveryGraph graph, Queue<InstallerInitializeResult> queue)>();
+        var branchesStack = new Stack<(DiscoveryGraph graph, Queue<ContractInitializeResult> queue)>();
         var discoveryGraph = new DiscoveryGraph();
         var applicationName = GetApplicationName(package);
 
@@ -61,13 +61,13 @@ public class ExecutionService(
         {
             nextContract ??= contractRegistry.CreateContract(nextId);
 
-            var branches = new Queue<InstallerInitializeResult>(DiscoverContract(nextContract, applicationName));
+            var branches = new Queue<ContractInitializeResult>(DiscoverContract(nextContract, applicationName));
             if (branches.Count == 0)
             {
                 // no variants found for that contract, rollback to the previous branching point
                 if (branchesStack.Count == 0)
                 {
-                    throw new InstallerNotFoundException(nextContract);
+                    throw new HandlerNotFoundException(nextContract);
                 }
 
                 (discoveryGraph, branches) = branchesStack.Pop();
@@ -90,15 +90,15 @@ public class ExecutionService(
     /// <summary>
     /// Discovers all possible dependent contracts for the given contract.
     /// </summary>
-    private IEnumerable<InstallerInitializeResult> DiscoverContract(Contract contract, string? prefix = null)
+    private IEnumerable<ContractInitializeResult> DiscoverContract(Contract contract, string? prefix = null)
     {
         if (contract.Handler != null)
         {
             return contract.Handler.Initialize(contract, prefix ?? "");
         }
         
-        return installerRegistry
+        return handlerRegistry
             .GetHandlers(contract.GetType())
-            .SelectMany(installer => installer.Initialize(contract, prefix ?? ""));
+            .SelectMany(handler => handler.Initialize(contract, prefix ?? ""));
     }
 }

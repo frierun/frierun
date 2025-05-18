@@ -1,32 +1,32 @@
-﻿Name: "sonarr"
-Url: "https://docs.linuxserver.io/images/docker-sonarr/"
-ShortDescription: "Monitor and download fresh media content"
-FullDescription: "Sonarr is a PVR for Usenet and BitTorrent users.
+﻿name: "sonarr"
+url: "https://docs.linuxserver.io/images/docker-sonarr/"
+shortDescription: "Monitor and download fresh media content"
+fullDescription: "Sonarr is a PVR for Usenet and BitTorrent users.
   It can monitor multiple RSS feeds for new episodes of your favorite shows and will grab, sort and rename them.
   It can also be configured to automatically upgrade the quality of files already downloaded when a better quality format becomes available."
-Tags: [ "network" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "lscr.io/linuxserver/sonarr:latest"
-    Env:
+tags: [ "network" ]
+contracts:
+  - type: "Container"
+    imageName: "lscr.io/linuxserver/sonarr:latest"
+    env:
       PUID: "1000"
       PGID: "1000"
       TZ: "Etc/UTC"
       
-  - Type: "HttpEndpoint"
-    Port: 8989
+  - type: "HttpEndpoint"
+    port: 8989
     
-  - Type: "Mount"
-    VolumeName: "config"
-    Path: "/config"
+  - type: "Mount"
+    volumeName: "config"
+    path: "/config"
     
-  - Type: "Mount"
-    VolumeName: "data"
-    Path: "/data"
+  - type: "Mount"
+    volumeName: "data"
+    path: "/data"
     
-  - Type: "File"
-    VolumeName: "data"
-    Path: ""
-    Owner: 1000
-    Group: 1000
-    DependencyOf: [ "Container" ]
+  - type: "File"
+    volumeName: "data"
+    path: ""
+    owner: 1000
+    group: 1000
+    dependencyOf: [ "Container" ]

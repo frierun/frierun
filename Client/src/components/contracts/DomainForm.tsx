@@ -28,8 +28,8 @@ export default function DomainForm({domain, setDomain}: Props) {
             {typeof data !== 'undefined' && (
                 <select
                     value={data.data.findIndex(
-                        installer => installer.typeName === domain.typeName
-                            && installer.applicationName === domain.applicationName
+                        handler => handler.typeName === domain.typeName
+                            && handler.applicationName === domain.applicationName
                     )}
                     onChange={e => {
                         const index = parseInt(e.target.value);

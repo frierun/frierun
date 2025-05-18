@@ -10,5 +10,5 @@ import type { DockerNetworkType } from "./dockerNetworkType";
 
 export type DockerNetwork = Resource &
   DockerNetworkAllOf & {
-    Type: DockerNetworkType;
+    type: DockerNetworkType;
   };

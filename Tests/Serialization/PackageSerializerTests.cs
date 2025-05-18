@@ -11,7 +11,7 @@ public class PackageSerializerTests : BaseTests
         var packageSerializer = Resolve<PackageSerializer>();
         var json =
             """
-            {"Name":"frierun"}
+            {"name":"frierun"}
             """u8;
         var package = packageSerializer.Load(new MemoryStream(json.ToArray()));
         Assert.NotNull(package);
@@ -25,9 +25,9 @@ public class PackageSerializerTests : BaseTests
         var json =
             """
             {
-                "Name":"frierun",
-                "DependsOn": ["Container:container1"],
-                "DependencyOf": ["Container:container2"]
+                "name":"frierun",
+                "dependsOn": ["Container:container1"],
+                "dependencyOf": ["Container:container2"]
             }
             """u8;
         var package = packageSerializer.Load(new MemoryStream(json.ToArray()));

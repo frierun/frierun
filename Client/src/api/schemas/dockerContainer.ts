@@ -10,5 +10,5 @@ import type { DockerContainerType } from "./dockerContainerType";
 
 export type DockerContainer = Resource &
   DockerContainerAllOf & {
-    Type: DockerContainerType;
+    type: DockerContainerType;
   };

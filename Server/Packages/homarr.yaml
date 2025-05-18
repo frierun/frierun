@@ -1,26 +1,26 @@
-﻿Name: "homarr"
-Url: "https://homarr.dev/docs/getting-started/installation/"
-ShortDescription: "App dashboard with drag-n-drop"
-FullDescription: "A sleek, modern dashboard that puts all of your apps and services at your fingertips.
+﻿name: "homarr"
+url: "https://homarr.dev/docs/getting-started/installation/"
+shortDescription: "App dashboard with drag-n-drop"
+fullDescription: "A sleek, modern dashboard that puts all of your apps and services at your fingertips.
   Control everything in one convenient location.
   Seamlessly integrates with the apps you've added, providing you with valuable information."
-Tags: [ "dashboard" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "ghcr.io/ajnart/homarr:latest"
-    RequireDocker: true
+tags: [ "dashboard" ]
+contracts:
+  - type: "Container"
+    imageName: "ghcr.io/ajnart/homarr:latest"
+    requireDocker: true
     
-  - Type: "HttpEndpoint"
-    Port: 7575
+  - type: "HttpEndpoint"
+    port: 7575
     
-  - Type: "Mount"
-    VolumeName: "configs"
-    Path: "/app/data/configs"
+  - type: "Mount"
+    volumeName: "configs"
+    path: "/app/data/configs"
     
-  - Type: "Mount"
-    VolumeName: "icons"
-    Path: "/app/public/icons"
+  - type: "Mount"
+    volumeName: "icons"
+    path: "/app/public/icons"
     
-  - Type: "Mount"
-    VolumeName: "data"
-    Path: "/data"
+  - type: "Mount"
+    volumeName: "data"
+    path: "/data"

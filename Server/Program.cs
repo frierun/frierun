@@ -33,6 +33,7 @@ builder.Services.AddAntiforgery(
         options.SuppressXFrameOptionsHeader = false;
     }
 );
+
 builder.Services.AddControllersWithViews(
     options =>
     {
@@ -40,11 +41,14 @@ builder.Services.AddControllersWithViews(
         options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
     }
 );
+builder.Services.ConfigureOptions<ConfigureJsonOptions>();
+
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(Storage.DirectoryName, "keys")));
 
+
 // create web root path to remove warnings in dev environment
-var webRootPath = Path.Combine(builder.Environment.ContentRootPath, builder.Environment.WebRootPath ?? "wwwroot");
+var webRootPath = Path.Combine(builder.Environment.ContentRootPath, builder.Environment.WebRootPath);
 if (!Directory.Exists(webRootPath))
 {
     Directory.CreateDirectory(webRootPath);

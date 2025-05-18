@@ -8,7 +8,7 @@ public class StateSerializer(
     string path,
     PackageRegistry packageRegistry,
     ContractRegistry contractRegistry,
-    Lazy<InstallerRegistry> lazyInstallerRegistry
+    Lazy<HandlerRegistry> lazyHandlerRegistry
 )
 {
     public string Path { get; } = path;
@@ -16,11 +16,12 @@ public class StateSerializer(
     private readonly JsonSerializerOptions _serializerOptions = new()
     {
         WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         Converters =
         {
             new PackageConverter(packageRegistry),
             new ContractIdConverter(contractRegistry),
-            new LazyHandlerConverter(lazyInstallerRegistry)
+            new LazyHandlerConverter(lazyHandlerRegistry)
         },
     };
 

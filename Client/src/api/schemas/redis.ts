@@ -10,5 +10,5 @@ import type { RedisType } from "./redisType";
 
 export type Redis = Contract &
   RedisAllOf & {
-    Type: RedisType;
+    type: RedisType;
   };

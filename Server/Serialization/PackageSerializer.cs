@@ -19,6 +19,7 @@ public class PackageSerializer(ILogger<PackageSerializer> logger, ContractRegist
             new YamlBoolConverter()
         },
         NumberHandling = JsonNumberHandling.AllowReadingFromString,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         TypeInfoResolver = new DefaultJsonTypeInfoResolver
         {
             Modifiers =

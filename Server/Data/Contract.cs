@@ -1,9 +1,9 @@
 ﻿using System.Text.Json.Serialization;
-using Frierun.Server.Installers;
+using Frierun.Server.Handlers;
 
 namespace Frierun.Server.Data;
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(Container), nameof(Container))]
 [JsonDerivedType(typeof(Dependency), nameof(Dependency))]
 [JsonDerivedType(typeof(Domain), nameof(Domain))]
@@ -34,9 +34,9 @@ public abstract record Contract(
     [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = DependsOn ?? Array.Empty<ContractId>();
     [JsonIgnore] public IEnumerable<ContractId> DependencyOf { get; init; } = DependencyOf ?? Array.Empty<ContractId>();
 
-    [JsonPropertyName("Handler")]
+    [JsonPropertyName("handler")]
     [JsonInclude]
-    protected Lazy<IHandler?> LazyHandler { get; init; } = LazyHandler ?? new Lazy<IHandler?>((IHandler?)null);
+    public Lazy<IHandler?> LazyHandler { get; protected init; } = LazyHandler ?? new Lazy<IHandler?>((IHandler?)null);
 
     [JsonIgnore]
     public IHandler? Handler

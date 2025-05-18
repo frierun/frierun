@@ -1,19 +1,19 @@
-﻿Name: "jellyseerr"
-Url: "https://docs.jellyseerr.dev/getting-started/docker?docker-methods=docker-cli"
-ShortDescription: "Jellyfin/Emby/Plex + Sonarr/Radarr integration"
-FullDescription: "Jellyseerr is a free and open source software application for managing requests for your media library.
+﻿name: "jellyseerr"
+url: "https://docs.jellyseerr.dev/getting-started/docker?docker-methods=docker-cli"
+shortDescription: "Jellyfin/Emby/Plex + Sonarr/Radarr integration"
+fullDescription: "Jellyseerr is a free and open source software application for managing requests for your media library.
   It integrates with the media server of your choice: Jellyfin, Plex, and Emby."
-Tags: [ "network" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "fallenbagel/jellyseerr:latest"
-    Env:
+tags: [ "network" ]
+contracts:
+  - type: "Container"
+    imageName: "fallenbagel/jellyseerr:latest"
+    env:
       LOG_LEVEL: "debug"
       TZ: "Etc/UTC"
       
-  - Type: "HttpEndpoint"
-    Port: 5055
+  - type: "HttpEndpoint"
+    port: 5055
     
-  - Type: "Mount"
-    VolumeName: "config"
-    Path: "/app/config"
+  - type: "Mount"
+    volumeName: "config"
+    path: "/app/config"

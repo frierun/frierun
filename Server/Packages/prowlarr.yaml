@@ -1,21 +1,21 @@
-﻿Name: "prowlarr"
-Url: "https://docs.linuxserver.io/images/docker-prowlarr/"
-ShortDescription: "Indexer manager/proxy"
-FullDescription: "Prowlarr is an indexer manager/proxy built on the popular *arr .net/reactjs base stack to integrate with your various PVR apps.
+﻿name: "prowlarr"
+url: "https://docs.linuxserver.io/images/docker-prowlarr/"
+shortDescription: "Indexer manager/proxy"
+fullDescription: "Prowlarr is an indexer manager/proxy built on the popular *arr .net/reactjs base stack to integrate with your various PVR apps.
   Prowlarr supports management of both Torrent Trackers and Usenet Indexers.
   It integrates seamlessly with Lidarr, Mylar3, Radarr, Readarr, and Sonarr offering complete management of your indexers with no per app Indexer setup required."
-Tags: [ "network" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "lscr.io/linuxserver/prowlarr:latest"
-    Env:
+tags: [ "network" ]
+contracts:
+  - type: "Container"
+    imageName: "lscr.io/linuxserver/prowlarr:latest"
+    env:
       PUID: "1000"
       PGID: "1000"
       TZ: "Etc/UTC"
       
-  - Type: "HttpEndpoint"
-    Port: 9696
+  - type: "HttpEndpoint"
+    port: 9696
     
-  - Type: "Mount"
-    VolumeName: "config"
-    Path: "/config"
+  - type: "Mount"
+    volumeName: "config"
+    path: "/config"

@@ -1,15 +1,15 @@
-﻿Name: "actualbudget"
-Url: "https://actualbudget.org/docs/install/docker/"
-ShortDescription: "Expenses and savings tracking"
-FullDescription: "Actual Budget is a super fast and privacy-focused app for managing your finances. At its heart is the well proven and much loved Envelope Budgeting methodology."
-Tags: [ "finance" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "docker.io/actualbudget/actual-server:latest"
+﻿name: "actualbudget"
+url: "https://actualbudget.org/docs/install/docker/"
+shortDescription: "Expenses and savings tracking"
+fullDescription: "Actual Budget is a super fast and privacy-focused app for managing your finances. At its heart is the well proven and much loved Envelope Budgeting methodology."
+tags: [ "finance" ]
+contracts:
+  - type: "Container"
+    imageName: "docker.io/actualbudget/actual-server:latest"
     
-  - Type: "HttpEndpoint"
-    Port: 5006
+  - type: "HttpEndpoint"
+    port: 5006
     
-  - Type: "Mount"
-    VolumeName: "data"
-    Path: "/data"
+  - type: "Mount"
+    volumeName: "data"
+    path: "/data"

@@ -2,7 +2,7 @@
 using Autofac;
 using Docker.DotNet;
 using Frierun.Server.Data;
-using Frierun.Server.Installers;
+using Frierun.Server.Handlers;
 using Module = Autofac.Module;
 
 namespace Frierun.Server;
@@ -11,13 +11,13 @@ public class AutofacModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        // Installers
+        // Handlers
         builder.RegisterInstance<ProviderScopeBuilder>(
                 static builder =>
                 {
                     var assembly = Assembly.GetExecutingAssembly();
                     builder.RegisterAssemblyTypes(assembly)
-                        .Where(type => type.Namespace?.StartsWith("Frierun.Server.Installers.Base") == true)
+                        .Where(type => type.Namespace?.StartsWith("Frierun.Server.Handlers.Base") == true)
                         .AsImplementedInterfaces()
                         .SingleInstance();
                 }
@@ -25,13 +25,12 @@ public class AutofacModule : Module
             .Named<ProviderScopeBuilder>("base")
             .SingleInstance();
 
-        // Package specific installers
         builder.RegisterInstance<ProviderScopeBuilder>(
                 static builder =>
                 {
                     var assembly = Assembly.GetExecutingAssembly();
                     builder.RegisterAssemblyTypes(assembly)
-                        .Where(type => type.Namespace?.StartsWith("Frierun.Server.Installers.Docker") == true)
+                        .Where(type => type.Namespace?.StartsWith("Frierun.Server.Handlers.Docker") == true)
                         .AsImplementedInterfaces()
                         .SingleInstance();
                     
@@ -60,35 +59,35 @@ public class AutofacModule : Module
             .SingleInstance();
         
         builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder => builder.RegisterType<MysqlInstaller>()
+                static builder => builder.RegisterType<MysqlHandler>()
                     .AsImplementedInterfaces()
                     .SingleInstance()
             )
             .Named<ProviderScopeBuilder>("mysql")
             .SingleInstance();
         builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder => builder.RegisterType<MysqlInstaller>()
+                static builder => builder.RegisterType<MysqlHandler>()
                     .AsImplementedInterfaces()
                     .SingleInstance()
             )
             .Named<ProviderScopeBuilder>("mariadb")
             .SingleInstance();
         builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder => builder.RegisterType<PostgresqlInstaller>()
+                static builder => builder.RegisterType<PostgresqlHandler>()
                     .AsImplementedInterfaces()
                     .SingleInstance()
             )
             .Named<ProviderScopeBuilder>("postgresql")
             .SingleInstance();
         builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder => builder.RegisterType<StaticDomainInstaller>()
+                static builder => builder.RegisterType<StaticDomainHandler>()
                     .AsImplementedInterfaces()
                     .SingleInstance()
             )
             .Named<ProviderScopeBuilder>("static-domain")
             .SingleInstance();
         builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder => builder.RegisterType<TraefikHttpEndpointInstaller>()
+                static builder => builder.RegisterType<TraefikHttpEndpointHandler>()
                     .AsImplementedInterfaces()
                     .SingleInstance()
             )
@@ -100,7 +99,7 @@ public class AutofacModule : Module
         builder.RegisterType<ExecutionService>().AsSelf().SingleInstance();
         builder.RegisterType<InstallService>().AsSelf().SingleInstance();
         builder.RegisterType<PackageRegistry>().AsSelf().SingleInstance();
-        builder.RegisterType<InstallerRegistry>().AsSelf().SingleInstance();
+        builder.RegisterType<HandlerRegistry>().AsSelf().SingleInstance();
         builder.RegisterType<StateManager>().AsSelf().SingleInstance();
         builder.RegisterType<UninstallService>().AsSelf().SingleInstance();
         

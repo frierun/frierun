@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { Package } from "./package";
-import type { ApplicationAllOfResourcesItem } from "./applicationAllOfResourcesItem";
+import type { ApplicationAllOfContractsItem } from "./applicationAllOfContractsItem";
 
 export type ApplicationAllOf = {
   name: string;
@@ -14,6 +14,6 @@ export type ApplicationAllOf = {
   url?: string | null;
   /** @nullable */
   description?: string | null;
-  resources: ApplicationAllOfResourcesItem[];
+  contracts: ApplicationAllOfContractsItem[];
   requiredApplications: string[];
 };

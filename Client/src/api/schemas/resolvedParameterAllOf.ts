@@ -7,6 +7,5 @@
 
 export type ResolvedParameterAllOf = {
   name: string;
-  /** @nullable */
-  value?: string | null;
+  value: string;
 };

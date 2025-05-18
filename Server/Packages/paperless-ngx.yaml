@@ -1,52 +1,52 @@
-﻿"Name": "paperless-ngx"
-"Url": "https://docs.paperless-ngx.com/setup/"
-"ShortDescription": "Document management system"
-"FullDescription": "Paperless-ngx is a community-supported open-source document management system that transforms
+﻿name: "paperless-ngx"
+url: "https://docs.paperless-ngx.com/setup/"
+shortDescription: "Document management system"
+fullDescription: "Paperless-ngx is a community-supported open-source document management system that transforms
   your physical documents into a searchable online archive so you can keep, well, less paper."
-"Tags": [ "storage" ]
-"ApplicationDescription": "Login: admin\nPassword: {{Password::Value}}"
-"Contracts":
-  - "Type": "Selector"
-    "Name": "Database"
-    "Options":
-      - "Name": "PostgreSQL"
-        "Contracts":
-          - "Type": "Container"
-            "Name": "webserver"
-            "ImageName": "ghcr.io/paperless-ngx/paperless-ngx:latest"
-            "Env":
-              "PAPERLESS_SECRET_KEY": "{{Password:SecretKey:Value}}"
-              "PAPERLESS_REDIS": "redis://{{Redis::Host}}:6379"
-              "PAPERLESS_AUTO_LOGIN_USERNAME": "admin"
-              "PAPERLESS_ADMIN_USER": "admin"
-              "PAPERLESS_ADMIN_PASSWORD": "{{Password::Value}}"
-              "PAPERLESS_DBENGINE": "postgresql"
-              "PAPERLESS_DBHOST": "{{Postgresql::Host}}"
-              "PAPERLESS_DBNAME": "{{Postgresql::Database}}"
-              "PAPERLESS_DBUSER": "{{Postgresql::User}}"
-              "PAPERLESS_DBPASS": "{{Postgresql::Password}}"
-      - "Name": "SQLite"
-        "Contracts":
-          - "Type": "Container"
-            "Name": "webserver"
-            "ImageName": "ghcr.io/paperless-ngx/paperless-ngx:latest"
-            "Env":
-              "PAPERLESS_SECRET_KEY": "{{Password:SecretKey:Value}}"
-              "PAPERLESS_REDIS": "redis://{{Redis::Host}}:6379"
-              "PAPERLESS_AUTO_LOGIN_USERNAME": "admin"
-              "PAPERLESS_ADMIN_USER": "admin"
-              "PAPERLESS_ADMIN_PASSWORD": "{{Password::Value}}"
+tags: [ "storage" ]
+applicationDescription: "Login: admin\nPassword: {{Password::Value}}"
+contracts:
+  - type: "Selector"
+    name: "Database"
+    options:
+      - name: "PostgreSQL"
+        contracts:
+          - type: "Container"
+            name: "webserver"
+            imageName: "ghcr.io/paperless-ngx/paperless-ngx:latest"
+            env:
+              PAPERLESS_SECRET_KEY: "{{Password:SecretKey:Value}}"
+              PAPERLESS_REDIS: "redis://{{Redis::Host}}:6379"
+              PAPERLESS_AUTO_LOGIN_USERNAME: "admin"
+              PAPERLESS_ADMIN_USER: "admin"
+              PAPERLESS_ADMIN_PASSWORD: "{{Password::Value}}"
+              PAPERLESS_DBENGINE: "postgresql"
+              PAPERLESS_DBHOST: "{{Postgresql::Host}}"
+              PAPERLESS_DBNAME: "{{Postgresql::Database}}"
+              PAPERLESS_DBUSER: "{{Postgresql::User}}"
+              PAPERLESS_DBPASS: "{{Postgresql::Password}}"
+      - name: "SQLite"
+        contracts:
+          - type: "Container"
+            name: "webserver"
+            imageName: "ghcr.io/paperless-ngx/paperless-ngx:latest"
+            env:
+              PAPERLESS_SECRET_KEY: "{{Password:SecretKey:Value}}"
+              PAPERLESS_REDIS: "redis://{{Redis::Host}}:6379"
+              PAPERLESS_AUTO_LOGIN_USERNAME: "admin"
+              PAPERLESS_ADMIN_USER: "admin"
+              PAPERLESS_ADMIN_PASSWORD: "{{Password::Value}}"
               
-  - "Type": "HttpEndpoint"
-    "ContainerName": "webserver"
-    "Port": 8000
+  - type: "HttpEndpoint"
+    containerName: "webserver"
+    port: 8000
     
-  - "Type": "Mount"
-    "ContainerName": "webserver"
-    "VolumeName": "data"
-    "Path": "/usr/src/paperless/data"
+  - type: "Mount"
+    containerName: "webserver"
+    volumeName: "data"
+    path: "/usr/src/paperless/data"
     
-  - "Type": "Mount"
-    "ContainerName": "webserver"
-    "VolumeName": "media"
-    "Path": "/usr/src/paperless/media"
+  - type: "Mount"
+    containerName: "webserver"
+    volumeName: "media"
+    path: "/usr/src/paperless/media"

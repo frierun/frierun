@@ -10,5 +10,5 @@ import type { ResolvedDomainType } from "./resolvedDomainType";
 
 export type ResolvedDomain = Resource &
   ResolvedDomainAllOf & {
-    Type: ResolvedDomainType;
+    type: ResolvedDomainType;
   };

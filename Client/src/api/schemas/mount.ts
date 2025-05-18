@@ -10,5 +10,5 @@ import type { MountType } from "./mountType";
 
 export type Mount = Contract &
   MountAllOf & {
-    Type: MountType;
+    type: MountType;
   };

@@ -1,55 +1,55 @@
-﻿Name: "plex"
-Url: "https://github.com/plexinc/pms-docker/"
-ShortDescription: "Personal media server"
-FullDescription: "Plex gives you one place to find and access all the media that matters to you.
+﻿name: "plex"
+url: "https://github.com/plexinc/pms-docker/"
+shortDescription: "Personal media server"
+fullDescription: "Plex gives you one place to find and access all the media that matters to you.
     From personal media on your own server, to free and on-demand Movies & Shows or live TV,
     to streaming music, you can enjoy it all in one app, on any device."
-Tags: [ "storage" ]
-Contracts:
-    - Type: "Container"
-      ImageName: "plexinc/pms-docker:latest"
-      Env:
-          PLEX_CLAIM: "{{Parameter:PlexClaim:Value}}"
-          
-    - Type: "HttpEndpoint"
-      Port: 32400
-      
-    - Type: "PortEndpoint"
-      Port: 8324
-      Protocol: "tcp"
-      
-    - Type: "PortEndpoint"
-      Port: 32469
-      Protocol: "tcp"
-      
-    - Type: "PortEndpoint"
-      Port: 1900
-      Protocol: "udp"
-      
-    - Type: "PortEndpoint"
-      Port: 32410
-      Protocol: "udp"
-      
-    - Type: "PortEndpoint"
-      Port: 32412
-      Protocol: "udp"
-      
-    - Type: "PortEndpoint"
-      Port: 32413
-      Protocol: "udp"
-      
-    - Type: "PortEndpoint"
-      Port: 32414
-      Protocol: "udp"
-      
-    - Type: "Mount"
-      VolumeName: "database"
-      Path: "/config"
-      
-    - Type: "Mount"
-      VolumeName: "transcode"
-      Path: "/transcode"
-      
-    - Type: "Mount"
-      VolumeName: "media"
-      Path: "/data"
+tags: [ "storage" ]
+contracts:
+  - type: "Container"
+    imageName: "plexinc/pms-docker:latest"
+    env:
+      PLEX_CLAIM: "{{Parameter:PlexClaim:Value}}"
+
+  - type: "HttpEndpoint"
+    port: 32400
+
+  - type: "PortEndpoint"
+    port: 8324
+    protocol: "tcp"
+
+  - type: "PortEndpoint"
+    port: 32469
+    protocol: "tcp"
+
+  - type: "PortEndpoint"
+    port: 1900
+    protocol: "udp"
+
+  - type: "PortEndpoint"
+    port: 32410
+    protocol: "udp"
+
+  - type: "PortEndpoint"
+    port: 32412
+    protocol: "udp"
+
+  - type: "PortEndpoint"
+    port: 32413
+    protocol: "udp"
+
+  - type: "PortEndpoint"
+    port: 32414
+    protocol: "udp"
+
+  - type: "Mount"
+    volumeName: "database"
+    path: "/config"
+
+  - type: "Mount"
+    volumeName: "transcode"
+    path: "/transcode"
+
+  - type: "Mount"
+    volumeName: "media"
+    path: "/data"
