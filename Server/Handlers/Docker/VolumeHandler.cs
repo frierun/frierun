@@ -71,7 +71,11 @@ public class VolumeHandler(Application application, DockerService dockerService,
     public void Uninstall(Volume contract)
     {
         var installedVolume = contract.Result as DockerVolume;
-        Debug.Assert(installedVolume != null);
+        if (installedVolume == null)
+        {
+            // Local path
+            return;
+        }
 
         var volumeUsed = state.Contracts
             .OfType<Volume>()
