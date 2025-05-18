@@ -47,6 +47,7 @@ public class PostgresqlHandler(
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
 
         _container.AttachNetwork(network.Name);
+        Debug.Assert(_container.Result != null);
 
         if (contract.Admin)
         {
@@ -56,7 +57,7 @@ public class PostgresqlHandler(
                 {
                     User = "postgres",
                     Password = _rootPassword,
-                    Host = _container.Name,
+                    Host = _container.Result.Name,
                     NetworkName = network.Name
                 }
             };
