@@ -44,6 +44,10 @@ public class ContainerHandler(Application application, DockerService dockerServi
             Image = contract.ImageName,
             HostConfig = new HostConfig
             {
+                RestartPolicy = new RestartPolicy()
+                {
+                    Name = RestartPolicyKind.UnlessStopped,
+                },
                 Mounts = new List<global::Docker.DotNet.Models.Mount>(),
                 PortBindings = new Dictionary<string, IList<PortBinding>>()
             },
