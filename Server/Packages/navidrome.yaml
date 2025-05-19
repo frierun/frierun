@@ -12,9 +12,9 @@ contracts:
     port: 4533
     
   - type: "Mount"
-    volumeName: "data"
+    volume: "data"
     path: "/data"
     
   - type: "Mount"
-    volumeName: "music"
+    volume: "music"
     path: "/music"

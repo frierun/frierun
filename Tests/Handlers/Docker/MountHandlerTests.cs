@@ -14,7 +14,7 @@ public class MountHandlerTests : BaseTests
         {
             Contracts = [
                 container,
-                Factory<Mount>().Generate() with { ContainerName = container.Name }
+                Factory<Mount>().Generate() with { Container = (ContractId<Container>)container.Id }
             ]
         };
         

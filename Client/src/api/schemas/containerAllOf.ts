@@ -4,17 +4,18 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { DockerContainer } from "./dockerContainer";
 import type { ContainerAllOfEnv } from "./containerAllOfEnv";
 
 export type ContainerAllOf = {
   /** @nullable */
   containerName?: string | null;
   /** @nullable */
+  networkName?: string | null;
+  /** @nullable */
   imageName?: string | null;
   requireDocker: boolean;
-  result?: DockerContainer;
+  installed?: boolean;
   command: string[];
   env: ContainerAllOfEnv;
-  networkName: string;
+  network: string;
 };

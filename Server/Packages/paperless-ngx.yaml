@@ -23,7 +23,7 @@ contracts:
               PAPERLESS_DBENGINE: "postgresql"
               PAPERLESS_DBHOST: "{{Postgresql::Host}}"
               PAPERLESS_DBNAME: "{{Postgresql::Database}}"
-              PAPERLESS_DBUSER: "{{Postgresql::User}}"
+              PAPERLESS_DBUSER: "{{Postgresql::Username}}"
               PAPERLESS_DBPASS: "{{Postgresql::Password}}"
       - name: "SQLite"
         contracts:
@@ -38,15 +38,15 @@ contracts:
               PAPERLESS_ADMIN_PASSWORD: "{{Password::Value}}"
               
   - type: "HttpEndpoint"
-    containerName: "webserver"
+    container: "webserver"
     port: 8000
     
   - type: "Mount"
-    containerName: "webserver"
-    volumeName: "data"
+    container: "webserver"
+    volume: "data"
     path: "/usr/src/paperless/data"
     
   - type: "Mount"
-    containerName: "webserver"
-    volumeName: "media"
+    container: "webserver"
+    volume: "media"
     path: "/usr/src/paperless/media"

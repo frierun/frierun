@@ -21,7 +21,7 @@ public class SelectorHandlerTests : BaseTests
         // Assert
         Assert.Single(result);
         var resolvedContract = (Selector)result[0].Contract;
-        Assert.Equal("option2", resolvedContract.SelectedOption);
+        Assert.Equal("option2", resolvedContract.Value);
         Assert.Single(result[0].AdditionalContracts);
         Assert.Equal("container2", result[0].AdditionalContracts.First().Name);
     }
@@ -41,12 +41,12 @@ public class SelectorHandlerTests : BaseTests
 
         Assert.Equal(2, result.Count);
         var resolvedContract1 = (Selector)result[0].Contract;
-        Assert.Equal("option1", resolvedContract1.SelectedOption);
+        Assert.Equal("option1", resolvedContract1.Value);
         Assert.Single(result[0].AdditionalContracts);
         Assert.Equal("container1", result[0].AdditionalContracts.First().Name);
 
         var resolvedContract2 = (Selector)result[1].Contract;
-        Assert.Equal("option2", resolvedContract2.SelectedOption);
+        Assert.Equal("option2", resolvedContract2.Value);
         Assert.Single(result[1].AdditionalContracts);
         Assert.Equal("container2", result[1].AdditionalContracts.First().Name);
     }
@@ -64,8 +64,8 @@ public class SelectorHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var resolvedParameter = application.Contracts.OfType<Parameter>().Single(p => p.Name == contract.Name).Result;
-        Assert.NotNull(resolvedParameter);
-        Assert.Equal(contract.Value, resolvedParameter.Value);
+        var installedSelector = application.Contracts.OfType<Parameter>().Single();
+        Assert.True(installedSelector.Installed);
+        Assert.Equal(contract.Value, installedSelector.Value);
     }
 }

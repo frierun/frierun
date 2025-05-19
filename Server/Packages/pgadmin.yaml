@@ -23,24 +23,24 @@ contracts:
     admin: true
     
   - type: "Mount"
-    volumeName: "config"
+    volume: "config"
     path: "/var/lib/pgadmin"
     
   - type: "File"
-    volumeName: "config"
+    volume: "config"
     path: "servers.json"
-    text: '{"Servers": {"1": {"Name": "Server","Group": "Servers","Port": 5432,"Username": "{{Postgresql:Root:User}}","Host": "{{Postgresql:Root:Host}}","SSLMode": "prefer","MaintenanceDB": "postgres", "PassFile": ".pgpass"}}}'
+    text: '{"Servers": {"1": {"Name": "Server","Group": "Servers","Port": 5432,"Username": "{{Postgresql:Root:Username}}","Host": "{{Postgresql:Root:Host}}","SSLMode": "prefer","MaintenanceDB": "postgres", "PassFile": ".pgpass"}}}'
     dependencyOf: [ "Container" ]
     
   - type: "File"
-    volumeName: "config"
+    volume: "config"
     path: "pgpass"
     owner: 5050
-    text: "{{Postgresql:Root:Host}}:*:*:{{Postgresql:Root:User}}:{{Postgresql:Root:Password}}\n"
+    text: "{{Postgresql:Root:Host}}:*:*:{{Postgresql:Root:Username}}:{{Postgresql:Root:Password}}\n"
     dependencyOf: [ "Container" ]
     
   - type: "File"
-    volumeName: "config"
+    volume: "config"
     path: ""
     owner: 5050
     dependencyOf: [ "Container" ]

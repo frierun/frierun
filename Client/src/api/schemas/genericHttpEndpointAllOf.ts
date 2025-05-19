@@ -6,7 +6,7 @@
  */
 
 export type GenericHttpEndpointAllOf = {
-  Type: string;
+  type: string;
   url: string;
   readonly host: string;
   readonly port: number;

@@ -17,9 +17,9 @@ contracts:
     port: 8083
     
   - type: "Mount"
-    volumeName: "books"
+    volume: "books"
     path: "/books"
     
   - type: "Mount"
-    volumeName: "config"
+    volume: "config"
     path: "/config"

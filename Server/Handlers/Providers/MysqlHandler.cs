@@ -9,29 +9,57 @@ public class MysqlHandler(Application application, State state)
 {
     private readonly Container _container = application.Contracts.OfType<Container>().Single();
 
-    private readonly string _rootPassword = application.Contracts.OfType<Password>().Single().Result?.Value ??
+    private readonly string _rootPassword = application.Contracts.OfType<Password>().Single().Value ??
                                             throw new Exception("Root password not found");
 
     public Application Application => application;
 
     public IEnumerable<ContractInitializeResult> Initialize(Mysql contract, string prefix)
     {
-        var baseName = contract.DatabaseName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
+        if (contract.Admin)
+        {
+            if (contract.Username != null && contract.Username != "root")
+            {
+                yield break;
+            }
+            
+            if (contract.Password != null && contract.Password != _rootPassword)
+            {
+                yield break;
+            }
+            
+            yield return new ContractInitializeResult(
+                contract with
+                {
+                    Username = "root",
+                    Password = _rootPassword,
+                    Handler = this,
+                    DependsOn = contract.DependsOn.Append(contract.Network)
+                }
+            );
+        }
+        
+        var baseName = contract.Database ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
 
         var count = 1;
-        var name = baseName;
-        while (state.Contracts.OfType<Mysql>().Any(c => c.Result?.Database == name))
+        var database = baseName;
+        while (state.Contracts.OfType<Mysql>().Any(c => c.Database == database))
         {
             count++;
-            name = $"{baseName}{count}";
+            database = $"{baseName}{count}";
         }
 
         yield return new ContractInitializeResult(
             contract with
             {
                 Handler = this,
-                DatabaseName = name,
-                DependsOn = contract.DependsOn.Append(contract.NetworkId)
+                Database = database,
+                Username = contract.Username ?? database,
+                Password = contract.Password ?? RandomNumberGenerator.GetString(
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+                    16
+                ),
+                DependsOn = contract.DependsOn.Append(contract.Network)
             }
         );
     }
@@ -39,40 +67,46 @@ public class MysqlHandler(Application application, State state)
     public Mysql Install(Mysql contract, ExecutionPlan plan)
     {
         Debug.Assert(_container.Installed);
+        Debug.Assert(contract.Username != null);
+        Debug.Assert(contract.Password != null);
+
+        var network = plan.GetContract(contract.Network);
+        Debug.Assert(network.Installed);
         
-        var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
-        _container.AttachNetwork(network.Name);
+        if (contract.Host != null && contract.Host != _container.ContainerName)
+        {
+            throw new Exception("Host cannot be set");
+        }
+        if (contract.NetworkName != null && contract.NetworkName != network.NetworkName)
+        {
+            throw new Exception("NetworkName cannot be set");
+        }
+        
+        _container.AttachNetwork(network.NetworkName);
 
         if (contract.Admin)
         {
             return contract with
             {
-                Result = new MysqlDatabase
-                {
-                    User = "root",
-                    Password = _rootPassword,
-                    Host = _container.ContainerName,
-                    NetworkName = network.Name
-                }
+                Username = "root",
+                Password = _rootPassword,
+                Host = _container.ContainerName,
+                NetworkName = network.NetworkName
             };
         }
+        
+        Debug.Assert(contract.Database != null);
 
-        var name = contract.DatabaseName;
-        var password = RandomNumberGenerator.GetString(
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
-            16
-        );
-
-        if (string.IsNullOrEmpty(name))
+        if (contract.Username == "root")
         {
-            throw new Exception("Empty name");
+            throw new Exception("Username cannot be root");
         }
-
+        
         RunSql(
             $"""
-             CREATE DATABASE `{name}`;
-             CREATE USER '{name}'@'%' IDENTIFIED BY '{password}';
-             GRANT ALL PRIVILEGES ON `{name}`.* TO '{name}'@'%';
+             CREATE DATABASE `{contract.Database}`;
+             CREATE USER '{contract.Username}'@'%' IDENTIFIED BY '{contract.Password}';
+             GRANT ALL PRIVILEGES ON `{contract.Database}`.* TO '{contract.Username}'@'%';
              FLUSH PRIVILEGES;
              """
         );
@@ -80,33 +114,26 @@ public class MysqlHandler(Application application, State state)
 
         return contract with
         {
-            Result = new MysqlDatabase
-            {
-                User = name,
-                Password = password,
-                Database = name,
-                Host = _container.ContainerName,
-                NetworkName = network.Name
-            }
+            Host = _container.ContainerName,
+            NetworkName = network.NetworkName
         };
     }
 
     void IHandler<Mysql>.Uninstall(Mysql contract)
     {
-        var resource = contract.Result;
-        Debug.Assert(resource != null);
-        
-        if (resource.User != "root")
+        Debug.Assert(contract.Installed);
+
+        if (!contract.Admin)
         {
             RunSql(
                 $"""
-                 DROP DATABASE `{resource.Database}`;
-                 DROP USER '{resource.User}';
+                 DROP DATABASE `{contract.Database}`;
+                 DROP USER '{contract.Username}';
                  """
             );
         }
 
-        _container.DetachNetwork(resource.NetworkName);
+        _container.DetachNetwork(contract.NetworkName);
     }
 
     /// <summary>

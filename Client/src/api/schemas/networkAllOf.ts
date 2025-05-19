@@ -4,10 +4,9 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { DockerNetwork } from "./dockerNetwork";
 
 export type NetworkAllOf = {
   /** @nullable */
   networkName?: string | null;
-  result?: DockerNetwork;
+  installed?: boolean;
 };

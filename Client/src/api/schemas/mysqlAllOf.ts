@@ -4,12 +4,19 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { MysqlDatabase } from "./mysqlDatabase";
 
 export type MysqlAllOf = {
   /** @nullable */
-  databaseName?: string | null;
+  username?: string | null;
+  /** @nullable */
+  password?: string | null;
+  /** @nullable */
+  host?: string | null;
+  /** @nullable */
+  database?: string | null;
+  /** @nullable */
+  networkName?: string | null;
   admin: boolean;
-  result?: MysqlDatabase;
-  networkName: string;
+  installed?: boolean;
+  network: string;
 };

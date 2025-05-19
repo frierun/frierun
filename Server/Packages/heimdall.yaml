@@ -12,5 +12,5 @@ contracts:
     port: 80
     
   - type: "Mount"
-    volumeName: "config"
+    volume: "config"
     path: "/config"

@@ -4,12 +4,19 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { PostgresqlDatabase } from "./postgresqlDatabase";
 
 export type PostgresqlAllOf = {
   /** @nullable */
-  databaseName?: string | null;
+  username?: string | null;
+  /** @nullable */
+  password?: string | null;
+  /** @nullable */
+  host?: string | null;
+  /** @nullable */
+  database?: string | null;
+  /** @nullable */
+  networkName?: string | null;
   admin: boolean;
-  result?: PostgresqlDatabase;
-  networkName: string;
+  installed?: boolean;
+  network: string;
 };

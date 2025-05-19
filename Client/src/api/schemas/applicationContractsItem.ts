@@ -22,7 +22,7 @@ import type { Selector } from "./selector";
 import type { Substitute } from "./substitute";
 import type { Volume } from "./volume";
 
-export type ApplicationAllOfContractsItem =
+export type ApplicationContractsItem =
   | Container
   | Dependency
   | Domain

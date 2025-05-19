@@ -15,14 +15,14 @@ contracts:
           - type: "Container"
             imageName: "freshrss/freshrss:1"
             env:
-              FRESHRSS_INSTALL: "--db-type mysql --language en --default-user admin --db-host {{Mysql::Host}} --db-base {{Mysql::Database}} --db-user {{Mysql::User}} --db-password {{Mysql::Password}}"
+              FRESHRSS_INSTALL: "--db-type mysql --language en --default-user admin --db-host {{Mysql::Host}} --db-base {{Mysql::Database}} --db-user {{Mysql::Username}} --db-password {{Mysql::Password}}"
               FRESHRSS_USER: "--user admin --password {{Password::Value}}"
       - name: "PostgreSQL"
         contracts:
           - type: "Container"
             imageName: "freshrss/freshrss:1"
             env:
-              FRESHRSS_INSTALL: "--db-type pgsql --language en --default-user admin --db-host {{Postgresql::Host}} --db-base {{Postgresql::Database}} --db-user {{Postgresql::User}} --db-password {{Postgresql::Password}}"
+              FRESHRSS_INSTALL: "--db-type pgsql --language en --default-user admin --db-host {{Postgresql::Host}} --db-base {{Postgresql::Database}} --db-user {{Postgresql::Username}} --db-password {{Postgresql::Password}}"
               FRESHRSS_USER: "--user admin --password {{Password::Value}}"
       - name: "SQLite"
         contracts:
@@ -34,8 +34,8 @@ contracts:
   - type: "HttpEndpoint"
     port: 80
   - type: "Mount"
-    volumeName: "data"
+    volume: "data"
     path: "/var/www/FreshRSS/data"
   - type: "Mount"
-    volumeName: "extensions"
+    volume: "extensions"
     path: "/var/www/FreshRSS/extensions"

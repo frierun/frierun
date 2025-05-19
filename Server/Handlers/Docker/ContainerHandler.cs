@@ -25,7 +25,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
             contract with
             {
                 ContainerName = name,
-                DependsOn = contract.DependsOn.Append(contract.NetworkId),
+                DependsOn = contract.DependsOn.Append(contract.Network),
                 Handler = this
             }
         );
@@ -33,9 +33,10 @@ public class ContainerHandler(Application application, DockerService dockerServi
 
     public Container Install(Container contract, ExecutionPlan plan)
     {
-        var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
+        var network = plan.GetContract(contract.Network);
+        Debug.Assert(network.Installed);
         Debug.Assert(contract.ContainerName != null);
-        
+
         var dockerParameters = new CreateContainerParameters
         {
             Cmd = contract.Command.ToList(),
@@ -48,7 +49,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
             },
             Labels = new Dictionary<string, string>
             {
-                ["com.docker.compose.project"] = network.Name,
+                ["com.docker.compose.project"] = network.NetworkName,
                 ["com.docker.compose.service"] = contract.Name
             },
             Name = contract.ContainerName,
@@ -57,7 +58,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
                 EndpointsConfig = new Dictionary<string, EndpointSettings>
                 {
                     {
-                        network.Name, new EndpointSettings
+                        network.NetworkName, new EndpointSettings
                         {
                             Aliases = contract.Name == "" ? Array.Empty<string>() : new List<string> { contract.Name }
                         }
@@ -90,7 +91,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
             throw new Exception("Failed to start container");
         }
 
-        return contract;
+        return contract with { NetworkName = network.NetworkName };
     }
 
     void IHandler<Container>.Uninstall(Container container)

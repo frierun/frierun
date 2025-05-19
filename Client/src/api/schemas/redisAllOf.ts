@@ -4,10 +4,14 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { RedisDatabase } from "./redisDatabase";
 
 export type RedisAllOf = {
-  result?: RedisDatabase;
-  networkName: string;
-  containerName: string;
+  /** @nullable */
+  container?: string | null;
+  /** @nullable */
+  volume?: string | null;
+  /** @nullable */
+  host?: string | null;
+  installed?: boolean;
+  network: string;
 };

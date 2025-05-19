@@ -4,10 +4,11 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { ResolvedDomain } from "./resolvedDomain";
 
 export type DomainAllOf = {
   /** @nullable */
-  subdomain?: string | null;
-  result?: ResolvedDomain;
+  value?: string | null;
+  /** @nullable */
+  isInternal?: boolean | null;
+  installed?: boolean;
 };

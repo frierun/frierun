@@ -15,7 +15,7 @@ public class NetworkHandler(Application application, DockerService dockerService
 
         var count = 1;
         var name = baseName;
-        while (state.Contracts.OfType<Network>().Any(c => c.Result?.Name == name))
+        while (state.Contracts.OfType<Network>().Any(c => c.NetworkName == name))
         {
             count++;
             name = $"{baseName}{count}";
@@ -37,15 +37,12 @@ public class NetworkHandler(Application application, DockerService dockerService
 
         dockerService.CreateNetwork(networkName).Wait();
 
-        return contract with
-        {
-            Result = new DockerNetwork { Name = networkName }
-        };
+        return contract;
     }
 
     public void Uninstall(Network contract)
     {
-        Debug.Assert(contract.Result != null);
-        dockerService.RemoveNetwork(contract.Result.Name).Wait();
+        Debug.Assert(contract.Installed);
+        dockerService.RemoveNetwork(contract.NetworkName).Wait();
     }
 }

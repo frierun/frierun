@@ -22,9 +22,9 @@ contracts:
     protocol: "udp"
 
   - type: "Mount"
-    volumeName: "data"
+    volume: "data"
     path: "/opt/adguardhome/work"
 
   - type: "Mount"
-    volumeName: "config"
+    volume: "config"
     path: "/opt/adguardhome/conf"

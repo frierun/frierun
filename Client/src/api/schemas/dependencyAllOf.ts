@@ -4,9 +4,8 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { ContractId } from "./contractId";
 
 export type DependencyAllOf = {
-  preceding: ContractId;
-  following: ContractId;
+  preceding: string;
+  following: string;
 };

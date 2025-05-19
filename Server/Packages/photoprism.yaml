@@ -17,9 +17,9 @@ contracts:
     port: 2342
     
   - type: "Mount"
-    volumeName: "originals"
+    volume: "originals"
     path: "/photoprism/originals"
     
   - type: "Mount"
-    volumeName: "storage"
+    volume: "storage"
     path: "/photoprism/storage"

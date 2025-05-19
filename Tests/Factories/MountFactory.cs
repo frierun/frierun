@@ -6,12 +6,12 @@ namespace Frierun.Tests.Factories;
 
 public sealed class MountFactory: Faker<Mount>
 {
-    public MountFactory(Faker<Volume> volumeFactory)
+    public MountFactory(Faker<Volume> volumeFactory, Faker<Container> containerFactory)
     {
-        CustomInstantiator(_ => new Mount("", ""));
+        CustomInstantiator(_ => new Mount(""));
         RuleFor(p => p.Path, f => f.System.DirectoryPath());
-        RuleFor(p => p.VolumeName, _ => volumeFactory.Generate().Name);
-        RuleFor(p => p.ContainerName, f => f.Lorem.Word());
+        RuleFor(p => p.Volume, _ => volumeFactory.Generate().Id);
+        RuleFor(p => p.Container, f => containerFactory.Generate().Id);
         RuleFor(p => p.ReadOnly, f => f.Random.Bool());
     }
 }

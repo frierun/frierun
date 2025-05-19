@@ -17,15 +17,15 @@ contracts:
     port: 8080
     
   - type: "Mount"
-    volumeName: "config"
+    volume: "config"
     path: "/config"
     
   - type: "Mount"
-    volumeName: "downloads"
+    volume: "downloads"
     path: "/downloads"
     
   - type: "File"
-    volumeName: "config"
+    volume: "config"
     path: "qBittorrent/qBittorrent.conf"
     text: "[Preferences]\nWebUI\\Password_PBKDF2=\"@ByteArray(OoaYkBQyA7MDk/P0abXiIA==:Yfx3IsX+S7SU8YGfd9/RjXmicHE0p1WwyWC9lolagkGzZu3G7ucrTIxdzgHh8KMswVJeCtzMj60clUg9l/bwJQ==)\""
     dependencyOf: [ "Container" ]

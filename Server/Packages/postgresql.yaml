@@ -13,5 +13,5 @@ contracts:
       POSTGRES_PASSWORD: "{{Password::Value}}"
       
   - type: "Mount"
-    volumeName: "data"
+    volume: "data"
     path: "/var/lib/postgresql/data"

@@ -6,13 +6,12 @@ public record PortEndpoint(
     Protocol Protocol,
     int Port,
     string? Name = null,
-    string? ContainerName = null,
+    ContractId<Container>? Container = null,
     int DestinationPort = 0,
     DockerPortEndpoint? Result = null
-) : Contract(Name ?? $"{(ContainerName != null ? ContainerName + ":" : "")}{Port}/{Protocol}"), IHasResult<DockerPortEndpoint>
+) : Contract(Name ?? $"{(Container != null ? Container.Name + ":" : "")}{Port}/{Protocol}"), IHasResult<DockerPortEndpoint>
 {
-    public string ContainerName { get; init; } = ContainerName ?? "";
-    [JsonIgnore] public ContractId<Container> ContainerId => new (ContainerName);
+    public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");    
 
     public override Contract With(Contract other)
     {

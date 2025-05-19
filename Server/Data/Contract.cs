@@ -30,7 +30,8 @@ public abstract record Contract(
     Lazy<IHandler?>? LazyHandler = null
 )
 {
-    [JsonIgnore] public ContractId Id => ContractId.Create(GetType(), Name);
+    [JsonIgnore]
+    public ContractId Id  => ContractId.Create(GetType(), Name);
 
     [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = DependsOn ?? Array.Empty<ContractId>();
     [JsonIgnore] public IEnumerable<ContractId> DependencyOf { get; init; } = DependencyOf ?? Array.Empty<ContractId>();

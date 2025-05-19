@@ -30,15 +30,15 @@ contracts:
     protocol: "udp"
     
   - type: "Mount"
-    volumeName: "data"
+    volume: "data"
     path: "/data"
     
   - type: "Mount"
-    volumeName: "config"
+    volume: "config"
     path: "/config"
     
   - type: "File"
-    volumeName: "data"
+    volume: "data"
     path: ""
     owner: 1000
     group: 1000

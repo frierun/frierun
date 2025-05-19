@@ -12,11 +12,11 @@ contracts:
     port: 8123
     
   - type: "Mount"
-    volumeName: "config"
+    volume: "config"
     path: "/config"
     
   - type: "File"
-    volumeName: "config"
+    volume: "config"
     path: "configuration.yaml"
     text: "http:\n  use_x_forwarded_for: true\n  trusted_proxies:\n    - 172.16.0.0/12\n"
     dependencyOf: [ "Container" ]

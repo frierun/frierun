@@ -13,16 +13,16 @@ public class MountHandler(Application application) : IHandler<Mount>
             contract with
             {
                 Handler = this,
-                DependsOn = contract.DependsOn.Append(contract.VolumeId),
-                DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
+                DependsOn = contract.DependsOn.Append(contract.Volume),
+                DependencyOf = contract.DependencyOf.Append(contract.Container),
             }
         );
     }
     
     public Mount Install(Mount contract, ExecutionPlan plan)
     {
-        var containerContract = plan.GetContract(contract.ContainerId);
-        var volume = plan.GetResource(contract.VolumeId);
+        var containerContract = plan.GetContract(contract.Container);
+        var volume = plan.GetResource(contract.Volume);
 
         if (volume is DockerVolume dockerVolume)
         {

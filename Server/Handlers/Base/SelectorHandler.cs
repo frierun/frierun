@@ -6,11 +6,14 @@ public class SelectorHandler : IHandler<Selector>
 {
     public IEnumerable<ContractInitializeResult> Initialize(Selector contract, string prefix)
     {
-        if (contract.SelectedOption != null)
+        if (contract.Value != null)
         {
             yield return new ContractInitializeResult(
-                contract with { Handler = this },
-                contract.Options.First(option => option.Name == contract.SelectedOption).Contracts
+                contract with
+                {
+                    Handler = this
+                },
+                contract.Options.First(option => option.Name == contract.Value).Contracts
             );
             yield break;
         }
@@ -18,22 +21,13 @@ public class SelectorHandler : IHandler<Selector>
         foreach (var (name, contracts) in contract.Options)
         {
             yield return new ContractInitializeResult(
-                contract with { SelectedOption = name, Handler = this },
+                contract with
+                {
+                    Value = name,
+                    Handler = this
+                },
                 contracts
             );
         }
-    }
-
-    public Selector Install(Selector contract, ExecutionPlan plan)
-    {
-        if (contract.SelectedOption == null)
-        {
-            throw new Exception("No option selected");
-        }
-
-        return contract with
-        {
-            Result = new ResolvedParameter { Name = contract.Name, Value = contract.SelectedOption }
-        };
     }
 }

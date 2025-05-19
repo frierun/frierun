@@ -17,5 +17,5 @@ contracts:
     port: 9696
     
   - type: "Mount"
-    volumeName: "config"
+    volume: "config"
     path: "/config"

@@ -26,9 +26,9 @@ public class PostgresqlHandlerTests : TestWithDocker
 
         var container = application.Contracts.OfType<Container>().Single();
         Assert.True(container.Installed);
-        var database = application.Contracts.OfType<Postgresql>().Single().Result;
-        Assert.NotNull(database);
-        Assert.Equal("db-client", database.User);
+        var database = application.Contracts.OfType<Postgresql>().Single();
+        Assert.True(database.Installed);
+        Assert.Equal("db-client", database.Username);
         Assert.Equal("db-client", database.Database);
         Assert.Equal("postgresql", database.Host);
         Assert.NotEmpty(database.Password);
@@ -40,7 +40,7 @@ public class PostgresqlHandlerTests : TestWithDocker
             container.ContainerName,
             [
                 "psql",
-                $"postgresql://{database.User}:{database.Password}@{database.Host}/{database.Database}",
+                $"postgresql://{database.Username}:{database.Password}@{database.Host}/{database.Database}",
                 "-c", sql
             ]
         );
@@ -72,9 +72,9 @@ public class PostgresqlHandlerTests : TestWithDocker
 
         var container = application.Contracts.OfType<Container>().Single();
         Assert.True(container.Installed);
-        var database = application.Contracts.OfType<Postgresql>().Single().Result;
-        Assert.NotNull(database);
-        Assert.Equal("postgres", database.User);
+        var database = application.Contracts.OfType<Postgresql>().Single();
+        Assert.True(database.Installed);
+        Assert.Equal("postgres", database.Username);
         Assert.Null(database.Database);
         Assert.Equal("postgresql", database.Host);
         Assert.NotEmpty(database.Password);
@@ -86,7 +86,7 @@ public class PostgresqlHandlerTests : TestWithDocker
             container.ContainerName,
             [
                 "psql",
-                $"postgresql://{database.User}:{database.Password}@{database.Host}/",
+                $"postgresql://{database.Username}:{database.Password}@{database.Host}/",
                 "-c", sql
             ]
         );

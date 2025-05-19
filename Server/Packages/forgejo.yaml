@@ -18,7 +18,7 @@ contracts:
               FORGEJO__database__DB_TYPE: "mysql"
               FORGEJO__database__HOST: "{{Mysql::Host}}"
               FORGEJO__database__NAME: "{{Mysql::Database}}"
-              FORGEJO__database__USER: "{{Mysql::User}}"
+              FORGEJO__database__USER: "{{Mysql::Username}}"
               FORGEJO__database__PASSWD: "{{Mysql::Password}}"
       - name: "PostgreSQL"
         contracts:
@@ -30,7 +30,7 @@ contracts:
               FORGEJO__database__DB_TYPE: "postgres"
               FORGEJO__database__HOST: "{{Postgresql::Host}}"
               FORGEJO__database__NAME: "{{Postgresql::Database}}"
-              FORGEJO__database__USER: "{{Postgresql::User}}"
+              FORGEJO__database__USER: "{{Postgresql::Username}}"
               FORGEJO__database__PASSWD: "{{Postgresql::Password}}"
       - name: "SQLite"
         contracts:
@@ -49,5 +49,5 @@ contracts:
     protocol: "tcp"
     
   - type: "Mount"
-    volumeName: "data"
+    volume: "data"
     path: "/data"

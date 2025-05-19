@@ -152,7 +152,7 @@ export default function InstallForm({contracts, name}: Props) {
                         .filter(contract => contracts.find(httpContract =>
                             httpContract.type === 'HttpEndpoint'
                             && httpContract.port === contract.port
-                            && httpContract.containerName === contract.containerName
+                            && httpContract.container === contract.container
                         ) === undefined)
                         .map(contract => (
                             <div key={`${contract.type}:${contract.name}`} className={"card"}>

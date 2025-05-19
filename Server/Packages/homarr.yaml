@@ -14,13 +14,13 @@ contracts:
     port: 7575
     
   - type: "Mount"
-    volumeName: "configs"
+    volume: "configs"
     path: "/app/data/configs"
     
   - type: "Mount"
-    volumeName: "icons"
+    volume: "icons"
     path: "/app/public/icons"
     
   - type: "Mount"
-    volumeName: "data"
+    volume: "data"
     path: "/data"

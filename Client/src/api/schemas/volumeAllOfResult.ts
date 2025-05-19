@@ -4,37 +4,19 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { Application } from "./application";
-import type { DockerContainer } from "./dockerContainer";
-import type { DockerNetwork } from "./dockerNetwork";
 import type { DockerPortEndpoint } from "./dockerPortEndpoint";
 import type { DockerVolume } from "./dockerVolume";
 import type { GenericHttpEndpoint } from "./genericHttpEndpoint";
-import type { GeneratedPassword } from "./generatedPassword";
 import type { LocalPath } from "./localPath";
-import type { MysqlDatabase } from "./mysqlDatabase";
-import type { PostgresqlDatabase } from "./postgresqlDatabase";
-import type { RedisDatabase } from "./redisDatabase";
-import type { ResolvedDomain } from "./resolvedDomain";
-import type { ResolvedParameter } from "./resolvedParameter";
 import type { TraefikHttpEndpoint } from "./traefikHttpEndpoint";
 
 /**
  * @nullable
  */
 export type VolumeAllOfResult =
-  | Application
-  | DockerContainer
-  | DockerNetwork
   | DockerPortEndpoint
   | DockerVolume
   | GenericHttpEndpoint
-  | GeneratedPassword
   | LocalPath
-  | MysqlDatabase
-  | PostgresqlDatabase
-  | RedisDatabase
-  | ResolvedDomain
-  | ResolvedParameter
   | TraefikHttpEndpoint
   | null;

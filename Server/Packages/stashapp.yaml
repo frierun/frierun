@@ -17,13 +17,13 @@ contracts:
     port: 9999
     
   - type: "Mount"
-    volumeName: "data"
+    volume: "data"
     path: "/data"
     
   - type: "Mount"
-    volumeName: "cache"
+    volume: "cache"
     path: "/cache"
     
   - type: "Mount"
-    volumeName: "config"
+    volume: "config"
     path: "/root/.stash"

@@ -11,17 +11,17 @@ contracts:
     port: 80
     
   - type: "Mount"
-    volumeName: "audiobooks"
+    volume: "audiobooks"
     path: "/audiobooks"
     
   - type: "Mount"
-    volumeName: "podcasts"
+    volume: "podcasts"
     path: "/podcasts"
     
   - type: "Mount"
-    volumeName: "config"
+    volume: "config"
     path: "/config"
     
   - type: "Mount"
-    volumeName: "metadata"
+    volume: "metadata"
     path: "/metadata"

@@ -1,15 +1,20 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Frierun.Server.Data;
 
 public record Mysql(
     string? Name = null,
-    string? DatabaseName = null,
+    ContractId<Network>? Network = null,
+    string? Username = null,
+    string? Password = null,
+    string? Host = null,
+    string? Database = null,
     string? NetworkName = null,
-    bool Admin = false,
-    MysqlDatabase? Result = null
-) : Contract(Name ?? ""), IHasResult<MysqlDatabase>
+    bool Admin = false
+) : Contract(Name ?? "")
 {
-    public string NetworkName { get; init; } = NetworkName ?? "";
-    [JsonIgnore] public ContractId<Network> NetworkId => new(NetworkName);
+    [MemberNotNullWhen(true, nameof(Username), nameof(Password), nameof(Host), nameof(NetworkName))]
+    public override bool Installed { get; init; }
+    
+    public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>("");
 }

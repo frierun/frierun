@@ -8,7 +8,7 @@ contracts:
   - type: "Container"
     imageName: "miniflux/miniflux:latest"
     env:
-      DATABASE_URL: "postgres://{{Postgresql::User}}:{{Postgresql::Password}}@{{Postgresql::Host}}/{{Postgresql::Database}}?sslmode=disable"
+      DATABASE_URL: "postgres://{{Postgresql::Username}}:{{Postgresql::Password}}@{{Postgresql::Host}}/{{Postgresql::Database}}?sslmode=disable"
       RUN_MIGRATIONS: "1"
       CREATE_ADMIN: "1"
       ADMIN_USERNAME: "admin"

@@ -16,12 +16,12 @@ contracts:
     dependsOn: [ "Container:database" ]
     
   - type: "HttpEndpoint"
-    containerName: "server"
+    container: "server"
     port: 2283
     
   - type: "Mount"
-    containerName: "server"
-    volumeName: "upload"
+    container: "server"
+    volume: "upload"
     path: "/usr/src/app/upload"
     
   - type: "Container"
@@ -29,8 +29,8 @@ contracts:
     imageName: "ghcr.io/immich-app/immich-machine-learning:release"
     
   - type: "Mount"
-    containerName: "machine-learning"
-    volumeName: "model-cache"
+    container: "machine-learning"
+    volume: "model-cache"
     path: "/cache"
     
   - type: "Container"
@@ -57,6 +57,6 @@ contracts:
       POSTGRES_INITDB_ARGS: "--data-checksums"
       
   - type: "Mount"
-    containerName: "database"
-    volumeName: "db"
+    container: "database"
+    volume: "db"
     path: "/var/lib/postgresql/data"

@@ -20,7 +20,7 @@ public class DomainsController : ControllerBase
                 handler => new DomainVariant(
                     handler.GetType().Name,
                     handler.Application?.Name,
-                    handler.Application?.Contracts.OfType<Parameter>().FirstOrDefault()?.Result?.Value
+                    handler.Application?.Contracts.OfType<Parameter>().FirstOrDefault()?.Value
                 )
             );
     }

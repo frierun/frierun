@@ -11,5 +11,5 @@ contracts:
     port: 8080
     
   - type: "Mount"
-    volumeName: "data"
+    volume: "data"
     path: "/app/user-data"

@@ -8,6 +8,6 @@ public record Substitute(
     [property: JsonIgnore] IReadOnlyDictionary<string, MatchCollection> Matches
 ) : Contract(OriginalId.ToString())
 {
-    public static readonly Regex InsertionRegex = new Regex(@"{{([^}]+)}}", RegexOptions.Compiled);
-    public static readonly Regex VariableRegex = new Regex(@"^(\w+):([\w/ ]*):(\w+)$", RegexOptions.Compiled);
+    public static readonly Regex InsertionRegex = new(@"{{([^}]+)}}", RegexOptions.Compiled);
+    public static readonly Regex VariableRegex = new(@"^(\w+):([\w/ ]*):(\w+)$", RegexOptions.Compiled);
 }

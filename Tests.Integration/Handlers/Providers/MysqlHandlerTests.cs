@@ -28,9 +28,9 @@ public class MysqlHandlerTests : TestWithDocker
 
         var container = application.Contracts.OfType<Container>().Single();
         Assert.True(container.Installed);
-        var database = application.Contracts.OfType<Mysql>().Single().Result;
-        Assert.NotNull(database);
-        Assert.Equal("db-client", database.User);
+        var database = application.Contracts.OfType<Mysql>().Single();
+        Assert.True(database.Installed);
+        Assert.Equal("db-client", database.Username);
         Assert.Equal("db-client", database.Database);
         Assert.Equal(packageName, database.Host);
         Assert.NotEmpty(database.Password);
@@ -43,7 +43,7 @@ public class MysqlHandlerTests : TestWithDocker
             container.ContainerName,
             [
                 "mysql",
-                "-u", database.User,
+                "-u", database.Username,
                 $"-p{database.Password}",
                 "-h", database.Host,
                 "-e", query,
@@ -80,9 +80,9 @@ public class MysqlHandlerTests : TestWithDocker
 
         var container = application.Contracts.OfType<Container>().Single();
         Assert.True(container.Installed);
-        var database = application.Contracts.OfType<Mysql>().Single().Result;
-        Assert.NotNull(database);
-        Assert.Equal("root", database.User);
+        var database = application.Contracts.OfType<Mysql>().Single();
+        Assert.True(database.Installed);
+        Assert.Equal("root", database.Username);
         Assert.Null(database.Database);
         Assert.Equal(packageName, database.Host);
         Assert.NotEmpty(database.Password);
@@ -94,7 +94,7 @@ public class MysqlHandlerTests : TestWithDocker
             container.ContainerName,
             [
                 "mysql",
-                "-u", database.User,
+                "-u", database.Username,
                 $"-p{database.Password}",
                 "-h", database.Host,
                 "-e", query

@@ -15,14 +15,14 @@ public class FileHandler(Application application, DockerService dockerService) :
             contract with
             {
                 Handler = this,
-                DependsOn = contract.DependsOn.Append(contract.VolumeId)
+                DependsOn = contract.DependsOn.Append(contract.Volume)
             }
         );
     }
 
     public File Install(File contract, ExecutionPlan plan)
     {
-        var volume = plan.GetResource(contract.VolumeId);
+        var volume = plan.GetResource(contract.Volume);
         Mount? mount = null;
         if (volume is DockerVolume dockerVolume)
         {

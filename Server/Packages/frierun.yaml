@@ -9,5 +9,5 @@ contracts:
     port: 8080
     
   - type: "Mount"
-    volumeName: "config"
+    volume: "config"
     path: "/App/Frierun"

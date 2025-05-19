@@ -9,6 +9,6 @@ import type { IHandlerLazy } from "./iHandlerLazy";
 export interface Contract {
   type: string;
   name: string;
-  installed?: boolean;
   handler?: IHandlerLazy;
+  installed?: boolean;
 }

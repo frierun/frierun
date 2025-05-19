@@ -12,14 +12,14 @@ contracts:
     port: 8096
     
   - type: "Mount"
-    volumeName: "config"
+    volume: "config"
     path: "/config"
     
   - type: "Mount"
-    volumeName: "cache"
+    volume: "cache"
     path: "/cache"
     
   - type: "Mount"
-    volumeName: "media"
+    volume: "media"
     path: "/media"
     readOnly: true

@@ -11,5 +11,5 @@ contracts:
     port: 80
     
   - type: "Mount"
-    volumeName: "data"
+    volume: "data"
     path: "/data"

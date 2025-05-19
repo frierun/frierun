@@ -28,25 +28,27 @@ public class TraefikHttpEndpointHandler(Application application)
             contract with
             {
                 Handler = this,
-                DependsOn = contract.DependsOn.Append(new Network("")).Append(contract.DomainId),
-                DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
+                DependsOn = contract.DependsOn.Append(new Network("")).Append(contract.Domain),
+                DependencyOf = contract.DependencyOf.Append(contract.Container),
             }
         );
     }
 
     public HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
     {
-        var domainResource = plan.GetResource<ResolvedDomain>(contract.DomainId);
-        var domain = domainResource.Value;
+        var domainContract = plan.GetContract(contract.Domain);
+        Debug.Assert(domainContract.Installed);
+        var domain = domainContract.Value;
         var subdomain = domain.Split('.')[0];
 
-        var containerContract = plan.GetContract(contract.ContainerId);
-        var network = plan.GetResource<DockerNetwork>(containerContract.NetworkId);
+        var containerContract = plan.GetContract(contract.Container);
+        var network = plan.GetContract(containerContract.Network);
+        Debug.Assert(network.Installed);
 
-        _container.AttachNetwork(network.Name);
+        _container.AttachNetwork(network.NetworkName);
 
         string? certResolver = null;
-        if (!domainResource.IsInternal)
+        if (domainContract.IsInternal == false)
         {
             if (_webPort == 80)
             {
@@ -88,7 +90,7 @@ public class TraefikHttpEndpointHandler(Application application)
             Result = new TraefikHttpEndpoint
             {
                 Url = url,
-                NetworkName = network.Name
+                NetworkName = network.NetworkName
             }
         };
     }

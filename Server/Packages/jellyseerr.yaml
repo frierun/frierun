@@ -15,5 +15,5 @@ contracts:
     port: 5055
     
   - type: "Mount"
-    volumeName: "config"
+    volume: "config"
     path: "/app/config"

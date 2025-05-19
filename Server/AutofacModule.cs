@@ -42,7 +42,6 @@ public class AutofacModule : Module
                                 var path = application.Contracts
                                     .OfType<Parameter>()
                                     .First(parameter => parameter.Name == "Path")
-                                    .Result
                                     ?.Value ?? "";
                                 
                                 var configuration = path == "" 

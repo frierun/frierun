@@ -11,7 +11,7 @@ public record Package(
     IReadOnlyList<string>? Tags = null,
     IEnumerable<Contract>? Contracts = null,
     Application? Result = null
-) : Contract(Name), IHasStrings, IHasResult<Application>
+) : Contract(Name), IHasStrings
 {
     public IReadOnlyList<string> Tags { get; init; } = Tags ?? Array.Empty<string>();
     public IEnumerable<Contract> Contracts { get; init; } = Contracts ?? Array.Empty<Contract>();

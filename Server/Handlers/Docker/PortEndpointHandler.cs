@@ -26,14 +26,14 @@ public class PortEndpointHandler(Application application, State state) : IHandle
             {
                 Handler = this,
                 DestinationPort = port,
-                DependencyOf = contract.DependencyOf.Append(contract.ContainerId),
+                DependencyOf = contract.DependencyOf.Append(contract.Container),
             }
         );
     }
 
     public PortEndpoint Install(PortEndpoint contract, ExecutionPlan plan)
     {
-        var containerContract = plan.GetContract(contract.ContainerId);
+        var containerContract = plan.GetContract(contract.Container);
 
         var externalPort = contract.DestinationPort;
         var internalPort = contract.Port;

@@ -21,7 +21,7 @@ contracts:
               DB_ENGINE: "postgres"
               POSTGRES_SERVER: "{{Postgresql::Host}}"
               POSTGRES_DB: "{{Postgresql::Database}}"
-              POSTGRES_USER: "{{Postgresql::User}}"
+              POSTGRES_USER: "{{Postgresql::Username}}"
               POSTGRES_PASSWORD: "{{Postgresql::Password}}"
       - name: "SQLite"
         contracts:
@@ -37,5 +37,5 @@ contracts:
     port: 9000
     
   - type: "Mount"
-    volumeName: "data"
+    volume: "data"
     path: "/app/data"

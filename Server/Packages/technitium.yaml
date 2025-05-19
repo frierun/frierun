@@ -23,5 +23,5 @@ contracts:
     protocol: "udp"
     
   - type: "Mount"
-    volumeName: "config"
+    volume: "config"
     path: "/etc/dns"

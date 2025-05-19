@@ -15,7 +15,7 @@ contracts:
               DB_TYPE: "postgresdb"
               DB_POSTGRESDB_HOST: "{{Postgresql::Host}}"
               DB_POSTGRESDB_DATABASE: "{{Postgresql::Database}}"
-              DB_POSTGRESDB_USER: "{{Postgresql::User}}"
+              DB_POSTGRESDB_USER: "{{Postgresql::Username}}"
               DB_POSTGRESDB_PASSWORD: "{{Postgresql::Password}}"
       - name: "SQLite"
         contracts:
@@ -26,5 +26,5 @@ contracts:
     port: 5678
     
   - type: "Mount"
-    volumeName: "data"
+    volume: "data"
     path: "/home/node/.n8n"

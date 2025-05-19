@@ -23,9 +23,9 @@ contracts:
     protocol: "udp"
     
   - type: "Mount"
-    volumeName: "etc-pihole"
+    volume: "etc-pihole"
     path: "/etc/pihole"
     
   - type: "Mount"
-    volumeName: "etc-dnsmasq"
+    volume: "etc-dnsmasq"
     path: "/etc/dnsmasq.d"

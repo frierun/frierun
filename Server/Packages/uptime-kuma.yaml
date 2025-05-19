@@ -11,5 +11,5 @@ contracts:
     port: 3001
     
   - type: "Mount"
-    volumeName: "data"
+    volume: "data"
     path: "/app/data"

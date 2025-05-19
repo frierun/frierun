@@ -12,5 +12,5 @@ export type PortEndpointAllOf = {
   port: number;
   destinationPort: number;
   result?: DockerPortEndpoint;
-  containerName: string;
+  container: string;
 };

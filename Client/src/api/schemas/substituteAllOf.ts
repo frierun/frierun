@@ -4,8 +4,7 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { ContractId } from "./contractId";
 
 export type SubstituteAllOf = {
-  originalId: ContractId;
+  originalId: string;
 };

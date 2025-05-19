@@ -7,17 +7,17 @@ type Props = {
 }
 
 export default function SelectorForm({contract, updateContract}: Props) {
-    const [value, setValue] = useState(contract.selectedOption ?? '');
+    const [value, setValue] = useState(contract.value ?? '');
 
     useEffect(() => {
-        setValue(contract.selectedOption ?? '');
+        setValue(contract.value ?? '');
     }, [contract]);
 
     const updateValue = (value: string) => {
         setValue(value);
         updateContract({
             ...contract,
-            selectedOption: value
+            value: value
         });
     }
 

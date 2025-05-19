@@ -13,9 +13,9 @@ contracts:
     port: 8096
     
   - type: "Mount"
-    volumeName: "media"
+    volume: "media"
     path: "/mnt/media"
     
   - type: "Mount"
-    volumeName: "config"
+    volume: "config"
     path: "/config"

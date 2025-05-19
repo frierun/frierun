@@ -13,7 +13,7 @@ type Props = {
 const findDomain = (contract: HttpEndpoint, contracts: GetPackagesIdPlan200Item[]) => {
     const domainContract = contracts
         .filter(contract => contract.type === 'Domain')
-        .find(domain => domain.name === contract.name);
+        .find(domain => domain.name === contract.domain);
 
     if (!domainContract) {
         return {
@@ -24,7 +24,7 @@ const findDomain = (contract: HttpEndpoint, contracts: GetPackagesIdPlan200Item[
     return {
         typeName: domainContract.handler?.typeName ?? '',
         applicationName: domainContract.handler?.applicationName,
-        subdomain: domainContract.subdomain
+        domain: domainContract.value
     }
 }
 
@@ -40,7 +40,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
 
         setPort(contracts
             .filter(contract => contract.type === 'PortEndpoint')
-            .find(port => port.containerName === contract.containerName && port.port === contract.port)
+            .find(port => port.container === contract.container && port.port === contract.port)
             ?.destinationPort ?? defaultPort)
         setHandlerType(contract.handler?.typeName ?? 'PortHttpEndpointHandler');
     }, [contract, contracts]);
@@ -67,7 +67,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
             {
                 type: 'Domain',
                 name: contract.name,
-                subdomain: domain.subdomain,
+                value: domain.domain,
                 handler: {
                     typeName: domain.typeName,
                     applicationName: domain.applicationName
@@ -91,9 +91,9 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
             },
             {
                 type: 'PortEndpoint',
-                name: `${contract.containerName}:${contract.port.toString()}/tcp`,
+                name: `${contract.container}:${contract.port.toString()}/tcp`,
                 protocol: 'Tcp',
-                containerName: contract.containerName,
+                container: contract.container,
                 port: contract.port,
                 destinationPort: port,
             }
@@ -104,7 +104,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
         <div>
             <div className={"my-1.5"}>
                 <label className={"inline-block w-48"}>Http endpoint to port </label>{contract.port}
-                {contract.containerName && ` in container ${contract.containerName}`}
+                {contract.container && ` in container ${contract.container}`}
             </div>
             {hasTraefik && (
                 <fieldset className={"flex gap-4"}>

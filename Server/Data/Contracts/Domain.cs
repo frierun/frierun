@@ -1,9 +1,13 @@
-﻿namespace Frierun.Server.Data;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Frierun.Server.Data;
 
 public record Domain(
     string? Name = null,
-    string? Subdomain = null,
-    ResolvedDomain? Result = null
-) : Contract(Name ?? ""), IHasResult<ResolvedDomain>
+    string? Value = null,
+    bool? IsInternal = null
+) : Contract(Name ?? "")
 {
+    [MemberNotNullWhen(true, nameof(Value), nameof(IsInternal))]
+    public override bool Installed { get; init; }    
 }

@@ -1,9 +1,7 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Frierun.Server.Data;
+﻿namespace Frierun.Server.Data;
 
 
-public class Application : Resource
+public class Application 
 {
     public required string Name { get; init; }
     public Package? Package { get; init; }

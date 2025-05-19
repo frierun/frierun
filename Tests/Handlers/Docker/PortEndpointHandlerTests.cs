@@ -14,7 +14,7 @@ public class PortEndpointHandlerTests : BaseTests
         List<Contract> contracts =
         [
             container,
-            Factory<PortEndpoint>().Generate() with { ContainerName = container.Name }
+            Factory<PortEndpoint>().Generate() with { Container = (ContractId<Container>)container.Id }
         ];
         if (reverseOrder)
         {

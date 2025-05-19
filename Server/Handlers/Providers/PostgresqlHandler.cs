@@ -12,9 +12,9 @@ public class PostgresqlHandler(
 {
     private readonly Container _container = application.Contracts.OfType<Container>().Single();
 
-    private readonly string _rootPassword = application.Contracts.OfType<Password>().Single().Result?.Value ??
+    private readonly string _rootPassword = application.Contracts.OfType<Password>().Single().Value ??
                                             throw new Exception("Root password not found");
-    
+
     public Application Application => application;
 
     public IEnumerable<ContractInitializeResult> Initialize(
@@ -22,22 +22,50 @@ public class PostgresqlHandler(
         string prefix
     )
     {
-        var baseName = contract.DatabaseName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
+        if (contract.Admin)
+        {
+            if (contract.Username != null && contract.Username != "postgres")
+            {
+                yield break;
+            }
+
+            if (contract.Password != null && contract.Password != _rootPassword)
+            {
+                yield break;
+            }
+            
+            yield return new ContractInitializeResult(
+                contract with
+                {
+                    Username = "postgres",
+                    Password = _rootPassword,
+                    Handler = this,
+                    DependsOn = contract.DependsOn.Append(contract.Network)
+                }
+            );
+        }
+
+        var baseName = contract.Database ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
 
         var count = 1;
-        var name = baseName;
-        while (state.Contracts.OfType<Postgresql>().Any(c => c.Result?.Database == name))
+        var database = baseName;
+        while (state.Contracts.OfType<Postgresql>().Any(c => c.Database == database))
         {
             count++;
-            name = $"{baseName}{count}";
+            database = $"{baseName}{count}";
         }
 
         yield return new ContractInitializeResult(
             contract with
             {
                 Handler = this,
-                DatabaseName = name,
-                DependsOn = contract.DependsOn.Append(contract.NetworkId)
+                Database = database,
+                Username = contract.Username ?? database,
+                Password = contract.Password ?? RandomNumberGenerator.GetString(
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+                    16
+                ),
+                DependsOn = contract.DependsOn.Append(contract.Network)
             }
         );
     }
@@ -45,72 +73,70 @@ public class PostgresqlHandler(
     public Postgresql Install(Postgresql contract, ExecutionPlan plan)
     {
         Debug.Assert(_container.Installed);
-        
-        var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
-        _container.AttachNetwork(network.Name);
+        Debug.Assert(contract.Username != null);
+        Debug.Assert(contract.Password != null);
+
+        var network = plan.GetContract(contract.Network);
+        Debug.Assert(network.Installed);
+
+        if (contract.Host != null && contract.Host != _container.ContainerName)
+        {
+            throw new Exception("Host cannot be set");
+        }
+
+        if (contract.NetworkName != null && contract.NetworkName != network.NetworkName)
+        {
+            throw new Exception("NetworkName cannot be set");
+        }
+
+        _container.AttachNetwork(network.NetworkName);
 
         if (contract.Admin)
         {
             return contract with
             {
-                Result = new PostgresqlDatabase
-                {
-                    User = "postgres",
-                    Password = _rootPassword,
-                    Host = _container.ContainerName,
-                    NetworkName = network.Name
-                }
+                Host = _container.ContainerName,
+                NetworkName = network.NetworkName
             };
         }
 
-        var name = contract.DatabaseName;
-        var password = RandomNumberGenerator.GetString(
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
-            16
-        );
+        Debug.Assert(contract.Database != null);
 
-        if (string.IsNullOrEmpty(name))
+        if (contract.Username == "postgres")
         {
-            throw new Exception("Empty name");
+            throw new Exception("Username cannot be root");
         }
 
         RunSql(
             [
-                $"CREATE DATABASE \"{name}\"",
-                $"CREATE USER \"{name}\" WITH ENCRYPTED PASSWORD '{password}'",
-                $"ALTER DATABASE \"{name}\" OWNER TO \"{name}\""
+                $"CREATE DATABASE \"{contract.Database}\"",
+                $"CREATE USER \"{contract.Username}\" WITH ENCRYPTED PASSWORD '{contract.Password}'",
+                $"ALTER DATABASE \"{contract.Database}\" OWNER TO \"{contract.Username}\""
             ]
         );
 
         return contract with
         {
-            Result = new PostgresqlDatabase
-            {
-                User = name,
-                Password = password,
-                Database = name,
-                Host = _container.ContainerName,
-                NetworkName = network.Name
-            }
+            Host = _container.ContainerName,
+            NetworkName = network.NetworkName
         };
     }
 
     void IHandler<Postgresql>.Uninstall(Postgresql contract)
     {
-        var resource = contract.Result;
-        Debug.Assert(resource != null);
-        
-        if (resource.User != "postgres")
+        Debug.Assert(contract.Installed);
+
+        if (!contract.Admin)
         {
             RunSql(
                 [
-                    $"DROP DATABASE \"{resource.Database}\"",
-                    $"DROP USER \"{resource.User}\""
+                    $"DROP DATABASE \"{contract.Database}\"",
+                    $"DROP USER \"{contract.Username}\""
                 ]
             );
         }
 
-        _container.DetachNetwork(resource.NetworkName);
+        _container.DetachNetwork(contract.NetworkName);
     }
 
     /// <summary>

@@ -8,22 +8,35 @@ public class StaticDomainHandler(State state, Application application)
     private readonly string _domainName = application.Contracts
         .OfType<Parameter>()
         .First(parameter => parameter.Name == "Domain")
-        .Result
-        ?.Value ?? "";
+        .Value ?? "";
 
     private readonly bool _isInternal = application.Contracts
         .OfType<Selector>()
         .First(parameter => parameter.Name == "Internal")
-        .Result
-        ?.Value == "Yes";
+        .Value == "Yes";
 
     public Application Application => application;
 
     public IEnumerable<ContractInitializeResult> Initialize(Domain contract, string prefix)
     {
-        if (contract.Subdomain != null && !IsSubdomainExist(contract.Subdomain))
+        if (contract.IsInternal != null && contract.IsInternal != _isInternal)
         {
-            yield return new ContractInitializeResult(contract with { Handler = this });
+            // Can't fulfil the request
+            yield break;
+        }
+        
+        if (contract.Value != null)
+        {
+            if (contract.Value != _domainName && !contract.Value.EndsWith($".{_domainName}"))
+            {
+                // Can't fulfil the request
+                yield break;
+            }
+
+            if (!IsDomainExist(contract.Value))
+            {
+                yield return new ContractInitializeResult(contract with { Handler = this, IsInternal = _isInternal});
+            }
             yield break;
         }
 
@@ -34,35 +47,25 @@ public class StaticDomainHandler(State state, Application application)
             prefix = $"{prefix}-{contract.Name}";
         }
 
-        while (IsSubdomainExist(subdomain))
+        var domain = $"{subdomain}.{_domainName}";
+
+        while (IsDomainExist(domain))
         {
             count++;
             subdomain = $"{prefix}{(count == 1 ? "" : count.ToString())}";
+            domain = $"{subdomain}.{_domainName}";
         }
 
         yield return new ContractInitializeResult(
-            contract with { Handler = this, Subdomain = subdomain }
+            contract with { Handler = this, Value = domain, IsInternal = _isInternal}
         );
     }
 
     /// <summary>
     /// Checks if subdomain is already in use
     /// </summary>
-    private bool IsSubdomainExist(string subdomain)
+    private bool IsDomainExist(string domain)
     {
-        var fullDomain = subdomain == "" ? _domainName : $"{subdomain}.{_domainName}";
-        return state.Contracts.OfType<Domain>().Any(c => c.Result?.Value == fullDomain);
-    }
-
-    public Domain Install(Domain contract, ExecutionPlan plan)
-    {
-        var domain = string.IsNullOrEmpty(contract.Subdomain)
-            ? _domainName
-            : $"{contract.Subdomain}.{_domainName}";
-
-        return contract with
-        {
-            Result = new ResolvedDomain { Value = domain, IsInternal = _isInternal }
-        };
+        return state.Contracts.OfType<Domain>().Any(c => c.Value == domain);
     }
 }

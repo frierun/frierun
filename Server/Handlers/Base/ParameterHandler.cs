@@ -9,15 +9,11 @@ public class ParameterHandler : IHandler<Parameter>
         var value = contract.Value ?? contract.DefaultValue ?? "";
 
         yield return new ContractInitializeResult(
-            contract with { Value = value, Handler = this }
+            contract with
+            {
+                Value = value, 
+                Handler = this
+            }
         );
-    }
-
-    public Parameter Install(Parameter contract, ExecutionPlan plan)
-    {
-        return contract with
-        {
-            Result = new ResolvedParameter { Name = contract.Name, Value = contract.Value ?? "" }
-        };
     }
 }

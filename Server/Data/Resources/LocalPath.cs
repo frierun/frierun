@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Frierun.Server.Data;
+﻿namespace Frierun.Server.Data;
 
 public class LocalPath : Resource
 {

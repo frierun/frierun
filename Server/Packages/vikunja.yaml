@@ -15,7 +15,7 @@ contracts:
               VIKUNJA_DATABASE_TYPE: "mysql"
               VIKUNJA_DATABASE_HOST: "{{Mysql::Host}}"
               VIKUNJA_DATABASE_DATABASE: "{{Mysql::Database}}"
-              VIKUNJA_DATABASE_USER: "{{Mysql::User}}"
+              VIKUNJA_DATABASE_USER: "{{Mysql::Username}}"
               VIKUNJA_DATABASE_PASSWORD: "{{Mysql::Password}}"
       - name: "PostgreSQL"
         contracts:
@@ -25,7 +25,7 @@ contracts:
               VIKUNJA_DATABASE_TYPE: "postgres"
               VIKUNJA_DATABASE_HOST: "{{Postgresql::Host}}"
               VIKUNJA_DATABASE_DATABASE: "{{Postgresql::Database}}"
-              VIKUNJA_DATABASE_USER: "{{Postgresql::User}}"
+              VIKUNJA_DATABASE_USER: "{{Postgresql::Username}}"
               VIKUNJA_DATABASE_PASSWORD: "{{Postgresql::Password}}"
       - name: "SQLite"
         contracts:
@@ -34,10 +34,10 @@ contracts:
             env:
               VIKUNJA_DATABASE_TYPE: "sqlite"
           - type: "Mount"
-            volumeName: "db"
+            volume: "db"
             path: "/db"
           - type: "File"
-            volumeName: "db"
+            volume: "db"
             path: ""
             owner: 1000
             group: 1000
@@ -47,11 +47,11 @@ contracts:
     port: 3456
     
   - type: "Mount"
-    volumeName: "files"
+    volume: "files"
     path: "/app/vikunja/files"
     
   - type: "File"
-    volumeName: "files"
+    volume: "files"
     path: ""
     owner: 1000
     group: 1000

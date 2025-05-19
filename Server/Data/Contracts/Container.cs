@@ -9,16 +9,24 @@ namespace Frierun.Server.Data;
 public record Container(
     string? Name = null,
     string? ContainerName = null,
+    string? NetworkName = null,
     string? ImageName = null,
     bool RequireDocker = false,
-    string? NetworkName = null,
+    ContractId<Network>? Network = null,
     IReadOnlyList<string>? Command = null,
     IReadOnlyDictionary<string, string>? Env = null,
     IEnumerable<Action<CreateContainerParameters>>? Configure = null
 ) : Contract(Name ?? ""), IHasStrings
 {
-    [MemberNotNullWhen(true, nameof(ContainerName))]
+    [MemberNotNullWhen(true, nameof(ContainerName), nameof(NetworkName))]
     public override bool Installed { get; init; }
+
+    [JsonIgnore]
+    public new IContainerHandler? Handler
+    {
+        get => (IContainerHandler?)LazyHandler.Value;
+        init => LazyHandler = new Lazy<IHandler?>(value);
+    }
     
     public IReadOnlyList<string> Command { get; init; } = Command ?? Array.Empty<string>();
     public IReadOnlyDictionary<string, string> Env { get; init; } = Env ?? new Dictionary<string, string>();
@@ -31,15 +39,7 @@ public record Container(
         Configure ?? Array.Empty<Action<CreateContainerParameters>>();
     
     
-    [JsonIgnore]
-    public new IContainerHandler? Handler
-    {
-        get => (IContainerHandler?)LazyHandler.Value;
-        init => LazyHandler = new Lazy<IHandler?>(value);
-    }
-    
-    public string NetworkName { get; init; } = NetworkName ?? "";
-    [JsonIgnore] public ContractId<Network> NetworkId => new(NetworkName);
+    public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>("");
     
     Contract IHasStrings.ApplyStringDecorator(Func<string, string> decorator)
     {

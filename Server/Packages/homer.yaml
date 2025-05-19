@@ -12,5 +12,5 @@ contracts:
     port: 8080
     
   - type: "Mount"
-    volumeName: "assets"
+    volume: "assets"
     path: "/www/assets"

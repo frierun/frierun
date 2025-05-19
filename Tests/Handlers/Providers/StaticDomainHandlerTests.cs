@@ -12,8 +12,8 @@ public class StaticDomainHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var domain = application.Contracts.OfType<Domain>().Single().Result;
-        Assert.NotNull(domain);
+        var domain = application.Contracts.OfType<Domain>().Single();
+        Assert.True(domain.Installed);
         Assert.True(domain.IsInternal);
     }
 
@@ -22,14 +22,14 @@ public class StaticDomainHandlerTests : BaseTests
     {
         InstallPackage(
             "static-domain",
-            [new Selector("Internal", SelectedOption: "No")]
+            [new Selector("Internal", Value: "No")]
         );
         var package = Factory<Package>().Generate() with { Contracts = [new Domain()] };
 
         var application = InstallPackage(package);
 
-        var domain = application.Contracts.OfType<Domain>().Single().Result;
-        Assert.NotNull(domain);
+        var domain = application.Contracts.OfType<Domain>().Single();
+        Assert.True(domain.Installed);
         Assert.False(domain.IsInternal);
     }
 }

@@ -16,5 +16,5 @@ contracts:
     port: 3000
     
   - type: "Mount"
-    volumeName: "config"
+    volume: "config"
     path: "/var/lib/grafana"

@@ -18,13 +18,13 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     public void Install_ContainerWithHttpEndpoint_InstallTraefikFirst(bool reverseOrder)
     {
         InstallPackage("static-domain");
-        var providerApplication = InstallPackage("traefik");
+        InstallPackage("traefik");
 
         var container = Factory<Container>().Generate();
         List<Contract> contracts =
         [
             container,
-            Factory<HttpEndpoint>().Generate() with { ContainerName = container.Name }
+            Factory<HttpEndpoint>().Generate() with { Container = (ContractId<Container>)container.Id }
         ];
         if (reverseOrder)
         {
@@ -64,7 +64,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage(
             "static-domain",
-            [new Selector("Internal", SelectedOption: "No")]
+            [new Selector("Internal", Value: "No")]
         );
         InstallPackage("traefik");
         var package = Factory<Package>().Generate() with { Contracts = [Factory<HttpEndpoint>().Generate()] };
@@ -83,7 +83,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage(
             "static-domain",
-            [new Selector("Internal", SelectedOption: "No")]
+            [new Selector("Internal", Value: "No")]
         );
         InstallPackage(
             "traefik",
@@ -108,7 +108,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage(
             "static-domain",
-            [new Selector("Internal", SelectedOption: "No")]
+            [new Selector("Internal", Value: "No")]
         );
         InstallPackage("traefik");
         var package = Factory<Package>().Generate() with { Contracts = Factory<HttpEndpoint>().Generate(2) };
@@ -135,7 +135,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage(
             "static-domain",
-            [new Selector("Internal", SelectedOption: "No")]
+            [new Selector("Internal", Value: "No")]
         );
         InstallPackage("traefik");
         var package = Factory<Package>().Generate() with { Contracts = Factory<HttpEndpoint>().Generate(2) };

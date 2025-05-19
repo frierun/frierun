@@ -10,5 +10,6 @@ export type HttpEndpointAllOf = {
   port: number;
   /** @nullable */
   result?: HttpEndpointAllOfResult;
-  containerName: string;
+  container: string;
+  domain: string;
 };

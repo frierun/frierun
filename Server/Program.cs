@@ -1,6 +1,7 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Frierun.Server;
+using Frierun.Server.Data;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,11 @@ builder.Services.AddSwaggerGen(
         options.UseAllOfForInheritance();
         options.EnableAnnotations(true, true);
         
+        
+        options.MapType(typeof(ContractId<>), () => new OpenApiSchema { Type = "string" });
+        options.MapType(typeof(ContractId), () => new OpenApiSchema { Type = "string" });
         options.SchemaFilter<LazyHandlerSchemaFilter>();
+        options.SchemaFilter<InstalledNotRequiredSchemaFilter>();
     }
 );
 builder.Services.AddAntiforgery(

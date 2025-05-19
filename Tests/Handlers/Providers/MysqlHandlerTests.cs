@@ -22,9 +22,9 @@ public class MysqlHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var database = application.Contracts.OfType<Mysql>().Single().Result;
-        Assert.NotNull(database);
-        Assert.Equal(package.Name, database.User);
+        var database = application.Contracts.OfType<Mysql>().Single();
+        Assert.True(database.Installed);
+        Assert.Equal(package.Name, database.Username);
         Assert.Equal(package.Name, database.Database);
         Assert.Contains(_providerApplication.Name, application.RequiredApplications);
         Assert.Equal(application.Name, database.NetworkName);

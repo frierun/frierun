@@ -5,16 +5,24 @@ namespace Frierun.Server.Handlers.Base;
 
 public class PasswordHandler : IHandler<Password>
 {
-    public Password Install(Password contract, ExecutionPlan plan)
+    public IEnumerable<ContractInitializeResult> Initialize(Password contract, string prefix)
     {
-        var password = RandomNumberGenerator.GetString(
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
-            16
-        );
-
-        return contract with
+        if (contract.Value != null)
         {
-            Result = new GeneratedPassword { Value = password }
-        };
+            yield return new ContractInitializeResult(
+                contract with { Handler = this }
+            );
+        }
+        else
+        {
+            yield return new ContractInitializeResult(contract with
+            {
+                Handler = this,
+                Value = RandomNumberGenerator.GetString(
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+                    16
+                )
+            });
+        }
     }
 }

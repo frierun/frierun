@@ -15,7 +15,6 @@ public class LazyHandlerSchemaFilter : ISchemaFilter
         {
             // Handler can be nullable
             schema.Required.Remove("handler");
-            schema.Required.Remove("installed");
             return;
         }
         

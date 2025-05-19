@@ -17,15 +17,15 @@ contracts:
     port: 8989
     
   - type: "Mount"
-    volumeName: "config"
+    volume: "config"
     path: "/config"
     
   - type: "Mount"
-    volumeName: "data"
+    volume: "data"
     path: "/data"
     
   - type: "File"
-    volumeName: "data"
+    volume: "data"
     path: ""
     owner: 1000
     group: 1000

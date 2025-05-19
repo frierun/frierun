@@ -12,5 +12,5 @@ contracts:
     port: 9000
     
   - type: "Mount"
-    volumeName: "data"
+    volume: "data"
     path: "/data"

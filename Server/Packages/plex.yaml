@@ -43,13 +43,13 @@ contracts:
     protocol: "udp"
 
   - type: "Mount"
-    volumeName: "database"
+    volume: "database"
     path: "/config"
 
   - type: "Mount"
-    volumeName: "transcode"
+    volume: "transcode"
     path: "/transcode"
 
   - type: "Mount"
-    volumeName: "media"
+    volume: "media"
     path: "/data"
