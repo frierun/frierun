@@ -85,18 +85,23 @@ public class SubstituteHandler(ContractRegistry contractRegistry) : IHandler<Sub
 
         var contractType = contractRegistry.GetContractType(contractTypeName);
         var contractId = ContractId.Create(contractType, contractName);
-        var resource = plan.GetResource(contractId);
-        if (resource == null)
+        
+        object result;
+        if (contractType.IsAssignableTo(typeof(IHasResult)))
         {
-            throw new Exception($"Resource not found: {contractId}");
+            result = plan.GetResource(contractId);
+        }
+        else
+        {
+            result = plan.GetContract(contractId);
         }
 
-        var propertyInfo = resource.GetType().GetProperty(propertyName);
+        var propertyInfo = result.GetType().GetProperty(propertyName);
         if (propertyInfo == null)
         {
             throw new Exception($"Property not found: {propertyName} in {contractType}");
         }
 
-        return propertyInfo.GetValue(resource)?.ToString() ?? "";
+        return propertyInfo.GetValue(result)?.ToString() ?? "";
     }
 }
