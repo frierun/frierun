@@ -7,9 +7,9 @@ namespace Frierun.Server.Handlers;
 public class MysqlHandler(Application application, State state)
     : IHandler<Mysql>
 {
-    private readonly Container _container = application.Contracts.OfType<Container>().First();
+    private readonly Container _container = application.Contracts.OfType<Container>().Single();
 
-    private readonly string _rootPassword = application.Contracts.OfType<Password>().First().Result?.Value ??
+    private readonly string _rootPassword = application.Contracts.OfType<Password>().Single().Result?.Value ??
                                             throw new Exception("Root password not found");
 
     public Application Application => application;
@@ -38,9 +38,10 @@ public class MysqlHandler(Application application, State state)
 
     public Mysql Install(Mysql contract, ExecutionPlan plan)
     {
+        Debug.Assert(_container.Installed);
+        
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
         _container.AttachNetwork(network.Name);
-        Debug.Assert(_container.Result != null);
 
         if (contract.Admin)
         {
@@ -50,7 +51,7 @@ public class MysqlHandler(Application application, State state)
                 {
                     User = "root",
                     Password = _rootPassword,
-                    Host = _container.Result.Name,
+                    Host = _container.ContainerName,
                     NetworkName = network.Name
                 }
             };
@@ -84,7 +85,7 @@ public class MysqlHandler(Application application, State state)
                 User = name,
                 Password = password,
                 Database = name,
-                Host = _container.Result.Name,
+                Host = _container.ContainerName,
                 NetworkName = network.Name
             }
         };

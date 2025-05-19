@@ -25,10 +25,10 @@ public class FileHandlerTests : TestWithDocker
         var volume = application.Contracts.OfType<Volume>().Single().Result;
         Assert.NotNull(volume);
         Assert.IsType<DockerVolume>(volume);
-        var container = application.Contracts.OfType<Container>().Single().Result;
-        Assert.NotNull(container);
+        var container = application.Contracts.OfType<Container>().Single();
+        Assert.True(container.Installed);
 
-        await checkContainer(container.Name);
+        await checkContainer(container.ContainerName);
 
         UninstallApplication(application);
     }

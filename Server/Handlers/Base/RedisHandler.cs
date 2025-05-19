@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Data;
+﻿using System.Diagnostics;
+using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
@@ -16,7 +17,8 @@ public class RedisHandler : IHandler<Redis>
                 new Container(
                     Name: contract.ContainerName,
                     ImageName: "redis:7",
-                    NetworkName: contract.NetworkName
+                    NetworkName: contract.NetworkName,
+                    ContainerName: contract.Host
                 ),
                 new Mount(
                     Path: "/data",
@@ -29,11 +31,13 @@ public class RedisHandler : IHandler<Redis>
 
     public Redis Install(Redis contract, ExecutionPlan plan)
     {
-        var container = plan.GetResource<DockerContainer>(contract.ContainerId);
-
+        var container = plan.GetContract(contract.ContainerId);
+        Debug.Assert(container.Installed);
+        Debug.Assert(contract.Host == null || contract.Host == container.ContainerName);
+        
         return contract with
         {
-            Result = new RedisDatabase { Host = container.Name }
+            Host = container.ContainerName
         };
     }
 }

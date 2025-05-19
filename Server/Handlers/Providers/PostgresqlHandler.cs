@@ -10,9 +10,9 @@ public class PostgresqlHandler(
     ILogger<PostgresqlHandler> logger)
     : IHandler<Postgresql>
 {
-    private readonly Container _container = application.Contracts.OfType<Container>().First();
+    private readonly Container _container = application.Contracts.OfType<Container>().Single();
 
-    private readonly string _rootPassword = application.Contracts.OfType<Password>().First().Result?.Value ??
+    private readonly string _rootPassword = application.Contracts.OfType<Password>().Single().Result?.Value ??
                                             throw new Exception("Root password not found");
     
     public Application Application => application;
@@ -44,10 +44,10 @@ public class PostgresqlHandler(
 
     public Postgresql Install(Postgresql contract, ExecutionPlan plan)
     {
+        Debug.Assert(_container.Installed);
+        
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
-
         _container.AttachNetwork(network.Name);
-        Debug.Assert(_container.Result != null);
 
         if (contract.Admin)
         {
@@ -57,7 +57,7 @@ public class PostgresqlHandler(
                 {
                     User = "postgres",
                     Password = _rootPassword,
-                    Host = _container.Result.Name,
+                    Host = _container.ContainerName,
                     NetworkName = network.Name
                 }
             };
@@ -89,7 +89,7 @@ public class PostgresqlHandler(
                 User = name,
                 Password = password,
                 Database = name,
-                Host = _container.Result.Name,
+                Host = _container.ContainerName,
                 NetworkName = network.Name
             }
         };

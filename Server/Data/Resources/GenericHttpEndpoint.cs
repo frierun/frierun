@@ -2,7 +2,7 @@
 
 namespace Frierun.Server.Data;
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(GenericHttpEndpoint), nameof(GenericHttpEndpoint))]
 [JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
 public class GenericHttpEndpoint : Resource

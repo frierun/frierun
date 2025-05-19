@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using Docker.DotNet.Models;
 using Frierun.Server.Handlers;
@@ -13,10 +14,12 @@ public record Container(
     string? NetworkName = null,
     IReadOnlyList<string>? Command = null,
     IReadOnlyDictionary<string, string>? Env = null,
-    IEnumerable<Action<CreateContainerParameters>>? Configure = null,
-    DockerContainer? Result = null
-) : Contract(Name ?? ""), IHasStrings, IHasResult<DockerContainer>
+    IEnumerable<Action<CreateContainerParameters>>? Configure = null
+) : Contract(Name ?? ""), IHasStrings
 {
+    [MemberNotNullWhen(true, nameof(ContainerName))]
+    public override bool Installed { get; init; }
+    
     public IReadOnlyList<string> Command { get; init; } = Command ?? Array.Empty<string>();
     public IReadOnlyDictionary<string, string> Env { get; init; } = Env ?? new Dictionary<string, string>();
     
@@ -47,6 +50,9 @@ public record Container(
         };
     }
     
+    /// <summary>
+    /// Attaches the container to a network.
+    /// </summary>
     public void AttachNetwork(string networkName)
     {
         Debug.Assert(Handler != null);
@@ -66,6 +72,9 @@ public record Container(
         }
     }
     
+    /// <summary>
+    /// Detaches container from a network.
+    /// </summary>
     public void DetachNetwork(string networkName)
     {
         Debug.Assert(Handler != null);
@@ -88,6 +97,9 @@ public record Container(
         Handler.DetachNetwork(this, networkName);
     }
     
+    /// <summary>
+    /// Executes a command in the container.
+    /// </summary>
     public Task<(string stdout, string stderr)> ExecInContainer(IList<string> command)
     {
         Debug.Assert(Handler != null);

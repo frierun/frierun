@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics;
+using System.Text.Json.Serialization;
 using Frierun.Server.Handlers;
 
 namespace Frierun.Server.Data;
@@ -45,6 +46,8 @@ public abstract record Contract(
         init => LazyHandler = new Lazy<IHandler?>(value);
     }
 
+    public virtual bool Installed { get; init; } = Installed;
+
     public virtual Contract With(Contract other)
     {
         throw new Exception("Not implemented");
@@ -52,6 +55,9 @@ public abstract record Contract(
 
     public static implicit operator ContractId(Contract contract) => contract.Id;
 
+    /// <summary>
+    /// Installs the contract using the handler.
+    /// </summary>
     public Contract Install(ExecutionPlan plan)
     {
         if (Handler == null)
@@ -59,11 +65,15 @@ public abstract record Contract(
             throw new Exception($"No handler for {Name}");
         }
 
-        return Handler.Install(this, plan) with {Installed = true};
+        return Handler.Install(this, plan) with { Installed = true };
     }
-    
+
+    /// <summary>
+    /// Uninstalls the contract
+    /// </summary>
     public void Uninstall()
     {
+        Debug.Assert(Installed, "Contract is not installed");
         Handler?.Uninstall(this);
-    }    
+    }
 }

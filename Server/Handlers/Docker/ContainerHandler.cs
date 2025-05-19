@@ -15,7 +15,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
 
         var count = 1;
         var name = baseName;
-        while (state.Contracts.OfType<Container>().Any(c => c.Result?.Name == name))
+        while (state.Contracts.OfType<Container>().Any(c => c.ContainerName == name))
         {
             count++;
             name = $"{baseName}{count}";
@@ -34,6 +34,8 @@ public class ContainerHandler(Application application, DockerService dockerServi
     public Container Install(Container contract, ExecutionPlan plan)
     {
         var network = plan.GetResource<DockerNetwork>(contract.NetworkId);
+        Debug.Assert(contract.ContainerName != null);
+        
         var dockerParameters = new CreateContainerParameters
         {
             Cmd = contract.Command.ToList(),
@@ -44,13 +46,13 @@ public class ContainerHandler(Application application, DockerService dockerServi
                 Mounts = new List<global::Docker.DotNet.Models.Mount>(),
                 PortBindings = new Dictionary<string, IList<PortBinding>>()
             },
-            Labels = new Dictionary<string, string>()
+            Labels = new Dictionary<string, string>
             {
                 ["com.docker.compose.project"] = network.Name,
                 ["com.docker.compose.service"] = contract.Name
             },
-            Name = contract.ContainerName!,
-            NetworkingConfig = new NetworkingConfig()
+            Name = contract.ContainerName,
+            NetworkingConfig = new NetworkingConfig
             {
                 EndpointsConfig = new Dictionary<string, EndpointSettings>
                 {
@@ -88,33 +90,30 @@ public class ContainerHandler(Application application, DockerService dockerServi
             throw new Exception("Failed to start container");
         }
 
-        return contract with
-        {
-            Result = new DockerContainer { Name = contract.ContainerName!, NetworkName = network.Name }
-        };
+        return contract;
     }
 
     void IHandler<Container>.Uninstall(Container container)
     {
-        Debug.Assert(container.Result != null);
-        dockerService.RemoveContainer(container.Result.Name).Wait();
+        Debug.Assert(container.Installed);
+        dockerService.RemoveContainer(container.ContainerName).Wait();
     }
 
     public void AttachNetwork(Container container, string networkName)
     {
-        Debug.Assert(container.Result != null);
-        dockerService.AttachNetwork(networkName, container.Result.Name).Wait();
+        Debug.Assert(container.Installed);
+        dockerService.AttachNetwork(networkName, container.ContainerName).Wait();
     }
 
     public void DetachNetwork(Container container, string networkName)
     {
-        Debug.Assert(container.Result != null);
-        dockerService.DetachNetwork(networkName, container.Result.Name).Wait();
+        Debug.Assert(container.Installed);
+        dockerService.DetachNetwork(networkName, container.ContainerName).Wait();
     }
 
     public Task<(string stdout, string stderr)> ExecInContainer(Container container, IList<string> command)
     {
-        Debug.Assert(container.Result != null);
-        return dockerService.ExecInContainer(container.Result.Name, command);
+        Debug.Assert(container.Installed);
+        return dockerService.ExecInContainer(container.ContainerName, command);
     }
 }

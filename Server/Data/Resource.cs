@@ -4,7 +4,6 @@ namespace Frierun.Server.Data;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(Application), nameof(Application))]
-[JsonDerivedType(typeof(DockerContainer), nameof(DockerContainer))]
 [JsonDerivedType(typeof(DockerNetwork), nameof(DockerNetwork))]
 [JsonDerivedType(typeof(DockerPortEndpoint), nameof(DockerPortEndpoint))]
 [JsonDerivedType(typeof(DockerVolume), nameof(DockerVolume))]
@@ -13,7 +12,6 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(LocalPath), nameof(LocalPath))]
 [JsonDerivedType(typeof(MysqlDatabase), nameof(MysqlDatabase))]
 [JsonDerivedType(typeof(PostgresqlDatabase), nameof(PostgresqlDatabase))]
-[JsonDerivedType(typeof(RedisDatabase), nameof(RedisDatabase))]
 [JsonDerivedType(typeof(ResolvedDomain), nameof(ResolvedDomain))]
 [JsonDerivedType(typeof(ResolvedParameter), nameof(ResolvedParameter))]
 [JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]

@@ -12,11 +12,11 @@ public class RedisHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var database = application.Contracts.OfType<Redis>().Single().Result;
-        Assert.NotNull(database);
+        var database = application.Contracts.OfType<Redis>().Single();
+        Assert.True(database.Installed);
 
-        var dbContainer = application.Contracts.OfType<Container>().Single().Result;
-        Assert.NotNull(dbContainer);
-        Assert.Equal(database.Host, dbContainer.Name);
+        var dbContainer = application.Contracts.OfType<Container>().Single();
+        Assert.True(dbContainer.Installed);
+        Assert.Equal(database.Host, dbContainer.ContainerName);
     }
 }

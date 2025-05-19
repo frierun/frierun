@@ -26,8 +26,8 @@ public class MysqlHandlerTests : TestWithDocker
         };
         var application = InstallPackage(package);
 
-        var container = application.Contracts.OfType<Container>().Single().Result;
-        Assert.NotNull(container);
+        var container = application.Contracts.OfType<Container>().Single();
+        Assert.True(container.Installed);
         var database = application.Contracts.OfType<Mysql>().Single().Result;
         Assert.NotNull(database);
         Assert.Equal("db-client", database.User);
@@ -40,7 +40,7 @@ public class MysqlHandlerTests : TestWithDocker
         var query =
             "CREATE TABLE Test (ID int);INSERT INTO Test VALUES (123);UPDATE Test SET ID = 2*ID;SELECT * FROM Test;";
         var result = await DockerService.ExecInContainer(
-            container.Name,
+            container.ContainerName,
             [
                 "mysql",
                 "-u", database.User,
@@ -78,8 +78,8 @@ public class MysqlHandlerTests : TestWithDocker
         };
         var application = InstallPackage(package);
 
-        var container = application.Contracts.OfType<Container>().Single().Result;
-        Assert.NotNull(container);
+        var container = application.Contracts.OfType<Container>().Single();
+        Assert.True(container.Installed);
         var database = application.Contracts.OfType<Mysql>().Single().Result;
         Assert.NotNull(database);
         Assert.Equal("root", database.User);
@@ -91,7 +91,7 @@ public class MysqlHandlerTests : TestWithDocker
         var query =
             "SHOW GRANTS";
         var result = await DockerService.ExecInContainer(
-            container.Name,
+            container.ContainerName,
             [
                 "mysql",
                 "-u", database.User,

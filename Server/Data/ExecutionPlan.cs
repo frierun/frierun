@@ -48,9 +48,6 @@ public class ExecutionPlan : IExecutionPlan
     /// </summary>
     public Contract GetContract(ContractId contractId)
     {
-        var contract = _contracts[contractId];
-        Debug.Assert(!contract.Installed);
-
         return _contracts[contractId];
     }
 

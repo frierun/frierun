@@ -1,13 +1,17 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace Frierun.Server.Data;
 
 public record Redis(
     string? Name = null,
     string? NetworkName = null,
-    RedisDatabase? Result = null
-) : Contract(Name ?? ""), IHasResult<RedisDatabase>
+    string? Host = null
+) : Contract(Name ?? "")
 {
+    [MemberNotNullWhen(true, nameof(Host))]
+    public override bool Installed { get; init; }
+    
     public string NetworkName { get; init; } = NetworkName ?? "";
     [JsonIgnore] public ContractId<Network> NetworkId => new(NetworkName);
 

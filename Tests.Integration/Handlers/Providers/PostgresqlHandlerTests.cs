@@ -24,8 +24,8 @@ public class PostgresqlHandlerTests : TestWithDocker
         };
         var application = InstallPackage(package);
 
-        var container = application.Contracts.OfType<Container>().Single().Result;
-        Assert.NotNull(container);
+        var container = application.Contracts.OfType<Container>().Single();
+        Assert.True(container.Installed);
         var database = application.Contracts.OfType<Postgresql>().Single().Result;
         Assert.NotNull(database);
         Assert.Equal("db-client", database.User);
@@ -37,7 +37,7 @@ public class PostgresqlHandlerTests : TestWithDocker
         var sql =
             "CREATE TABLE Test (col int);INSERT INTO Test VALUES (123);UPDATE Test SET col = 2*col;SELECT * FROM Test;";
         var result = await DockerService.ExecInContainer(
-            container.Name,
+            container.ContainerName,
             [
                 "psql",
                 $"postgresql://{database.User}:{database.Password}@{database.Host}/{database.Database}",
@@ -70,8 +70,8 @@ public class PostgresqlHandlerTests : TestWithDocker
         };
         var application = InstallPackage(package);
 
-        var container = application.Contracts.OfType<Container>().Single().Result;
-        Assert.NotNull(container);
+        var container = application.Contracts.OfType<Container>().Single();
+        Assert.True(container.Installed);
         var database = application.Contracts.OfType<Postgresql>().Single().Result;
         Assert.NotNull(database);
         Assert.Equal("postgres", database.User);
@@ -83,7 +83,7 @@ public class PostgresqlHandlerTests : TestWithDocker
         var sql =
             "SELECT CASE WHEN rolsuper='t' THEN 123+123 ELSE 123 END FROM pg_authid WHERE rolname=CURRENT_USER;";
         var (stdout, _) = await DockerService.ExecInContainer(
-            container.Name,
+            container.ContainerName,
             [
                 "psql",
                 $"postgresql://{database.User}:{database.Password}@{database.Host}/",
