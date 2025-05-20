@@ -21,9 +21,8 @@ import type {
 
 import type {
   GetPackagesIdPlan200Item,
-  GetPackagesIdPlan409,
+  HandlerExceptionResult,
   Package,
-  PostPackagesIdInstall409,
 } from "../schemas";
 
 import { customFetch } from "../../custom-fetch";
@@ -170,7 +169,7 @@ export type getPackagesIdPlanResponse404 = {
 };
 
 export type getPackagesIdPlanResponse409 = {
-  data: GetPackagesIdPlan409;
+  data: HandlerExceptionResult;
   status: 409;
 };
 
@@ -203,7 +202,7 @@ export const getGetPackagesIdPlanQueryKey = (id: string) => {
 
 export const getGetPackagesIdPlanQueryOptions = <
   TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
-  TError = void | GetPackagesIdPlan409,
+  TError = void | HandlerExceptionResult,
 >(
   id: string,
   options?: {
@@ -240,11 +239,11 @@ export const getGetPackagesIdPlanQueryOptions = <
 export type GetPackagesIdPlanQueryResult = NonNullable<
   Awaited<ReturnType<typeof getPackagesIdPlan>>
 >;
-export type GetPackagesIdPlanQueryError = void | GetPackagesIdPlan409;
+export type GetPackagesIdPlanQueryError = void | HandlerExceptionResult;
 
 export function useGetPackagesIdPlan<
   TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
-  TError = void | GetPackagesIdPlan409,
+  TError = void | HandlerExceptionResult,
 >(
   id: string,
   options: {
@@ -270,7 +269,7 @@ export function useGetPackagesIdPlan<
 };
 export function useGetPackagesIdPlan<
   TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
-  TError = void | GetPackagesIdPlan409,
+  TError = void | HandlerExceptionResult,
 >(
   id: string,
   options?: {
@@ -296,7 +295,7 @@ export function useGetPackagesIdPlan<
 };
 export function useGetPackagesIdPlan<
   TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
-  TError = void | GetPackagesIdPlan409,
+  TError = void | HandlerExceptionResult,
 >(
   id: string,
   options?: {
@@ -315,7 +314,7 @@ export function useGetPackagesIdPlan<
 
 export function useGetPackagesIdPlan<
   TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
-  TError = void | GetPackagesIdPlan409,
+  TError = void | HandlerExceptionResult,
 >(
   id: string,
   options?: {
@@ -353,7 +352,7 @@ export type postPackagesIdInstallResponse404 = {
 };
 
 export type postPackagesIdInstallResponse409 = {
-  data: PostPackagesIdInstall409;
+  data: HandlerExceptionResult;
   status: 409;
 };
 
@@ -388,7 +387,7 @@ export const postPackagesIdInstall = async (
 };
 
 export const getPostPackagesIdInstallMutationOptions = <
-  TError = void | PostPackagesIdInstall409,
+  TError = void | HandlerExceptionResult,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -429,11 +428,10 @@ export type PostPackagesIdInstallMutationResult = NonNullable<
   Awaited<ReturnType<typeof postPackagesIdInstall>>
 >;
 export type PostPackagesIdInstallMutationBody = Package;
-export type PostPackagesIdInstallMutationError =
-  void | PostPackagesIdInstall409;
+export type PostPackagesIdInstallMutationError = void | HandlerExceptionResult;
 
 export const usePostPackagesIdInstall = <
-  TError = void | PostPackagesIdInstall409,
+  TError = void | HandlerExceptionResult,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<

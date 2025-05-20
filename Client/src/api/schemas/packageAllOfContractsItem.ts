@@ -6,6 +6,7 @@
  */
 import type { Container } from "./container";
 import type { Dependency } from "./dependency";
+import type { DockerApiConnection } from "./dockerApiConnection";
 import type { Domain } from "./domain";
 import type { File } from "./file";
 import type { HttpEndpoint } from "./httpEndpoint";
@@ -25,6 +26,7 @@ import type { Volume } from "./volume";
 export type PackageAllOfContractsItem =
   | Container
   | Dependency
+  | DockerApiConnection
   | Domain
   | File
   | HttpEndpoint

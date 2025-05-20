@@ -54,7 +54,7 @@ export default function InstallForm({contracts, name}: Props) {
         }
 
         if (result.status === 409) {
-            setError(`Couldn't install contract ${result.data.type}. Install the missing dependencies first.`);
+            setError(`${result.data.message} ${result.data.solution}`);
             return;
         }
 

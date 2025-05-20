@@ -89,6 +89,10 @@ public abstract class BaseTests
                         .As<IDockerClient>()
                         .SingleInstance()
                         .OnlyIf(registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(IDockerClient))));
+                    b.RegisterType<FakeDockerApiConnectionHandler>()
+                        .AsImplementedInterfaces()
+                        .SingleInstance()
+                        .OnlyIf(registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(IHandler<DockerApiConnection>))));
                 };
             });
         

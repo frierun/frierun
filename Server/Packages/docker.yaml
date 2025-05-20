@@ -5,11 +5,6 @@ tags: [ "provider" ]
 contracts:
   - type: "Parameter"
     name: "Path"
-    defaultValue: null
     
-  - type: "Selector"
-    name: "Podman"
-    options:
-      - name: "No"
-      - name: "Yes"
-        
+  - type: "DockerApiConnection"
+    path: "{{Parameter:Path:Value}}"

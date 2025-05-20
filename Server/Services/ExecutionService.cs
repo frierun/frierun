@@ -12,7 +12,7 @@ public class ExecutionService(
     /// <summary>
     /// Creates an execution plan for the given package.
     /// </summary>
-    /// <exception cref="HandlerNotFoundException"></exception>
+    /// <exception cref="HandlerException"></exception>
     public ExecutionPlan Create(Package package)
     {
         var contracts = DiscoverContracts(package);

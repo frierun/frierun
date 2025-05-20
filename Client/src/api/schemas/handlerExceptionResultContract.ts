@@ -6,6 +6,7 @@
  */
 import type { Container } from "./container";
 import type { Dependency } from "./dependency";
+import type { DockerApiConnection } from "./dockerApiConnection";
 import type { Domain } from "./domain";
 import type { File } from "./file";
 import type { HttpEndpoint } from "./httpEndpoint";
@@ -22,9 +23,10 @@ import type { Selector } from "./selector";
 import type { Substitute } from "./substitute";
 import type { Volume } from "./volume";
 
-export type GetPackagesIdPlan409 =
+export type HandlerExceptionResultContract =
   | Container
   | Dependency
+  | DockerApiConnection
   | Domain
   | File
   | HttpEndpoint

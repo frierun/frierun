@@ -33,21 +33,22 @@ public class AutofacModule : Module
                         .Where(type => type.Namespace?.StartsWith("Frierun.Server.Handlers.Docker") == true)
                         .AsImplementedInterfaces()
                         .SingleInstance();
-                    
+
                     builder.RegisterType<DockerService>().AsSelf().SingleInstance();
                     builder.Register<IDockerClient>(
                             context =>
                             {
-                                var application = context.Resolve<Application>();
-                                var path = application.Contracts
-                                    .OfType<Parameter>()
-                                    .First(parameter => parameter.Name == "Path")
-                                    ?.Value ?? "";
-                                
-                                var configuration = path == "" 
-                                    ? new DockerClientConfiguration() 
+                                var contract = context
+                                    .Resolve<Application>()
+                                    .Contracts
+                                    .OfType<DockerApiConnection>()
+                                    .Single();
+                                    
+                                var path = contract.Path ?? "";
+                                var configuration = path == ""
+                                    ? new DockerClientConfiguration()
                                     : new DockerClientConfiguration(new Uri(path));
-                                
+
                                 return configuration.CreateClient();
                             }
                         )
@@ -56,7 +57,7 @@ public class AutofacModule : Module
             )
             .Named<ProviderScopeBuilder>("docker")
             .SingleInstance();
-        
+
         builder.RegisterInstance<ProviderScopeBuilder>(
                 static builder => builder.RegisterType<MysqlHandler>()
                     .AsImplementedInterfaces()
@@ -101,7 +102,7 @@ public class AutofacModule : Module
         builder.RegisterType<HandlerRegistry>().AsSelf().SingleInstance();
         builder.RegisterType<StateManager>().AsSelf().SingleInstance();
         builder.RegisterType<UninstallService>().AsSelf().SingleInstance();
-        
+
         // Serialization
         builder.Register<string>(_ => Path.Combine(Storage.DirectoryName, "state.json"))
             .Named<string>("stateFilePath")

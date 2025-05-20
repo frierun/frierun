@@ -10,12 +10,8 @@
           "type": "Parameter",
           "defaultValue": "localhost",
           "value": "localhost",
-          "result": {
-            "name": "Domain",
-            "value": "localhost"
-          },
-          "name": "Domain",
           "installed": true,
+          "name": "Domain",
           "handler": {
             "typeName": "ParameterHandler"
           }
@@ -24,18 +20,15 @@
           "type": "Substitute",
           "originalId": "Package:static-domain",
           "name": "Package:static-domain",
-          "installed": true,
           "handler": {
             "typeName": "SubstituteHandler"
-          }
+          },
+          "installed": true
         },
         {
           "type": "Selector",
-          "selectedOption": "Yes",
-          "result": {
-            "name": "Internal",
-            "value": "Yes"
-          },
+          "value": "Yes",
+          "installed": true,
           "options": [
             {
               "name": "Yes",
@@ -47,7 +40,6 @@
             }
           ],
           "name": "Internal",
-          "installed": true,
           "handler": {
             "typeName": "SelectorHandler"
           }
@@ -65,38 +57,30 @@
           "type": "Parameter",
           "defaultValue": null,
           "value": "",
-          "result": {
-            "name": "Path",
-            "value": ""
-          },
-          "name": "Path",
           "installed": true,
+          "name": "Path",
           "handler": {
             "typeName": "ParameterHandler"
           }
         },
         {
-          "type": "Selector",
-          "selectedOption": "No",
-          "result": {
-            "name": "Podman",
-            "value": "No"
-          },
-          "options": [
-            {
-              "name": "No",
-              "contracts": null
-            },
-            {
-              "name": "Yes",
-              "contracts": null
-            }
-          ],
-          "name": "Podman",
-          "installed": true,
+          "type": "Substitute",
+          "originalId": "DockerApiConnection:",
+          "name": "DockerApiConnection:",
           "handler": {
-            "typeName": "SelectorHandler"
-          }
+            "typeName": "SubstituteHandler"
+          },
+          "installed": true
+        },
+        {
+          "type": "DockerApiConnection",
+          "path": "",
+          "isPodman": false,
+          "handler": {
+            "typeName": "DockerApiConnectionHandler"
+          },
+          "name": "",
+          "installed": true
         }
       ],
       "requiredApplications": []
