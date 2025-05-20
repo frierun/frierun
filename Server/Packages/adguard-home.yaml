@@ -1,4 +1,4 @@
-﻿name: "adguard"
+﻿name: "adguard-home"
 url: "https://hub.docker.com/r/adguard/adguardhome"
 shortDescription: "Blocking ads & tracking"
 fullDescription: "AdGuard Home is a network-wide software for blocking ads & tracking. 

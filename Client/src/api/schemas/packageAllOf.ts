@@ -13,6 +13,8 @@ export type PackageAllOf = {
   /** @nullable */
   prefix?: string | null;
   /** @nullable */
+  iconUrl?: string | null;
+  /** @nullable */
   applicationUrl?: string | null;
   /** @nullable */
   applicationDescription?: string | null;

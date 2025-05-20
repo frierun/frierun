@@ -1,4 +1,5 @@
 ﻿name: "stashapp"
+iconUrl: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/stash.png"
 url: "https://github.com/stashapp/stash/"
 shortDescription: "Mature content collection"
 fullDescription: "Stash is a web application written in Go for serving and organizing your mature content collection."

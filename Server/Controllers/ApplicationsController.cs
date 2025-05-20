@@ -10,7 +10,8 @@ public class ApplicationsController : ControllerBase
         string Name,
         string? PackageName,
         string? Url,
-        string? Description
+        string? Description,
+        string? IconUrl
     );
 
     [HttpGet]
@@ -22,7 +23,8 @@ public class ApplicationsController : ControllerBase
                 application.Name,
                 application.Package?.Name,
                 application.Url,
-                application.Description
+                application.Description,
+                application.Package?.IconUrl
             )
         );
     }

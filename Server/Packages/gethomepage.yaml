@@ -1,5 +1,6 @@
 ﻿name: "gethomepage"
 url: "https://github.com/gethomepage/homepage/"
+iconUrl: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/homepage.png"
 shortDescription: "Static, customisable dashboard app"
 fullDescription: "A modern, fully static, fast, secure fully proxied, highly customizable application dashboard
   with integrations for over 100 services and translations into multiple languages.
