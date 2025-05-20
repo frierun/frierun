@@ -7,7 +7,7 @@ applicationUrl: "{{HttpEndpoint:80:Url}}admin"
 applicationDescription: "Password: {{Password::Value}}"
 contracts:
   - type: "Container"
-    imageName: "pihole/pihole:latest"
+    imageName: "ghcr.io/pi-hole/pihole:latest"
     env:
       FTLCONF_webserver_api_password: "{{Password::Value}}"
       

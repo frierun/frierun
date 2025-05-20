@@ -5,7 +5,7 @@ fullDescription: "Actual Budget is a super fast and privacy-focused app for mana
 tags: [ "finance" ]
 contracts:
   - type: "Container"
-    imageName: "docker.io/actualbudget/actual-server:latest"
+    imageName: "ghcr.io/actualbudget/actual:latest"
     
   - type: "HttpEndpoint"
     port: 5006

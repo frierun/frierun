@@ -13,7 +13,7 @@ contracts:
       - name: "MySQL"
         contracts:
           - type: "Container"
-            imageName: "gitea/gitea:1"
+            imageName: "docker.gitea.com/gitea:1"
             env:
               USER_UID: "1000"
               USER_GID: "1000"
@@ -25,7 +25,7 @@ contracts:
       - name: "PostgreSQL"
         contracts:
           - type: "Container"
-            imageName: "gitea/gitea:1"
+            imageName: "docker.gitea.com/gitea:1"
             env:
               USER_UID: "1000"
               USER_GID: "1000"
@@ -37,7 +37,7 @@ contracts:
       - name: "SQLite"
         contracts:
           - type: "Container"
-            imageName: "gitea/gitea:1"
+            imageName: "docker.gitea.com/gitea:1"
             env:
               USER_UID: "1000"
               USER_GID: "1000"

@@ -6,7 +6,7 @@ fullDescription: "Miniflux is a minimalist software. The purpose of this applica
 tags: [ "internet" ]
 contracts:
   - type: "Container"
-    imageName: "miniflux/miniflux:latest"
+    imageName: "ghcr.io/miniflux/miniflux:latest"
     env:
       DATABASE_URL: "postgres://{{Postgresql::Username}}:{{Postgresql::Password}}@{{Postgresql::Host}}/{{Postgresql::Database}}?sslmode=disable"
       RUN_MIGRATIONS: "1"

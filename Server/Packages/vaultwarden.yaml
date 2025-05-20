@@ -5,7 +5,7 @@ fullDescription: "Vaultwarden gives you power to create and manage unique passwo
 tags: [ "security" ]
 contracts:
   - type: "Container"
-    imageName: "vaultwarden/server:latest"
+    imageName: "ghcr.io/dani-garcia/vaultwarden:latest"
     
   - type: "HttpEndpoint"
     port: 80
