@@ -16,7 +16,7 @@ export default function PackageInstall({name}: Props) {
     }
     
     if (data.status === 409) {
-        return <p>Error: Couldn&apos;t install contract {data.data.type}. Install the missing dependencies first.</p>;
+        return <p>Error: {data.data.message} {data.data.solution}</p>;
     }
     
     return (
