@@ -90,6 +90,11 @@ export default function InstallForm({contracts, name}: Props) {
                 <div className={"flex justify-between items-center px-1"}>
                     <div className={"flex gap-2 mb-2"}>
                         <div className={"h-12 w-12 rounded flex-shrink-0"}>
+                            <img
+                                className={"rounded"}
+                                alt={name}
+                                src={pkg?.iconUrl ?? `https://cdn.jsdelivr.net/gh/selfhst/icons/png/${name}.png`}
+                            />
                             <img src={`/packages/${name}.png`} className={"rounded"} alt={name}/>
                         </div>
                         <h1>
@@ -98,7 +103,7 @@ export default function InstallForm({contracts, name}: Props) {
                     </div>
                     <div>
                         <Button onClick={install} disabled={isPending} type={"primary"}>
-                            Install
+                        Install
                         </Button>
                     </div>
                 </div>
