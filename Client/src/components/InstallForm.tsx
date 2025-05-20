@@ -58,7 +58,11 @@ export default function InstallForm({contracts, name}: Props) {
             return;
         }
 
-        await waitForReady();
+        const state = await waitForReady();
+        if (state.error) {
+            setError(`${state.error.message} ${state.error.solution}`);
+            return;
+        }
         await queryClient.invalidateQueries({queryKey: getGetApplicationsQueryKey()});
         navigate('/');
     };

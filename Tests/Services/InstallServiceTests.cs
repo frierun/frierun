@@ -1,5 +1,6 @@
 ﻿using Frierun.Server;
 using Frierun.Server.Data;
+using Frierun.Server.Handlers;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Substitute = NSubstitute.Substitute;
@@ -45,6 +46,22 @@ public class InstallServiceTests : BaseTests
         
         Assert.Throws<Exception>(() => service.Handle(executionPlan));
 
+        Assert.True(stateManager.Ready);
+    }
+    
+    [Fact]
+    public void Handle_FailedExecutionPlan_SetsError()
+    {
+        var stateManager = Resolve<StateManager>();
+        var executionPlan = Substitute.For<IExecutionPlan>();
+        var contract = Factory<Container>().Generate();
+        var error = new HandlerException("test", "test", contract);
+        executionPlan.Install().Throws(_ => error);
+        var service = Resolve<InstallService>();
+
+        service.Handle(executionPlan);
+
+        Assert.Equal(error.Result, stateManager.Error);
         Assert.True(stateManager.Ready);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Frierun.Server.Data;
+using Frierun.Server.Handlers;
 
 namespace Frierun.Server;
 
@@ -20,6 +21,11 @@ public class InstallService(
             state.AddApplication(application);
             stateSerializer.Save(state);
             return application;
+        }
+        catch (HandlerException e)
+        {
+            stateManager.Error = e.Result;
+            return null;
         }
         finally
         {

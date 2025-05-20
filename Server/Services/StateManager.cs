@@ -1,9 +1,12 @@
-﻿namespace Frierun.Server;
+﻿using Frierun.Server.Handlers;
+
+namespace Frierun.Server;
 
 public class StateManager
 {
     public bool Ready { get; private set; } = true;
     public string TaskName { get; private set; } = string.Empty;
+    public HandlerExceptionResult? Error { get; set; }
     private readonly object _lock = new();
     
     /// <summary>
@@ -19,6 +22,7 @@ public class StateManager
             }
             TaskName = taskName;
             Ready = false;
+            Error = null;
             return true;
         }
     }
