@@ -20,7 +20,7 @@ public class PackageTests : TestWithDocker
             "docker",
             
             // skip due to port 53 already in use
-            "adguard",
+            "adguard-home",
             "pi-hole",
             "technitium",
             
