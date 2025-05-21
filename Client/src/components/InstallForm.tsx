@@ -95,7 +95,6 @@ export default function InstallForm({contracts, name}: Props) {
                                 alt={name}
                                 src={pkg?.iconUrl ?? `https://cdn.jsdelivr.net/gh/selfhst/icons/png/${name}.png`}
                             />
-                            <img src={`/packages/${name}.png`} className={"rounded"} alt={name}/>
                         </div>
                         <h1>
                             {name}
