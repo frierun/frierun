@@ -4,7 +4,7 @@ fullDescription: "Link to your Docker API socket. Allows to use Docker container
 tags: [ "provider" ]
 contracts:
   - type: "Parameter"
-    name: "Path"
+    name: "Uri"
     
   - type: "DockerApiConnection"
-    path: "{{Parameter:Path:Value}}"
+    path: "{{Parameter:Uri:Value}}"

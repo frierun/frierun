@@ -69,7 +69,7 @@ public class DockerApiConnectionHandler : IDockerApiConnectionHandler
         var json = JsonNode.Parse(body);
         var path = json?["host"]?["remoteSocket"]?["path"]?.GetValue<string>();
         var exists = json?["host"]?["remoteSocket"]?["exists"]?.GetValue<bool>();
-        if (exists != true || path == null || !path.StartsWith("unix://"))
+        if (exists != true || path == null)
         {
             throw new HandlerException(
                 "Podman API connection failed.",
@@ -78,6 +78,11 @@ public class DockerApiConnectionHandler : IDockerApiConnectionHandler
             );
         }
 
-        return path.Substring("unix://".Length);
+        if (path.StartsWith("unix://"))
+        {
+            path = path.Substring("unix://".Length);
+        }
+        
+        return path;
     }
 }

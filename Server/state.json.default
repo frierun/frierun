@@ -58,7 +58,7 @@
           "defaultValue": null,
           "value": "",
           "installed": true,
-          "name": "Path",
+          "name": "Uri",
           "handler": {
             "typeName": "ParameterHandler"
           }

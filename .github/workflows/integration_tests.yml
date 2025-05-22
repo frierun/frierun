@@ -8,6 +8,11 @@ on:
         description: 'Run the build with tmate debugging enabled'
         required: false
         default: false
+      filter:
+        type: string
+        description: 'Filter for the tests to run'
+        required: false
+        default: ''
   push:
     branches:
       - main
@@ -51,7 +56,7 @@ jobs:
         run: dotnet build
 
       - name: Test with the dotnet CLI
-        run: dotnet test Tests.Integration --logger "console;verbosity=normal" -- xUnit.StopOnFail=true
+        run: dotnet test Tests.Integration --logger "console;verbosity=normal" --filter "${{inputs.filter}}" -- xUnit.StopOnFail=true
 
       - name: Collect logs
         if: ${{ failure() }}
