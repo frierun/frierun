@@ -2,6 +2,7 @@
 using Autofac.Features.Indexed;
 using Frierun.Server.Data;
 using Frierun.Server.Handlers;
+using Frierun.Server.Handlers.Base;
 
 namespace Frierun.Server;
 
@@ -136,8 +137,33 @@ public class HandlerRegistry : IDisposable
             _handlerPerType[contractType] = new List<IHandler>();
         }
 
-        // Add the handler to the beginning of the list so that it is used first
-        _handlerPerType[contractType].Insert(0, handler);
+        if (ShouldPrioritize(handler.GetType(), contractType))
+        {
+            // Add the handler to the beginning of the list so that it is used first
+            _handlerPerType[contractType].Insert(0, handler);
+        }
+        else
+        {
+            _handlerPerType[contractType].Add(handler);
+        }
+    }
+
+    /// <summary>
+    /// Checks if the handler should be prioritized over others.
+    /// </summary>
+    private bool ShouldPrioritize(Type handlerType, Type contractType)
+    {
+        if (handlerType == typeof(TraefikHttpEndpointHandler))
+        {
+            return true;
+        }
+        
+        if (contractType == typeof(DockerApiConnection) && handlerType != typeof(DockerApiConnectionHandler))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>

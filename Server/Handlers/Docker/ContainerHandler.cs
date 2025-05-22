@@ -8,6 +8,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
     : IContainerHandler
 {
     public Application Application => application;
+    private DockerApiConnection dockerApiConnection => application.Contracts.OfType<DockerApiConnection>().Single();
 
     public IEnumerable<ContractInitializeResult> Initialize(Container contract, string prefix)
     {
@@ -76,7 +77,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
             dockerParameters.HostConfig.Mounts.Add(
                 new global::Docker.DotNet.Models.Mount
                 {
-                    Source = "/var/run/docker.sock",
+                    Source = dockerApiConnection.GetSocketRootPath(),
                     Target = "/var/run/docker.sock",
                     Type = "bind"
                 }

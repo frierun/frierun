@@ -1,4 +1,7 @@
-﻿using Frierun.Server.Data;
+﻿using Docker.DotNet.Models;
+using Frierun.Server.Data;
+using NSubstitute;
+using Network = Frierun.Server.Data.Network;
 
 namespace Frierun.Tests.Handlers.Docker;
 
@@ -12,9 +15,49 @@ public class ContainerHandlerTests : BaseTests
         {
             Contracts = [Factory<Container>().Generate()]
         };
-        
+
         var application = InstallPackage(package);
 
         Assert.True(application.Contracts.OfType<Network>().Single().Installed);
     }
+
+    [Fact]
+    public void Install_RequireDocker_MountsSocket()
+    {
+        InstallPackage("docker");
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts = [Factory<Container>().Generate() with { RequireDocker = true }]
+        };
+
+        InstallPackage(package);
+        
+        DockerClient.Containers.Received(1)
+            .CreateContainerAsync(Arg.Is<CreateContainerParameters>(p =>
+                p.HostConfig.Mounts.Count == 1 &&
+                p.HostConfig.Mounts[0].Source == "/var/run/docker.sock" &&
+                p.HostConfig.Mounts[0].Target == "/var/run/docker.sock"
+            ));
+    }
+    
+    [Fact]
+    public void Install_RequireDockerWithPodman_MountsSocket()
+    {
+        var path = "/run/podman/podman.sock";
+        FakeDockerApiConnectionHandler.SocketRootPath = path;
+        InstallPackage("docker");
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts = [Factory<Container>().Generate() with { RequireDocker = true }]
+        };
+
+        InstallPackage(package);
+        
+        DockerClient.Containers.Received(1)
+            .CreateContainerAsync(Arg.Is<CreateContainerParameters>(p =>
+                p.HostConfig.Mounts.Count == 1 &&
+                p.HostConfig.Mounts[0].Source == path &&
+                p.HostConfig.Mounts[0].Target == "/var/run/docker.sock"
+            ));
+    }    
 }

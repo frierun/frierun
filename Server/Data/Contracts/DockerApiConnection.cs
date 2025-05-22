@@ -34,4 +34,13 @@ public record DockerApiConnection(
         Debug.Assert(Handler != null);
         return Handler.CreateClient(this);
     }
+    
+    /// <summary>
+    /// Gets the socket path in the root system, to be mounted in a container to control this docker instance.
+    /// </summary>
+    public string GetSocketRootPath()
+    {
+        Debug.Assert(Handler != null);
+        return Handler.GetSocketRootPath(this);
+    }
 }

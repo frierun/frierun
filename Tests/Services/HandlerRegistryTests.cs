@@ -199,6 +199,6 @@ public class HandlerRegistryTests : BaseTests
         
         var handler = registry.GetHandlers(typeof(DockerApiConnection)).First();
 
-        Assert.IsType<DockerApiConnectionHandler>(handler);
+        Assert.IsType<FakeDockerApiConnectionHandler>(handler);
     }
 }

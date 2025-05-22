@@ -1,4 +1,6 @@
-﻿using Docker.DotNet;
+﻿using System.Reflection;
+using System.Text.Json.Nodes;
+using Docker.DotNet;
 using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
@@ -23,10 +25,10 @@ public class DockerApiConnectionHandler : IDockerApiConnectionHandler
                 IsPodman = isPodman
             };
         }
-        catch (Exception e)
+        catch (Exception)
         {
             throw new HandlerException(
-                "Docker API connection failed.", 
+                "Docker API connection failed.",
                 "Specify correct path and make sure the docker daemon is running.",
                 contract
             );
@@ -41,5 +43,41 @@ public class DockerApiConnectionHandler : IDockerApiConnectionHandler
             : new DockerClientConfiguration(new Uri(path));
 
         return configuration.CreateClient();
+    }
+
+    public string GetSocketRootPath(DockerApiConnection contract)
+    {
+        if (contract.IsPodman != true)
+        {
+            return "/var/run/docker.sock";
+        }
+
+        var client = CreateClient(contract);
+        var baseUri = (Uri)client
+            .GetType()
+            .GetField("_endpointBaseUri", BindingFlags.NonPublic | BindingFlags.Instance)!
+            .GetValue(client)!;
+        
+        var httpClient = (HttpClient)client 
+            .GetType()
+            .GetField("_client", BindingFlags.NonPublic | BindingFlags.Instance)!
+            .GetValue(client)!;
+
+
+        var result = httpClient.GetAsync(new Uri(baseUri, "v3.0.0/libpod/info")).Result;
+        var body = result.Content.ReadAsStringAsync().Result;
+        var json = JsonNode.Parse(body);
+        var path = json?["host"]?["remoteSocket"]?["path"]?.GetValue<string>();
+        var exists = json?["host"]?["remoteSocket"]?["exists"]?.GetValue<bool>();
+        if (exists != true || path == null || !path.StartsWith("unix://"))
+        {
+            throw new HandlerException(
+                "Podman API connection failed.",
+                "Make sure the podman socket is enabled.",
+                contract
+            );
+        }
+
+        return path.Substring("unix://".Length);
     }
 }
