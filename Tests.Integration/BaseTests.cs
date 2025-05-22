@@ -32,12 +32,18 @@ public abstract class BaseTests
     /// <summary>
     /// Installs package by name and returns application
     /// </summary>
-    protected Application InstallPackage(string name)
+    protected Application InstallPackage(string name, IEnumerable<Contract>? overrides = null)
     {
         Services.GetRequiredService<PackageRegistry>().Load();
         var package = Services.GetRequiredService<PackageRegistry>().Find(name)
                       ?? throw new Exception($"Package {name} not found");
 
+        if (overrides != null)
+        {
+            var overridePackage = new Package(name) {Contracts = overrides};
+            package = (Package)package.With(overridePackage);
+        }
+        
         return InstallPackage(package);
     }
 

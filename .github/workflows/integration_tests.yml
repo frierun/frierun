@@ -19,6 +19,11 @@ jobs:
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+      - name: Install podman
+        run: |
+          sudo apt install -y podman
+          systemctl start podman.socket
 
       - uses: actions/checkout@v4
 
