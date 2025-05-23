@@ -6,6 +6,12 @@
  */
 
 export type RedisAllOf = {
-  networkName: string;
-  containerName: string;
+  /** @nullable */
+  container?: string | null;
+  /** @nullable */
+  volume?: string | null;
+  /** @nullable */
+  host?: string | null;
+  installed?: boolean;
+  network: string;
 };

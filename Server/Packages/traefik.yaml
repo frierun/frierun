@@ -1,28 +1,28 @@
-﻿Name: "traefik"
-Url: "https://doc.traefik.io/traefik/getting-started/install-traefik/"
-ShortDescription: "Application proxy"
-FullDescription: "Traefik is an open-source Application Proxy that makes publishing your services a fun and easy experience.
+﻿name: "traefik"
+url: "https://doc.traefik.io/traefik/getting-started/install-traefik/"
+shortDescription: "Application proxy"
+fullDescription: "Traefik is an open-source Application Proxy that makes publishing your services a fun and easy experience.
   It receives requests on behalf of your system and identifies which components are responsible for handling them,
   and routes them securely."
-Tags: [ "network", "provider" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "traefik:v3.1"
-    Command:
+tags: [ "network", "provider" ]
+contracts:
+  - type: "Container"
+    imageName: "traefik:v3.1"
+    command:
       - "--api.insecure=true"
       - "--providers.docker"
       - "--entryPoints.web.address=:80"
       - "--entryPoints.websecure.address=:443"
       - "--certificatesresolvers.httpchallenge.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.tlschallenge.acme.tlschallenge=true"
-    RequireDocker: true
+    requireDocker: true
     
-  - Type: "PortEndpoint"
-    Name: "Web"
-    Port: 80
-    Protocol: "tcp"
+  - type: "PortEndpoint"
+    name: "Web"
+    port: 80
+    protocol: "tcp"
     
-  - Type: "PortEndpoint"
-    Name: "WebSecure"
-    Port: 443
-    Protocol: "tcp"
+  - type: "PortEndpoint"
+    name: "WebSecure"
+    port: 443
+    protocol: "tcp"

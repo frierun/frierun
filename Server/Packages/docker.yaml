@@ -1,0 +1,10 @@
+﻿name: "docker"
+shortDescription: "Docker API socket"
+fullDescription: "Link to your Docker API socket. Allows to use Docker containers as a service."
+tags: [ "provider" ]
+contracts:
+  - type: "Parameter"
+    name: "Uri"
+    
+  - type: "DockerApiConnection"
+    path: "{{Parameter:Uri:Value}}"

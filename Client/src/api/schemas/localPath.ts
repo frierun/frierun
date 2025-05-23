@@ -10,5 +10,5 @@ import type { LocalPathType } from "./localPathType";
 
 export type LocalPath = Resource &
   LocalPathAllOf & {
-    Type: LocalPathType;
+    type: LocalPathType;
   };

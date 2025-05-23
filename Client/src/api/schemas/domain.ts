@@ -10,5 +10,5 @@ import type { DomainType } from "./domainType";
 
 export type Domain = Contract &
   DomainAllOf & {
-    Type: DomainType;
+    type: DomainType;
   };

@@ -1,6 +1,7 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Frierun.Server;
+using Frierun.Server.Data;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +23,12 @@ builder.Services.AddSwaggerGen(
         options.UseOneOfForPolymorphism();
         options.UseAllOfForInheritance();
         options.EnableAnnotations(true, true);
+        
+        
+        options.MapType(typeof(ContractId<>), () => new OpenApiSchema { Type = "string" });
+        options.MapType(typeof(ContractId), () => new OpenApiSchema { Type = "string" });
+        options.SchemaFilter<LazyHandlerSchemaFilter>();
+        options.SchemaFilter<InstalledNotRequiredSchemaFilter>();
     }
 );
 builder.Services.AddAntiforgery(
@@ -31,6 +38,7 @@ builder.Services.AddAntiforgery(
         options.SuppressXFrameOptionsHeader = false;
     }
 );
+
 builder.Services.AddControllersWithViews(
     options =>
     {
@@ -38,10 +46,14 @@ builder.Services.AddControllersWithViews(
         options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
     }
 );
+builder.Services.ConfigureOptions<ConfigureJsonOptions>();
+
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(Storage.DirectoryName, "keys")));
 
+
 // create web root path to remove warnings in dev environment
+// ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract required for integration tests
 var webRootPath = Path.Combine(builder.Environment.ContentRootPath, builder.Environment.WebRootPath ?? "wwwroot");
 if (!Directory.Exists(webRootPath))
 {

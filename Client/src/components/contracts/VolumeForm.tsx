@@ -9,7 +9,7 @@ type Props = {
 
 export default function VolumeForm({contract, updateContract}: Props) {
     const [value, setValue] = useState('');
-    const [installer, setInstaller] = useState<'NewVolume' | 'ExistingVolume' | 'LocalPath'>('NewVolume');
+    const [installer, setinstaller] = useState<'NewVolume' | 'ExistingVolume' | 'LocalPath'>('NewVolume');
     const {data: getVolumesResponse} = useGetVolumes();
 
     useEffect(() => {
@@ -66,7 +66,7 @@ export default function VolumeForm({contract, updateContract}: Props) {
                             type="radio"
                             checked={installer === 'NewVolume'}
                             onChange={() => {
-                                setInstaller('NewVolume');
+                                setinstaller('NewVolume');
                             }}
                         />
                         <label htmlFor={"NewVolume" + value}>
@@ -80,7 +80,7 @@ export default function VolumeForm({contract, updateContract}: Props) {
                                 type="radio"
                                 checked={installer === 'ExistingVolume'}
                                 onChange={() => {
-                                    setInstaller('ExistingVolume');
+                                    setinstaller('ExistingVolume');
                                 }}
                             />
                             <label htmlFor={"ExistingVolume" + value}>
@@ -94,7 +94,7 @@ export default function VolumeForm({contract, updateContract}: Props) {
                             type="radio"
                             checked={installer === 'LocalPath'}
                             onChange={() => {
-                                setInstaller('LocalPath');
+                                setinstaller('LocalPath');
                             }}
                         />
                         <label htmlFor={"LocalPath" + value}>

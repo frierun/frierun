@@ -4,9 +4,11 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { HandlerExceptionResult } from "./handlerExceptionResult";
 
 export interface State {
   ready: boolean;
   /** @nullable */
   taskName?: string | null;
+  error?: HandlerExceptionResult;
 }

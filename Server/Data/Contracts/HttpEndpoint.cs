@@ -5,14 +5,14 @@ namespace Frierun.Server.Data;
 public record HttpEndpoint(
     string? Name = null,
     int Port = 0,
-    string? ContainerName = null
-) : Contract(Name ?? $"{Port}{(ContainerName != null ? $" at {ContainerName}" : "")}")
+    ContractId<Container>? Container = null,
+    ContractId<Domain>? Domain = null,
+    GenericHttpEndpoint? Result = null
+) : Contract(Name ?? $"{Port}{(Container != null ? $" at {Container.Name}" : "")}"), IHasResult<GenericHttpEndpoint>
 {
-    public string ContainerName { get; init; } = ContainerName ?? "";
-    [JsonIgnore] public ContractId<Container> ContainerId => new(ContainerName);
-    [JsonIgnore] public ContractId<Domain> DomainId => new(Name);
+    public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");
+    public ContractId<Domain> Domain { get; init; } = Domain ?? new ContractId<Domain>(Name ?? "");
 
-    /// <inheritdoc />
     public override Contract With(Contract other)
     {
         if (other is not HttpEndpoint endpoint || other.Id != Id)
@@ -22,7 +22,7 @@ public record HttpEndpoint(
 
         return this with
         {
-            Installer = endpoint.Installer ?? Installer,
+            Handler = endpoint.Handler,
         };
     }
 }

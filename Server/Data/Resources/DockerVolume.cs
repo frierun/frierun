@@ -1,3 +1,6 @@
 ﻿namespace Frierun.Server.Data;
 
-public record DockerVolume(string Name) : Resource;
+public class DockerVolume : Resource
+{
+    public required string Name { get; init; }
+}

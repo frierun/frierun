@@ -8,6 +8,6 @@
 export type MountAllOf = {
   path: string;
   readOnly: boolean;
-  volumeName: string;
-  containerName: string;
+  volume: string;
+  container: string;
 };

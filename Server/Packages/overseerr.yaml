@@ -1,19 +1,19 @@
-﻿Name: "overseerr"
-Url: "https://docs.linuxserver.io/images/docker-overseerr/"
-ShortDescription: "Request management for Plex"
-FullDescription: "Overseerr is a request management and media discovery tool built to work with your existing Plex ecosystem."
-Tags: [ "network" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "lscr.io/linuxserver/overseerr:latest"
-    Env:
+﻿name: "overseerr"
+url: "https://docs.linuxserver.io/images/docker-overseerr/"
+shortDescription: "Request management for Plex"
+fullDescription: "Overseerr is a request management and media discovery tool built to work with your existing Plex ecosystem."
+tags: [ "network" ]
+contracts:
+  - type: "Container"
+    imageName: "lscr.io/linuxserver/overseerr:latest"
+    env:
       PUID: "1000"
       PGID: "1000"
       TZ: "Etc/UTC"
       
-  - Type: "HttpEndpoint"
-    Port: 5055
+  - type: "HttpEndpoint"
+    port: 5055
     
-  - Type: "Mount"
-    VolumeName: "config"
-    Path: "/config"
+  - type: "Mount"
+    volume: "config"
+    path: "/config"

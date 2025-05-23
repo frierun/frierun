@@ -4,11 +4,11 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { Resource } from "./resource";
+import type { GenericHttpEndpoint } from "./genericHttpEndpoint";
 import type { TraefikHttpEndpointAllOf } from "./traefikHttpEndpointAllOf";
 import type { TraefikHttpEndpointType } from "./traefikHttpEndpointType";
 
-export type TraefikHttpEndpoint = Resource &
+export type TraefikHttpEndpoint = GenericHttpEndpoint &
   TraefikHttpEndpointAllOf & {
-    Type: TraefikHttpEndpointType;
+    type: TraefikHttpEndpointType;
   };

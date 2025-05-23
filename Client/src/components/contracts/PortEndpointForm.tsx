@@ -37,7 +37,7 @@ export default function PortEndpointForm({contract, updateContract}: Props) {
                         {contract.protocol} endpoint to port 
                     </label>
                     {contract.port}
-                    {contract.containerName && ` in container ${contract.containerName}`}
+                    {contract.container && ` in container ${contract.container}`}
                 </div>
                 <label className={"inline-block w-48"}>
                     Destination port:

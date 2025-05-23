@@ -7,5 +7,8 @@
 
 export type DomainAllOf = {
   /** @nullable */
-  subdomain?: string | null;
+  value?: string | null;
+  /** @nullable */
+  isInternal?: boolean | null;
+  installed?: boolean;
 };

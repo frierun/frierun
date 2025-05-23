@@ -1,58 +1,58 @@
-﻿Name: "vikunja"
-Url: "https://vikunja.io/docs/installing/#docker"
-ShortDescription: "To-do lists"
-FullDescription: "Vikunja, the fluffy, open-source, self-hostable to-do app."
-Tags: [ "dashboard" ]
-Contracts:
-  - Type: "Selector"
-    Name: "Database"
-    Options:
-      - Name: "MySQL"
-        Contracts:
-          - Type: "Container"
-            ImageName: "vikunja/vikunja:latest"
-            Env:
+﻿name: "vikunja"
+url: "https://vikunja.io/docs/installing/#docker"
+shortDescription: "To-do lists"
+fullDescription: "Vikunja, the fluffy, open-source, self-hostable to-do app."
+tags: [ "dashboard" ]
+contracts:
+  - type: "Selector"
+    name: "Database"
+    options:
+      - name: "MySQL"
+        contracts:
+          - type: "Container"
+            imageName: "vikunja/vikunja:latest"
+            env:
               VIKUNJA_DATABASE_TYPE: "mysql"
               VIKUNJA_DATABASE_HOST: "{{Mysql::Host}}"
               VIKUNJA_DATABASE_DATABASE: "{{Mysql::Database}}"
-              VIKUNJA_DATABASE_USER: "{{Mysql::User}}"
+              VIKUNJA_DATABASE_USER: "{{Mysql::Username}}"
               VIKUNJA_DATABASE_PASSWORD: "{{Mysql::Password}}"
-      - Name: "PostgreSQL"
-        Contracts:
-          - Type: "Container"
-            ImageName: "vikunja/vikunja:latest"
-            Env:
+      - name: "PostgreSQL"
+        contracts:
+          - type: "Container"
+            imageName: "vikunja/vikunja:latest"
+            env:
               VIKUNJA_DATABASE_TYPE: "postgres"
               VIKUNJA_DATABASE_HOST: "{{Postgresql::Host}}"
               VIKUNJA_DATABASE_DATABASE: "{{Postgresql::Database}}"
-              VIKUNJA_DATABASE_USER: "{{Postgresql::User}}"
+              VIKUNJA_DATABASE_USER: "{{Postgresql::Username}}"
               VIKUNJA_DATABASE_PASSWORD: "{{Postgresql::Password}}"
-      - Name: "SQLite"
-        Contracts:
-          - Type: "Container"
-            ImageName: "vikunja/vikunja:latest"
-            Env:
+      - name: "SQLite"
+        contracts:
+          - type: "Container"
+            imageName: "vikunja/vikunja:latest"
+            env:
               VIKUNJA_DATABASE_TYPE: "sqlite"
-          - Type: "Mount"
-            VolumeName: "db"
-            Path: "/db"
-          - Type: "File"
-            VolumeName: "db"
-            Path: ""
-            Owner: 1000
-            Group: 1000
-            DependencyOf: [ "Container" ]
+          - type: "Mount"
+            volume: "db"
+            path: "/db"
+          - type: "File"
+            volume: "db"
+            path: ""
+            owner: 1000
+            group: 1000
+            dependencyOf: [ "Container" ]
             
-  - Type: "HttpEndpoint"
-    Port: 3456
+  - type: "HttpEndpoint"
+    port: 3456
     
-  - Type: "Mount"
-    VolumeName: "files"
-    Path: "/app/vikunja/files"
+  - type: "Mount"
+    volume: "files"
+    path: "/app/vikunja/files"
     
-  - Type: "File"
-    VolumeName: "files"
-    Path: ""
-    Owner: 1000
-    Group: 1000
-    DependencyOf: [ "Container" ]
+  - type: "File"
+    volume: "files"
+    path: ""
+    owner: 1000
+    group: 1000
+    dependencyOf: [ "Container" ]

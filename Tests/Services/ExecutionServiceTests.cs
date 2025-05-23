@@ -1,14 +1,15 @@
 ﻿using Frierun.Server;
 using Frierun.Server.Data;
-using Frierun.Server.Installers;
+using Frierun.Server.Handlers;
 using NSubstitute;
 using Substitute = NSubstitute.Substitute;
 
-namespace Frierun.Tests.Services;
+namespace Frierun.Tests;
 
 public class ExecutionServiceTests : BaseTests
 {
     public record Contract1(string? Name = null) : Contract(Name ?? "");
+
     public record Contract2(string? Name = null) : Contract(Name ?? "");
 
     [Fact]
@@ -25,57 +26,57 @@ public class ExecutionServiceTests : BaseTests
     }
 
     [Fact]
-    public void Create_WithoutInstaller_ThrowsException()
+    public void Create_WithoutHandler_ThrowsException()
     {
-        var contract = Substitute.For<Contract>("", null, null, null);
+        var contract = Substitute.For<Contract>("", false, null, null, null);
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
 
-        Assert.Throws<InstallerNotFoundException>(() => service.Create(package));
+        Assert.Throws<HandlerNotFoundException>(() => service.Create(package));
     }
 
     [Fact]
-    public void Create_InstallerWithoutOptions_ThrowsException()
+    public void Create_HandlerWithoutOptions_ThrowsException()
     {
-        var installer = Mock<IInstaller<Contract1>, IInstaller>();
-        
+        var handler = Mock<IHandler<Contract1>, IHandler>();
+
         var contract = new Contract1();
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
-        installer
+        handler
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
             .Returns([]);
 
-        Assert.Throws<InstallerNotFoundException>(() => service.Create(package));
+        Assert.Throws<HandlerNotFoundException>(() => service.Create(package));
     }
 
     [Fact]
-    public void Create_InstallerReturnsUnknownContract_ThrowsException()
+    public void Create_HandlerReturnsUnknownContract_ThrowsException()
     {
-        var installer = Mock<IInstaller<Contract1>, IInstaller>();
-        
+        var handler = Mock<IHandler<Contract1>, IHandler>();
+
         var contract = new Contract1();
         var unknownContract = new Contract2();
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
-        installer
+        handler
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
-            .Returns([new InstallerInitializeResult(contract, [unknownContract])]);
+            .Returns([new ContractInitializeResult(contract, [unknownContract])]);
 
-        Assert.Throws<InstallerNotFoundException>(() => service.Create(package));
+        Assert.Throws<HandlerNotFoundException>(() => service.Create(package));
     }
-    
+
     [Fact]
-    public void Create_CorrectInstaller_ExecutesInitialize()
+    public void Create_CorrectHandler_ExecutesInitialize()
     {
-        var installer = Mock<IInstaller<Contract1>, IInstaller>();
-        
+        var handler = Mock<IHandler<Contract1>, IHandler>();
+
         var contract = new Contract1();
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
-        installer
+        handler
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
-            .Returns([new InstallerInitializeResult(contract)]);
+            .Returns([new ContractInitializeResult(contract with { Handler = handler })]);
 
         var plan = service.Create(package);
 
@@ -83,20 +84,20 @@ public class ExecutionServiceTests : BaseTests
         Assert.Equal(2, plan.Contracts.Count);
         Assert.Contains(package.Id, plan.Contracts);
         Assert.Contains(contract.Id, plan.Contracts);
-        installer.Received(1).Initialize(Arg.Any<Contract>(), Arg.Any<string>());
+        handler.Received(1).Initialize(Arg.Any<Contract>(), Arg.Any<string>());
     }
-    
+
     [Fact]
-    public void Create_RecursiveInstaller_InitializesPlan()
+    public void Create_RecursiveHandler_InitializesPlan()
     {
-        var installer = Mock<IInstaller<Contract1>, IInstaller>();
-        
+        var handler = Mock<IHandler<Contract1>, IHandler>();
+
         var contract = new Contract1();
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
-        installer
+        handler
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
-            .Returns([new InstallerInitializeResult(contract, [contract])]);
+            .Returns([new ContractInitializeResult(contract with { Handler = handler }, [contract])]);
 
         var plan = service.Create(package);
 
@@ -107,21 +108,24 @@ public class ExecutionServiceTests : BaseTests
     }
 
     [Fact]
-    public void Create_InstallerWithTwoBranches_InitializesPlan()
+    public void Create_HandlerWithTwoBranches_InitializesPlan()
     {
-        var installer = Mock<IInstaller<Contract1>, IInstaller>();
-        
+        var handler = Mock<IHandler<Contract1>, IHandler>();
+
         var contract = new Contract1();
         var unknownContract = new Contract2();
         var knownContract = new Contract1("second");
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
-        installer
+        handler
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
-            .Returns(info => [
-                new InstallerInitializeResult(info.Arg<Contract>(), [unknownContract]),
-                new InstallerInitializeResult(info.Arg<Contract>(), [knownContract])
-            ]);
+            .Returns(
+                info =>
+                [
+                    new ContractInitializeResult(info.Arg<Contract>() with { Handler = handler }, [unknownContract]),
+                    new ContractInitializeResult(info.Arg<Contract>() with { Handler = handler }, [knownContract])
+                ]
+            );
 
         var plan = service.Create(package);
 
@@ -131,28 +135,34 @@ public class ExecutionServiceTests : BaseTests
         Assert.Contains(contract.Id, plan.Contracts);
         Assert.Contains(knownContract.Id, plan.Contracts);
     }
-    
+
     [Fact]
-    public void Create_TwoInstallers_InitializesPlan()
+    public void Create_TwoHandlers_InitializesPlan()
     {
-        var installer = Mock<IInstaller<Contract1>, IInstaller>();
-        var installer2 = Mock<IInstaller<Contract1>, IInstaller>();
-        
+        var handler = Mock<IHandler<Contract1>, IHandler>();
+        var handler2 = Mock<IHandler<Contract1>, IHandler>();
+
         var contract = new Contract1();
         var unknownContract = new Contract2();
         var knownContract = new Contract1("second");
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
-        installer
+        handler
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
-            .Returns(info => [
-                new InstallerInitializeResult(info.Arg<Contract>(), [unknownContract]),
-            ]);
-        installer2
+            .Returns(
+                info =>
+                [
+                    new ContractInitializeResult(info.Arg<Contract>() with { Handler = handler }, [unknownContract]),
+                ]
+            );
+        handler2
             .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
-            .Returns(info => [
-                new InstallerInitializeResult(info.Arg<Contract>(), [knownContract])
-            ]);
+            .Returns(
+                info =>
+                [
+                    new ContractInitializeResult(info.Arg<Contract>() with { Handler = handler2 }, [knownContract])
+                ]
+            );
 
         var plan = service.Create(package);
 
@@ -161,5 +171,5 @@ public class ExecutionServiceTests : BaseTests
         Assert.Contains(package.Id, plan.Contracts);
         Assert.Contains(contract.Id, plan.Contracts);
         Assert.Contains(knownContract.Id, plan.Contracts);
-    }    
+    }
 }

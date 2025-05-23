@@ -6,19 +6,22 @@ namespace Frierun.Server.Controllers;
 [Route("/domains")]
 public class DomainsController : ControllerBase
 {
-    public record DomainInstaller(
+    public record DomainVariant(
         string TypeName,
         string? ApplicationName,
         string? DomainName
     );
 
     [HttpGet]
-    public IEnumerable<DomainInstaller> List(InstallerRegistry registry)
+    public IEnumerable<DomainVariant> List(HandlerRegistry registry)
     {
-        return registry.GetInstallers(typeof(Domain)).Select(installer => new DomainInstaller(
-            installer.GetType().Name,
-            installer.Application?.Name,
-            installer.Application?.Resources.OfType<ResolvedParameter>().FirstOrDefault()?.Value
-        ));
+        return registry.GetHandlers(typeof(Domain))
+            .Select(
+                handler => new DomainVariant(
+                    handler.GetType().Name,
+                    handler.Application?.Name,
+                    handler.Application?.Contracts.OfType<Parameter>().FirstOrDefault()?.Value
+                )
+            );
     }
 }

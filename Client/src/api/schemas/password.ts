@@ -10,5 +10,5 @@ import type { PasswordType } from "./passwordType";
 
 export type Password = Contract &
   PasswordAllOf & {
-    Type: PasswordType;
+    type: PasswordType;
   };

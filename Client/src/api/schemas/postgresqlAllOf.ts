@@ -7,7 +7,16 @@
 
 export type PostgresqlAllOf = {
   /** @nullable */
-  databaseName?: string | null;
+  username?: string | null;
+  /** @nullable */
+  password?: string | null;
+  /** @nullable */
+  host?: string | null;
+  /** @nullable */
+  database?: string | null;
+  /** @nullable */
+  networkName?: string | null;
   admin: boolean;
-  networkName: string;
+  installed?: boolean;
+  network: string;
 };

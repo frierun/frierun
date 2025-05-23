@@ -1,30 +1,30 @@
-﻿Name: "n8n"
-Url: "https://docs.n8n.io/hosting/installation/docker/"
-ShortDescription: "Building workflows/integrations"
-FullDescription: "Stop struggling with your scripts, start creating workflows 10X faster — with n8n"
-Tags: [ "network" ]
-Contracts:
-  - Type: "Selector"
-    Name: "Database"
-    Options:
-      - Name: "PostgreSQL"
-        Contracts:
-          - Type: "Container"
-            ImageName: "docker.n8n.io/n8nio/n8n:latest"
-            Env:
+﻿name: "n8n"
+url: "https://docs.n8n.io/hosting/installation/docker/"
+shortDescription: "Building workflows/integrations"
+fullDescription: "Stop struggling with your scripts, start creating workflows 10X faster — with n8n"
+tags: [ "network" ]
+contracts:
+  - type: "Selector"
+    name: "Database"
+    options:
+      - name: "PostgreSQL"
+        contracts:
+          - type: "Container"
+            imageName: "docker.n8n.io/n8nio/n8n:latest"
+            env:
               DB_TYPE: "postgresdb"
               DB_POSTGRESDB_HOST: "{{Postgresql::Host}}"
               DB_POSTGRESDB_DATABASE: "{{Postgresql::Database}}"
-              DB_POSTGRESDB_USER: "{{Postgresql::User}}"
+              DB_POSTGRESDB_USER: "{{Postgresql::Username}}"
               DB_POSTGRESDB_PASSWORD: "{{Postgresql::Password}}"
-      - Name: "SQLite"
-        Contracts:
-          - Type: "Container"
-            ImageName: "docker.n8n.io/n8nio/n8n:latest"
+      - name: "SQLite"
+        contracts:
+          - type: "Container"
+            imageName: "docker.n8n.io/n8nio/n8n:latest"
             
-  - Type: "HttpEndpoint"
-    Port: 5678
+  - type: "HttpEndpoint"
+    port: 5678
     
-  - Type: "Mount"
-    VolumeName: "data"
-    Path: "/home/node/.n8n"
+  - type: "Mount"
+    volume: "data"
+    path: "/home/node/.n8n"

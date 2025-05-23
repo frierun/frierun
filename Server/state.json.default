@@ -1,23 +1,89 @@
 ﻿{
-  "Applications": [
+  "applications": [
     {
-      "Name": "localhost domain",
-      "Package": "static-domain",
-      "Url": null,
-      "Description": "Default localhost domain",
-      "Resources": [
+      "name": "localhost domain",
+      "package": "static-domain",
+      "url": null,
+      "description": "Domain: localhost",
+      "contracts": [
         {
-          "Type": "ResolvedParameter",
-          "Name": "Domain",
-          "Value": "localhost"
+          "type": "Parameter",
+          "defaultValue": "localhost",
+          "value": "localhost",
+          "installed": true,
+          "name": "Domain",
+          "handler": {
+            "typeName": "ParameterHandler"
+          }
         },
         {
-          "Type": "ResolvedSelector",
-          "Name": "Internal",
-          "Value": "Yes"
+          "type": "Substitute",
+          "originalId": "Package:static-domain",
+          "name": "Package:static-domain",
+          "handler": {
+            "typeName": "SubstituteHandler"
+          },
+          "installed": true
+        },
+        {
+          "type": "Selector",
+          "value": "Yes",
+          "installed": true,
+          "options": [
+            {
+              "name": "Yes",
+              "contracts": null
+            },
+            {
+              "name": "No",
+              "contracts": null
+            }
+          ],
+          "name": "Internal",
+          "handler": {
+            "typeName": "SelectorHandler"
+          }
         }
       ],
-      "RequiredApplications": []
+      "requiredApplications": []
+    },
+    {
+      "name": "docker",
+      "package": "docker",
+      "url": null,
+      "description": null,
+      "contracts": [
+        {
+          "type": "Parameter",
+          "defaultValue": null,
+          "value": "",
+          "installed": true,
+          "name": "Uri",
+          "handler": {
+            "typeName": "ParameterHandler"
+          }
+        },
+        {
+          "type": "Substitute",
+          "originalId": "DockerApiConnection:",
+          "name": "DockerApiConnection:",
+          "handler": {
+            "typeName": "SubstituteHandler"
+          },
+          "installed": true
+        },
+        {
+          "type": "DockerApiConnection",
+          "path": "",
+          "isPodman": false,
+          "handler": {
+            "typeName": "DockerApiConnectionHandler"
+          },
+          "name": "",
+          "installed": true
+        }
+      ],
+      "requiredApplications": []
     }
   ]
 }

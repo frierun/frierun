@@ -10,9 +10,12 @@ export type ContainerAllOf = {
   /** @nullable */
   containerName?: string | null;
   /** @nullable */
+  networkName?: string | null;
+  /** @nullable */
   imageName?: string | null;
   requireDocker: boolean;
+  installed?: boolean;
   command: string[];
   env: ContainerAllOfEnv;
-  networkName: string;
+  network: string;
 };

@@ -1,15 +1,15 @@
-﻿Name: "uptime-kuma"
-Url: "https://github.com/louislam/uptime-kuma/"
-ShortDescription: "Uptime monitoring"
-FullDescription: "Monitoring uptime for HTTP(s) / TCP / HTTP(s) Keyword / HTTP(s) Json Query / Ping / DNS Record / Push / Steam Game Server / Docker Containers"
-Tags: [ "dashboard", "network" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "louislam/uptime-kuma:1"
+﻿name: "uptime-kuma"
+url: "https://github.com/louislam/uptime-kuma/"
+shortDescription: "Uptime monitoring"
+fullDescription: "Monitoring uptime for HTTP(s) / TCP / HTTP(s) Keyword / HTTP(s) Json Query / Ping / DNS Record / Push / Steam Game Server / Docker Containers"
+tags: [ "dashboard", "network" ]
+contracts:
+  - type: "Container"
+    imageName: "louislam/uptime-kuma:1"
     
-  - Type: "HttpEndpoint"
-    Port: 3001
+  - type: "HttpEndpoint"
+    port: 3001
     
-  - Type: "Mount"
-    VolumeName: "data"
-    Path: "/app/data"
+  - type: "Mount"
+    volume: "data"
+    path: "/app/data"

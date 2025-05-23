@@ -10,5 +10,5 @@ import type { ParameterType } from "./parameterType";
 
 export type Parameter = Contract &
   ParameterAllOf & {
-    Type: ParameterType;
+    type: ParameterType;
   };

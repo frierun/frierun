@@ -1,5 +1,5 @@
 ﻿using Frierun.Server.Data;
-using Frierun.Server.Installers;
+using Frierun.Server.Handlers;
 
 namespace Frierun.Tests.Data;
 
@@ -14,7 +14,7 @@ public class DiscoveryGraphTests : BaseTests
         var graph = new DiscoveryGraph();
 
         graph.Apply(
-            new InstallerInitializeResult(
+            new ContractInitializeResult(
                 rootContract with { DependsOn = [emptyContract] },
                 [queuedContract]
             )
@@ -32,7 +32,7 @@ public class DiscoveryGraphTests : BaseTests
         var graph = new DiscoveryGraph();
 
         graph.Apply(
-            new InstallerInitializeResult(
+            new ContractInitializeResult(
                 rootContract,
                 [rootContract]
             )
@@ -48,7 +48,7 @@ public class DiscoveryGraphTests : BaseTests
         var graph = new DiscoveryGraph();
 
         graph.Apply(
-            new InstallerInitializeResult(
+            new ContractInitializeResult(
                 rootContract with { DependsOn = [rootContract] }
             )
         );

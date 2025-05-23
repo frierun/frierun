@@ -1,0 +1,30 @@
+﻿name: "adguard-home"
+url: "https://hub.docker.com/r/adguard/adguardhome"
+shortDescription: "Blocking ads & tracking"
+fullDescription: "AdGuard Home is a network-wide software for blocking ads & tracking. 
+  After you set it up, it’ll cover ALL your home devices, and you don’t need any client-side software for that. 
+  With the rise of Internet-Of-Things and connected devices, it becomes more and more important to be able to control your whole network."
+tags: [ "network" ]
+contracts:
+  - type: "Container"
+    imageName: "adguard/adguardhome:latest"
+    command: [ "--web-addr", "0.0.0.0:80" ]
+
+  - type: "HttpEndpoint"
+    port: 80
+
+  - type: "PortEndpoint"
+    port: 53
+    protocol: "tcp"
+
+  - type: "PortEndpoint"
+    port: 53
+    protocol: "udp"
+
+  - type: "Mount"
+    volume: "data"
+    path: "/opt/adguardhome/work"
+
+  - type: "Mount"
+    volume: "config"
+    path: "/opt/adguardhome/conf"

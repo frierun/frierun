@@ -4,10 +4,11 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { InstallerDefinition } from "./installerDefinition";
+import type { IHandlerLazy } from "./iHandlerLazy";
 
 export interface Contract {
-  Type: string;
+  type: string;
   name: string;
-  installer?: InstallerDefinition;
+  handler?: IHandlerLazy;
+  installed?: boolean;
 }

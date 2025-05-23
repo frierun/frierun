@@ -1,12 +1,13 @@
-﻿using System.Text.Json.Serialization;
-using Frierun.Server.Installers;
+﻿using System.Diagnostics;
+using System.Text.Json.Serialization;
+using Frierun.Server.Handlers;
 
 namespace Frierun.Server.Data;
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
-[JsonDerivedType(typeof(ConnectExternalContainer), nameof(ConnectExternalContainer))]
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(Container), nameof(Container))]
 [JsonDerivedType(typeof(Dependency), nameof(Dependency))]
+[JsonDerivedType(typeof(DockerApiConnection), nameof(DockerApiConnection))]
 [JsonDerivedType(typeof(Domain), nameof(Domain))]
 [JsonDerivedType(typeof(File), nameof(File))]
 [JsonDerivedType(typeof(HttpEndpoint), nameof(HttpEndpoint))]
@@ -24,15 +25,30 @@ namespace Frierun.Server.Data;
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
 public abstract record Contract(
     string Name,
-    InstallerDefinition? Installer = null,
+    bool Installed = false,
     IEnumerable<ContractId>? DependsOn = null,
-    IEnumerable<ContractId>? DependencyOf = null
+    IEnumerable<ContractId>? DependencyOf = null,
+    Lazy<IHandler?>? LazyHandler = null
 )
 {
-    [JsonIgnore] public ContractId Id => ContractId.Create(GetType(), Name);
+    [JsonIgnore]
+    public ContractId Id  => ContractId.Create(GetType(), Name);
 
     [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = DependsOn ?? Array.Empty<ContractId>();
     [JsonIgnore] public IEnumerable<ContractId> DependencyOf { get; init; } = DependencyOf ?? Array.Empty<ContractId>();
+
+    [JsonPropertyName("handler")]
+    [JsonInclude]
+    public Lazy<IHandler?> LazyHandler { get; protected init; } = LazyHandler ?? new Lazy<IHandler?>((IHandler?)null);
+
+    [JsonIgnore]
+    public IHandler? Handler
+    {
+        get => LazyHandler.Value;
+        init => LazyHandler = new Lazy<IHandler?>(value);
+    }
+
+    public virtual bool Installed { get; init; } = Installed;
 
     public virtual Contract With(Contract other)
     {
@@ -40,4 +56,26 @@ public abstract record Contract(
     }
 
     public static implicit operator ContractId(Contract contract) => contract.Id;
+
+    /// <summary>
+    /// Installs the contract using the handler.
+    /// </summary>
+    public Contract Install(ExecutionPlan plan)
+    {
+        if (Handler == null)
+        {
+            throw new Exception($"No handler for {Name}");
+        }
+
+        return Handler.Install(this, plan) with { Installed = true };
+    }
+
+    /// <summary>
+    /// Uninstalls the contract
+    /// </summary>
+    public void Uninstall()
+    {
+        Debug.Assert(Installed, "Contract is not installed");
+        Handler?.Uninstall(this);
+    }
 }

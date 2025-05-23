@@ -4,18 +4,19 @@ public record Package(
     string Name,
     string? Url = null,
     string? Prefix = null,
+    string? IconUrl = null,
     string? ApplicationUrl = null,
     string? ApplicationDescription = null,
     string? ShortDescription = null,
     string? FullDescription = null,
     IReadOnlyList<string>? Tags = null,
-    IEnumerable<Contract>? Contracts = null
+    IEnumerable<Contract>? Contracts = null,
+    Application? Result = null
 ) : Contract(Name), IHasStrings
 {
     public IReadOnlyList<string> Tags { get; init; } = Tags ?? Array.Empty<string>();
     public IEnumerable<Contract> Contracts { get; init; } = Contracts ?? Array.Empty<Contract>();
 
-    /// <inheritdoc />
     public Contract ApplyStringDecorator(Func<string, string> decorator)
     {
         return this with
@@ -25,7 +26,6 @@ public record Package(
         };
     }
 
-    /// <inheritdoc />
     public override Contract With(Contract other)
     {
         if (other is not Package package || other.Id != Id)

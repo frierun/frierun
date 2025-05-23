@@ -5,4 +5,8 @@
  * OpenAPI spec version: 1.0
  */
 
-export type PasswordAllOf = { [key: string]: unknown };
+export type PasswordAllOf = {
+  /** @nullable */
+  value?: string | null;
+  installed?: boolean;
+};

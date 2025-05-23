@@ -10,5 +10,5 @@ import type { DockerVolumeType } from "./dockerVolumeType";
 
 export type DockerVolume = Resource &
   DockerVolumeAllOf & {
-    Type: DockerVolumeType;
+    type: DockerVolumeType;
   };

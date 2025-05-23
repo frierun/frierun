@@ -2,69 +2,118 @@
 using Autofac;
 using Docker.DotNet;
 using Frierun.Server.Data;
-using Frierun.Server.Installers;
+using Frierun.Server.Handlers;
 using Module = Autofac.Module;
-using ResolvedParameter = Autofac.Core.ResolvedParameter;
 
 namespace Frierun.Server;
 
-public class AutofacModule : Module 
+public class AutofacModule : Module
 {
-    /// <inheritdoc />
     protected override void Load(ContainerBuilder builder)
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        
-        // Installers
-        builder.RegisterAssemblyTypes(assembly)
-            .Where(type => type.Namespace?.StartsWith("Frierun.Server.Installers.Base") == true)
-            .AsImplementedInterfaces()
-            .SingleInstance();
-        builder.RegisterAssemblyTypes(assembly)
-            .Where(type => type.Namespace?.StartsWith("Frierun.Server.Installers.Docker") == true)
-            .AsImplementedInterfaces()
+        // Handlers
+        builder.RegisterInstance<ProviderScopeBuilder>(
+                static builder =>
+                {
+                    var assembly = Assembly.GetExecutingAssembly();
+                    builder.RegisterAssemblyTypes(assembly)
+                        .Where(type => type.Namespace?.StartsWith("Frierun.Server.Handlers.Base") == true)
+                        .AsImplementedInterfaces()
+                        .SingleInstance();
+                }
+            )
+            .Named<ProviderScopeBuilder>("base")
             .SingleInstance();
 
-        // Package specific installers
-        builder.RegisterType<MysqlInstaller>()
-            .Named<IInstaller>("mariadb")
-            .InstancePerDependency();
-        builder.RegisterType<MysqlInstaller>()
-            .Named<IInstaller>("mysql")
-            .InstancePerDependency();
-        builder.RegisterType<PostgresqlInstaller>()
-            .Named<IInstaller>("postgresql")
-            .InstancePerDependency();
-        builder.RegisterType<StaticDomainInstaller>()
-            .Named<IInstaller>("static-domain")
-            .InstancePerDependency();
-        builder.RegisterType<TraefikHttpEndpointInstaller>()
-            .Named<IInstaller>("traefik")
-            .InstancePerDependency();
-        
+        builder.RegisterInstance<ProviderScopeBuilder>(
+                static builder =>
+                {
+                    var assembly = Assembly.GetExecutingAssembly();
+                    builder.RegisterAssemblyTypes(assembly)
+                        .Where(type => type.Namespace?.StartsWith("Frierun.Server.Handlers.Docker") == true)
+                        .AsImplementedInterfaces()
+                        .SingleInstance();
+
+                    builder.RegisterType<DockerService>().AsSelf().SingleInstance();
+                    builder.Register<IDockerClient>(
+                            context =>
+                            {
+                                var contract = context
+                                    .Resolve<Application>()
+                                    .Contracts
+                                    .OfType<DockerApiConnection>()
+                                    .Single();
+                                    
+                                var path = contract.Path ?? "";
+                                var configuration = path == ""
+                                    ? new DockerClientConfiguration()
+                                    : new DockerClientConfiguration(new Uri(path));
+
+                                return configuration.CreateClient();
+                            }
+                        )
+                        .SingleInstance();
+                }
+            )
+            .Named<ProviderScopeBuilder>("docker")
+            .SingleInstance();
+
+        builder.RegisterInstance<ProviderScopeBuilder>(
+                static builder => builder.RegisterType<MysqlHandler>()
+                    .AsImplementedInterfaces()
+                    .SingleInstance()
+            )
+            .Named<ProviderScopeBuilder>("mysql")
+            .SingleInstance();
+        builder.RegisterInstance<ProviderScopeBuilder>(
+                static builder => builder.RegisterType<MysqlHandler>()
+                    .AsImplementedInterfaces()
+                    .SingleInstance()
+            )
+            .Named<ProviderScopeBuilder>("mariadb")
+            .SingleInstance();
+        builder.RegisterInstance<ProviderScopeBuilder>(
+                static builder => builder.RegisterType<PostgresqlHandler>()
+                    .AsImplementedInterfaces()
+                    .SingleInstance()
+            )
+            .Named<ProviderScopeBuilder>("postgresql")
+            .SingleInstance();
+        builder.RegisterInstance<ProviderScopeBuilder>(
+                static builder => builder.RegisterType<StaticDomainHandler>()
+                    .AsImplementedInterfaces()
+                    .SingleInstance()
+            )
+            .Named<ProviderScopeBuilder>("static-domain")
+            .SingleInstance();
+        builder.RegisterInstance<ProviderScopeBuilder>(
+                static builder => builder.RegisterType<TraefikHttpEndpointHandler>()
+                    .AsImplementedInterfaces()
+                    .SingleInstance()
+            )
+            .Named<ProviderScopeBuilder>("traefik")
+            .SingleInstance();
+
         // Services
         builder.RegisterType<ContractRegistry>().AsSelf().SingleInstance();
-        builder.RegisterType<DockerService>().AsSelf().SingleInstance();
         builder.RegisterType<ExecutionService>().AsSelf().SingleInstance();
         builder.RegisterType<InstallService>().AsSelf().SingleInstance();
         builder.RegisterType<PackageRegistry>().AsSelf().SingleInstance();
-        builder.RegisterType<InstallerRegistry>().AsSelf().SingleInstance();
+        builder.RegisterType<HandlerRegistry>().AsSelf().SingleInstance();
         builder.RegisterType<StateManager>().AsSelf().SingleInstance();
         builder.RegisterType<UninstallService>().AsSelf().SingleInstance();
-        
-        builder.Register<IDockerClient>(_ => new DockerClientConfiguration().CreateClient()).SingleInstance();
 
-        // Services/Serialization
+        // Serialization
         builder.Register<string>(_ => Path.Combine(Storage.DirectoryName, "state.json"))
             .Named<string>("stateFilePath")
             .SingleInstance();
-        
+
         builder.RegisterType<StateSerializer>()
             .SingleInstance()
-            .WithParameter(ResolvedParameter.ForNamed<string>("stateFilePath"));
+            .WithParameter(Autofac.Core.ResolvedParameter.ForNamed<string>("stateFilePath"));
         builder.RegisterType<PackageSerializer>().SingleInstance();
-        
-        
-        builder.Register<State>(context => context.Resolve<StateSerializer>().Load()).AsSelf().SingleInstance();        
+
+
+        builder.Register<State>(context => context.Resolve<StateSerializer>().Load()).AsSelf().SingleInstance();
     }
 }

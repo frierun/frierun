@@ -10,5 +10,5 @@ import type { VolumeType } from "./volumeType";
 
 export type Volume = Contract &
   VolumeAllOf & {
-    Type: VolumeType;
+    type: VolumeType;
   };

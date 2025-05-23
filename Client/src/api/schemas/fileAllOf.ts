@@ -13,5 +13,5 @@ export type FileAllOf = {
   owner?: number | null;
   /** @nullable */
   group?: number | null;
-  volumeName: string;
+  volume: string;
 };

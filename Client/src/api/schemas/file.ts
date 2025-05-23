@@ -10,5 +10,5 @@ import type { FileType } from "./fileType";
 
 export type File = Contract &
   FileAllOf & {
-    Type: FileType;
+    type: FileType;
   };

@@ -10,5 +10,5 @@ import type { PortEndpointType } from "./portEndpointType";
 
 export type PortEndpoint = Contract &
   PortEndpointAllOf & {
-    Type: PortEndpointType;
+    type: PortEndpointType;
   };

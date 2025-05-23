@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Tests.Integration;
 
-public class BaseTests : IDisposable
+public abstract class BaseTests
 {
     private readonly WebApplicationFactory<Program> _factory = new();
     protected IServiceProvider Services => _factory.Services;
@@ -13,13 +13,6 @@ public class BaseTests : IDisposable
     protected BaseTests()
     {
         ClearState();
-    }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        var dockerService = Services.GetRequiredService<DockerService>();
-        dockerService.Prune().Wait();
     }
 
     protected HttpClient CreateClient()
@@ -35,25 +28,32 @@ public class BaseTests : IDisposable
             state.RemoveApplication(application);
         }
     }
-    
+
     /// <summary>
     /// Installs package by name and returns application
     /// </summary>
-    protected Application? InstallPackage(string name)
+    protected Application InstallPackage(string name, IEnumerable<Contract>? overrides = null)
     {
         Services.GetRequiredService<PackageRegistry>().Load();
         var package = Services.GetRequiredService<PackageRegistry>().Find(name)
                       ?? throw new Exception($"Package {name} not found");
 
+        if (overrides != null)
+        {
+            var overridePackage = new Package(name) {Contracts = overrides};
+            package = (Package)package.With(overridePackage);
+        }
+        
         return InstallPackage(package);
     }
 
-    protected Application? InstallPackage(Package package)
+    protected Application InstallPackage(Package package)
     {
         var plan = Services.GetRequiredService<ExecutionService>().Create(package);
-        return Services.GetRequiredService<InstallService>().Handle(plan);
+        return Services.GetRequiredService<InstallService>().Handle(plan) ??
+               throw new Exception($"Package {package.Name} not installed");
     }
-    
+
     protected void UninstallApplication(Application application)
     {
         Services.GetRequiredService<UninstallService>().Handle(application);

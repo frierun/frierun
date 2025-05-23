@@ -10,5 +10,5 @@ import type { SubstituteType } from "./substituteType";
 
 export type Substitute = Contract &
   SubstituteAllOf & {
-    Type: SubstituteType;
+    type: SubstituteType;
   };

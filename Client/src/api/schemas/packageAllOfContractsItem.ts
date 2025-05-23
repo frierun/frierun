@@ -4,9 +4,9 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { ConnectExternalContainer } from "./connectExternalContainer";
 import type { Container } from "./container";
 import type { Dependency } from "./dependency";
+import type { DockerApiConnection } from "./dockerApiConnection";
 import type { Domain } from "./domain";
 import type { File } from "./file";
 import type { HttpEndpoint } from "./httpEndpoint";
@@ -24,9 +24,9 @@ import type { Substitute } from "./substitute";
 import type { Volume } from "./volume";
 
 export type PackageAllOfContractsItem =
-  | ConnectExternalContainer
   | Container
   | Dependency
+  | DockerApiConnection
   | Domain
   | File
   | HttpEndpoint

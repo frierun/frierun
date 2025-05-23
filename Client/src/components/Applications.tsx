@@ -22,7 +22,7 @@ export default function Applications() {
                             {item.packageName && (
                                 <img 
                                     alt={item.packageName}
-                                    src={`/packages/${item.packageName}.png`} 
+                                    src={item.iconUrl ?? `https://cdn.jsdelivr.net/gh/selfhst/icons/png/${item.packageName}.png`}
                                     className={"rounded"}
                                 />
                             )}

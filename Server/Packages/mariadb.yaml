@@ -1,16 +1,16 @@
-﻿Name: "mariadb"
-Url: "https://hub.docker.com/_/mariadb"
-ApplicationDescription: "Root password: {{Password::Value}}"
-ShortDescription: "SQL database"
-FullDescription: "MariaDB Server is one of the most popular open source relational databases.
+﻿name: "mariadb"
+url: "https://hub.docker.com/_/mariadb"
+applicationDescription: "Root password: {{Password::Value}}"
+shortDescription: "SQL database"
+fullDescription: "MariaDB Server is one of the most popular open source relational databases.
   It’s made by the original developers of MySQL and guaranteed to stay open source."
-Tags: [ "storage", "provider" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "mariadb:10"
-    Env:
+tags: [ "storage", "provider" ]
+contracts:
+  - type: "Container"
+    imageName: "mariadb:10"
+    env:
       MARIADB_ROOT_PASSWORD: "{{Password::Value}}"
       
-  - Type: "Mount"
-    VolumeName: "data"
-    Path: "/var/lib/mysql"
+  - type: "Mount"
+    volume: "data"
+    path: "/var/lib/mysql"

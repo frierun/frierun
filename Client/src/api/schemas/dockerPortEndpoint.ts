@@ -10,5 +10,5 @@ import type { DockerPortEndpointType } from "./dockerPortEndpointType";
 
 export type DockerPortEndpoint = Resource &
   DockerPortEndpointAllOf & {
-    Type: DockerPortEndpointType;
+    type: DockerPortEndpointType;
   };

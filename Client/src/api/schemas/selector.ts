@@ -10,5 +10,5 @@ import type { SelectorType } from "./selectorType";
 
 export type Selector = Contract &
   SelectorAllOf & {
-    Type: SelectorType;
+    type: SelectorType;
   };

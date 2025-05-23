@@ -1,16 +1,16 @@
-﻿Name: "portainer"
-Url: "https://docs.portainer.io/start/install-ce/server/docker/linux"
-ShortDescription: "Container management"
-FullDescription: "Portainer is your all-in-one platform engineering solution for managing containerized environments."
-Tags: [ "dev" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "portainer/portainer-ce:latest"
-    RequireDocker: true
+﻿name: "portainer"
+url: "https://docs.portainer.io/start/install-ce/server/docker/linux"
+shortDescription: "Container management"
+fullDescription: "Portainer is your all-in-one platform engineering solution for managing containerized environments."
+tags: [ "dev" ]
+contracts:
+  - type: "Container"
+    imageName: "portainer/portainer-ce:latest"
+    requireDocker: true
     
-  - Type: "HttpEndpoint"
-    Port: 9000
+  - type: "HttpEndpoint"
+    port: 9000
     
-  - Type: "Mount"
-    VolumeName: "data"
-    Path: "/data"
+  - type: "Mount"
+    volume: "data"
+    path: "/data"

@@ -1,12 +1,12 @@
-﻿using Frierun.Server.Data;
+﻿using System.Diagnostics;
+using Frierun.Server.Data;
 
 namespace Frierun.Server;
 
 public class UninstallService(
     State state,
     StateSerializer stateSerializer,
-    StateManager stateManager,
-    InstallerRegistry installerRegistry)
+    StateManager stateManager)
 {
     public void Handle(Application application)
     {
@@ -25,17 +25,13 @@ public class UninstallService(
                 }
             }
             
-            foreach (var resource in application.Resources.Reverse())
+            foreach (var contract in application.Contracts.Reverse())
             {
-                if (resource is Application)
-                {
-                    throw new Exception("Application cannot contain another application");
-                }
+                Debug.Assert(contract is not Package);
                 
-                UninstallResource(resource);
+                contract.Uninstall();
             }
 
-            UninstallResource(application);
             state.RemoveApplication(application);
             
             stateSerializer.Save(state);
@@ -44,18 +40,5 @@ public class UninstallService(
         {
             stateManager.FinishTask();
         }
-    }
-
-    /// <summary>
-    /// Uninstalls a resource
-    /// </summary>
-    private void UninstallResource(Resource resource)
-    {
-        var uninstaller = installerRegistry.GetUninstaller(resource.GetType());
-        if (uninstaller == null)
-        {
-            throw new Exception($"Uninstaller not found for resource type {resource.GetType()}");
-        }
-        uninstaller.Uninstall(resource);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Frierun.Server.Data;
+using Frierun.Server.Handlers;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -19,7 +20,7 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
     [HttpGet("{id}/plan")]
     [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(IEnumerable<Contract>))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Package not found")]
-    [SwaggerResponse(StatusCodes.Status409Conflict, "No installation options found", typeof(Contract))]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "Error installing contract", typeof(HandlerExceptionResult))]
     public IActionResult Plan(string id, PackageRegistry packageRegistry, ExecutionService executionService)
     {
         var package = packageRegistry.Find(id);
@@ -32,12 +33,9 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
         {
             return Ok(executionService.Create(package).Contracts.Values);
         }
-        catch (InstallerNotFoundException e)
+        catch (HandlerException e)
         {
-            return new ConflictObjectResult(e.Contract)
-            {
-                DeclaredType = typeof(Contract)
-            };
+            return new ConflictObjectResult(e.Result);
         }
     }
 
@@ -47,7 +45,7 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
     [HttpPost("{id}/install")]
     [SwaggerResponse(StatusCodes.Status202Accepted, "Started installation")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Package not found")]
-    [SwaggerResponse(StatusCodes.Status409Conflict, "No installation options found", typeof(Contract))]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "Error installing contract", typeof(HandlerExceptionResult))]
     public IActionResult Install(
         string id,
         [FromBody] Package overrides,
@@ -70,12 +68,9 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
             logger.LogInformation("Installing package {id}", id);
             Task.Run(() => installService.Handle(plan));
         }
-        catch (InstallerNotFoundException e)
+        catch (HandlerException e)
         {
-            return new ConflictObjectResult(e.Contract)
-            {
-                DeclaredType = typeof(Contract)
-            };
+            return new ConflictObjectResult(e.Result);
         }
 
         return Accepted();

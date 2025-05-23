@@ -10,5 +10,5 @@ import type { MysqlType } from "./mysqlType";
 
 export type Mysql = Contract &
   MysqlAllOf & {
-    Type: MysqlType;
+    type: MysqlType;
   };

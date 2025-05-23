@@ -10,7 +10,6 @@ public sealed class PackageFactory : Faker<Package>
     
     public PackageFactory(PackageRegistry packageRegistry)
     {
-        StrictMode(true);
         CustomInstantiator(_ => new Package(""));
         this.UniqueRuleFor(p => p.Name, f => f.Lorem.Word(), _uniqueNames);
         RuleFor(p => p.Prefix, (_, p) => p.Name);
@@ -21,9 +20,6 @@ public sealed class PackageFactory : Faker<Package>
         RuleFor(p => p.FullDescription, f => f.Lorem.Paragraph());
         RuleFor(p => p.Tags, f => new List<string>(f.Lorem.Words()));
         RuleFor(p => p.Contracts, _ => Array.Empty<Contract>());
-        Ignore(p => p.Installer);
-        Ignore(p => p.DependsOn);
-        Ignore(p => p.DependencyOf);
         FinishWith((_, package) => packageRegistry.Packages.Add(package));
     }
 }

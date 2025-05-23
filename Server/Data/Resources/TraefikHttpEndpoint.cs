@@ -1,7 +1,8 @@
-﻿namespace Frierun.Server.Data;
+﻿using System.Text.Json.Serialization;
 
-public record TraefikHttpEndpoint(
-    string Domain,
-    int Port,
-    bool Ssl = false
-) : GenericHttpEndpoint(new Uri($"{(Ssl ? "https": "http")}://{Domain}:{Port}"));
+namespace Frierun.Server.Data;
+
+public class TraefikHttpEndpoint : GenericHttpEndpoint
+{
+    public required string NetworkName { get; init; }
+}

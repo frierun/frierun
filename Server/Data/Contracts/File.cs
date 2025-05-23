@@ -1,20 +1,17 @@
-﻿using System.Text.Json.Serialization;
-
+﻿
 namespace Frierun.Server.Data;
 
 public record File(
     string Path,
     string? Name = null,
     string? Text = null,
-    string? VolumeName = null,
+    ContractId<Volume>? Volume = null,
     int? Owner = null,
     int? Group = null
-) : Contract(Name ?? $"{Path}{(VolumeName != null ? " in " + VolumeName : "")}"), IHasStrings
+) : Contract(Name ?? $"{Path}{(Volume != null ? " in " + Volume.Name : "")}"), IHasStrings
 {
-    public string VolumeName { get; } = VolumeName ?? "";
-    [JsonIgnore] public ContractId<Volume> VolumeId => new(VolumeName);
+    public ContractId<Volume> Volume { get; init; } = Volume ?? new ContractId<Volume>("");
     
-    /// <inheritdoc />
     Contract IHasStrings.ApplyStringDecorator(Func<string, string> decorator)
     {
         return this with

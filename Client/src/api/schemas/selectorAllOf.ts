@@ -7,7 +7,8 @@
 import type { SelectorOption } from "./selectorOption";
 
 export type SelectorAllOf = {
-  options: SelectorOption[];
   /** @nullable */
-  selectedOption?: string | null;
+  value?: string | null;
+  installed?: boolean;
+  options: SelectorOption[];
 };

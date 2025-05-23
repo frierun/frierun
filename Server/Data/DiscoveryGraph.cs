@@ -1,4 +1,4 @@
-﻿using Frierun.Server.Installers;
+﻿using Frierun.Server.Handlers;
 
 namespace Frierun.Server.Data;
 
@@ -58,7 +58,7 @@ public class DiscoveryGraph
     /// <summary>
     /// Applies contract initialization result.
     /// </summary>
-    public void Apply(InstallerInitializeResult result)
+    public void Apply(ContractInitializeResult result)
     {
         Contracts[result.Contract.Id] = result.Contract;
         

@@ -1,45 +1,45 @@
-﻿Name: "syncthing"
-Url: "https://github.com/linuxserver/docker-syncthing"
-ShortDescription: "Continuous file synchronization"
-FullDescription: "Syncthing is a continuous file synchronization program.
+﻿name: "syncthing"
+url: "https://github.com/linuxserver/docker-syncthing"
+shortDescription: "Continuous file synchronization"
+fullDescription: "Syncthing is a continuous file synchronization program.
   It synchronizes files between two or more computers in real time, safely protected from prying eyes.
   Your data is your data alone and you deserve to choose where it is stored, whether it is shared with some third party,
   and how it’s transmitted over the internet."
-Tags: [ "storage" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "lscr.io/linuxserver/syncthing:latest"
-    Env:
+tags: [ "storage" ]
+contracts:
+  - type: "Container"
+    imageName: "lscr.io/linuxserver/syncthing:latest"
+    env:
       PUID: "1000"
       PGID: "1000"
       TZ: "Etc/UTC"
       
-  - Type: "HttpEndpoint"
-    Port: 8384
+  - type: "HttpEndpoint"
+    port: 8384
     
-  - Type: "PortEndpoint"
-    Port: 22000
-    Protocol: "tcp"
+  - type: "PortEndpoint"
+    port: 22000
+    protocol: "tcp"
     
-  - Type: "PortEndpoint"
-    Port: 22000
-    Protocol: "udp"
+  - type: "PortEndpoint"
+    port: 22000
+    protocol: "udp"
     
-  - Type: "PortEndpoint"
-    Port: 21027
-    Protocol: "udp"
+  - type: "PortEndpoint"
+    port: 21027
+    protocol: "udp"
     
-  - Type: "Mount"
-    VolumeName: "data"
-    Path: "/data"
+  - type: "Mount"
+    volume: "data"
+    path: "/data"
     
-  - Type: "Mount"
-    VolumeName: "config"
-    Path: "/config"
+  - type: "Mount"
+    volume: "config"
+    path: "/config"
     
-  - Type: "File"
-    VolumeName: "data"
-    Path: ""
-    Owner: 1000
-    Group: 1000
-    DependencyOf: [ "Container" ]
+  - type: "File"
+    volume: "data"
+    path: ""
+    owner: 1000
+    group: 1000
+    dependencyOf: [ "Container" ]

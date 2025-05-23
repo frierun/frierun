@@ -3,7 +3,7 @@
 export type Domain = {
     typeName: string;
     applicationName?: string | null;
-    subdomain?: string | null;
+    domain?: string | null;
 }
 
 type Props = {
@@ -13,30 +13,33 @@ type Props = {
 
 export default function DomainForm({domain, setDomain}: Props) {
     const {data} = useGetDomains();
+    const subdomain = domain.domain?.split('.')[0] ?? '';
+    const domainName = domain.domain?.split('.').slice(1).join('.') ?? '';
     return (
         <div>
             <label className={"inline-block w-48"}>
                 Domain:
             </label>
-            <input value={domain.subdomain ?? ''} onChange={e => {
+            <input value={subdomain} onChange={e => {
                 setDomain({
                     ...domain,
-                    subdomain: e.target.value
+                    domain: `${e.target.value}.${domainName}`
                 });
             }}/>
 
             {typeof data !== 'undefined' && (
                 <select
                     value={data.data.findIndex(
-                        installer => installer.typeName === domain.typeName
-                            && installer.applicationName === domain.applicationName
+                        handler => handler.typeName === domain.typeName
+                            && handler.applicationName === domain.applicationName
                     )}
                     onChange={e => {
                         const index = parseInt(e.target.value);
                         setDomain({
                             ...domain,
                             typeName: data.data[index].typeName,
-                            applicationName: data.data[index].applicationName
+                            applicationName: data.data[index].applicationName,
+                            domain: `${subdomain}.${data.data[index].domainName ?? ""}`
                         });
                     }}
                 >

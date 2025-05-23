@@ -9,13 +9,7 @@ public sealed class VolumeFactory: Faker<Volume>
     
     public VolumeFactory()
     {
-        StrictMode(true);
         CustomInstantiator(_ => new Volume(""));
         this.UniqueRuleFor(p => p.Name, f => f.Lorem.Word(), _uniqueNames);
-        Ignore(p => p.Path);
-        Ignore(p => p.VolumeName);
-        Ignore(p => p.Installer);
-        Ignore(p => p.DependsOn);
-        Ignore(p => p.DependencyOf);
     }
 }

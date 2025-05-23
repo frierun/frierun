@@ -9,6 +9,9 @@ public class VolumesController : ControllerBase
     [HttpGet]
     public IEnumerable<DockerVolume> List(State state)
     {
-        return state.Resources.OfType<DockerVolume>();
+        return state.Contracts
+            .OfType<Volume>()
+            .Select(volume => volume.Result)
+            .OfType<DockerVolume>();
     }
 }

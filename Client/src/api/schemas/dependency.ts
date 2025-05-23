@@ -10,5 +10,5 @@ import type { DependencyType } from "./dependencyType";
 
 export type Dependency = Contract &
   DependencyAllOf & {
-    Type: DependencyType;
+    type: DependencyType;
   };

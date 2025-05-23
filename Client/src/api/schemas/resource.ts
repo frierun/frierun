@@ -6,5 +6,5 @@
  */
 
 export interface Resource {
-  Type: string;
+  type: string;
 }

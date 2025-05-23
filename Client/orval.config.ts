@@ -9,6 +9,7 @@
             httpClient: 'fetch',
             baseUrl: '/api/v1',
             prettier: true,
+            namingConvention: 'camelCase',
             clean: ['src/api/endpoints', 'src/api/schemas'],
             override: {
                 contentType: {

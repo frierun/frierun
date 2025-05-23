@@ -1,29 +1,30 @@
-﻿Name: "stashapp"
-Url: "https://github.com/stashapp/stash/"
-ShortDescription: "Mature content collection"
-FullDescription: "Stash is a web application written in Go for serving and organizing your mature content collection."
-Tags: [ "storage" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "stashapp/stash:latest"
-    Env:
+﻿name: "stashapp"
+iconUrl: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/stash.png"
+url: "https://github.com/stashapp/stash/"
+shortDescription: "Mature content collection"
+fullDescription: "Stash is a web application written in Go for serving and organizing your mature content collection."
+tags: [ "storage" ]
+contracts:
+  - type: "Container"
+    imageName: "stashapp/stash:latest"
+    env:
       STASH_STASH: "/data/"
       STASH_GENERATED: "/cache/generated/"
       STASH_METADATA: "/cache/metadata/"
       STASH_CACHE: "/cache/cache/"
       STASH_BLOBS: "/cache/blobs/"
       
-  - Type: "HttpEndpoint"
-    Port: 9999
+  - type: "HttpEndpoint"
+    port: 9999
     
-  - Type: "Mount"
-    VolumeName: "data"
-    Path: "/data"
+  - type: "Mount"
+    volume: "data"
+    path: "/data"
     
-  - Type: "Mount"
-    VolumeName: "cache"
-    Path: "/cache"
+  - type: "Mount"
+    volume: "cache"
+    path: "/cache"
     
-  - Type: "Mount"
-    VolumeName: "config"
-    Path: "/root/.stash"
+  - type: "Mount"
+    volume: "config"
+    path: "/root/.stash"

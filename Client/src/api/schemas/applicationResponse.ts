@@ -13,4 +13,6 @@ export interface ApplicationResponse {
   url?: string | null;
   /** @nullable */
   description?: string | null;
+  /** @nullable */
+  iconUrl?: string | null;
 }

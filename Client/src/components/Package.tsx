@@ -20,7 +20,11 @@ export default function Package({pkg}: Props) {
         <div className={"bg-gray p-2 lg:p-3 rounded-md flex justify-between items-center"}>
             <div className={"flex gap-3"}>
                 <div className={"h-12 w-12 rounded flex-shrink-0"}>
-                    <img src={`/packages/${pkg.name}.png`} className={"rounded"} alt={pkg.name}/>
+                    <img
+                        className={"rounded"}
+                        alt={pkg.name}
+                        src={pkg.iconUrl ?? `https://cdn.jsdelivr.net/gh/selfhst/icons/png/${pkg.name}.png`}
+                    />
                 </div>
                 <div>
                     <div className={"text-bold text-md font-bold"}>{pkg.name}</div>

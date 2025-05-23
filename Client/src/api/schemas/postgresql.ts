@@ -10,5 +10,5 @@ import type { PostgresqlType } from "./postgresqlType";
 
 export type Postgresql = Contract &
   PostgresqlAllOf & {
-    Type: PostgresqlType;
+    type: PostgresqlType;
   };

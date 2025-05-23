@@ -2,6 +2,17 @@
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      tmate_enabled:
+        type: boolean
+        description: 'Run the build with tmate debugging enabled'
+        required: false
+        default: false
+      filter:
+        type: string
+        description: 'Filter for the tests to run'
+        required: false
+        default: ''
   push:
     branches:
       - main
@@ -12,30 +23,41 @@ concurrency:
 
 jobs:
   test:
-    strategy:
-      fail-fast: false    
     runs-on: ubuntu-latest
     steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+      - name: Install podman
+        run: |
+          sudo apt-get install -y podman
+          sudo systemctl start podman.socket
+          sudo chmod 750 /run/podman
+          sudo chgrp -R docker /run/podman
+
       - uses: actions/checkout@v4
 
       - name: Setup dotnet
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.x
-          
+
       - name: Install dependencies
         run: dotnet restore --locked-mode
-        
+
       - name: Create node_modules
         run: |
           mkdir -p Client/node_modules
-          
+
       - name: Build
         run: dotnet build
-        
+
       - name: Test with the dotnet CLI
-        run: dotnet test Tests.Integration --logger "console;verbosity=normal" -- xUnit.StopOnFail=true
-        
+        run: dotnet test Tests.Integration --logger "console;verbosity=normal" --filter "${{inputs.filter}}" -- xUnit.StopOnFail=true
+
       - name: Collect logs
         if: ${{ failure() }}
         run: |
@@ -54,5 +76,9 @@ jobs:
         with:
           name: failure-logs
           path: failure-logs
+        
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ failure() && github.event_name == 'workflow_dispatch' && inputs.tmate_enabled }}
         
         

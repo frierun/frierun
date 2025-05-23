@@ -1,19 +1,19 @@
-﻿Name: "miniflux"
-Url: "https://miniflux.app/docs/docker.html"
-ApplicationDescription: "Login: admin\nPassword: {{Password::Value}}"
-ShortDescription: "Minimalist feed reader"
-FullDescription: "Miniflux is a minimalist software. The purpose of this application is to read feeds. Nothing else."
-Tags: [ "internet" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "miniflux/miniflux:latest"
-    Env:
-      DATABASE_URL: "postgres://{{Postgresql::User}}:{{Postgresql::Password}}@{{Postgresql::Host}}/{{Postgresql::Database}}?sslmode=disable"
+﻿name: "miniflux"
+url: "https://miniflux.app/docs/docker.html"
+applicationDescription: "Login: admin\nPassword: {{Password::Value}}"
+shortDescription: "Minimalist feed reader"
+fullDescription: "Miniflux is a minimalist software. The purpose of this application is to read feeds. Nothing else."
+tags: [ "internet" ]
+contracts:
+  - type: "Container"
+    imageName: "ghcr.io/miniflux/miniflux:latest"
+    env:
+      DATABASE_URL: "postgres://{{Postgresql::Username}}:{{Postgresql::Password}}@{{Postgresql::Host}}/{{Postgresql::Database}}?sslmode=disable"
       RUN_MIGRATIONS: "1"
       CREATE_ADMIN: "1"
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "{{Password::Value}}"
       
-  - Type: "HttpEndpoint"
-    Name: "frontend"
-    Port: 8080
+  - type: "HttpEndpoint"
+    name: "frontend"
+    port: 8080

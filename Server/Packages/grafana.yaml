@@ -1,20 +1,20 @@
-﻿Name: "grafana"
-Url: "https://grafana.com/docs/grafana/latest/setup-grafana/installation/docker/"
-ApplicationDescription: "Default login: admin\nDefault password: admin"
-ShortDescription: "Metrics visualisation, monitoring"
-FullDescription: "Grafana Open Source Software (OSS) enables you to query, visualize, alert on, and explore
+﻿name: "grafana"
+url: "https://grafana.com/docs/grafana/latest/setup-grafana/installation/docker/"
+applicationDescription: "Default login: admin\nDefault password: admin"
+shortDescription: "Metrics visualisation, monitoring"
+fullDescription: "Grafana Open Source Software (OSS) enables you to query, visualize, alert on, and explore
   your metrics, logs, and traces wherever they’re stored. "
-Tags: [ "dashboard", "dev" ]
-Contracts:
-  - Type: "Container"
-    ImageName: "grafana/grafana-oss:latest"
-    Env:
+tags: [ "dashboard", "dev" ]
+contracts:
+  - type: "Container"
+    imageName: "grafana/grafana-oss:latest"
+    env:
       LOG_LEVEL: "debug"
       TZ: "Etc/UTC"
       
-  - Type: "HttpEndpoint"
-    Port: 3000
+  - type: "HttpEndpoint"
+    port: 3000
     
-  - Type: "Mount"
-    VolumeName: "config"
-    Path: "/var/lib/grafana"
+  - type: "Mount"
+    volume: "config"
+    path: "/var/lib/grafana"
