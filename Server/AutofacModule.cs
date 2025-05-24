@@ -36,21 +36,12 @@ public class AutofacModule : Module
 
                     builder.RegisterType<DockerService>().AsSelf().SingleInstance();
                     builder.Register<IDockerClient>(
-                            context =>
-                            {
-                                var contract = context
-                                    .Resolve<Application>()
-                                    .Contracts
-                                    .OfType<DockerApiConnection>()
-                                    .Single();
-                                    
-                                var path = contract.Path ?? "";
-                                var configuration = path == ""
-                                    ? new DockerClientConfiguration()
-                                    : new DockerClientConfiguration(new Uri(path));
-
-                                return configuration.CreateClient();
-                            }
+                            static context => context
+                                .Resolve<Application>()
+                                .Contracts
+                                .OfType<DockerApiConnection>()
+                                .Single()
+                                .CreateClient()
                         )
                         .SingleInstance();
                 }

@@ -11,6 +11,7 @@ public class HandlerRegistry : IDisposable
     private readonly IIndex<string, ProviderScopeBuilder> _scopeBuilders;
     private readonly ILifetimeScope _container;
     private readonly ILifetimeScope _baseScope;
+    private readonly HashSet<Application> _applicationsToLoad = new();
     private readonly Dictionary<Application, ILifetimeScope> _applicationScopes = new();
     private readonly Dictionary<Application, IList<IHandler>> _handlerPerApplication = new();
     private readonly Dictionary<Type, IList<IHandler>> _handlerPerType = new();
@@ -34,10 +35,10 @@ public class HandlerRegistry : IDisposable
 
         foreach (var application in state.Applications)
         {
-            AddApplication(application);
+            _applicationsToLoad.Add(application);
         }
 
-        state.ApplicationAdded += AddApplication;
+        state.ApplicationAdded += application => _applicationsToLoad.Add(application);
         state.ApplicationRemoved += RemoveApplication;
     }
 
@@ -56,6 +57,8 @@ public class HandlerRegistry : IDisposable
     /// </summary>
     private void AddApplication(Application application)
     {
+        _applicationsToLoad.Remove(application);
+        
         var packageName = application.Package?.Name;
         if (packageName == null)
         {
@@ -93,6 +96,8 @@ public class HandlerRegistry : IDisposable
     /// </summary>
     private void RemoveApplication(Application application)
     {
+        _applicationsToLoad.Remove(application);
+        
         var packageName = application.Package?.Name;
         if (packageName == null)
         {
@@ -171,6 +176,11 @@ public class HandlerRegistry : IDisposable
     /// </summary>
     public IEnumerable<IHandler> GetHandlers(Type contractType)
     {
+        foreach (var application in _applicationsToLoad)
+        {
+            AddApplication(application);
+        }
+        
         if (!_handlerPerType.TryGetValue(contractType, out var handlers))
         {
             return Array.Empty<IHandler>();
@@ -181,6 +191,13 @@ public class HandlerRegistry : IDisposable
 
     public IHandler? GetHandler(string typeName, string? applicationName = null)
     {
+        if (applicationName != null)
+        {
+            foreach (var application in _applicationsToLoad.Where(application => applicationName == application.Name))
+            {
+                AddApplication(application);
+            }
+        }
         return _handlers.GetValueOrDefault((typeName, applicationName));
     }
 }

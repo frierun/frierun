@@ -187,4 +187,12 @@ public abstract class BaseTests
         var plan = executionService.Create(package);
         return installService.Handle(plan) ?? throw new Exception($"Failed to install package {package.Name}");
     }
+    
+    /// <summary>
+    /// Uninstalls application.
+    /// </summary>
+    protected void UninstallApplication(Application application)
+    {
+        Resolve<UninstallService>().Handle(application);
+    }    
 }
