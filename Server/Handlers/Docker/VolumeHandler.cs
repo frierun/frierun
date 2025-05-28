@@ -10,7 +10,12 @@ public class VolumeHandler(Application application, DockerService dockerService,
 
     public IEnumerable<ContractInitializeResult> Initialize(Volume contract, string prefix)
     {
-        if (contract.VolumeName != null || contract.Path != null)
+        if (contract.LocalPath != null)
+        {
+            yield break;
+        }
+        
+        if (contract.VolumeName != null)
         {
             yield return new ContractInitializeResult(contract with { Handler = this });
             yield break;
@@ -22,9 +27,7 @@ public class VolumeHandler(Application application, DockerService dockerService,
         var name = baseName;
         while (state.Contracts
                .OfType<Volume>()
-               .Select(volume => volume.Result)
-               .OfType<DockerVolume>()
-               .Any(c => c.Name == name)
+               .Any(volume => volume.VolumeName == name)
               )
         {
             count++;
@@ -42,52 +45,34 @@ public class VolumeHandler(Application application, DockerService dockerService,
 
     public Volume Install(Volume contract, ExecutionPlan plan)
     {
-        if (contract.Path != null)
-        {
-            return contract with
-            {
-                Result = new LocalPath { Path = contract.Path }
-            };
-        }
-
+        Debug.Assert(contract.LocalPath == null);
+        
         var volumeName = contract.VolumeName!;
 
         if (state.Contracts
             .OfType<Volume>()
-            .Select(volume => volume.Result)
-            .OfType<DockerVolume>()
-            .All(dockerVolume => dockerVolume.Name != volumeName)
+            .All(volume => volume.VolumeName != volumeName)
            )
         {
             dockerService.CreateVolume(volumeName).Wait();
         }
 
-        return contract with
-        {
-            Result = new DockerVolume { Name = volumeName }
-        };
+        return contract;
     }
 
     public void Uninstall(Volume contract)
     {
-        var installedVolume = contract.Result as DockerVolume;
-        if (installedVolume == null)
-        {
-            // Local path
-            return;
-        }
+        Debug.Assert(contract.VolumeName != null);
 
         var volumeUsed = state.Contracts
             .OfType<Volume>()
-            .Select(volume => volume.Result)
-            .OfType<DockerVolume>()
-            .Count(dockerVolume => dockerVolume.Name == installedVolume.Name);
+            .Count(volume => volume.VolumeName == contract.VolumeName);
 
         if (volumeUsed > 1)
         {
             return;
         }
 
-        dockerService.RemoveVolume(installedVolume.Name).Wait();
+        dockerService.RemoveVolume(contract.VolumeName).Wait();
     }
 }

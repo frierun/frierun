@@ -16,10 +16,10 @@ export default function VolumeForm({contract, updateContract}: Props) {
         switch (installer)
         {
             case 'ExistingVolume':
-                setValue(getVolumesResponse?.data[0].name ?? '');
+                setValue(getVolumesResponse?.data[0] ?? '');
                 break;
             case 'LocalPath':
-                setValue(contract.path ?? '/data');
+                setValue(contract.localPath ?? '/data');
                 break;
         }
     }, [contract, getVolumesResponse, installer]);
@@ -30,21 +30,24 @@ export default function VolumeForm({contract, updateContract}: Props) {
                 updateContract({
                     ...contract,
                     volumeName: null,
-                    path: null,
+                    localPath: null,
+                    handler: undefined
                 });
                 break;
             case 'ExistingVolume':
                 updateContract({
                     ...contract,
                     volumeName: value,
-                    path: null,
+                    localPath: null,
+                    handler: undefined
                 });
                 break;
             case 'LocalPath':
                 updateContract({
                     ...contract,
-                    path: value,
+                    localPath: value,
                     volumeName: null,
+                    handler: undefined
                 });
                 break;
         }
@@ -114,7 +117,7 @@ export default function VolumeForm({contract, updateContract}: Props) {
                                 onChange={e => { setValue(e.target.value); }}
                             >
                                 {getVolumesResponse?.data.map(volume => (
-                                    <option key={volume.name} value={volume.name}>{volume.name}</option>
+                                    <option key={volume} value={volume}>{volume}</option>
                                 ))}
                             </select>
 

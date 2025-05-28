@@ -9,7 +9,12 @@ public class LocalPathHandler(Application application) : IHandler<Volume>
 
     public IEnumerable<ContractInitializeResult> Initialize(Volume contract, string prefix)
     {
-        if (contract.Path != null)
+        if (contract.VolumeName != null)
+        {
+            yield break;
+        }
+        
+        if (contract.LocalPath != null)
         {
             yield return new ContractInitializeResult(contract with { Handler = this });
         }
@@ -17,11 +22,8 @@ public class LocalPathHandler(Application application) : IHandler<Volume>
 
     public Volume Install(Volume contract, ExecutionPlan plan)
     {
-        Debug.Assert(contract.Path != null, "Path should not be null");
+        Debug.Assert(contract.LocalPath != null);
 
-        return contract with
-        {
-            Result = new LocalPath { Path = contract.Path }
-        };
+        return contract;
     }
 }

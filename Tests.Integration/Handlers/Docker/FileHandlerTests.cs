@@ -22,9 +22,9 @@ public class FileHandlerTests : TestWithDocker
 
         var application = InstallPackage(package);
 
-        var volume = application.Contracts.OfType<Volume>().Single().Result;
-        Assert.NotNull(volume);
-        Assert.IsType<DockerVolume>(volume);
+        var volume = application.Contracts.OfType<Volume>().Single();
+        Assert.True(volume.Installed);
+        Assert.NotNull(volume.VolumeName);
         var container = application.Contracts.OfType<Container>().Single();
         Assert.True(container.Installed);
 
@@ -145,7 +145,7 @@ public class FileHandlerTests : TestWithDocker
                     Command: ["tail", "-f", "/dev/null"]
                 ),
                 new Mount(Path: "/mnt"),
-                new Volume(Name: "", Path: directory.FullName),
+                new Volume(Name: "", LocalPath: directory.FullName),
                 new File(
                     Path: fileName,
                     Text: "test-text"

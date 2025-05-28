@@ -4,13 +4,10 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { VolumeAllOfResult } from "./volumeAllOfResult";
 
 export type VolumeAllOf = {
   /** @nullable */
   volumeName?: string | null;
   /** @nullable */
-  path?: string | null;
-  /** @nullable */
-  result?: VolumeAllOfResult;
+  localPath?: string | null;
 };

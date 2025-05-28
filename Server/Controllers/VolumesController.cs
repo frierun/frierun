@@ -7,11 +7,11 @@ namespace Frierun.Server.Controllers;
 public class VolumesController : ControllerBase
 {
     [HttpGet]
-    public IEnumerable<DockerVolume> List(State state)
+    public IEnumerable<string> List(State state)
     {
         return state.Contracts
             .OfType<Volume>()
-            .Select(volume => volume.Result)
-            .OfType<DockerVolume>();
+            .Select(volume => volume.VolumeName)
+            .OfType<string>();
     }
 }

@@ -22,9 +22,9 @@ public class MountHandler(Application application) : IHandler<Mount>
     public Mount Install(Mount contract, ExecutionPlan plan)
     {
         var containerContract = plan.GetContract(contract.Container);
-        var volume = plan.GetResource(contract.Volume);
+        var volume = plan.GetContract(contract.Volume);
 
-        if (volume is DockerVolume dockerVolume)
+        if (volume.VolumeName != null)
         {
             plan.UpdateContract(
                 containerContract with
@@ -35,7 +35,7 @@ public class MountHandler(Application application) : IHandler<Mount>
                             parameters.HostConfig.Mounts.Add(
                                 new global::Docker.DotNet.Models.Mount
                                 {
-                                    Source = dockerVolume.Name,
+                                    Source = volume.VolumeName,
                                     Target = contract.Path,
                                     Type = "volume",
                                     ReadOnly = contract.ReadOnly
@@ -49,7 +49,7 @@ public class MountHandler(Application application) : IHandler<Mount>
             return contract;
         }
 
-        if (volume is LocalPath localPath)
+        if (volume.LocalPath != null)
         {
             plan.UpdateContract(
                 containerContract with
@@ -60,7 +60,7 @@ public class MountHandler(Application application) : IHandler<Mount>
                             parameters.HostConfig.Mounts.Add(
                                 new global::Docker.DotNet.Models.Mount
                                 {
-                                    Source = localPath.Path,
+                                    Source = volume.LocalPath,
                                     Target = contract.Path,
                                     Type = "bind",
                                     ReadOnly = contract.ReadOnly
@@ -74,6 +74,6 @@ public class MountHandler(Application application) : IHandler<Mount>
             return contract;
         }
         
-        throw new Exception("Unknown volume type: " + volume.GetType().Name);
+        throw new Exception($"Unknown volume type for volume {volume.Name}");
     }
 }

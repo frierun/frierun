@@ -22,30 +22,29 @@ public class FileHandler(Application application, DockerService dockerService) :
 
     public File Install(File contract, ExecutionPlan plan)
     {
-        var volume = plan.GetResource(contract.Volume);
-        Mount? mount = null;
-        if (volume is DockerVolume dockerVolume)
+        var volume = plan.GetContract(contract.Volume);
+        Mount? mount;
+        if (volume.VolumeName != null)
         {
             mount = new Mount
             {
-                Source = dockerVolume.Name,
+                Source = volume.VolumeName,
                 Target = "/mnt",
                 Type = "volume",
             };
         }
-        else if (volume is LocalPath localPath)
+        else if (volume.LocalPath != null)
         {
             mount = new Mount
             {
-                Source = localPath.Path,
+                Source = volume.LocalPath,
                 Target = "/mnt",
                 Type = "bind",
             };
         }
-
-        if (mount == null)
+        else
         {
-            throw new Exception("Unknown volume type: " + volume.GetType().Name);
+            throw new Exception($"Unknown volume type for volume {volume.Name}");
         }
 
         var containerId = dockerService.StartContainer(

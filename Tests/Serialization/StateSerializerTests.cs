@@ -108,8 +108,8 @@ public class StateSerializerTests : BaseTests
         var loadedState = stateManager.Load();
         
         Assert.NotEmpty(loadedState.Applications);
-        Assert.IsType<DockerVolume>(state.Contracts.OfType<Volume>().Single().Result);
-        Assert.IsType<DockerVolume>(loadedState.Contracts.OfType<Volume>().Single().Result);
+        Assert.NotNull(state.Contracts.OfType<Volume>().Single().VolumeName);
+        Assert.NotNull(loadedState.Contracts.OfType<Volume>().Single().VolumeName);
     }
     
     [Fact]
@@ -121,14 +121,14 @@ public class StateSerializerTests : BaseTests
         InstallPackage(
             "frierun",
             [
-                new Volume("config", Path: "/test"),
+                new Volume("config", LocalPath: "/test"),
             ]
         );
         
         var loadedState = stateManager.Load();
         
         Assert.NotEmpty(loadedState.Applications);
-        Assert.IsType<LocalPath>(state.Contracts.OfType<Volume>().Single().Result);
-        Assert.IsType<LocalPath>(loadedState.Contracts.OfType<Volume>().Single().Result);
+        Assert.NotNull(state.Contracts.OfType<Volume>().Single().LocalPath);
+        Assert.NotNull(loadedState.Contracts.OfType<Volume>().Single().LocalPath);
     }
 }
