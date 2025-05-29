@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using Newtonsoft.Json;
 
 namespace Frierun.Server.Data;
 
@@ -7,9 +8,13 @@ public record HttpEndpoint(
     int Port = 0,
     ContractId<Container>? Container = null,
     ContractId<Domain>? Domain = null,
-    GenericHttpEndpoint? Result = null
-) : Contract(Name ?? $"{Port}{(Container != null ? $" at {Container.Name}" : "")}"), IHasResult<GenericHttpEndpoint>
+    Uri? Url = null,
+    string? NetworkName = null // for Traefik endpoints
+) : Contract(Name ?? $"{Port}{(Container != null ? $" at {Container.Name}" : "")}")
 {
+    [MemberNotNullWhen(true, nameof(Url))]
+    public override bool Installed { get; init; }
+    
     public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");
     public ContractId<Domain> Domain { get; init; } = Domain ?? new ContractId<Domain>(Name ?? "");
 
@@ -25,4 +30,7 @@ public record HttpEndpoint(
             Handler = endpoint.Handler,
         };
     }
+    
+    [JsonIgnore]
+    public string? Host => Url?.Host;
 }

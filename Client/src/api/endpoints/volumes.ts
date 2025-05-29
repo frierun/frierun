@@ -16,14 +16,12 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { DockerVolume } from "../schemas";
-
 import { customFetch } from "../../custom-fetch";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 export type getVolumesResponse200 = {
-  data: DockerVolume[];
+  data: string[];
   status: 200;
 };
 

@@ -2,7 +2,7 @@
 
 namespace Frierun.Server.Handlers;
 
-public interface IContainerHandler : IHandler<Container>
+public interface IContainerHandler : IHandler
 {
     /// <summary>
     /// Attaches the container to a network.

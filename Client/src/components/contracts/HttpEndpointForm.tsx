@@ -41,7 +41,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
         setPort(contracts
             .filter(contract => contract.type === 'PortEndpoint')
             .find(port => port.container === contract.container && port.port === contract.port)
-            ?.destinationPort ?? defaultPort)
+            ?.externalPort ?? defaultPort)
         setHandlerType(contract.handler?.typeName ?? 'PortHttpEndpointHandler');
     }, [contract, contracts]);
 
@@ -95,7 +95,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
                 protocol: 'Tcp',
                 container: contract.container,
                 port: contract.port,
-                destinationPort: port,
+                externalPort: port,
             }
         ]);
     }

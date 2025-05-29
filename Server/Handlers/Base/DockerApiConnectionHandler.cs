@@ -5,14 +5,9 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class DockerApiConnectionHandler : IDockerApiConnectionHandler
+public class DockerApiConnectionHandler : Handler<DockerApiConnection>, IDockerApiConnectionHandler
 {
-    public IEnumerable<ContractInitializeResult> Initialize(DockerApiConnection contract, string prefix)
-    {
-        yield return new ContractInitializeResult(contract with { Handler = this });
-    }
-
-    public DockerApiConnection Install(DockerApiConnection contract, ExecutionPlan plan)
+    public override DockerApiConnection Install(DockerApiConnection contract, ExecutionPlan plan)
     {
         try
         {
@@ -64,9 +59,8 @@ public class DockerApiConnectionHandler : IDockerApiConnectionHandler
             .GetValue(client)!;
 
 
-        var result = httpClient.GetAsync(new Uri(baseUri, "v3.0.0/libpod/info")).Result;
-        var body = result.Content.ReadAsStringAsync().Result;
-        var json = JsonNode.Parse(body);
+        var result = httpClient.GetStringAsync(new Uri(baseUri, "v3.0.0/libpod/info")).Result;
+        var json = JsonNode.Parse(result);
         var path = json?["host"]?["remoteSocket"]?["path"]?.GetValue<string>();
         var exists = json?["host"]?["remoteSocket"]?["exists"]?.GetValue<bool>();
         if (exists != true || path == null)

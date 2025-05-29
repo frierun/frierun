@@ -4,6 +4,7 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { CloudflareApiConnection } from "./cloudflareApiConnection";
 import type { Container } from "./container";
 import type { Dependency } from "./dependency";
 import type { DockerApiConnection } from "./dockerApiConnection";
@@ -24,6 +25,7 @@ import type { Substitute } from "./substitute";
 import type { Volume } from "./volume";
 
 export type PackageAllOfContractsItem =
+  | CloudflareApiConnection
   | Container
   | Dependency
   | DockerApiConnection

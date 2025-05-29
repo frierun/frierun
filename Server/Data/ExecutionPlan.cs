@@ -82,10 +82,6 @@ public class ExecutionPlan : IExecutionPlan
                 var installedContract = contract.Install(this);
                 
                 Debug.Assert(installedContract.Id == contractId);
-                Debug.Assert(
-                    installedContract is not IHasResult { Result: null },
-                    "Result must be set for installed contract"
-                );
 
                 if (installedContract is not Package)
                 {
@@ -113,23 +109,5 @@ public class ExecutionPlan : IExecutionPlan
             Contracts = installedContracts,
             RequiredApplications = _requiredApplications.Select(app => app.Name).ToList()
         };
-    }
-
-    public Resource GetResource(ContractId contractId)
-    {
-        return GetResource<Resource>(contractId);
-    }
-
-    public T GetResource<T>(ContractId contractId)
-        where T : Resource
-    {
-        var contract = _contracts[contractId];
-        Debug.Assert(contract.Installed, $"Contract is not installed");
-        Debug.Assert(contract is IHasResult, $"Contract does not have a result");
-
-        var result = ((IHasResult)contract).Result;
-        Debug.Assert(result is T, $"Contract result is of wrong type");
-
-        return (T)result;
     }
 }

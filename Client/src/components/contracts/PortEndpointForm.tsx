@@ -7,10 +7,10 @@ type Props = {
 }
 
 export default function PortEndpointForm({contract, updateContract}: Props) {
-    const [port, setPort] = useState(contract.destinationPort);
+    const [port, setPort] = useState(contract.externalPort);
 
     useEffect(() => {
-        setPort(contract.destinationPort);
+        setPort(contract.externalPort);
     }, [contract]);
     
     const updatePort = (port: string) => {
@@ -25,7 +25,7 @@ export default function PortEndpointForm({contract, updateContract}: Props) {
         setPort(intPort);
         updateContract({
             ...contract,
-            destinationPort: intPort
+            externalPort: intPort
         });
     }
 

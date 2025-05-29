@@ -4,25 +4,21 @@ using Frierun.Server.Data;
 namespace Frierun.Server.Handlers;
 
 public class TraefikHttpEndpointHandler(Application application)
-    : IHandler<HttpEndpoint>
+    : Handler<HttpEndpoint>(application)
 {
     private readonly Container _container = application.Contracts.OfType<Container>().First();    
 
     private readonly int _webPort = application.Contracts
         .OfType<PortEndpoint>()
         .FirstOrDefault(endpoint => endpoint.Name == "Web")
-        ?.Result
-        ?.Port ?? 0;
+        ?.ExternalPort ?? 0;
 
     private readonly int _webSecurePort = application.Contracts
         .OfType<PortEndpoint>()
         .FirstOrDefault(endpoint => endpoint.Name == "WebSecure")
-        ?.Result
-        ?.Port ?? 0;
+        ?.ExternalPort ?? 0;
 
-    public Application Application => application;
-
-    public IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
     {
         yield return new ContractInitializeResult(
             contract with
@@ -34,7 +30,7 @@ public class TraefikHttpEndpointHandler(Application application)
         );
     }
 
-    public HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
+    public override HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
     {
         var domainContract = plan.GetContract(contract.Domain);
         Debug.Assert(domainContract.Installed);
@@ -87,19 +83,16 @@ public class TraefikHttpEndpointHandler(Application application)
 
         return contract with
         {
-            Result = new TraefikHttpEndpoint
-            {
-                Url = url,
-                NetworkName = network.NetworkName
-            }
+            Url = url,
+            NetworkName = network.NetworkName,
         };
     }
 
-    void IHandler<HttpEndpoint>.Uninstall(HttpEndpoint contract)
+    public override void Uninstall(HttpEndpoint contract)
     {
-        var resource = contract.Result as TraefikHttpEndpoint;
-        Debug.Assert(resource != null);
+        Debug.Assert(contract.Installed);
+        Debug.Assert(contract.NetworkName != null);
         
-        _container.DetachNetwork(resource.NetworkName);
+        _container.DetachNetwork(contract.NetworkName);
     }
 }
