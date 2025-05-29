@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Newtonsoft.Json;
 
 namespace Frierun.Server.Data;
 
@@ -29,4 +30,7 @@ public record HttpEndpoint(
             Handler = endpoint.Handler,
         };
     }
+    
+    [JsonIgnore]
+    public string? Host => Url?.Host;
 }
