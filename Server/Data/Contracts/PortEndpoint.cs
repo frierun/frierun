@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace Frierun.Server.Data;
 
@@ -7,10 +8,13 @@ public record PortEndpoint(
     int Port,
     string? Name = null,
     ContractId<Container>? Container = null,
-    int DestinationPort = 0,
-    DockerPortEndpoint? Result = null
-) : Contract(Name ?? $"{(Container != null ? Container.Name + ":" : "")}{Port}/{Protocol}"), IHasResult<DockerPortEndpoint>
+    int ExternalPort = 0,
+    string? ExternalIp = null
+) : Contract(Name ?? $"{(Container != null ? Container.Name + ":" : "")}{Port}/{Protocol}")
 {
+    [MemberNotNullWhen(true, nameof(ExternalIp))]
+    public override bool Installed { get; init; }
+    
     public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");    
 
     public override Contract With(Contract other)
@@ -22,7 +26,10 @@ public record PortEndpoint(
         
         return this with
         {
-            DestinationPort = endpoint.DestinationPort
+            ExternalPort = endpoint.ExternalPort
         };
     }
+    
+    [JsonIgnore]
+    public string Url => $"{Protocol.ToString().ToLower()}://{ExternalIp}:{ExternalPort}";
 }

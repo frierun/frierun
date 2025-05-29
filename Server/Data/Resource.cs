@@ -3,7 +3,6 @@
 namespace Frierun.Server.Data;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(DockerPortEndpoint), nameof(DockerPortEndpoint))]
 [JsonDerivedType(typeof(GenericHttpEndpoint), nameof(GenericHttpEndpoint))]
 [JsonDerivedType(typeof(TraefikHttpEndpoint), nameof(TraefikHttpEndpoint))]
 public abstract class Resource

@@ -7,7 +7,7 @@ public class PortEndpointHandler(Application application, State state) : Handler
 {
     public override IEnumerable<ContractInitializeResult> Initialize(PortEndpoint contract, string prefix)
     {
-        int port = contract.DestinationPort == 0 ? contract.Port : contract.DestinationPort;
+        int port = contract.ExternalPort == 0 ? contract.Port : contract.ExternalPort;
 
         while (state.Contracts.OfType<PortEndpoint>()
                .Any(endpoint => endpoint.Port == port && endpoint.Protocol == contract.Protocol))
@@ -23,7 +23,7 @@ public class PortEndpointHandler(Application application, State state) : Handler
             contract with
             {
                 Handler = this,
-                DestinationPort = port,
+                ExternalPort = port,
                 DependencyOf = contract.DependencyOf.Append(contract.Container),
             }
         );
@@ -33,7 +33,7 @@ public class PortEndpointHandler(Application application, State state) : Handler
     {
         var containerContract = plan.GetContract(contract.Container);
 
-        var externalPort = contract.DestinationPort;
+        var externalPort = contract.ExternalPort;
         var internalPort = contract.Port;
 
         plan.UpdateContract(
@@ -58,13 +58,7 @@ public class PortEndpointHandler(Application application, State state) : Handler
         // TODO: fill the correct ip of the host
         return contract with
         {
-            Result = new DockerPortEndpoint
-            {
-                Name = contract.Name,
-                Ip = "127.0.0.1",
-                Port = externalPort,
-                Protocol = contract.Protocol
-            }
+            ExternalIp = "127.0.0.1",
         };
     }
 }

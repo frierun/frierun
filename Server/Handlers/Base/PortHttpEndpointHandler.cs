@@ -6,9 +6,7 @@ public class PortHttpEndpointHandler : Handler<HttpEndpoint>
 {
     public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
     {
-        var portEndpoint = new PortEndpoint(
-            Protocol.Tcp, contract.Port, Container: contract.Container, DestinationPort: 80
-        );
+        var portEndpoint = CreatePortEndpoint(contract);
         yield return new ContractInitializeResult(
             contract with
             {
@@ -22,15 +20,20 @@ public class PortHttpEndpointHandler : Handler<HttpEndpoint>
 
     public override HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
     {
-        var portEndpoint = plan.GetResource<DockerPortEndpoint>(
-            new PortEndpoint(Protocol.Tcp, contract.Port, Container: contract.Container, DestinationPort: 80)
-        );
+        var portEndpoint = plan.GetContract((ContractId<PortEndpoint>)CreatePortEndpoint(contract).Id);
 
-        var url = new Uri($"http://{portEndpoint.Ip}:{portEndpoint.Port}");
+        var url = new Uri($"http://{portEndpoint.ExternalIp}:{portEndpoint.ExternalPort}");
 
         return contract with
         {
             Result = new GenericHttpEndpoint { Url = url }
         };
+    }
+    
+    private static PortEndpoint CreatePortEndpoint(HttpEndpoint contract)
+    {
+        return new PortEndpoint(
+            Protocol.Tcp, contract.Port, Container: contract.Container, ExternalPort: 80
+        );
     }
 }

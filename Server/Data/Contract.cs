@@ -55,7 +55,7 @@ public abstract record Contract(
 
     [JsonPropertyName("handler")]
     [JsonInclude]
-    protected Lazy<IHandler?> LazyHandler { get; init; } = LazyHandler ?? new Lazy<IHandler?>((IHandler?)null);
+    public Lazy<IHandler?> LazyHandler { get; protected init; } = LazyHandler ?? new Lazy<IHandler?>((IHandler?)null);
 
     [JsonIgnore]
     public IHandler? Handler

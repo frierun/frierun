@@ -88,8 +88,8 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
         InstallPackage(
             "traefik",
             [
-                new PortEndpoint(Protocol.Tcp, 80, Name: "Web", DestinationPort: 81),
-                new PortEndpoint(Protocol.Tcp, 443, Name: "WebSecure", DestinationPort: 444),
+                new PortEndpoint(Protocol.Tcp, 80, Name: "Web", ExternalPort: 81),
+                new PortEndpoint(Protocol.Tcp, 443, Name: "WebSecure", ExternalPort: 444),
             ]
         );
         var package = Factory<Package>().Generate() with { Contracts = [Factory<HttpEndpoint>().Generate()] };

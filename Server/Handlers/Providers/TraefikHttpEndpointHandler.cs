@@ -11,14 +11,12 @@ public class TraefikHttpEndpointHandler(Application application)
     private readonly int _webPort = application.Contracts
         .OfType<PortEndpoint>()
         .FirstOrDefault(endpoint => endpoint.Name == "Web")
-        ?.Result
-        ?.Port ?? 0;
+        ?.ExternalPort ?? 0;
 
     private readonly int _webSecurePort = application.Contracts
         .OfType<PortEndpoint>()
         .FirstOrDefault(endpoint => endpoint.Name == "WebSecure")
-        ?.Result
-        ?.Port ?? 0;
+        ?.ExternalPort ?? 0;
 
     public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
     {

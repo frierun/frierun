@@ -5,12 +5,13 @@
  * OpenAPI spec version: 1.0
  */
 import type { Protocol } from "./protocol";
-import type { DockerPortEndpoint } from "./dockerPortEndpoint";
 
 export type PortEndpointAllOf = {
   protocol: Protocol;
   port: number;
-  destinationPort: number;
-  result?: DockerPortEndpoint;
+  externalPort: number;
+  /** @nullable */
+  externalIp?: string | null;
+  installed?: boolean;
   container: string;
 };
