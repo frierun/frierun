@@ -47,7 +47,7 @@ contracts:
     
   - type: "PortEndpoint"
     port: 22
-    destinationPort: 2222
+    externalPort: 2222
     protocol: "tcp"
     
   - type: "Mount"
