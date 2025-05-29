@@ -5,6 +5,6 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface Resource {
-  type: string;
-}
+export type CloudflareApiConnectionAllOf = {
+  token: string;
+};

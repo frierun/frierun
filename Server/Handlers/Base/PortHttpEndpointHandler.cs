@@ -26,7 +26,7 @@ public class PortHttpEndpointHandler : Handler<HttpEndpoint>
 
         return contract with
         {
-            Result = new GenericHttpEndpoint { Url = url }
+            Url = url,
         };
     }
     

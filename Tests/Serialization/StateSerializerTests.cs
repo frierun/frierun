@@ -88,8 +88,10 @@ public class StateSerializerTests : BaseTests
         var loadedState = stateManager.Load();
 
         Assert.NotEmpty(loadedState.Applications);
-        Assert.IsType<TraefikHttpEndpoint>(state.Contracts.OfType<HttpEndpoint>().Single().Result);
-        Assert.IsType<TraefikHttpEndpoint>(loadedState.Contracts.OfType<HttpEndpoint>().Single().Result);
+        Assert.Equal(
+            state.Contracts.OfType<HttpEndpoint>().Single().NetworkName,
+            loadedState.Contracts.OfType<HttpEndpoint>().Single().NetworkName
+        );
     }
 
     [Fact]
@@ -104,14 +106,14 @@ public class StateSerializerTests : BaseTests
                 new Volume("config", VolumeName: "test"),
             ]
         );
-        
+
         var loadedState = stateManager.Load();
-        
+
         Assert.NotEmpty(loadedState.Applications);
         Assert.NotNull(state.Contracts.OfType<Volume>().Single().VolumeName);
         Assert.NotNull(loadedState.Contracts.OfType<Volume>().Single().VolumeName);
     }
-    
+
     [Fact]
     public void Load_FrierunWithLocalPath_Serialized()
     {
@@ -124,9 +126,9 @@ public class StateSerializerTests : BaseTests
                 new Volume("config", LocalPath: "/test"),
             ]
         );
-        
+
         var loadedState = stateManager.Load();
-        
+
         Assert.NotEmpty(loadedState.Applications);
         Assert.NotNull(state.Contracts.OfType<Volume>().Single().LocalPath);
         Assert.NotNull(loadedState.Contracts.OfType<Volume>().Single().LocalPath);

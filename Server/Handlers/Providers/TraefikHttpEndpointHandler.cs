@@ -83,19 +83,16 @@ public class TraefikHttpEndpointHandler(Application application)
 
         return contract with
         {
-            Result = new TraefikHttpEndpoint
-            {
-                Url = url,
-                NetworkName = network.NetworkName
-            }
+            Url = url,
+            NetworkName = network.NetworkName,
         };
     }
 
     public override void Uninstall(HttpEndpoint contract)
     {
-        var resource = contract.Result as TraefikHttpEndpoint;
-        Debug.Assert(resource != null);
+        Debug.Assert(contract.Installed);
+        Debug.Assert(contract.NetworkName != null);
         
-        _container.DetachNetwork(resource.NetworkName);
+        _container.DetachNetwork(contract.NetworkName);
     }
 }

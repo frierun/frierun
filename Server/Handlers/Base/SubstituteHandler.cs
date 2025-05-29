@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics;
+using System.Text.RegularExpressions;
 using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
@@ -86,15 +87,8 @@ public class SubstituteHandler(ContractRegistry contractRegistry) : Handler<Subs
         var contractType = contractRegistry.GetContractType(contractTypeName);
         var contractId = ContractId.Create(contractType, contractName);
         
-        object result;
-        if (contractType.IsAssignableTo(typeof(IHasResult)))
-        {
-            result = plan.GetResource(contractId);
-        }
-        else
-        {
-            result = plan.GetContract(contractId);
-        }
+        Contract result = plan.GetContract(contractId);
+        Debug.Assert(result.Installed);
 
         var propertyInfo = result.GetType().GetProperty(propertyName);
         if (propertyInfo == null)
