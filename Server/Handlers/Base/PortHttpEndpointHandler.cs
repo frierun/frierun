@@ -2,9 +2,9 @@
 
 namespace Frierun.Server.Handlers.Base;
 
-public class PortHttpEndpointHandler : IHandler<HttpEndpoint>
+public class PortHttpEndpointHandler : Handler<HttpEndpoint>
 {
-    public IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
     {
         var portEndpoint = new PortEndpoint(
             Protocol.Tcp, contract.Port, Container: contract.Container, DestinationPort: 80
@@ -20,7 +20,7 @@ public class PortHttpEndpointHandler : IHandler<HttpEndpoint>
         );
     }
 
-    public HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
+    public override HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
     {
         var portEndpoint = plan.GetResource<DockerPortEndpoint>(
             new PortEndpoint(Protocol.Tcp, contract.Port, Container: contract.Container, DestinationPort: 80)

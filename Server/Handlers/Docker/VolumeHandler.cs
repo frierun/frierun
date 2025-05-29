@@ -4,11 +4,9 @@ using Frierun.Server.Data;
 namespace Frierun.Server.Handlers.Docker;
 
 public class VolumeHandler(Application application, DockerService dockerService, State state)
-    : IHandler<Volume>
+    : Handler<Volume>(application)
 {
-    public Application Application => application;
-
-    public IEnumerable<ContractInitializeResult> Initialize(Volume contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Volume contract, string prefix)
     {
         if (contract.LocalPath != null)
         {
@@ -43,7 +41,7 @@ public class VolumeHandler(Application application, DockerService dockerService,
         );
     }
 
-    public Volume Install(Volume contract, ExecutionPlan plan)
+    public override Volume Install(Volume contract, ExecutionPlan plan)
     {
         Debug.Assert(contract.LocalPath == null);
         
@@ -60,7 +58,7 @@ public class VolumeHandler(Application application, DockerService dockerService,
         return contract;
     }
 
-    public void Uninstall(Volume contract)
+    public override void Uninstall(Volume contract)
     {
         Debug.Assert(contract.VolumeName != null);
 

@@ -3,7 +3,7 @@
 namespace Frierun.Server.Handlers;
 
 public class StaticDomainHandler(State state, Application application)
-    : IHandler<Domain>
+    : Handler<Domain>(application)
 {
     private readonly string _domainName = application.Contracts
         .OfType<Parameter>()
@@ -14,10 +14,8 @@ public class StaticDomainHandler(State state, Application application)
         .OfType<Selector>()
         .First(parameter => parameter.Name == "Internal")
         .Value == "Yes";
-
-    public Application Application => application;
-
-    public IEnumerable<ContractInitializeResult> Initialize(Domain contract, string prefix)
+    
+    public override IEnumerable<ContractInitializeResult> Initialize(Domain contract, string prefix)
     {
         if (contract.IsInternal != null && contract.IsInternal != _isInternal)
         {

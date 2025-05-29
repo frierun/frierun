@@ -5,12 +5,11 @@ using Frierun.Server.Data;
 namespace Frierun.Server.Handlers.Docker;
 
 public class ContainerHandler(Application application, DockerService dockerService, State state)
-    : IContainerHandler
+    : Handler<Container>(application), IContainerHandler
 {
-    public Application Application => application;
-    private DockerApiConnection dockerApiConnection => application.Contracts.OfType<DockerApiConnection>().Single();
+    private readonly DockerApiConnection _dockerApiConnection = application.Contracts.OfType<DockerApiConnection>().Single();
 
-    public IEnumerable<ContractInitializeResult> Initialize(Container contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Container contract, string prefix)
     {
         var baseName = contract.ContainerName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
 
@@ -32,7 +31,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
         );
     }
 
-    public Container Install(Container contract, ExecutionPlan plan)
+    public override Container Install(Container contract, ExecutionPlan plan)
     {
         var network = plan.GetContract(contract.Network);
         Debug.Assert(network.Installed);
@@ -77,7 +76,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
             dockerParameters.HostConfig.Mounts.Add(
                 new global::Docker.DotNet.Models.Mount
                 {
-                    Source = dockerApiConnection.GetSocketRootPath(),
+                    Source = _dockerApiConnection.GetSocketRootPath(),
                     Target = "/var/run/docker.sock",
                     Type = "bind"
                 }
@@ -99,7 +98,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
         return contract with { NetworkName = network.NetworkName };
     }
 
-    void IHandler<Container>.Uninstall(Container container)
+    public override void Uninstall(Container container)
     {
         Debug.Assert(container.Installed);
         dockerService.RemoveContainer(container.ContainerName).Wait();

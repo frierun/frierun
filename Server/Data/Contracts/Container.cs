@@ -16,17 +16,10 @@ public record Container(
     IReadOnlyList<string>? Command = null,
     IReadOnlyDictionary<string, string>? Env = null,
     IEnumerable<Action<CreateContainerParameters>>? Configure = null
-) : Contract(Name ?? ""), IHasStrings
+) : Contract<IContainerHandler>(Name ?? ""), IHasStrings
 {
     [MemberNotNullWhen(true, nameof(ContainerName), nameof(NetworkName))]
     public override bool Installed { get; init; }
-
-    [JsonIgnore]
-    public new IContainerHandler? Handler
-    {
-        get => (IContainerHandler?)LazyHandler.Value;
-        init => LazyHandler = new Lazy<IHandler?>(value);
-    }
     
     public IReadOnlyList<string> Command { get; init; } = Command ?? Array.Empty<string>();
     public IReadOnlyDictionary<string, string> Env { get; init; } = Env ?? new Dictionary<string, string>();

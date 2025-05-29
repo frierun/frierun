@@ -3,11 +3,9 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class PortEndpointHandler(Application application, State state) : IHandler<PortEndpoint>
+public class PortEndpointHandler(Application application, State state) : Handler<PortEndpoint>(application)
 {
-    public Application Application => application;
-
-    public IEnumerable<ContractInitializeResult> Initialize(PortEndpoint contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(PortEndpoint contract, string prefix)
     {
         int port = contract.DestinationPort == 0 ? contract.Port : contract.DestinationPort;
 
@@ -31,7 +29,7 @@ public class PortEndpointHandler(Application application, State state) : IHandle
         );
     }
 
-    public PortEndpoint Install(PortEndpoint contract, ExecutionPlan plan)
+    public override PortEndpoint Install(PortEndpoint contract, ExecutionPlan plan)
     {
         var containerContract = plan.GetContract(contract.Container);
 

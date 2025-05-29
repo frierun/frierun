@@ -4,7 +4,7 @@ using Frierun.Server.Data;
 namespace Frierun.Server.Handlers;
 
 public class TraefikHttpEndpointHandler(Application application)
-    : IHandler<HttpEndpoint>
+    : Handler<HttpEndpoint>(application)
 {
     private readonly Container _container = application.Contracts.OfType<Container>().First();    
 
@@ -20,9 +20,7 @@ public class TraefikHttpEndpointHandler(Application application)
         ?.Result
         ?.Port ?? 0;
 
-    public Application Application => application;
-
-    public IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
     {
         yield return new ContractInitializeResult(
             contract with
@@ -34,7 +32,7 @@ public class TraefikHttpEndpointHandler(Application application)
         );
     }
 
-    public HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
+    public override HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
     {
         var domainContract = plan.GetContract(contract.Domain);
         Debug.Assert(domainContract.Installed);
@@ -95,7 +93,7 @@ public class TraefikHttpEndpointHandler(Application application)
         };
     }
 
-    void IHandler<HttpEndpoint>.Uninstall(HttpEndpoint contract)
+    public override void Uninstall(HttpEndpoint contract)
     {
         var resource = contract.Result as TraefikHttpEndpoint;
         Debug.Assert(resource != null);

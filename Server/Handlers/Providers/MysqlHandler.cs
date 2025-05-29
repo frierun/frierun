@@ -5,16 +5,14 @@ using Frierun.Server.Data;
 namespace Frierun.Server.Handlers;
 
 public class MysqlHandler(Application application, State state)
-    : IHandler<Mysql>
+    : Handler<Mysql>(application)
 {
     private readonly Container _container = application.Contracts.OfType<Container>().Single();
 
     private readonly string _rootPassword = application.Contracts.OfType<Password>().Single().Value ??
                                             throw new Exception("Root password not found");
 
-    public Application Application => application;
-
-    public IEnumerable<ContractInitializeResult> Initialize(Mysql contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Mysql contract, string prefix)
     {
         if (contract.Admin)
         {
@@ -64,7 +62,7 @@ public class MysqlHandler(Application application, State state)
         );
     }
 
-    public Mysql Install(Mysql contract, ExecutionPlan plan)
+    public override Mysql Install(Mysql contract, ExecutionPlan plan)
     {
         Debug.Assert(_container.Installed);
         Debug.Assert(contract.Username != null);
@@ -119,7 +117,7 @@ public class MysqlHandler(Application application, State state)
         };
     }
 
-    void IHandler<Mysql>.Uninstall(Mysql contract)
+    public override void Uninstall(Mysql contract)
     {
         Debug.Assert(contract.Installed);
 

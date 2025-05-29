@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using System.Diagnostics;
+using Autofac;
 using Autofac.Features.Indexed;
 using Frierun.Server.Data;
 using Frierun.Server.Handlers;
@@ -130,10 +131,9 @@ public class HandlerRegistry : IDisposable
     {
         _handlers[(handler.GetType().Name, handler.Application?.Name)] = handler;
 
-        var handlerType = handler
-            .GetType()
-            .GetInterfaces()
-            .Single(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IHandler<>));
+        var handlerType = handler.GetType().BaseType;
+        
+        Debug.Assert(handlerType != null);
         
         var contractType = handlerType.GetGenericArguments()[0];
 

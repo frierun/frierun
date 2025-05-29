@@ -3,11 +3,9 @@ using Mount = Frierun.Server.Data.Mount;
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class MountHandler(Application application) : IHandler<Mount>
+public class MountHandler(Application application) : Handler<Mount>(application)
 {
-    public Application Application => application;
-    
-    public IEnumerable<ContractInitializeResult> Initialize(Mount contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Mount contract, string prefix)
     {
         yield return new ContractInitializeResult(
             contract with
@@ -19,7 +17,7 @@ public class MountHandler(Application application) : IHandler<Mount>
         );
     }
     
-    public Mount Install(Mount contract, ExecutionPlan plan)
+    public override Mount Install(Mount contract, ExecutionPlan plan)
     {
         var containerContract = plan.GetContract(contract.Container);
         var volume = plan.GetContract(contract.Volume);

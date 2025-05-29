@@ -38,13 +38,13 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_HandlerWithoutOptions_ThrowsException()
     {
-        var handler = Mock<IHandler<Contract1>, IHandler>();
+        var handler = Mock<Handler<Contract1>, IHandler>([null]);
 
         var contract = new Contract1();
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
         handler
-            .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
+            .Initialize(Arg.Any<Contract1>(), Arg.Any<string>())
             .Returns([]);
 
         Assert.Throws<HandlerNotFoundException>(() => service.Create(package));
@@ -53,15 +53,15 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_HandlerReturnsUnknownContract_ThrowsException()
     {
-        var handler = Mock<IHandler<Contract1>, IHandler>();
+        var handler = Mock<Handler<Contract1>, IHandler>([null]);
 
         var contract = new Contract1();
         var unknownContract = new Contract2();
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
         handler
-            .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
-            .Returns([new ContractInitializeResult(contract, [unknownContract])]);
+            .Initialize(Arg.Any<Contract1>(), Arg.Any<string>())
+            .Returns([new ContractInitializeResult(contract with {Handler = handler}, [unknownContract])]);
 
         Assert.Throws<HandlerNotFoundException>(() => service.Create(package));
     }
@@ -69,13 +69,13 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_CorrectHandler_ExecutesInitialize()
     {
-        var handler = Mock<IHandler<Contract1>, IHandler>();
+        var handler = Mock<Handler<Contract1>, IHandler>([null]);
 
         var contract = new Contract1();
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
         handler
-            .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
+            .Initialize(Arg.Any<Contract1>(), Arg.Any<string>())
             .Returns([new ContractInitializeResult(contract with { Handler = handler })]);
 
         var plan = service.Create(package);
@@ -84,19 +84,20 @@ public class ExecutionServiceTests : BaseTests
         Assert.Equal(2, plan.Contracts.Count);
         Assert.Contains(package.Id, plan.Contracts);
         Assert.Contains(contract.Id, plan.Contracts);
-        handler.Received(1).Initialize(Arg.Any<Contract>(), Arg.Any<string>());
+        // ReSharper disable once IteratorMethodResultIsIgnored
+        handler.Received(1).Initialize(Arg.Any<Contract1>(), Arg.Any<string>());
     }
 
     [Fact]
     public void Create_RecursiveHandler_InitializesPlan()
     {
-        var handler = Mock<IHandler<Contract1>, IHandler>();
+        var handler = Mock<Handler<Contract1>, IHandler>([null]);
 
         var contract = new Contract1();
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
         handler
-            .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
+            .Initialize(Arg.Any<Contract1>(), Arg.Any<string>())
             .Returns([new ContractInitializeResult(contract with { Handler = handler }, [contract])]);
 
         var plan = service.Create(package);
@@ -110,7 +111,7 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_HandlerWithTwoBranches_InitializesPlan()
     {
-        var handler = Mock<IHandler<Contract1>, IHandler>();
+        var handler = Mock<Handler<Contract1>, IHandler>([null]);
 
         var contract = new Contract1();
         var unknownContract = new Contract2();
@@ -118,12 +119,12 @@ public class ExecutionServiceTests : BaseTests
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
         handler
-            .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
+            .Initialize(Arg.Any<Contract1>(), Arg.Any<string>())
             .Returns(
                 info =>
                 [
-                    new ContractInitializeResult(info.Arg<Contract>() with { Handler = handler }, [unknownContract]),
-                    new ContractInitializeResult(info.Arg<Contract>() with { Handler = handler }, [knownContract])
+                    new ContractInitializeResult(info.Arg<Contract1>() with { Handler = handler }, [unknownContract]),
+                    new ContractInitializeResult(info.Arg<Contract1>() with { Handler = handler }, [knownContract])
                 ]
             );
 
@@ -139,8 +140,8 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_TwoHandlers_InitializesPlan()
     {
-        var handler = Mock<IHandler<Contract1>, IHandler>();
-        var handler2 = Mock<IHandler<Contract1>, IHandler>();
+        var handler = Mock<Handler<Contract1>, IHandler>([null]);
+        var handler2 = Mock<Handler<Contract1>, IHandler>([null]);
 
         var contract = new Contract1();
         var unknownContract = new Contract2();
@@ -148,19 +149,19 @@ public class ExecutionServiceTests : BaseTests
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         var service = Resolve<ExecutionService>();
         handler
-            .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
+            .Initialize(Arg.Any<Contract1>(), Arg.Any<string>())
             .Returns(
                 info =>
                 [
-                    new ContractInitializeResult(info.Arg<Contract>() with { Handler = handler }, [unknownContract]),
+                    new ContractInitializeResult(info.Arg<Contract1>() with { Handler = handler }, [unknownContract]),
                 ]
             );
         handler2
-            .Initialize(Arg.Any<Contract>(), Arg.Any<string>())
+            .Initialize(Arg.Any<Contract1>(), Arg.Any<string>())
             .Returns(
                 info =>
                 [
-                    new ContractInitializeResult(info.Arg<Contract>() with { Handler = handler2 }, [knownContract])
+                    new ContractInitializeResult(info.Arg<Contract1>() with { Handler = handler2 }, [knownContract])
                 ]
             );
 

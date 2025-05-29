@@ -4,7 +4,24 @@ using Frierun.Server.Handlers;
 
 namespace Frierun.Server.Data;
 
+public abstract record Contract<THandler>(
+    string Name,
+    bool Installed = false,
+    IEnumerable<ContractId>? DependsOn = null,
+    IEnumerable<ContractId>? DependencyOf = null,
+    Lazy<IHandler?>? LazyHandler = null)
+    : Contract(Name, Installed, DependsOn, DependencyOf, LazyHandler) where THandler : IHandler
+{
+    [JsonIgnore]
+    public new THandler? Handler
+    {
+        get => (THandler?)LazyHandler.Value;
+        init => LazyHandler = new Lazy<IHandler?>(value);
+    }
+}
+
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
+[JsonDerivedType(typeof(CloudflareApiConnection), nameof(CloudflareApiConnection))]
 [JsonDerivedType(typeof(Container), nameof(Container))]
 [JsonDerivedType(typeof(Dependency), nameof(Dependency))]
 [JsonDerivedType(typeof(DockerApiConnection), nameof(DockerApiConnection))]
@@ -31,15 +48,14 @@ public abstract record Contract(
     Lazy<IHandler?>? LazyHandler = null
 )
 {
-    [JsonIgnore]
-    public ContractId Id  => ContractId.Create(GetType(), Name);
+    [JsonIgnore] public ContractId Id => ContractId.Create(GetType(), Name);
 
     [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = DependsOn ?? Array.Empty<ContractId>();
     [JsonIgnore] public IEnumerable<ContractId> DependencyOf { get; init; } = DependencyOf ?? Array.Empty<ContractId>();
 
     [JsonPropertyName("handler")]
     [JsonInclude]
-    public Lazy<IHandler?> LazyHandler { get; protected init; } = LazyHandler ?? new Lazy<IHandler?>((IHandler?)null);
+    protected Lazy<IHandler?> LazyHandler { get; init; } = LazyHandler ?? new Lazy<IHandler?>((IHandler?)null);
 
     [JsonIgnore]
     public IHandler? Handler

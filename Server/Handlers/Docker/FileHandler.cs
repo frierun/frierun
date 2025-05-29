@@ -5,11 +5,9 @@ using Mount = Docker.DotNet.Models.Mount;
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class FileHandler(Application application, DockerService dockerService) : IHandler<File>
+public class FileHandler(Application application, DockerService dockerService) : Handler<File>(application)
 {
-    public Application Application => application;
-    
-    public IEnumerable<ContractInitializeResult> Initialize(File contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(File contract, string prefix)
     {
         yield return new ContractInitializeResult(
             contract with
@@ -20,7 +18,7 @@ public class FileHandler(Application application, DockerService dockerService) :
         );
     }
 
-    public File Install(File contract, ExecutionPlan plan)
+    public override File Install(File contract, ExecutionPlan plan)
     {
         var volume = plan.GetContract(contract.Volume);
         Mount? mount;

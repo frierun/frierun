@@ -3,9 +3,9 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class SubstituteHandler(ContractRegistry contractRegistry) : IHandler<Substitute>
+public class SubstituteHandler(ContractRegistry contractRegistry) : Handler<Substitute>
 {
-    public IEnumerable<ContractInitializeResult> Initialize(Substitute contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Substitute contract, string prefix)
     {
         var contractIds = contract.Matches
             .SelectMany(pair => pair.Value)
@@ -38,7 +38,7 @@ public class SubstituteHandler(ContractRegistry contractRegistry) : IHandler<Sub
         );
     }
 
-    public Substitute Install(Substitute contract, ExecutionPlan plan)
+    public override Substitute Install(Substitute contract, ExecutionPlan plan)
     {
         var original = plan.GetContract(contract.OriginalId);
         if (original is not IHasStrings hasStrings)

@@ -85,14 +85,10 @@ public abstract class BaseTests
                 return b =>
                 {
                     builder(b);
-                    b.RegisterInstance(DockerClient)
-                        .As<IDockerClient>()
-                        .SingleInstance()
-                        .OnlyIf(registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(IDockerClient))));
                     b.RegisterType<FakeDockerApiConnectionHandler>()
                         .AsImplementedInterfaces()
                         .SingleInstance()
-                        .OnlyIf(registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(IHandler<DockerApiConnection>))));
+                        .OnlyIf(registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(IDockerClient))));
                 };
             });
         
@@ -137,24 +133,15 @@ public abstract class BaseTests
     {
         return Resolve<Faker<T>>().Clone();
     }
-
+    
     /// <summary>
     /// Creates mock service and registers it in the container.
     /// </summary>
-    protected T Mock<T>()
-        where T : class
-    {
-        return Mock<T, T>();
-    }
-
-    /// <summary>
-    /// Creates mock service and registers it in the container.
-    /// </summary>
-    protected T Mock<T, TService>()
+    protected T Mock<T, TService>(object?[]? constructorArguments = null)
         where T : class, TService
         where TService : class
     {
-        var mock = Substitute.For<T>();
+        var mock = Substitute.For<T>(constructorArguments);
         GetContainerBuilder().RegisterInstance(mock).As<TService>();
         return mock;
     }

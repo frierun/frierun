@@ -5,14 +5,9 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class DockerApiConnectionHandler : IDockerApiConnectionHandler
+public class DockerApiConnectionHandler : Handler<DockerApiConnection>, IDockerApiConnectionHandler
 {
-    public IEnumerable<ContractInitializeResult> Initialize(DockerApiConnection contract, string prefix)
-    {
-        yield return new ContractInitializeResult(contract with { Handler = this });
-    }
-
-    public DockerApiConnection Install(DockerApiConnection contract, ExecutionPlan plan)
+    public override DockerApiConnection Install(DockerApiConnection contract, ExecutionPlan plan)
     {
         try
         {

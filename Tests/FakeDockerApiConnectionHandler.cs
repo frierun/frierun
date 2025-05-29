@@ -4,14 +4,10 @@ using Frierun.Server.Handlers;
 
 namespace Frierun.Tests;
 
-public class FakeDockerApiConnectionHandler(IDockerClient dockerClient) : IDockerApiConnectionHandler
+public class FakeDockerApiConnectionHandler(IDockerClient dockerClient)
+    : Handler<DockerApiConnection>, IDockerApiConnectionHandler
 {
     public static string SocketRootPath = "/var/run/docker.sock";
-        
-    public IEnumerable<ContractInitializeResult> Initialize(DockerApiConnection contract, string prefix)
-    {
-        yield return new ContractInitializeResult(contract with {Handler = this});
-    }
 
     public IDockerClient CreateClient(DockerApiConnection contract)
     {
