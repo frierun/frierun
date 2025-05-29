@@ -59,9 +59,8 @@ public class DockerApiConnectionHandler : Handler<DockerApiConnection>, IDockerA
             .GetValue(client)!;
 
 
-        var result = httpClient.GetAsync(new Uri(baseUri, "v3.0.0/libpod/info")).Result;
-        var body = result.Content.ReadAsStringAsync().Result;
-        var json = JsonNode.Parse(body);
+        var result = httpClient.GetStringAsync(new Uri(baseUri, "v3.0.0/libpod/info")).Result;
+        var json = JsonNode.Parse(result);
         var path = json?["host"]?["remoteSocket"]?["path"]?.GetValue<string>();
         var exists = json?["host"]?["remoteSocket"]?["exists"]?.GetValue<bool>();
         if (exists != true || path == null)
