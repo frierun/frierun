@@ -44,13 +44,16 @@ public class ExecutionPlan : IExecutionPlan
     }
 
     /// <summary>
-    /// Gets contract by id.
+    /// Get contract by id.
     /// </summary>
     public Contract GetContract(ContractId contractId)
     {
         return _contracts[contractId];
     }
 
+    /// <summary>
+    /// Get contract by id.
+    /// </summary>
     public T GetContract<T>(ContractId<T> contractId)
         where T : Contract
     {

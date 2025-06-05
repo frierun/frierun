@@ -24,7 +24,7 @@ public class Handler<TContract>(Application? application = null) : IHandler
         return contract;
     }
 
-    public virtual void Uninstall(TContract resource)
+    public virtual void Uninstall(TContract contract)
     {
         // do nothing
     }

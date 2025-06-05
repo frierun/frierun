@@ -7,5 +7,5 @@ public interface ICloudflareApiConnectionHandler : IHandler
     /// <summary>
     /// Create a cloudflare client from the contract.
     /// </summary>
-    CloudflareClient CreateClient(CloudflareApiConnection contract);
+    ICloudflareClient CreateClient(CloudflareApiConnection contract);
 }

@@ -50,6 +50,27 @@ public class AutofacModule : Module
             .SingleInstance();
 
         builder.RegisterInstance<ProviderScopeBuilder>(
+                static builder =>
+                {
+                    builder.RegisterType<CloudflareHttpEndpointHandler>()
+                        .AsImplementedInterfaces()
+                        .SingleInstance();
+
+                    builder.Register<ICloudflareClient>(
+                            static context => context
+                                .Resolve<Application>()
+                                .Contracts
+                                .OfType<CloudflareApiConnection>()
+                                .Single()
+                                .CreateClient()
+                        )
+                        .SingleInstance();
+                }
+            )
+            .Named<ProviderScopeBuilder>("cloudflare-tunnel")
+            .SingleInstance();
+
+        builder.RegisterInstance<ProviderScopeBuilder>(
                 static builder => builder.RegisterType<MysqlHandler>()
                     .AsImplementedInterfaces()
                     .SingleInstance()

@@ -9,4 +9,21 @@ public class Application
     public string? Description { get; init; }
     public IReadOnlyList<Contract> Contracts { get; init; } = Array.Empty<Contract>();
     public IReadOnlyList<string> RequiredApplications { get; init; } = Array.Empty<string>();
+    
+    /// <summary>
+    /// Get contract by id.
+    /// </summary>
+    public Contract GetContract(ContractId contractId)
+    {
+        return Contracts.Single(contract => contract.Id == contractId);
+    }
+
+    /// <summary>
+    /// Get contract by id.
+    /// </summary>
+    public T GetContract<T>(ContractId<T> contractId)
+        where T : Contract
+    {
+        return (T)GetContract((ContractId)contractId);
+    }
 }

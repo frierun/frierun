@@ -26,7 +26,7 @@ public class CloudflareApiConnectionHandler : Handler<CloudflareApiConnection>, 
         }
     }
 
-    public CloudflareClient CreateClient(CloudflareApiConnection contract)
+    public ICloudflareClient CreateClient(CloudflareApiConnection contract)
     {
         return new CloudflareClient(contract.Token);
     }

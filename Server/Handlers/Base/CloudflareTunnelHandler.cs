@@ -1,0 +1,113 @@
+﻿using System.Diagnostics;
+using System.Net.Mime;
+using Frierun.Server.Data;
+
+namespace Frierun.Server.Handlers.Base;
+
+public class CloudflareTunnelHandler(State state) : Handler<CloudflareTunnel>
+{
+    public override IEnumerable<ContractInitializeResult> Initialize(CloudflareTunnel contract, string prefix)
+    {
+        var baseName = contract.TunnelName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
+        var count = 1;
+        var name = baseName;
+        while (state.Contracts.OfType<CloudflareTunnel>().Any(c => c.TunnelName == name))
+        {
+            count++;
+            name = $"{baseName}{count}";
+        }
+
+        yield return new ContractInitializeResult(
+            contract with
+            {
+                Handler = this,
+                TunnelName = name,
+                DependsOn = [contract.CloudflareApiConnection],
+                DependencyOf = [contract.Container],
+            },
+            [
+                new Container(
+                    Name: contract.Container.Name,
+                    ImageName: "cloudflare/cloudflared:latest"
+                )
+            ]
+        );
+    }
+
+    public override CloudflareTunnel Install(CloudflareTunnel contract, ExecutionPlan plan)
+    {
+        Debug.Assert(contract.TunnelName != null);
+        var cloudflareApiConnection = plan.GetContract(contract.CloudflareApiConnection);
+
+        var client = cloudflareApiConnection.CreateClient();
+        List<(string id, string name)> accounts;
+        try
+        {
+            accounts = client.GetAccounts().ToList();
+        }
+        catch (Exception e)
+        {
+            throw new HandlerException(
+                "Failed to get accounts from Cloudflare API.",
+                "Check your Cloudflare API token and permissions.",
+                contract,
+                e
+            );
+        }
+
+        if (contract.AccountId == null)
+        {
+            contract = contract with { AccountId = accounts.First().id };
+        }
+        else
+        {
+            if (accounts.All(a => a.id != contract.AccountId))
+            {
+                throw new HandlerException(
+                    $"Account with ID {contract.AccountId} not found.",
+                    "Check the account ID in your Cloudflare settings.",
+                    contract
+                );
+            }
+        }
+
+        (string id, string token) tunnel;
+        try
+        {
+            tunnel = client.CreateTunnel(contract.AccountId, contract.TunnelName);
+        }
+        catch (Exception e)
+        {
+            throw new HandlerException(
+                "Failed to create Cloudflare Tunnel.",
+                "Check your Cloudflare API token and permissions.",
+                contract,
+                e
+            );
+        }
+
+        var container = plan.GetContract(contract.Container);
+        plan.UpdateContract(
+            container with
+            {
+                Command = ["tunnel", "--no-autoupdate", "run", "--token", tunnel.token],
+            }
+        );
+
+        return contract with
+        {
+            TunnelId = tunnel.id,
+            Token = tunnel.token
+        };
+    }
+
+    public override void Uninstall(CloudflareTunnel contract)
+    {
+        Debug.Assert(contract.Installed);
+        var application = state.Applications.Single(application => application.Contracts.Contains(contract));
+        var cloudflareApiConnection = application.GetContract(contract.CloudflareApiConnection);
+
+        var client = cloudflareApiConnection.CreateClient();
+        client.DeleteTunnel(contract.AccountId, contract.TunnelId);
+    }
+}

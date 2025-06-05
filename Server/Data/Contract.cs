@@ -22,6 +22,7 @@ public abstract record Contract<THandler>(
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(CloudflareApiConnection), nameof(CloudflareApiConnection))]
+[JsonDerivedType(typeof(CloudflareTunnel), nameof(CloudflareTunnel))]
 [JsonDerivedType(typeof(Container), nameof(Container))]
 [JsonDerivedType(typeof(Dependency), nameof(Dependency))]
 [JsonDerivedType(typeof(DockerApiConnection), nameof(DockerApiConnection))]

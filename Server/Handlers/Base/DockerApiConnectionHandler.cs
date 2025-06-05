@@ -20,12 +20,13 @@ public class DockerApiConnectionHandler : Handler<DockerApiConnection>, IDockerA
                 IsPodman = isPodman
             };
         }
-        catch (Exception)
+        catch (Exception e)
         {
             throw new HandlerException(
                 "Docker API connection failed.",
                 "Specify correct path and make sure the docker daemon is running.",
-                contract
+                contract,
+                e
             );
         }
     }

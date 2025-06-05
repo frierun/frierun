@@ -9,3 +9,5 @@ contracts:
 
   - type: "CloudflareApiConnection"
     token: "{{Parameter:Token:Value}}"
+    
+  - type: "CloudflareTunnel"
