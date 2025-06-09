@@ -31,6 +31,7 @@ const findDomain = (contract: HttpEndpoint, contracts: GetPackagesIdPlan200Item[
 export default function HttpEndpointForm({contract, contracts, updateContracts}: Props) {
     const [domain, setDomain] = useState<Domain>({typeName: ''});
     const [port, setPort] = useState(0);
+    const hasCloudflare = contract.handler?.typeName === 'CloudflareHttpEndpointHandler';
     const hasTraefik = contract.handler?.typeName === 'TraefikHttpEndpointHandler';
     const traefikApplication = hasTraefik ? contract.handler?.applicationName : null;
     const [handlerType, setHandlerType] = useState('');
@@ -106,22 +107,40 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
                 <label className={"inline-block w-48"}>Http endpoint to port </label>{contract.port}
                 {contract.container && ` in container ${contract.container}`}
             </div>
-            {hasTraefik && (
+            {(hasTraefik || hasCloudflare) && (
                 <fieldset className={"flex gap-4"}>
-                    <div>
-                        <input
-                            type="radio"
-                            id={"TraefikHttpEndpointHandlerRadio"}
-                            value="TraefikHttpEndpointHandler"
-                            checked={handlerType === "TraefikHttpEndpointHandler"}
-                            onChange={e => {
-                                updateHandlerType(e.target.value);
-                            }}
-                        >
-                        </input>
-                        <label htmlFor={"TraefikHttpEndpointHandlerRadio"}>Traefik
-                        </label>
-                    </div>
+                    {hasTraefik && (
+                        <div>
+                            <input
+                                type="radio"
+                                id={"TraefikHttpEndpointHandlerRadio"}
+                                value="TraefikHttpEndpointHandler"
+                                checked={handlerType === "TraefikHttpEndpointHandler"}
+                                onChange={e => {
+                                    updateHandlerType(e.target.value);
+                                }}
+                            >
+                            </input>
+                            <label htmlFor={"TraefikHttpEndpointHandlerRadio"}>Traefik
+                            </label>
+                        </div>
+                    )}
+                    {hasCloudflare && (
+                        <div>
+                            <input
+                                type="radio"
+                                id={"CloudflareHttpEndpointHandlerRadio"}
+                                value="CloudflareHttpEndpointHandler"
+                                checked={handlerType === "CloudflareHttpEndpointHandler"}
+                                onChange={e => {
+                                    updateHandlerType(e.target.value);
+                                }}
+                            />
+                            <label htmlFor={"CloudflareHttpEndpointHandlerRadio"}>
+                                Cloudflare
+                            </label>
+                        </div>
+                    )}
                     <div>
                         <input
                             type="radio"

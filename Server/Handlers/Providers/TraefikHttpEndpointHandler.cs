@@ -37,8 +37,8 @@ public class TraefikHttpEndpointHandler(Application application)
         var domain = domainContract.Value;
         var subdomain = domain.Split('.')[0];
 
-        var containerContract = plan.GetContract(contract.Container);
-        var network = plan.GetContract(containerContract.Network);
+        var container = plan.GetContract(contract.Container);
+        var network = plan.GetContract(container.Network);
         Debug.Assert(network.Installed);
 
         _container.AttachNetwork(network.NetworkName);
@@ -57,9 +57,9 @@ public class TraefikHttpEndpointHandler(Application application)
         }
 
         plan.UpdateContract(
-            containerContract with
+            container with
             {
-                Configure = containerContract.Configure.Append(
+                Configure = container.Configure.Append(
                     parameters =>
                     {
                         parameters.Labels["traefik.enable"] = "true";
@@ -77,13 +77,11 @@ public class TraefikHttpEndpointHandler(Application application)
             }
         );
 
-        var url = certResolver == null
-            ? new Uri($"http://{domain}:{_webPort}")
-            : new Uri($"https://{domain}:{_webSecurePort}");
-
         return contract with
         {
-            Url = url,
+            ResultSsl = certResolver != null,
+            ResultHost = domain,
+            ResultPort = certResolver != null ? _webSecurePort : _webPort,
             NetworkName = network.NetworkName,
         };
     }

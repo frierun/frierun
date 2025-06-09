@@ -26,7 +26,9 @@ public class PortHttpEndpointHandler : Handler<HttpEndpoint>
 
         return contract with
         {
-            Url = url,
+            ResultSsl = false,
+            ResultHost = portEndpoint.ExternalIp,
+            ResultPort = portEndpoint.ExternalPort,
         };
     }
     

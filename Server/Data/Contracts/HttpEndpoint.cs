@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Frierun.Server.Data;
 
@@ -8,13 +8,15 @@ public record HttpEndpoint(
     int Port = 0,
     ContractId<Container>? Container = null,
     ContractId<Domain>? Domain = null,
-    Uri? Url = null,
-    string? NetworkName = null // for Traefik endpoints
+    bool? ResultSsl = null,
+    string? ResultHost = null,
+    int? ResultPort = null,
+    string? NetworkName = null, // for Traefik endpoints
+    string? CloudflareZoneId = null // for Cloudflare endpoints
 ) : Contract(Name ?? $"{Port}{(Container != null ? $" at {Container.Name}" : "")}")
 {
-    [MemberNotNullWhen(true, nameof(Url))]
-    public override bool Installed { get; init; }
-    
+    [MemberNotNullWhen(true, nameof(Url))] public override bool Installed { get; init; }
+
     public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");
     public ContractId<Domain> Domain { get; init; } = Domain ?? new ContractId<Domain>(Name ?? "");
 
@@ -30,7 +32,7 @@ public record HttpEndpoint(
             Handler = endpoint.Handler,
         };
     }
-    
+
     [JsonIgnore]
-    public string? Host => Url?.Host;
+    public Uri Url => new($"http{(ResultSsl == true ? "s" : "")}://{ResultHost}:{ResultPort}");
 }

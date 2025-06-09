@@ -8,9 +8,15 @@
 export type HttpEndpointAllOf = {
   port: number;
   /** @nullable */
-  url?: string | null;
+  resultSsl?: boolean | null;
+  /** @nullable */
+  resultHost?: string | null;
+  /** @nullable */
+  resultPort?: number | null;
   /** @nullable */
   networkName?: string | null;
+  /** @nullable */
+  cloudflareZoneId?: string | null;
   installed?: boolean;
   container: string;
   domain: string;

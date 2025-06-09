@@ -163,6 +163,11 @@ public class HandlerRegistry : IDisposable
             return true;
         }
         
+        if (handlerType == typeof(CloudflareHttpEndpointHandler))
+        {
+            return true;
+        }
+        
         if (contractType == typeof(DockerApiConnection) && handlerType != typeof(DockerApiConnectionHandler))
         {
             return true;

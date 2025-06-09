@@ -5,6 +5,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { CloudflareApiConnection } from "./cloudflareApiConnection";
+import type { CloudflareTunnel } from "./cloudflareTunnel";
 import type { Container } from "./container";
 import type { Dependency } from "./dependency";
 import type { DockerApiConnection } from "./dockerApiConnection";
@@ -26,6 +27,7 @@ import type { Volume } from "./volume";
 
 export type SelectorOptionContractsItem =
   | CloudflareApiConnection
+  | CloudflareTunnel
   | Container
   | Dependency
   | DockerApiConnection
