@@ -4,6 +4,7 @@ using Frierun.Server;
 using Frierun.Server.Data;
 using Frierun.Server.Handlers;
 using Frierun.Server.Handlers.Base;
+using Frierun.Tests.Handlers;
 
 namespace Frierun.Tests;
 
