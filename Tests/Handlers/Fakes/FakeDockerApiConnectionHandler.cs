@@ -10,11 +10,11 @@ public class FakeDockerApiConnectionHandler
     : Handler<DockerApiConnection>, IDockerApiConnectionHandler
 {
     public string SocketRootPath { get; set; } = "/var/run/docker.sock";
-    public IDockerClient DockerClient { get; } = CreateDockerSubstitute();
+    public IDockerClient Client { get; } = CreateClientSubstitute();
 
     public IDockerClient CreateClient(DockerApiConnection contract)
     {
-        return DockerClient;
+        return Client;
     }
 
     public string GetSocketRootPath(DockerApiConnection contract)
@@ -25,16 +25,16 @@ public class FakeDockerApiConnectionHandler
     /// <summary>
     /// Creates substitute for docker client.
     /// </summary>
-    private static IDockerClient CreateDockerSubstitute()
+    private static IDockerClient CreateClientSubstitute()
     {
-        var dockerClient = NSubstitute.Substitute.For<IDockerClient>();
-        dockerClient.Containers
+        var client = NSubstitute.Substitute.For<IDockerClient>();
+        client.Containers
             .CreateContainerAsync(default)
             .ReturnsForAnyArgs(Task.FromResult(new CreateContainerResponse {ID = "containerId"}));
-        dockerClient.Containers
+        client.Containers
             .StartContainerAsync(default, default)
             .ReturnsForAnyArgs(Task.FromResult(true));
-        dockerClient.Exec
+        client.Exec
             .ExecCreateContainerAsync(default, default)
             .ReturnsForAnyArgs(
                 Task.FromResult(
@@ -45,10 +45,10 @@ public class FakeDockerApiConnectionHandler
                 )
             );
 
-        dockerClient.Exec
+        client.Exec
             .StartAndAttachContainerExecAsync(default, default)
             .ReturnsForAnyArgs(Task.FromResult(new MultiplexedStream(new MemoryStream(), false)));
 
-        return dockerClient;
+        return client;
     }    
 }

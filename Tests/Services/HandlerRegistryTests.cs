@@ -207,6 +207,17 @@ public class HandlerRegistryTests : BaseTests
 
         Assert.IsType<FakeDockerApiConnectionHandler>(handler);
     }
+    
+    [Fact]
+    public void GetHandlers_DefaultConfiguration_ReturnsFakeCloudflareApiConnectionHandler()
+    {
+        var registry = Resolve<HandlerRegistry>();
+
+        var handler = registry.GetHandlers(typeof(CloudflareApiConnection)).First();
+
+        Assert.IsType<FakeCloudflareApiConnectionHandler>(handler);
+    }
+    
 
     [Fact]
     public void GetHandler_InstalledPackage_LoadsLazily()

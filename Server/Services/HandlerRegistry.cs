@@ -168,7 +168,7 @@ public class HandlerRegistry : IDisposable
             return true;
         }
         
-        if (contractType == typeof(DockerApiConnection) && handlerType != typeof(DockerApiConnectionHandler))
+        if (contractType.Name.StartsWith("Fake"))
         {
             return true;
         }

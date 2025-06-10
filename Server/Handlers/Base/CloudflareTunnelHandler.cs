@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Net.Mime;
 using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
@@ -40,10 +39,10 @@ public class CloudflareTunnelHandler(State state) : Handler<CloudflareTunnel>
         var cloudflareApiConnection = plan.GetContract(contract.CloudflareApiConnection);
 
         var client = cloudflareApiConnection.CreateClient();
-        List<(string id, string name)> accounts;
+        IEnumerable<(string id, string name)> accounts;
         try
         {
-            accounts = client.GetAccounts().ToList();
+            accounts = client.GetAccounts();
         }
         catch (Exception e)
         {
@@ -57,7 +56,16 @@ public class CloudflareTunnelHandler(State state) : Handler<CloudflareTunnel>
 
         if (contract.AccountId == null)
         {
-            contract = contract with { AccountId = accounts.First().id };
+            var account = accounts.FirstOrDefault();
+            if (account == default)
+            {
+                throw new HandlerException(
+                    "No Cloudflare accounts found.",
+                    "Ensure you have at least one account in your Cloudflare settings.",
+                    contract
+                );
+            }
+            contract = contract with { AccountId = account.id };
         }
         else
         {
@@ -90,7 +98,7 @@ public class CloudflareTunnelHandler(State state) : Handler<CloudflareTunnel>
         plan.UpdateContract(
             container with
             {
-                Command = ["tunnel", "--no-autoupdate", "run", "--token", tunnel.token],
+                Command = ["tunnel", "--no-autoupdate", "run", "--token", tunnel.token]
             }
         );
 
@@ -108,6 +116,17 @@ public class CloudflareTunnelHandler(State state) : Handler<CloudflareTunnel>
         var cloudflareApiConnection = application.GetContract(contract.CloudflareApiConnection);
 
         var client = cloudflareApiConnection.CreateClient();
-        client.DeleteTunnel(contract.AccountId, contract.TunnelId);
+        try
+        {
+            client.DeleteTunnel(contract.AccountId, contract.TunnelId);
+        } catch (Exception e)
+        {
+            throw new HandlerException(
+                "Failed to delete Cloudflare Tunnel.",
+                "Check your Cloudflare API token and permissions.",
+                contract,
+                e
+            );
+        }
     }
 }

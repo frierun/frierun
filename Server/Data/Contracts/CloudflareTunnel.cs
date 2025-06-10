@@ -19,4 +19,17 @@ public record CloudflareTunnel(
         CloudflareApiConnection ?? new ContractId<CloudflareApiConnection>("");
 
     public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");
+    
+    public override Contract With(Contract other) 
+    {
+        if (other is not CloudflareTunnel cloudflareTunnel || other.Id != Id)
+        {
+            throw new Exception("Invalid contract");
+        }
+
+        return this with
+        {
+            AccountId = AccountId ?? cloudflareTunnel.AccountId
+        };
+    }
 }

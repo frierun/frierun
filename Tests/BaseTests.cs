@@ -17,7 +17,8 @@ public abstract class BaseTests
 {
     private IContainer? Provider { get; set; }
     private ContainerBuilder? ContainerBuilder { get; set; }
-    protected IDockerClient DockerClient => Handler<FakeDockerApiConnectionHandler>().DockerClient;
+    protected IDockerClient DockerClient => Handler<FakeDockerApiConnectionHandler>().Client;
+    protected ICloudflareClient CloudflareClient => Handler<FakeCloudflareApiConnectionHandler>().Client;
 
     /// <summary>
     /// Resolve object from the provider.
@@ -84,6 +85,12 @@ public abstract class BaseTests
                         .SingleInstance()
                         .OnlyIf(
                             registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(IDockerApiConnectionHandler)))
+                        );
+                    b.RegisterType<FakeCloudflareApiConnectionHandler>()
+                        .AsImplementedInterfaces()
+                        .SingleInstance()
+                        .OnlyIf(
+                            registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(ICloudflareApiConnectionHandler)))
                         );
                 };
             }
@@ -154,7 +161,18 @@ public abstract class BaseTests
         var executionService = Resolve<ExecutionService>();
         var installService = Resolve<InstallService>();
         var plan = executionService.Create(package);
-        return installService.Handle(plan) ?? throw new Exception($"Failed to install package {package.Name}");
+        var application = installService.Handle(plan);
+        if (application != null)
+        {
+            return application;
+        }
+
+        var stateManager = Resolve<StateManager>();
+        if (stateManager.Exception != null)
+        {
+            throw stateManager.Exception;
+        }
+        throw new Exception($"Failed to install package {package.Name}");
     }
 
     /// <summary>
