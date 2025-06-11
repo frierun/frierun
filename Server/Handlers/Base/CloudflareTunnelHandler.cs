@@ -3,24 +3,18 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class CloudflareTunnelHandler(State state) : Handler<CloudflareTunnel>
+public class CloudflareTunnelHandler : Handler<CloudflareTunnel>
 {
     public override IEnumerable<ContractInitializeResult> Initialize(CloudflareTunnel contract, string prefix)
     {
-        var baseName = contract.TunnelName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
-        var count = 1;
-        var name = baseName;
-        while (state.Contracts.OfType<CloudflareTunnel>().Any(c => c.TunnelName == name))
-        {
-            count++;
-            name = $"{baseName}{count}";
-        }
-
         yield return new ContractInitializeResult(
             contract with
             {
                 Handler = this,
-                TunnelName = name,
+                TunnelName = contract.TunnelName ?? FindUniqueName(
+                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    tunnel => tunnel.TunnelName
+                ),
                 DependsOn = [contract.CloudflareApiConnection],
                 DependencyOf = [contract.Container],
             },
@@ -65,6 +59,7 @@ public class CloudflareTunnelHandler(State state) : Handler<CloudflareTunnel>
                     contract
                 );
             }
+
             contract = contract with { AccountId = account.id };
         }
         else
@@ -112,14 +107,15 @@ public class CloudflareTunnelHandler(State state) : Handler<CloudflareTunnel>
     public override void Uninstall(CloudflareTunnel contract)
     {
         Debug.Assert(contract.Installed);
-        var application = state.Applications.Single(application => application.Contracts.Contains(contract));
+        var application = State.Applications.Single(application => application.Contracts.Contains(contract));
         var cloudflareApiConnection = application.GetContract(contract.CloudflareApiConnection);
 
         var client = cloudflareApiConnection.CreateClient();
         try
         {
             client.DeleteTunnel(contract.AccountId, contract.TunnelId);
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             throw new HandlerException(
                 "Failed to delete Cloudflare Tunnel.",

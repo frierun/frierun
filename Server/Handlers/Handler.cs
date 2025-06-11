@@ -7,6 +7,7 @@ namespace Frierun.Server.Handlers;
 public class Handler<TContract>(Application? application = null) : IHandler
     where TContract : Contract
 {
+    public required State State { protected get; init; }
     public Application? Application => application;
 
     public virtual IEnumerable<ContractInitializeResult> Initialize(TContract contract, string prefix)
@@ -76,5 +77,21 @@ public class Handler<TContract>(Application? application = null) : IHandler
     void IHandler.Uninstall(Contract contract)
     {
         Uninstall((TContract)contract);
+    }
+
+    /// <summary>
+    /// Finds a unique name for a contract property
+    /// </summary>
+    protected string FindUniqueName(string baseName, Func<TContract, string?> predicate)
+    {
+        var count = 1;
+        var name = baseName;
+        while (State.Contracts.OfType<TContract>().Any(c => predicate(c) == name))
+        {
+            count++;
+            name = $"{baseName}{count}";
+        }
+
+        return name;
     }
 }

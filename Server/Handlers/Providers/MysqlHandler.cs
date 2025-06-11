@@ -4,7 +4,7 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers;
 
-public class MysqlHandler(Application application, State state)
+public class MysqlHandler(Application application)
     : Handler<Mysql>(application)
 {
     private readonly Container _container = application.Contracts.OfType<Container>().Single();
@@ -20,12 +20,12 @@ public class MysqlHandler(Application application, State state)
             {
                 yield break;
             }
-            
+
             if (contract.Password != null && contract.Password != _rootPassword)
             {
                 yield break;
             }
-            
+
             yield return new ContractInitializeResult(
                 contract with
                 {
@@ -36,23 +36,19 @@ public class MysqlHandler(Application application, State state)
                 }
             );
         }
-        
-        var baseName = contract.Database ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
-
-        var count = 1;
-        var database = baseName;
-        while (state.Contracts.OfType<Mysql>().Any(c => c.Database == database))
-        {
-            count++;
-            database = $"{baseName}{count}";
-        }
 
         yield return new ContractInitializeResult(
             contract with
             {
                 Handler = this,
-                Database = database,
-                Username = contract.Username ?? database,
+                Database = contract.Database ?? FindUniqueName(
+                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    c => c.Database
+                ),
+                Username = contract.Username ?? FindUniqueName(
+                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    c => c.Username
+                ),
                 Password = contract.Password ?? RandomNumberGenerator.GetString(
                     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
                     16
@@ -70,16 +66,17 @@ public class MysqlHandler(Application application, State state)
 
         var network = plan.GetContract(contract.Network);
         Debug.Assert(network.Installed);
-        
+
         if (contract.Host != null && contract.Host != _container.ContainerName)
         {
             throw new Exception("Host cannot be set");
         }
+
         if (contract.NetworkName != null && contract.NetworkName != network.NetworkName)
         {
             throw new Exception("NetworkName cannot be set");
         }
-        
+
         _container.AttachNetwork(network.NetworkName);
 
         if (contract.Admin)
@@ -92,14 +89,14 @@ public class MysqlHandler(Application application, State state)
                 NetworkName = network.NetworkName
             };
         }
-        
+
         Debug.Assert(contract.Database != null);
 
         if (contract.Username == "root")
         {
             throw new Exception("Username cannot be root");
         }
-        
+
         RunSql(
             $"""
              CREATE DATABASE `{contract.Database}`;

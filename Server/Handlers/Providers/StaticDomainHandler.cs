@@ -2,7 +2,7 @@
 
 namespace Frierun.Server.Handlers;
 
-public class StaticDomainHandler(State state, Application application)
+public class StaticDomainHandler(Application application)
     : Handler<Domain>(application)
 {
     private readonly string _domainName = application.Contracts
@@ -64,6 +64,6 @@ public class StaticDomainHandler(State state, Application application)
     /// </summary>
     private bool IsDomainExist(string domain)
     {
-        return state.Contracts.OfType<Domain>().Any(c => c.Value == domain);
+        return State.Contracts.OfType<Domain>().Any(c => c.Value == domain);
     }
 }

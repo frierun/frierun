@@ -4,27 +4,21 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class ContainerHandler(Application application, DockerService dockerService, State state)
+public class ContainerHandler(Application application, DockerService dockerService)
     : Handler<Container>(application), IContainerHandler
 {
-    private readonly DockerApiConnection _dockerApiConnection = application.Contracts.OfType<DockerApiConnection>().Single();
+    private readonly DockerApiConnection _dockerApiConnection =
+        application.Contracts.OfType<DockerApiConnection>().Single();
 
     public override IEnumerable<ContractInitializeResult> Initialize(Container contract, string prefix)
     {
-        var baseName = contract.ContainerName ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
-
-        var count = 1;
-        var name = baseName;
-        while (state.Contracts.OfType<Container>().Any(c => c.ContainerName == name))
-        {
-            count++;
-            name = $"{baseName}{count}";
-        }
-
         yield return new ContractInitializeResult(
             contract with
             {
-                ContainerName = name,
+                ContainerName = contract.ContainerName ?? FindUniqueName(
+                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    c => c.ContainerName
+                ),
                 DependsOn = contract.DependsOn.Append(contract.Network),
                 Handler = this
             }

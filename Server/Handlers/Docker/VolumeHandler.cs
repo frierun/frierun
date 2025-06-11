@@ -3,7 +3,7 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class VolumeHandler(Application application, DockerService dockerService, State state)
+public class VolumeHandler(Application application, DockerService dockerService)
     : Handler<Volume>(application)
 {
     public override IEnumerable<ContractInitializeResult> Initialize(Volume contract, string prefix)
@@ -12,31 +12,15 @@ public class VolumeHandler(Application application, DockerService dockerService,
         {
             yield break;
         }
-        
-        if (contract.VolumeName != null)
-        {
-            yield return new ContractInitializeResult(contract with { Handler = this });
-            yield break;
-        }
-
-        var baseName = prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
-
-        var count = 0;
-        var name = baseName;
-        while (state.Contracts
-               .OfType<Volume>()
-               .Any(volume => volume.VolumeName == name)
-              )
-        {
-            count++;
-            name = $"{baseName}{count}";
-        }
 
         yield return new ContractInitializeResult(
             contract with
             {
                 Handler = this,
-                VolumeName = name
+                VolumeName = contract.VolumeName ?? FindUniqueName(
+                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    volume => volume.VolumeName
+                )
             }
         );
     }
@@ -44,10 +28,10 @@ public class VolumeHandler(Application application, DockerService dockerService,
     public override Volume Install(Volume contract, ExecutionPlan plan)
     {
         Debug.Assert(contract.LocalPath == null);
-        
+
         var volumeName = contract.VolumeName!;
 
-        if (state.Contracts
+        if (State.Contracts
             .OfType<Volume>()
             .All(volume => volume.VolumeName != volumeName)
            )
@@ -62,7 +46,7 @@ public class VolumeHandler(Application application, DockerService dockerService,
     {
         Debug.Assert(contract.VolumeName != null);
 
-        var volumeUsed = state.Contracts
+        var volumeUsed = State.Contracts
             .OfType<Volume>()
             .Count(volume => volume.VolumeName == contract.VolumeName);
 
