@@ -16,7 +16,7 @@ public class PackageTests : TestWithDocker
         HashSet<string> ignoredPackages =
         [
             // internal
-            "static-domain",
+            "static-zone",
             "docker",
             "cloudflare-tunnel",
             

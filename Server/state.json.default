@@ -2,7 +2,7 @@
   "applications": [
     {
       "name": "localhost domain",
-      "package": "static-domain",
+      "package": "static-zone",
       "url": null,
       "description": "Domain: localhost",
       "contracts": [
@@ -18,8 +18,8 @@
         },
         {
           "type": "Substitute",
-          "originalId": "Package:static-domain",
-          "name": "Package:static-domain",
+          "originalId": "Package:static-zone",
+          "name": "Package:static-zone",
           "handler": {
             "typeName": "SubstituteHandler"
           },

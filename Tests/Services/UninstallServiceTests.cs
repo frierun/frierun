@@ -41,7 +41,7 @@ public class UninstallServiceTests : BaseTests
     public void Handle_DependentApplication_ThrowsExceptionOnWrongOrder()
     {
         InstallPackage("docker");
-        InstallPackage("static-domain");
+        InstallPackage("static-zone");
         var traefik = InstallPackage("traefik");
         var application = InstallPackage("frierun");
         

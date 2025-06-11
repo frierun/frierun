@@ -80,7 +80,7 @@ public class StateSerializerTests : BaseTests
     {
         var stateManager = Resolve<StateSerializer>();
         var state = Resolve<State>();
-        InstallPackage("static-domain");
+        InstallPackage("static-zone");
         InstallPackage("docker");
         InstallPackage("traefik");
         InstallPackage("frierun");

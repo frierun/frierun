@@ -96,7 +96,7 @@ public class AutofacModule : Module
                     .AsImplementedInterfaces()
                     .SingleInstance()
             )
-            .Named<ProviderScopeBuilder>("static-domain")
+            .Named<ProviderScopeBuilder>("static-zone")
             .SingleInstance();
         builder.RegisterInstance<ProviderScopeBuilder>(
                 static builder => builder.RegisterType<TraefikHttpEndpointHandler>()
