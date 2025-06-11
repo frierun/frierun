@@ -1,5 +1,5 @@
-﻿name: "static-domain"
-iconUrl: "/packages/static-domain.png"
+﻿name: "static-zone"
+iconUrl: "/packages/static-zone.png"
 shortDescription: "Your own preconfigured domain/localhost"
 fullDescription: "Domain which must point to the server. Allows use subdomains for different services."
 tags: [ "provider" ]

@@ -1,0 +1,13 @@
+﻿name: "cloudflare-tunnel"
+iconUrl: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/cloudflare.png"
+shortDescription: "Cloudflare Zero Trust Tunnel"
+fullDescription: "Allows exposing local application to the internet via Cloudflare Zero Trust Tunnel."
+tags: [ "provider" ]
+contracts:
+  - type: "Parameter"
+    name: "Token"
+
+  - type: "CloudflareApiConnection"
+    token: "{{Parameter:Token:Value}}"
+    
+  - type: "CloudflareTunnel"

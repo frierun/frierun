@@ -4,20 +4,15 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers;
 
-public class PostgresqlHandler(
-    Application application,
-    State state,
-    ILogger<PostgresqlHandler> logger)
-    : IHandler<Postgresql>
+public class PostgresqlHandler(Application application, ILogger<PostgresqlHandler> logger)
+    : Handler<Postgresql>(application)
 {
     private readonly Container _container = application.Contracts.OfType<Container>().Single();
 
     private readonly string _rootPassword = application.Contracts.OfType<Password>().Single().Value ??
                                             throw new Exception("Root password not found");
 
-    public Application Application => application;
-
-    public IEnumerable<ContractInitializeResult> Initialize(
+    public override IEnumerable<ContractInitializeResult> Initialize(
         Postgresql contract,
         string prefix
     )
@@ -33,7 +28,7 @@ public class PostgresqlHandler(
             {
                 yield break;
             }
-            
+
             yield return new ContractInitializeResult(
                 contract with
                 {
@@ -45,22 +40,18 @@ public class PostgresqlHandler(
             );
         }
 
-        var baseName = contract.Database ?? prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
-
-        var count = 1;
-        var database = baseName;
-        while (state.Contracts.OfType<Postgresql>().Any(c => c.Database == database))
-        {
-            count++;
-            database = $"{baseName}{count}";
-        }
-
         yield return new ContractInitializeResult(
             contract with
             {
                 Handler = this,
-                Database = database,
-                Username = contract.Username ?? database,
+                Database = contract.Database ?? FindUniqueName(
+                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    c => c.Database
+                ),
+                Username = contract.Username ?? FindUniqueName(
+                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    c => c.Username
+                ),
                 Password = contract.Password ?? RandomNumberGenerator.GetString(
                     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
                     16
@@ -70,7 +61,7 @@ public class PostgresqlHandler(
         );
     }
 
-    public Postgresql Install(Postgresql contract, ExecutionPlan plan)
+    public override Postgresql Install(Postgresql contract, ExecutionPlan plan)
     {
         Debug.Assert(_container.Installed);
         Debug.Assert(contract.Username != null);
@@ -122,7 +113,7 @@ public class PostgresqlHandler(
         };
     }
 
-    void IHandler<Postgresql>.Uninstall(Postgresql contract)
+    public override void Uninstall(Postgresql contract)
     {
         Debug.Assert(contract.Installed);
 

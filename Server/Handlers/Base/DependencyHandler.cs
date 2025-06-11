@@ -2,9 +2,9 @@
 
 namespace Frierun.Server.Handlers.Base;
 
-public class DependencyHandler : IHandler<Dependency>
+public class DependencyHandler : Handler<Dependency>
 {
-    public IEnumerable<ContractInitializeResult> Initialize(Dependency contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Dependency contract, string prefix)
     {
         yield return new ContractInitializeResult(
             contract with

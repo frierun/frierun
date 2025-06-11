@@ -3,9 +3,9 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class RedisHandler : IHandler<Redis>
+public class RedisHandler : Handler<Redis>
 {
-    public IEnumerable<ContractInitializeResult> Initialize(Redis contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Redis contract, string prefix)
     {
         var name = "redis" + (string.IsNullOrEmpty(contract.Name) ? "" : $"-{contract.Name}");
         var container = contract.Container ?? new ContractId<Container>(name);
@@ -35,7 +35,7 @@ public class RedisHandler : IHandler<Redis>
         );
     }
 
-    public Redis Install(Redis contract, ExecutionPlan plan)
+    public override Redis Install(Redis contract, ExecutionPlan plan)
     {
         Debug.Assert(contract.Container != null);
         

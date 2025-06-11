@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using System.Diagnostics;
+using Autofac;
 using Autofac.Features.Indexed;
 using Frierun.Server.Data;
 using Frierun.Server.Handlers;
@@ -11,6 +12,7 @@ public class HandlerRegistry : IDisposable
     private readonly IIndex<string, ProviderScopeBuilder> _scopeBuilders;
     private readonly ILifetimeScope _container;
     private readonly ILifetimeScope _baseScope;
+    private readonly HashSet<Application> _applicationsToLoad = new();
     private readonly Dictionary<Application, ILifetimeScope> _applicationScopes = new();
     private readonly Dictionary<Application, IList<IHandler>> _handlerPerApplication = new();
     private readonly Dictionary<Type, IList<IHandler>> _handlerPerType = new();
@@ -34,10 +36,10 @@ public class HandlerRegistry : IDisposable
 
         foreach (var application in state.Applications)
         {
-            AddApplication(application);
+            _applicationsToLoad.Add(application);
         }
 
-        state.ApplicationAdded += AddApplication;
+        state.ApplicationAdded += application => _applicationsToLoad.Add(application);
         state.ApplicationRemoved += RemoveApplication;
     }
 
@@ -56,6 +58,8 @@ public class HandlerRegistry : IDisposable
     /// </summary>
     private void AddApplication(Application application)
     {
+        _applicationsToLoad.Remove(application);
+        
         var packageName = application.Package?.Name;
         if (packageName == null)
         {
@@ -93,6 +97,8 @@ public class HandlerRegistry : IDisposable
     /// </summary>
     private void RemoveApplication(Application application)
     {
+        _applicationsToLoad.Remove(application);
+        
         var packageName = application.Package?.Name;
         if (packageName == null)
         {
@@ -125,10 +131,9 @@ public class HandlerRegistry : IDisposable
     {
         _handlers[(handler.GetType().Name, handler.Application?.Name)] = handler;
 
-        var handlerType = handler
-            .GetType()
-            .GetInterfaces()
-            .Single(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IHandler<>));
+        var handlerType = handler.GetType().BaseType;
+        
+        Debug.Assert(handlerType != null);
         
         var contractType = handlerType.GetGenericArguments()[0];
 
@@ -158,7 +163,12 @@ public class HandlerRegistry : IDisposable
             return true;
         }
         
-        if (contractType == typeof(DockerApiConnection) && handlerType != typeof(DockerApiConnectionHandler))
+        if (handlerType == typeof(CloudflareHttpEndpointHandler))
+        {
+            return true;
+        }
+        
+        if (contractType.Name.StartsWith("Fake"))
         {
             return true;
         }
@@ -171,6 +181,11 @@ public class HandlerRegistry : IDisposable
     /// </summary>
     public IEnumerable<IHandler> GetHandlers(Type contractType)
     {
+        foreach (var application in _applicationsToLoad)
+        {
+            AddApplication(application);
+        }
+        
         if (!_handlerPerType.TryGetValue(contractType, out var handlers))
         {
             return Array.Empty<IHandler>();
@@ -181,6 +196,13 @@ public class HandlerRegistry : IDisposable
 
     public IHandler? GetHandler(string typeName, string? applicationName = null)
     {
+        if (applicationName != null)
+        {
+            foreach (var application in _applicationsToLoad.Where(application => applicationName == application.Name))
+            {
+                AddApplication(application);
+            }
+        }
         return _handlers.GetValueOrDefault((typeName, applicationName));
     }
 }

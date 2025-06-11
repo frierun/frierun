@@ -4,12 +4,20 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { HttpEndpointAllOfResult } from "./httpEndpointAllOfResult";
 
 export type HttpEndpointAllOf = {
   port: number;
   /** @nullable */
-  result?: HttpEndpointAllOfResult;
+  resultSsl?: boolean | null;
+  /** @nullable */
+  resultHost?: string | null;
+  /** @nullable */
+  resultPort?: number | null;
+  /** @nullable */
+  networkName?: string | null;
+  /** @nullable */
+  cloudflareZoneId?: string | null;
+  installed?: boolean;
   container: string;
   domain: string;
 };

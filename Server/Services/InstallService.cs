@@ -24,7 +24,7 @@ public class InstallService(
         }
         catch (HandlerException e)
         {
-            stateManager.Error = e.Result;
+            stateManager.Exception = e;
             return null;
         }
         finally

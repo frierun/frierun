@@ -1,4 +1,5 @@
 ﻿using Frierun.Server.Handlers;
+using Newtonsoft.Json;
 
 namespace Frierun.Server;
 
@@ -6,7 +7,9 @@ public class StateManager
 {
     public bool Ready { get; private set; } = true;
     public string TaskName { get; private set; } = string.Empty;
-    public HandlerExceptionResult? Error { get; set; }
+    public HandlerExceptionResult? Error => Exception?.Result;
+    [JsonIgnore] public HandlerException? Exception { get; set; }
+    
     private readonly object _lock = new();
     
     /// <summary>
@@ -22,7 +25,7 @@ public class StateManager
             }
             TaskName = taskName;
             Ready = false;
-            Error = null;
+            Exception = null;
             return true;
         }
     }

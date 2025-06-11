@@ -5,9 +5,10 @@
  * OpenAPI spec version: 1.0
  */
 
-export type LocalPathType = (typeof LocalPathType)[keyof typeof LocalPathType];
+export type CloudflareTunnelType =
+  (typeof CloudflareTunnelType)[keyof typeof CloudflareTunnelType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const LocalPathType = {
-  LocalPath: "LocalPath",
+export const CloudflareTunnelType = {
+  CloudflareTunnel: "CloudflareTunnel",
 } as const;

@@ -11,7 +11,7 @@ contracts:
     imageName: "ghcr.io/gethomepage/homepage:latest"
     requireDocker: true
     env:
-      HOMEPAGE_ALLOWED_HOSTS: "{{HttpEndpoint:frontend:Host}}"
+      HOMEPAGE_ALLOWED_HOSTS: "{{HttpEndpoint:frontend:ResultHost}}"
       
   - type: "HttpEndpoint"
     name: "frontend"

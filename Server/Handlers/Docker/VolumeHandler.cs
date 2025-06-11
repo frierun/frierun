@@ -3,91 +3,58 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class VolumeHandler(Application application, DockerService dockerService, State state)
-    : IHandler<Volume>
+public class VolumeHandler(Application application, DockerService dockerService)
+    : Handler<Volume>(application)
 {
-    public Application Application => application;
-
-    public IEnumerable<ContractInitializeResult> Initialize(Volume contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Volume contract, string prefix)
     {
-        if (contract.VolumeName != null || contract.Path != null)
+        if (contract.LocalPath != null)
         {
-            yield return new ContractInitializeResult(contract with { Handler = this });
             yield break;
-        }
-
-        var baseName = prefix + (contract.Name == "" ? "" : $"-{contract.Name}");
-
-        var count = 0;
-        var name = baseName;
-        while (state.Contracts
-               .OfType<Volume>()
-               .Select(volume => volume.Result)
-               .OfType<DockerVolume>()
-               .Any(c => c.Name == name)
-              )
-        {
-            count++;
-            name = $"{baseName}{count}";
         }
 
         yield return new ContractInitializeResult(
             contract with
             {
                 Handler = this,
-                VolumeName = name
+                VolumeName = contract.VolumeName ?? FindUniqueName(
+                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    volume => volume.VolumeName
+                )
             }
         );
     }
 
-    public Volume Install(Volume contract, ExecutionPlan plan)
+    public override Volume Install(Volume contract, ExecutionPlan plan)
     {
-        if (contract.Path != null)
-        {
-            return contract with
-            {
-                Result = new LocalPath { Path = contract.Path }
-            };
-        }
+        Debug.Assert(contract.LocalPath == null);
 
         var volumeName = contract.VolumeName!;
 
-        if (state.Contracts
+        if (State.Contracts
             .OfType<Volume>()
-            .Select(volume => volume.Result)
-            .OfType<DockerVolume>()
-            .All(dockerVolume => dockerVolume.Name != volumeName)
+            .All(volume => volume.VolumeName != volumeName)
            )
         {
             dockerService.CreateVolume(volumeName).Wait();
         }
 
-        return contract with
-        {
-            Result = new DockerVolume { Name = volumeName }
-        };
+        return contract;
     }
 
-    public void Uninstall(Volume contract)
+    public override void Uninstall(Volume contract)
     {
-        var installedVolume = contract.Result as DockerVolume;
-        if (installedVolume == null)
-        {
-            // Local path
-            return;
-        }
+        Debug.Assert(contract.VolumeName != null);
 
-        var volumeUsed = state.Contracts
+        var volumeUsed = State.Contracts
             .OfType<Volume>()
-            .Select(volume => volume.Result)
-            .OfType<DockerVolume>()
-            .Count(dockerVolume => dockerVolume.Name == installedVolume.Name);
+            .Count(volume => volume.VolumeName == contract.VolumeName);
 
         if (volumeUsed > 1)
         {
             return;
         }
 
-        dockerService.RemoveVolume(installedVolume.Name).Wait();
+        dockerService.RemoveVolume(contract.VolumeName).Wait();
     }
 }

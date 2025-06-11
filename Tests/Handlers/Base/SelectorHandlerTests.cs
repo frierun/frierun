@@ -14,7 +14,7 @@ public class SelectorHandlerTests : BaseTests
                 new SelectorOption("option2", [new Container("container2")])
             ], "option2"
         );
-        var handler = new SelectorHandler();
+        var handler = Handler<SelectorHandler>();
 
         var result = handler.Initialize(selector, "prefix").ToList();
 
@@ -35,7 +35,7 @@ public class SelectorHandlerTests : BaseTests
                 new SelectorOption("option2", [new Container("container2")])
             ]
         );
-        var handler = new SelectorHandler();
+        var handler = Handler<SelectorHandler>();
 
         var result = handler.Initialize(selector, "prefix").ToList();
 

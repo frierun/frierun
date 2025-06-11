@@ -5,6 +5,6 @@
  * OpenAPI spec version: 1.0
  */
 
-export type LocalPathAllOf = {
-  path: string;
+export type CloudflareApiConnectionAllOf = {
+  token: string;
 };

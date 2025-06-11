@@ -2,9 +2,9 @@
 
 namespace Frierun.Server.Handlers.Base;
 
-public class SelectorHandler : IHandler<Selector>
+public class SelectorHandler : Handler<Selector>
 {
-    public IEnumerable<ContractInitializeResult> Initialize(Selector contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Selector contract, string prefix)
     {
         if (contract.Value != null)
         {

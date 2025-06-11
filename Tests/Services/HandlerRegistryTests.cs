@@ -1,7 +1,10 @@
-﻿using Frierun.Server;
+﻿using Autofac;
+using Autofac.Features.Indexed;
+using Frierun.Server;
 using Frierun.Server.Data;
 using Frierun.Server.Handlers;
 using Frierun.Server.Handlers.Base;
+using Frierun.Tests.Handlers;
 
 namespace Frierun.Tests;
 
@@ -39,7 +42,11 @@ public class HandlerRegistryTests : BaseTests
     {
         InstallPackage("docker");
         InstallPackage("traefik");
-        var registry = Resolve<HandlerRegistry>();
+        var registry = new HandlerRegistry(
+            Resolve<State>(),
+            Resolve<IIndex<string, ProviderScopeBuilder>>(),
+            Resolve<ILifetimeScope>()
+        );
 
         var result = registry.GetHandlers(typeof(HttpEndpoint)).ToList();
 
@@ -65,10 +72,10 @@ public class HandlerRegistryTests : BaseTests
     [Fact]
     public void GetHandlers_RemoveTraefik_ReturnsDefaultHandler()
     {
+        var registry = Resolve<HandlerRegistry>();
         InstallPackage("docker");
         var application = InstallPackage("traefik");
-        var registry = Resolve<HandlerRegistry>();
-        Resolve<State>().RemoveApplication(application);
+        UninstallApplication(application);
 
         var result = registry.GetHandlers(typeof(HttpEndpoint)).ToList();
 
@@ -80,18 +87,17 @@ public class HandlerRegistryTests : BaseTests
     public void GetHandlers_AddTraefikSeveralTimes_ReturnsBothHandlers()
     {
         var registry = Resolve<HandlerRegistry>();
-        var uninstallService = Resolve<UninstallService>();
         InstallPackage("docker");
         var application = InstallPackage("traefik");
-        uninstallService.Handle(application);
         var application2 = InstallPackage("traefik");
 
         var result = registry.GetHandlers(typeof(HttpEndpoint)).ToList();
 
         Assert.NotEqual(application, application2);
-        Assert.Equal(2, result.Count);
+        Assert.Equal(3, result.Count);
         Assert.IsType<TraefikHttpEndpointHandler>(result[0]);
-        Assert.IsType<PortHttpEndpointHandler>(result[1]);
+        Assert.IsType<TraefikHttpEndpointHandler>(result[1]);
+        Assert.IsType<PortHttpEndpointHandler>(result[2]);
     }
 
     public static IEnumerable<object[]> PackagesWithHandlers()
@@ -165,7 +171,7 @@ public class HandlerRegistryTests : BaseTests
 
         Assert.Null(result);
     }
-    
+
     [Theory]
     [MemberData(nameof(PackagesWithHandlers))]
     public void GetHandler_InstallPackage_AddsHandler(string packageName, Type handlerType, Type _)
@@ -191,14 +197,107 @@ public class HandlerRegistryTests : BaseTests
 
         Assert.Null(handlerRegistry.GetHandler(handlerType.Name, packageName));
     }
-    
+
     [Fact]
     public void GetHandlers_DefaultConfiguration_ReturnsFakeDockerApiConnectionHandler()
     {
         var registry = Resolve<HandlerRegistry>();
-        
+
         var handler = registry.GetHandlers(typeof(DockerApiConnection)).First();
 
         Assert.IsType<FakeDockerApiConnectionHandler>(handler);
+    }
+    
+    [Fact]
+    public void GetHandlers_DefaultConfiguration_ReturnsFakeCloudflareApiConnectionHandler()
+    {
+        var registry = Resolve<HandlerRegistry>();
+
+        var handler = registry.GetHandlers(typeof(CloudflareApiConnection)).First();
+
+        Assert.IsType<FakeCloudflareApiConnectionHandler>(handler);
+    }
+    
+
+    [Fact]
+    public void GetHandler_InstalledPackage_LoadsLazily()
+    {
+        InstallPackage("docker");
+
+        var scope = Resolve<ILifetimeScope>().BeginLifetimeScope(
+            static builder =>
+            {
+                builder.RegisterInstance<ProviderScopeBuilder>(
+                        static _ => throw new Exception()
+                    )
+                    .Named<ProviderScopeBuilder>("docker")
+                    .SingleInstance();
+            }
+        );
+
+        var registry = new HandlerRegistry(
+            scope.Resolve<State>(),
+            scope.Resolve<IIndex<string, ProviderScopeBuilder>>(),
+            scope
+        );
+
+        Assert.Throws<Exception>(
+            () =>
+                registry.GetHandler(nameof(DockerApiConnection), "docker")
+        );
+    }
+
+    [Fact]
+    public void GetHandler_InstalledPackage_RemovedFromLazyQueue()
+    {
+        var application = InstallPackage("docker");
+
+        var scope = Resolve<ILifetimeScope>().BeginLifetimeScope(
+            static builder =>
+            {
+                builder.RegisterInstance<ProviderScopeBuilder>(
+                        static _ => throw new Exception()
+                    )
+                    .Named<ProviderScopeBuilder>("docker")
+                    .SingleInstance();
+            }
+        );
+
+        var registry = new HandlerRegistry(
+            scope.Resolve<State>(),
+            scope.Resolve<IIndex<string, ProviderScopeBuilder>>(),
+            scope
+        );
+
+        UninstallApplication(application);
+
+        var result = registry.GetHandler(nameof(DockerApiConnection), "docker");
+
+        Assert.Null(result);
+    }
+    
+    [Fact]
+    public void GetHandlers_InstalledPackage_LoadsLazily()
+    {
+        InstallPackage("docker");
+
+        var scope = Resolve<ILifetimeScope>().BeginLifetimeScope(
+            static builder =>
+            {
+                builder.RegisterInstance<ProviderScopeBuilder>(
+                        static _ => throw new Exception()
+                    )
+                    .Named<ProviderScopeBuilder>("docker")
+                    .SingleInstance();
+            }
+        );
+
+        var registry = new HandlerRegistry(
+            scope.Resolve<State>(),
+            scope.Resolve<IIndex<string, ProviderScopeBuilder>>(),
+            scope
+        );
+
+        Assert.Throws<Exception>(() => registry.GetHandlers(typeof(HttpEndpoint)));
     }
 }

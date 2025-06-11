@@ -16,8 +16,9 @@ public class PackageTests : TestWithDocker
         HashSet<string> ignoredPackages =
         [
             // internal
-            "static-domain",
+            "static-zone",
             "docker",
+            "cloudflare-tunnel",
             
             // skip due to port 53 already in use
             "adguard-home",
