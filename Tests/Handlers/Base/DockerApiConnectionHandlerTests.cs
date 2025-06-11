@@ -9,13 +9,19 @@ public class DockerApiConnectionHandlerTests : BaseTests
     [Fact]
     public void Install_WrongPath_ThrowsHandlerException()
     {
-        var handler = new DockerApiConnectionHandler();
-        var contract = new DockerApiConnection
+        var package = Factory<Package>().Generate() with
         {
-            Path = "wrong_path"
+            Contracts =
+            [
+                new DockerApiConnection
+                {
+                    Path = "wrong_path",
+                    Handler = Handler<DockerApiConnectionHandler>()
+                }
+            ]
         };
-        var plan = new ExecutionPlan(new Dictionary<ContractId, Contract>());
 
-        Assert.Throws<HandlerException>(() => handler.Install(contract, plan));
+        var exception = Assert.Throws<HandlerException>(() => InstallPackage(package));
+        Assert.Equal("Docker API connection failed.", exception.Message);
     }
 }
