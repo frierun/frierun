@@ -1,4 +1,5 @@
-﻿using Frierun.Server;
+﻿using System.Text.Json.Nodes;
+using Frierun.Server;
 using Frierun.Server.Data;
 using Frierun.Server.Handlers;
 using NSubstitute;
@@ -27,9 +28,22 @@ public class FakeCloudflareApiConnectionHandler : Handler<CloudflareApiConnectio
                 ("accountId2", "Account 2"),
             }
         );
-        
+
         client.CreateTunnel(Arg.Any<string>(), Arg.Any<string>())
-            .ReturnsForAnyArgs(_ => ("tunnelId", "tunnel token"));
+            .ReturnsForAnyArgs(("tunnelId", "tunnel token"));
+
+        client.GetTunnelConfiguration(Arg.Any<string>(), Arg.Any<string>())
+            .ReturnsForAnyArgs(new JsonObject());
+
+        client.GetZones()
+            .ReturnsForAnyArgs(
+                new List<(string id, string name)>
+                {
+                    ("zoneId1", "domain1.zone1"),
+                    ("zoneId2", "domain2.zone2"),
+                }
+            );
+        
         
 
         return client;

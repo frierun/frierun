@@ -1,5 +1,4 @@
-﻿using Bogus;
-using Frierun.Server.Data;
+﻿using Frierun.Server.Data;
 using Frierun.Server.Handlers;
 using NSubstitute;
 
@@ -13,8 +12,6 @@ public class CloudflareTunnelHandlerTests : BaseTests
         InstallPackage("docker");
 
         var application = InstallPackage("cloudflare-tunnel");
-
-        Assert.NotNull(application);
 
         var cloudflareTunnel = application.Contracts.OfType<CloudflareTunnel>().Single();
         Assert.Equal("accountId1", cloudflareTunnel.AccountId);
@@ -52,7 +49,6 @@ public class CloudflareTunnelHandlerTests : BaseTests
             ]
         );
 
-        Assert.NotNull(application);
         var cloudflareTunnel = application.Contracts.OfType<CloudflareTunnel>().Single();
         Assert.Equal("accountId2", cloudflareTunnel.AccountId);
     }
