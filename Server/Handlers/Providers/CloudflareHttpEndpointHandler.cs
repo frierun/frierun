@@ -29,7 +29,7 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
             contract = contract with
             {
                 ResultHost = FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    prefix,
                     c => c.ResultHost,
                     $".{zone.name}"
                 )

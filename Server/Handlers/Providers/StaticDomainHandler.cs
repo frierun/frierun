@@ -44,7 +44,7 @@ public class StaticDomainHandler(Application application)
             {
                 Handler = this,
                 Value = FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    prefix,
                     c => c.Value,
                     $".{_domainName}"
                 ),
