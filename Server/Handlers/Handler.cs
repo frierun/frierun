@@ -82,14 +82,14 @@ public class Handler<TContract>(Application? application = null) : IHandler
     /// <summary>
     /// Finds a unique name for a contract property
     /// </summary>
-    protected string FindUniqueName(string baseName, Func<TContract, string?> predicate)
+    protected string FindUniqueName(string baseName, Func<TContract, string?> predicate, string suffix = "")
     {
         var count = 1;
-        var name = baseName;
+        var name = $"{baseName}{suffix}";
         while (State.Contracts.OfType<TContract>().Any(c => predicate(c) == name))
         {
             count++;
-            name = $"{baseName}{count}";
+            name = $"{baseName}{count}{suffix}";
         }
 
         return name;

@@ -14,7 +14,7 @@ public class StaticDomainHandler(Application application)
         .OfType<Selector>()
         .First(parameter => parameter.Name == "Internal")
         .Value == "Yes";
-    
+
     public override IEnumerable<ContractInitializeResult> Initialize(Domain contract, string prefix)
     {
         if (contract.IsInternal != null && contract.IsInternal != _isInternal)
@@ -22,7 +22,7 @@ public class StaticDomainHandler(Application application)
             // Can't fulfil the request
             yield break;
         }
-        
+
         if (contract.Value != null)
         {
             if (contract.Value != _domainName && !contract.Value.EndsWith($".{_domainName}"))
@@ -33,29 +33,23 @@ public class StaticDomainHandler(Application application)
 
             if (!IsDomainExist(contract.Value))
             {
-                yield return new ContractInitializeResult(contract with { Handler = this, IsInternal = _isInternal});
+                yield return new ContractInitializeResult(contract with { Handler = this, IsInternal = _isInternal });
             }
+
             yield break;
         }
-
-        var count = 0;
-        var subdomain = prefix;
-        if (contract.Name != "")
-        {
-            prefix = $"{prefix}-{contract.Name}";
-        }
-
-        var domain = $"{subdomain}.{_domainName}";
-
-        while (IsDomainExist(domain))
-        {
-            count++;
-            subdomain = $"{prefix}{(count == 1 ? "" : count.ToString())}";
-            domain = $"{subdomain}.{_domainName}";
-        }
-
+        
         yield return new ContractInitializeResult(
-            contract with { Handler = this, Value = domain, IsInternal = _isInternal}
+            contract with
+            {
+                Handler = this,
+                Value = FindUniqueName(
+                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    c => c.Value,
+                    $".{_domainName}"
+                ),
+                IsInternal = _isInternal
+            }
         );
     }
 
