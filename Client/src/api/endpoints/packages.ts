@@ -20,7 +20,7 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  GetPackagesIdPlan200Item,
+  ExecutionPlan,
   HandlerExceptionResult,
   Package,
 } from "../schemas";
@@ -158,189 +158,112 @@ export function useGetPackages<
   return query;
 }
 
-export type getPackagesIdPlanResponse200 = {
-  data: GetPackagesIdPlan200Item[];
+export type postPackagesIdPlanResponse200 = {
+  data: ExecutionPlan;
   status: 200;
 };
 
-export type getPackagesIdPlanResponse404 = {
+export type postPackagesIdPlanResponse404 = {
   data: void;
   status: 404;
 };
 
-export type getPackagesIdPlanResponse409 = {
+export type postPackagesIdPlanResponse409 = {
   data: HandlerExceptionResult;
   status: 409;
 };
 
-export type getPackagesIdPlanResponseComposite =
-  | getPackagesIdPlanResponse200
-  | getPackagesIdPlanResponse404
-  | getPackagesIdPlanResponse409;
+export type postPackagesIdPlanResponseComposite =
+  | postPackagesIdPlanResponse200
+  | postPackagesIdPlanResponse404
+  | postPackagesIdPlanResponse409;
 
-export type getPackagesIdPlanResponse = getPackagesIdPlanResponseComposite & {
+export type postPackagesIdPlanResponse = postPackagesIdPlanResponseComposite & {
   headers: Headers;
 };
 
-export const getGetPackagesIdPlanUrl = (id: string) => {
+export const getPostPackagesIdPlanUrl = (id: string) => {
   return `/api/v1/packages/${id}/plan`;
 };
 
-export const getPackagesIdPlan = async (
+export const postPackagesIdPlan = async (
   id: string,
+  _package: Package,
   options?: RequestInit,
-): Promise<getPackagesIdPlanResponse> => {
-  return customFetch<getPackagesIdPlanResponse>(getGetPackagesIdPlanUrl(id), {
+): Promise<postPackagesIdPlanResponse> => {
+  return customFetch<postPackagesIdPlanResponse>(getPostPackagesIdPlanUrl(id), {
     ...options,
-    method: "GET",
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(_package),
   });
 };
 
-export const getGetPackagesIdPlanQueryKey = (id: string) => {
-  return [`/api/v1/packages/${id}/plan`] as const;
-};
-
-export const getGetPackagesIdPlanQueryOptions = <
-  TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
+export const getPostPackagesIdPlanMutationOptions = <
   TError = void | HandlerExceptionResult,
->(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getPackagesIdPlan>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey = queryOptions?.queryKey ?? getGetPackagesIdPlanQueryKey(id);
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getPackagesIdPlan>>
-  > = ({ signal }) => getPackagesIdPlan(id, { signal, ...requestOptions });
-
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!id,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof getPackagesIdPlan>>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postPackagesIdPlan>>,
     TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+    { id: string; data: Package },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postPackagesIdPlan>>,
+  TError,
+  { id: string; data: Package },
+  TContext
+> => {
+  const mutationKey = ["postPackagesIdPlan"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
 
-export type GetPackagesIdPlanQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getPackagesIdPlan>>
->;
-export type GetPackagesIdPlanQueryError = void | HandlerExceptionResult;
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postPackagesIdPlan>>,
+    { id: string; data: Package }
+  > = (props) => {
+    const { id, data } = props ?? {};
 
-export function useGetPackagesIdPlan<
-  TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
-  TError = void | HandlerExceptionResult,
->(
-  id: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getPackagesIdPlan>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPackagesIdPlan>>,
-          TError,
-          Awaited<ReturnType<typeof getPackagesIdPlan>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetPackagesIdPlan<
-  TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
-  TError = void | HandlerExceptionResult,
->(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getPackagesIdPlan>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPackagesIdPlan>>,
-          TError,
-          Awaited<ReturnType<typeof getPackagesIdPlan>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetPackagesIdPlan<
-  TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
-  TError = void | HandlerExceptionResult,
->(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getPackagesIdPlan>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-
-export function useGetPackagesIdPlan<
-  TData = Awaited<ReturnType<typeof getPackagesIdPlan>>,
-  TError = void | HandlerExceptionResult,
->(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getPackagesIdPlan>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getGetPackagesIdPlanQueryOptions(id, options);
-
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>;
+    return postPackagesIdPlan(id, data, requestOptions);
   };
 
-  query.queryKey = queryOptions.queryKey;
+  return { mutationFn, ...mutationOptions };
+};
 
-  return query;
-}
+export type PostPackagesIdPlanMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postPackagesIdPlan>>
+>;
+export type PostPackagesIdPlanMutationBody = Package;
+export type PostPackagesIdPlanMutationError = void | HandlerExceptionResult;
 
+export const usePostPackagesIdPlan = <
+  TError = void | HandlerExceptionResult,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postPackagesIdPlan>>,
+    TError,
+    { id: string; data: Package },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postPackagesIdPlan>>,
+  TError,
+  { id: string; data: Package },
+  TContext
+> => {
+  const mutationOptions = getPostPackagesIdPlanMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
 export type postPackagesIdInstallResponse202 = {
   data: void;
   status: 202;

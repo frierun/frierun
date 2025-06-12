@@ -17,11 +17,16 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
     /// <summary>
     /// Gets package and default parameters
     /// </summary>
-    [HttpGet("{id}/plan")]
-    [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(IEnumerable<Contract>))]
+    [HttpPost("{id}/plan")]
+    [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(ExecutionPlan))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Package not found")]
     [SwaggerResponse(StatusCodes.Status409Conflict, "Error installing contract", typeof(HandlerExceptionResult))]
-    public IActionResult Plan(string id, PackageRegistry packageRegistry, ExecutionService executionService)
+    public IActionResult Plan(
+        string id,
+        [FromBody] Package overrides,
+        PackageRegistry packageRegistry,
+        ExecutionService executionService
+    )
     {
         var package = packageRegistry.Find(id);
         if (package == null)
@@ -29,13 +34,16 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
             return NotFound();
         }
 
-        try
+        package = (Package)package.With(overrides);
         {
-            return Ok(executionService.Create(package).Contracts.Values);
-        }
-        catch (HandlerException e)
-        {
-            return new ConflictObjectResult(e.Result);
+            try
+            {
+                return Ok(executionService.Create(package));
+            }
+            catch (HandlerException e)
+            {
+                return new ConflictObjectResult(e.Result);
+            }
         }
     }
 
@@ -61,10 +69,11 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
             return NotFound();
         }
 
-        var overriden = (Package)package.With(overrides);
+        package = (Package)package.With(overrides);
+
         try
         {
-            var plan = executionService.Create(overriden);
+            var plan = executionService.Create(package);
             logger.LogInformation("Installing package {id}", id);
             Task.Run(() => installService.Handle(plan));
         }

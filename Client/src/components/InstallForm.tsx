@@ -7,14 +7,14 @@ import HttpEndpointForm from "@/components/contracts/HttpEndpointForm.tsx";
 import PortEndpointForm from "@/components/contracts/PortEndpointForm.tsx";
 import Debug from "@/components/Debug";
 import ParameterForm from "@/components/contracts/ParameterForm.tsx";
-import {GetPackagesIdPlan200Item, Package,} from "@/api/schemas";
+import {ExecutionPlanContractsItem, Package,} from "@/api/schemas";
 import VolumeForm from "@/components/contracts/VolumeForm.tsx";
 import SelectorForm from "@/components/contracts/SelectorForm.tsx";
 import {usePostPackagesIdInstall} from "@/api/endpoints/packages.ts";
 import {getGetApplicationsQueryKey} from "@/api/endpoints/applications.ts";
 
 type Props = {
-    contracts: GetPackagesIdPlan200Item[];
+    contracts: ExecutionPlanContractsItem[];
     name: string;
 }
 
@@ -29,12 +29,10 @@ export default function InstallForm({contracts, name}: Props) {
     const queryClient = useQueryClient()
     const navigate = useNavigate();
 
-    const pkg = contracts.find(contract => contract.type === 'Package');
-    const [prefix, setPrefix] = useState(pkg?.prefix ?? '');
-    const [overrides, setOverrides] = useState<Overrides>({});
-
     const packageContract = contracts.find(contract => contract.type === 'Package');
-
+    const [prefix, setPrefix] = useState(packageContract?.prefix ?? '');
+    const [overrides, setOverrides] = useState<Overrides>({});
+    
     const install = async () => {
         setError(null);
         const result = await mutateAsync({
@@ -93,7 +91,7 @@ export default function InstallForm({contracts, name}: Props) {
                             <img
                                 className={"rounded"}
                                 alt={name}
-                                src={pkg?.iconUrl ?? `https://cdn.jsdelivr.net/gh/selfhst/icons/png/${name}.png`}
+                                src={packageContract?.iconUrl ?? `https://cdn.jsdelivr.net/gh/selfhst/icons/png/${name}.png`}
                             />
                         </div>
                         <h1>

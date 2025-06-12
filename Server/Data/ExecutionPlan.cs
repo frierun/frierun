@@ -8,11 +8,9 @@ public class ExecutionPlan : IExecutionPlan
     private readonly DirectedAcyclicGraph<ContractId> _graph = new();
     private readonly HashSet<Application> _requiredApplications = [];
 
-    public IReadOnlyDictionary<ContractId, Contract> Contracts => _contracts;
+    public IEnumerable<Contract> Contracts => _contracts.Values;
 
-    public ExecutionPlan(
-        Dictionary<ContractId, Contract> contracts
-    )
+    public ExecutionPlan(Dictionary<ContractId, Contract> contracts)
     {
         _contracts = contracts;
 
@@ -83,13 +81,14 @@ public class ExecutionPlan : IExecutionPlan
                 Debug.Assert(!contract.Installed);
 
                 var installedContract = contract.Install(this);
-                
+
                 Debug.Assert(installedContract.Id == contractId);
 
                 if (installedContract is not Package)
                 {
                     installedContracts.Add(installedContract);
                 }
+
                 _contracts[contractId] = installedContract;
 
                 var handlerApplication = installedContract.Handler?.Application;

@@ -22,7 +22,7 @@ public class ExecutionServiceTests : BaseTests
 
         Assert.NotNull(plan);
         Assert.Single(plan.Contracts);
-        Assert.Contains(package.Id, plan.Contracts);
+        Assert.NotNull(plan.GetContract(package));
     }
 
     [Fact]
@@ -81,9 +81,9 @@ public class ExecutionServiceTests : BaseTests
         var plan = service.Create(package);
 
         Assert.NotNull(plan);
-        Assert.Equal(2, plan.Contracts.Count);
-        Assert.Contains(package.Id, plan.Contracts);
-        Assert.Contains(contract.Id, plan.Contracts);
+        Assert.Equal(2, plan.Contracts.Count());
+        Assert.NotNull(plan.GetContract(package));
+        Assert.NotNull(plan.GetContract(contract));
         // ReSharper disable once IteratorMethodResultIsIgnored
         handler.Received(1).Initialize(Arg.Any<Contract1>(), Arg.Any<string>());
     }
@@ -103,9 +103,9 @@ public class ExecutionServiceTests : BaseTests
         var plan = service.Create(package);
 
         Assert.NotNull(plan);
-        Assert.Equal(2, plan.Contracts.Count);
-        Assert.Contains(package.Id, plan.Contracts);
-        Assert.Contains(contract.Id, plan.Contracts);
+        Assert.Equal(2, plan.Contracts.Count());
+        Assert.NotNull(plan.GetContract(package));
+        Assert.NotNull(plan.GetContract(contract));
     }
 
     [Fact]
@@ -131,10 +131,10 @@ public class ExecutionServiceTests : BaseTests
         var plan = service.Create(package);
 
         Assert.NotNull(plan);
-        Assert.Equal(3, plan.Contracts.Count);
-        Assert.Contains(package.Id, plan.Contracts);
-        Assert.Contains(contract.Id, plan.Contracts);
-        Assert.Contains(knownContract.Id, plan.Contracts);
+        Assert.Equal(3, plan.Contracts.Count());
+        Assert.NotNull(plan.GetContract(package));
+        Assert.NotNull(plan.GetContract(contract));
+        Assert.NotNull(plan.GetContract(knownContract));
     }
 
     [Fact]
@@ -168,9 +168,9 @@ public class ExecutionServiceTests : BaseTests
         var plan = service.Create(package);
 
         Assert.NotNull(plan);
-        Assert.Equal(3, plan.Contracts.Count);
-        Assert.Contains(package.Id, plan.Contracts);
-        Assert.Contains(contract.Id, plan.Contracts);
-        Assert.Contains(knownContract.Id, plan.Contracts);
+        Assert.Equal(3, plan.Contracts.Count());
+        Assert.NotNull(plan.GetContract(package));
+        Assert.NotNull(plan.GetContract(contract));
+        Assert.NotNull(plan.GetContract(knownContract));
     }
 }

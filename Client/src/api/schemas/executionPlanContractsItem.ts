@@ -25,7 +25,7 @@ import type { Selector } from "./selector";
 import type { Substitute } from "./substitute";
 import type { Volume } from "./volume";
 
-export type GetPackagesIdPlan200Item =
+export type ExecutionPlanContractsItem =
   | CloudflareApiConnection
   | CloudflareTunnel
   | Container

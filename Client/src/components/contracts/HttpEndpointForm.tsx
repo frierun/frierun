@@ -1,16 +1,16 @@
 ﻿import {useEffect, useState} from "react";
-import {GetPackagesIdPlan200Item, HttpEndpoint, Package} from "@/api/schemas";
+import {ExecutionPlanContractsItem, HttpEndpoint, Package} from "@/api/schemas";
 import DomainForm, {Domain} from "@/components/contracts/DomainForm.tsx";
 
 const defaultPort = 1080;
 
 type Props = {
     contract: HttpEndpoint;
-    contracts: GetPackagesIdPlan200Item[];
+    contracts: ExecutionPlanContractsItem[];
     updateContracts: (contracts: Package['contracts']) => void;
 }
 
-const findDomain = (contract: HttpEndpoint, contracts: GetPackagesIdPlan200Item[]) => {
+const findDomain = (contract: HttpEndpoint, contracts: ExecutionPlanContractsItem[]) => {
     const domainContract = contracts
         .filter(contract => contract.type === 'Domain')
         .find(domain => domain.name === contract.domain);
@@ -39,7 +39,7 @@ export default function HttpEndpointForm({contract, contracts, updateContracts}:
     useEffect(() => {
         setDomain(findDomain(contract, contracts));
 
-        setPort(contracts
+        setPort(Object.values(contracts)
             .filter(contract => contract.type === 'PortEndpoint')
             .find(port => port.container === contract.container && port.port === contract.port)
             ?.externalPort ?? defaultPort)
