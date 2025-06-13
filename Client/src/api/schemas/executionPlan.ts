@@ -5,7 +5,9 @@
  * OpenAPI spec version: 1.0
  */
 import type { ExecutionPlanContractsItem } from "./executionPlanContractsItem";
+import type { ExecutionPlanAlternativesItem } from "./executionPlanAlternativesItem";
 
 export interface ExecutionPlan {
   contracts: ExecutionPlanContractsItem[];
+  alternatives: ExecutionPlanAlternativesItem[];
 }

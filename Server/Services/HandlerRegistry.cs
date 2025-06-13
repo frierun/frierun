@@ -17,6 +17,7 @@ public class HandlerRegistry : IDisposable
     private readonly Dictionary<Application, IList<IHandler>> _handlerPerApplication = new();
     private readonly Dictionary<Type, IList<IHandler>> _handlerPerType = new();
     private readonly Dictionary<(string type, string? application), IHandler> _handlers = new();
+    private readonly object _lock = new();
 
     public HandlerRegistry(
         State state,
@@ -58,38 +59,41 @@ public class HandlerRegistry : IDisposable
     /// </summary>
     private void AddApplication(Application application)
     {
-        _applicationsToLoad.Remove(application);
+        lock (_lock)
+        {
+            _applicationsToLoad.Remove(application);
         
-        var packageName = application.Package?.Name;
-        if (packageName == null)
-        {
-            return;
-        }
-
-        if (_scopeBuilders.TryGetValue(packageName, out var scopeBuilder) == false)
-        {
-            return;
-        }
-
-        if (_handlerPerApplication.ContainsKey(application))
-        {
-            throw new Exception("Application already added to the registry");
-        }
-
-        var scope = _container.BeginLifetimeScope(
-            _scopeBuilders[packageName],
-            builder =>
+            var packageName = application.Package?.Name;
+            if (packageName == null)
             {
-                builder.RegisterInstance(application).AsSelf().SingleInstance();
-                scopeBuilder(builder);
+                return;
             }
-        );
 
-        var handlers = scope.Resolve<IEnumerable<IHandler>>().ToList();
+            if (_scopeBuilders.TryGetValue(packageName, out var scopeBuilder) == false)
+            {
+                return;
+            }
 
-        handlers.ForEach(AddHandler);
-        _handlerPerApplication[application] = handlers;
-        _applicationScopes[application] = scope;
+            if (_handlerPerApplication.ContainsKey(application))
+            {
+                throw new Exception("Application already added to the registry");
+            }
+
+            var scope = _container.BeginLifetimeScope(
+                _scopeBuilders[packageName],
+                builder =>
+                {
+                    builder.RegisterInstance(application).AsSelf().SingleInstance();
+                    scopeBuilder(builder);
+                }
+            );
+
+            var handlers = scope.Resolve<IEnumerable<IHandler>>().ToList();
+
+            handlers.ForEach(AddHandler);
+            _handlerPerApplication[application] = handlers;
+            _applicationScopes[application] = scope;
+        }
     }
 
     /// <summary>
@@ -97,31 +101,34 @@ public class HandlerRegistry : IDisposable
     /// </summary>
     private void RemoveApplication(Application application)
     {
-        _applicationsToLoad.Remove(application);
+        lock (_lock)
+        {
+            _applicationsToLoad.Remove(application);
         
-        var packageName = application.Package?.Name;
-        if (packageName == null)
-        {
-            return;
+            var packageName = application.Package?.Name;
+            if (packageName == null)
+            {
+                return;
+            }
+
+            if (!_handlerPerApplication.Remove(application, out var handlers))
+            {
+                return;
+            }
+
+            foreach (var handler in handlers)
+            {
+                _handlers.Remove((handler.GetType().Name, application.Name));
+
+                _handlerPerType
+                    .Values
+                    .ToList()
+                    .ForEach(list => list.Remove(handler));
+            }
+
+            _applicationScopes[application].Dispose();
+            _applicationScopes.Remove(application);
         }
-
-        if (!_handlerPerApplication.Remove(application, out var handlers))
-        {
-            return;
-        }
-
-        foreach (var handler in handlers)
-        {
-            _handlers.Remove((handler.GetType().Name, application.Name));
-
-            _handlerPerType
-                .Values
-                .ToList()
-                .ForEach(list => list.Remove(handler));
-        }
-
-        _applicationScopes[application].Dispose();
-        _applicationScopes.Remove(application);
     }
     
     /// <summary>

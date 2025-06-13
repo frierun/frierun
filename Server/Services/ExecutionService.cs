@@ -49,7 +49,12 @@ public class ExecutionService(
             (nextId, nextContract) = discoveryGraph.Next();
         }
 
-        return new ExecutionPlan(discoveryGraph.Contracts);
+        var alternatives = branchesStack
+            .SelectMany(pair => pair.queue)
+            .Select(result => result.Contract)
+            .ToList();
+        
+        return new ExecutionPlan(discoveryGraph.Contracts, alternatives);
     }
 
     /// <summary>

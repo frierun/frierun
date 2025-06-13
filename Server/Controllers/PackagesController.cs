@@ -35,15 +35,13 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
         }
 
         package = (Package)package.With(overrides);
+        try
         {
-            try
-            {
-                return Ok(executionService.Create(package));
-            }
-            catch (HandlerException e)
-            {
-                return new ConflictObjectResult(e.Result);
-            }
+            return Ok(executionService.Create(package));
+        }
+        catch (HandlerException e)
+        {
+            return new ConflictObjectResult(e.Result);
         }
     }
 

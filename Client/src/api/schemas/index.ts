@@ -30,6 +30,7 @@ export * from "./domainAllOf";
 export * from "./domainType";
 export * from "./domainVariant";
 export * from "./executionPlan";
+export * from "./executionPlanAlternativesItem";
 export * from "./executionPlanContractsItem";
 export * from "./file";
 export * from "./fileAllOf";
