@@ -76,7 +76,7 @@ export default function HttpEndpointForm({contract, variants, updateContract, al
             </fieldset>
             {contract.handler?.typeName === 'CloudflareHttpEndpointHandler' && (
                 <div className="my-1.5">
-                    <label className={"inline-block w-48"}>Result host:</label>
+                    <label className={"inline-block w-48"}>Target host:</label>
                     <input
                         value={host}
                         onChange={e => {

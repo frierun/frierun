@@ -84,6 +84,7 @@ Some packages require providers to be installed first, providers also add featur
   It would create subdomains like `app.localhost` for each application.
 - `docker` is installed by default. It provides the ability to run applications in containers.
 - `mysql`, `mariadb`, `postgresql` run in containers and provide other applications with access to separate databases.
+- `cloudflare-tunnel` allows to expose applications to the internet using Cloudflare tunnels. See the [Cloudflare documentation](Docs/Cloudflare.md) for more details.
  
 The `static-domain` provider is installed by default. But we also recommend to install `traefik` as well to make applications accessible by domain name.
 
