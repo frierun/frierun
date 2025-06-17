@@ -29,6 +29,7 @@ public record HttpEndpoint(
 
         return this with
         {
+            ResultHost = ResultHost ?? endpoint.ResultHost,
             Handler = endpoint.Handler,
         };
     }

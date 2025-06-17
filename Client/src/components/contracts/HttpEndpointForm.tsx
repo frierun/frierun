@@ -25,10 +25,15 @@ function VariantName(contract: HttpEndpoint): string {
 
 export default function HttpEndpointForm({contract, variants, updateContract, allContracts}: Props) {
     const [selected, setSelected] = useState<number>(0);
+    const [host, setHost] = useState<string>(contract.resultHost ?? '');
 
     useEffect(() => {
         setSelected(0);
     }, [variants]);
+
+    useEffect(() => {
+        setHost(contract.resultHost ?? '');
+    }, [contract]);
 
     const updateSelected = (idx: number) => {
         // reset other related contracts
@@ -69,6 +74,21 @@ export default function HttpEndpointForm({contract, variants, updateContract, al
                     </label>
                 ))}
             </fieldset>
+            {contract.handler?.typeName === 'CloudflareHttpEndpointHandler' && (
+                <div className="my-1.5">
+                    <label className={"inline-block w-48"}>Result host:</label>
+                    <input
+                        value={host}
+                        onChange={e => {
+                            setHost(e.target.value);
+                            updateContract({
+                                ...contract,
+                                resultHost: e.target.value
+                            });
+                        }}
+                    />
+                </div>
+            )}
         </div>
     );
 }

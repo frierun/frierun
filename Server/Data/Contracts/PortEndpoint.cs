@@ -26,7 +26,7 @@ public record PortEndpoint(
         
         return this with
         {
-            ExternalPort = endpoint.ExternalPort
+            ExternalPort = ExternalPort == 0 ? endpoint.ExternalPort : ExternalPort,
         };
     }
     

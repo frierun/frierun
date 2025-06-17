@@ -15,8 +15,8 @@ public record Volume(
 
         return this with
         {
-            VolumeName = volume.VolumeName ?? VolumeName,
-            LocalPath = volume.LocalPath ?? LocalPath,
+            VolumeName = VolumeName ?? volume.VolumeName,
+            LocalPath = LocalPath ?? volume.LocalPath
         };
     }
 }
