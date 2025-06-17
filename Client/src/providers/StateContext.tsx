@@ -32,7 +32,6 @@ export function StateContextProvider({children}: { children: React.ReactNode }) 
         }
     }
 
-
     return (
         <StateContext.Provider value={{ready: data.data.ready, waitForReady: waitForReady}}>
             {children}

@@ -19,7 +19,6 @@ type Props = {
 }
 
 export default function InstallForm({packageContract, contracts, alternatives, name, setError, refetch}: Props) {
-
     const [prefix, setPrefix] = useState(packageContract.prefix ?? '');
     const [overrides, setOverrides] = useState<Contract[]>([]);
 
@@ -144,14 +143,7 @@ export default function InstallForm({packageContract, contracts, alternatives, n
                         Install
                     </Button>
                 </div>
-                <Debug>
-                    {contracts.map(contract => (
-                        <div key={`${contract.type}:${contract.name}`}>
-                            <p>{contract.type}</p>
-                            <pre>{JSON.stringify(contract, null, 2)}</pre>
-                        </div>
-                    ))}
-                </Debug>
+                <Debug contracts={contracts}/>
             </div>
         </>
     );

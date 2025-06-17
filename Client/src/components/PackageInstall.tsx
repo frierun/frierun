@@ -68,14 +68,22 @@ export default function PackageInstall({name}: Props) {
                 {error}
             </div>
             {plan && (
-                <InstallForm
-                    packageContract={plan.packageContract}
-                    contracts={plan.contracts}
-                    alternatives={plan.alternatives}
-                    name={name}
-                    refetch={refetch}
-                    setError={setError}
-                />
+                <>
+                    {isPending &&
+                        <div
+                            className="z-50 bg-gray opacity-50 absolute top-20 left-0 right-0 bottom-0 flex justify-center font-bold">
+                            Please wait...
+                        </div>
+                    }                    
+                    <InstallForm
+                        packageContract={plan.packageContract}
+                        contracts={plan.contracts}
+                        alternatives={plan.alternatives}
+                        name={name}
+                        refetch={refetch}
+                        setError={setError}
+                    />
+                </>
             )}
         </>
     );
