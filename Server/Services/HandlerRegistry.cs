@@ -3,7 +3,6 @@ using Autofac;
 using Autofac.Features.Indexed;
 using Frierun.Server.Data;
 using Frierun.Server.Handlers;
-using Frierun.Server.Handlers.Base;
 
 namespace Frierun.Server;
 
@@ -188,28 +187,34 @@ public class HandlerRegistry : IDisposable
     /// </summary>
     public IEnumerable<IHandler> GetHandlers(Type contractType)
     {
-        foreach (var application in _applicationsToLoad)
+        lock (_lock)
         {
-            AddApplication(application);
-        }
+            foreach (var application in _applicationsToLoad)
+            {
+                AddApplication(application);
+            }
         
-        if (!_handlerPerType.TryGetValue(contractType, out var handlers))
-        {
-            return Array.Empty<IHandler>();
-        }
+            if (!_handlerPerType.TryGetValue(contractType, out var handlers))
+            {
+                return Array.Empty<IHandler>();
+            }
 
-        return handlers;
+            return handlers;
+        }
     }
 
     public IHandler? GetHandler(string typeName, string? applicationName = null)
     {
-        if (applicationName != null)
+        lock (_lock)
         {
-            foreach (var application in _applicationsToLoad.Where(application => applicationName == application.Name))
+            if (applicationName != null)
             {
-                AddApplication(application);
+                foreach (var application in _applicationsToLoad.Where(application => applicationName == application.Name))
+                {
+                    AddApplication(application);
+                }
             }
+            return _handlers.GetValueOrDefault((typeName, applicationName));
         }
-        return _handlers.GetValueOrDefault((typeName, applicationName));
     }
 }
