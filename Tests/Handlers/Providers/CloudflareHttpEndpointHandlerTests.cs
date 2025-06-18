@@ -231,6 +231,44 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
     }
 
     [Fact]
+    public void Install_HasExistingDnsRecords_RemovesDnsRecords()
+    {
+        InstallPackage("docker");
+        InstallPackage("cloudflare-tunnel");
+
+        CloudflareClient.GetDnsRecords("zoneId1").Returns(
+            new List<JsonObject>
+            {
+                new() { ["id"] = "recordId1", ["name"] = "test.domain1.zone1" },
+                new() { ["id"] = "recordId2", ["name"] = "test.domain1.zone1" },
+                new() { ["id"] = "recordId3", ["name"] = "domain1.zone1" },
+                new() { ["id"] = "recordId4", ["name"] = "other.domain" },
+                new() { ["id"] = "recordId5" }
+            }
+        );
+
+        var application = InstallPackage(
+            Factory<Package>().Generate() with
+            {
+                Contracts =
+                [
+                    new HttpEndpoint
+                    {
+                        ResultHost = "test.domain1.zone1"
+                    }
+                ]
+            }
+        );
+        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
+        Assert.Equal("zoneId1", httpEndpoint.CloudflareZoneId);
+
+        CloudflareClient.Received(1).DeleteDnsRecord("zoneId1", "recordId1");
+        CloudflareClient.Received(1).DeleteDnsRecord("zoneId1", "recordId2");
+        CloudflareClient.Received(2).DeleteDnsRecord(Arg.Any<string>(), Arg.Any<string>());
+    }
+
+
+    [Fact]
     public void Uninstall_HasDnsRecords_RemovesDnsRecords()
     {
         InstallPackage("docker");

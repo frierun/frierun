@@ -98,6 +98,7 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
             config
         );
         
+        DeleteOldDnsRecords(contract.CloudflareZoneId, contract.ResultHost);
         client.CreateDnsRecord(contract.CloudflareZoneId, new JsonObject
         {
             ["type"] = "CNAME",
@@ -111,6 +112,29 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
         {
             NetworkName = network.NetworkName
         };
+    }
+    
+    private void DeleteOldDnsRecords(string cloudflareZoneId, string? resultHost)
+    {
+        if (resultHost == null)
+        {
+            return;
+        }
+        
+        foreach (var record in client.GetDnsRecords(cloudflareZoneId))
+        {
+            if (record["name"]?.GetValue<string>() != resultHost)
+            {
+                continue;
+            }
+
+            var recordId = record["id"]?.GetValue<string>();
+            if (recordId == null)
+            {
+                continue;
+            }
+            client.DeleteDnsRecord(cloudflareZoneId, recordId);
+        }
     }
 
     public override void Uninstall(HttpEndpoint contract)
@@ -141,19 +165,6 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
             client.UpdateTunnelConfiguration(_tunnel.AccountId, _tunnel.TunnelId, config);
         }
 
-        foreach (var record in client.GetDnsRecords(contract.CloudflareZoneId))
-        {
-            if (record["name"]?.GetValue<string>() != contract.ResultHost)
-            {
-                continue;
-            }
-
-            var recordId = record["id"]?.GetValue<string>();
-            if (recordId == null)
-            {
-                continue;
-            }
-            client.DeleteDnsRecord(contract.CloudflareZoneId, recordId);
-        }
+        DeleteOldDnsRecords(contract.CloudflareZoneId, contract.ResultHost);
     }
 }
