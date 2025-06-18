@@ -4,41 +4,39 @@
 
 Go to the [Cloudflare dashboard](https://dash.cloudflare.com/profile/api-tokens)
 
-<div style="background-color: #f0f0f0; padding: 10px; border-radius: 8px; display: inline-block;">
+<details>
+<summary>Click on "Create Token"</summary>
 
 ![API Token screenshot](Cloudflare1.png)
+</details>
 
-</div>
-
-Select "Create Token" and then "Create Custom Token". 
-
-<div style="background-color: #f0f0f0; padding: 10px; border-radius: 8px; display: inline-block;">
+<details>
+<summary>Click on "Create Custom Token"</summary>
 
 ![Create Custom Token screenshot](Cloudflare2.png)
-
-</div>
+</details>
 
 Type a name for the token and select the following permissions for the token:
 - Account: Cloudflare Tunnel: Edit
 - Account: DNS Views: Read
 - Zone: DNS: Edit
-
-<div style="background-color: #f0f0f0; padding: 10px; border-radius: 8px; display: inline-block;">
  
-![Token select screenshot](Cloudflare3.png)
+<details>
+<summary>As shown on the screenshot</summary>
 
-</div>
+![Token select screenshot](Cloudflare3.png)
+</details>
 
 You can leave other fields as default, or set restrictions to what zones and accounts the token can access.
 
 Press "Continue to summary" and then "Create Token". 
-You will be shown the token, copy it and save it somewhere safe. You will not be able to see it again.
 
-<div style="background-color: #f0f0f0; padding: 10px; border-radius: 8px; display: inline-block;">
+<details>
+<summary>You will be shown the token, copy it and save it somewhere safe. You will not be able to see it again.</summary>
 
 ![Token created screenshot](Cloudflare4.png)
 
-</div>
+</details>
 
 ## Register or move domain
 
@@ -53,18 +51,10 @@ In the Frierun web interface select `cloudflare-tunnel` from the list of provide
 
 Enter the API token you created earlier.
 
-<div style="background-color: #f0f0f0; padding: 10px; border-radius: 8px; display: inline-block;">
-
 ![Install cloudflare-tunnel screenshot](Cloudflare5.png)
-
-</div>
 
 ## Use it
 
 You can now expose other applications to the internet using Cloudflare tunnels. When installing other application, select `Cloudflare` as Http endpoint.
 
-<div style="background-color: #f0f0f0; padding: 10px; border-radius: 8px; display: inline-block;">
-
 ![Install application with CloudflareHandler screenshot](Cloudflare6.png)
-
-</div>
