@@ -99,3 +99,5 @@ Installing a new package:
 # Contributing
 
 All contributions are welcome! You can create an [issue](https://github.com/frierun/frierun/issues) or a [pull request](https://github.com/frierun/frierun/pulls).
+
+There is an indepth guide on how to [create a package](Docs/Package.md).
