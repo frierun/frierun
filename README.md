@@ -79,7 +79,7 @@ Open your browser and go to `http://localhost:8080`.
 Some packages require providers to be installed first, providers also add features to other applications. See the list below.
 
 ## Providers
-- `traefik` provides ability to route http traffic from one port to many containers using domain names.
+- `traefik` provides the ability to route http traffic from one port to many containers using domain names.
 - `static-zone` provides `traefik` with a static domain name. For local environments the `localhost` domain can be used.
   It would create subdomains like `app.localhost` for each application.
 - `docker` is installed by default. It provides the ability to run applications in containers.

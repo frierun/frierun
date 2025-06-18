@@ -1,6 +1,6 @@
 ﻿# Changing and testing packages
 
-You can update packages without having to rebuild the entire project. This is useful for testing changes in packages or 
+You can update packages without having to rebuild the entire project. This is helpful for testing changes in packages or 
 when you want to use a different version of a package.
 
 ## Clone the repository
