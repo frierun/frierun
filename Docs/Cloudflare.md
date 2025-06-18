@@ -22,7 +22,7 @@ Type a name for the token and select the following permissions for the token:
 - Zone: DNS: Edit
  
 <details>
-<summary>As shown on the screenshot</summary>
+<summary>As shown in the screenshot</summary>
 
 ![Token select screenshot](Cloudflare3.png)
 </details>
