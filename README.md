@@ -79,11 +79,12 @@ Open your browser and go to `http://localhost:8080`.
 Some packages require providers to be installed first, providers also add features to other applications. See the list below.
 
 ## Providers
-- `traefik` provides ability to route http traffic from one port to many containers using domain names.
-- `static-domain` provides `traefik` with a static domain name. For local environments the `localhost` domain can be used.
+- `traefik` provides the ability to route http traffic from one port to many containers using domain names.
+- `static-zone` provides `traefik` with a static domain name. For local environments the `localhost` domain can be used.
   It would create subdomains like `app.localhost` for each application.
 - `docker` is installed by default. It provides the ability to run applications in containers.
 - `mysql`, `mariadb`, `postgresql` run in containers and provide other applications with access to separate databases.
+- `cloudflare-tunnel` allows to expose applications to the internet using Cloudflare tunnels. See the [Cloudflare documentation](Docs/Cloudflare.md) for more details.
  
 The `static-domain` provider is installed by default. But we also recommend to install `traefik` as well to make applications accessible by domain name.
 
@@ -98,3 +99,5 @@ Installing a new package:
 # Contributing
 
 All contributions are welcome! You can create an [issue](https://github.com/frierun/frierun/issues) or a [pull request](https://github.com/frierun/frierun/pulls).
+
+There is an indepth guide on how to [create a package](Docs/Package.md).

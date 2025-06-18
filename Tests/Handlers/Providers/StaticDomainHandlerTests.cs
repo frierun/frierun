@@ -7,7 +7,7 @@ public class StaticDomainHandlerTests : BaseTests
     [Fact]
     public void Install_InternalDomainPackage_InstallInternalDomain()
     {
-        InstallPackage("static-domain");
+        InstallPackage("static-zone");
         var package = Factory<Package>().Generate() with { Contracts = [new Domain()] };
 
         var application = InstallPackage(package);
@@ -21,7 +21,7 @@ public class StaticDomainHandlerTests : BaseTests
     public void Install_ExternalDomainPackage_InstallExternalDomain()
     {
         InstallPackage(
-            "static-domain",
+            "static-zone",
             [new Selector("Internal", Value: "No")]
         );
         var package = Factory<Package>().Generate() with { Contracts = [new Domain()] };

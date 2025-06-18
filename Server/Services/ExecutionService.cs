@@ -15,41 +15,6 @@ public class ExecutionService(
     /// <exception cref="HandlerException"></exception>
     public ExecutionPlan Create(Package package)
     {
-        var contracts = DiscoverContracts(package);
-        return new ExecutionPlan(contracts);
-    }
-
-    /// <summary>
-    /// Gets the application name from the package.
-    /// </summary>
-    private string GetApplicationName(Package package)
-    {
-        if (package.Prefix != null)
-        {
-            if (state.Applications.Any(application => application.Name == package.Prefix))
-            {
-                throw new Exception("Application with the same name already exists");
-            }
-
-            return package.Prefix;
-        }
-
-        var count = 1;
-        var applicationName = package.Name;
-        while (state.Applications.Any(application => application.Name == applicationName))
-        {
-            count++;
-            applicationName = $"{package.Name}{count}";
-        }
-
-        return applicationName;
-    }
-
-    /// <summary>
-    /// Discovers and collects all contracts required to fulfill the package.
-    /// </summary>
-    private Dictionary<ContractId, Contract> DiscoverContracts(Package package)
-    {
         var branchesStack = new Stack<(DiscoveryGraph graph, Queue<ContractInitializeResult> queue)>();
         var discoveryGraph = new DiscoveryGraph();
         var applicationName = GetApplicationName(package);
@@ -84,7 +49,38 @@ public class ExecutionService(
             (nextId, nextContract) = discoveryGraph.Next();
         }
 
-        return discoveryGraph.Contracts;
+        var alternatives = branchesStack
+            .SelectMany(pair => pair.queue)
+            .Select(result => result.Contract)
+            .ToList();
+        
+        return new ExecutionPlan(discoveryGraph.Contracts, alternatives);
+    }
+
+    /// <summary>
+    /// Gets the application name from the package.
+    /// </summary>
+    private string GetApplicationName(Package package)
+    {
+        if (package.Prefix != null)
+        {
+            if (state.Applications.Any(application => application.Name == package.Prefix))
+            {
+                throw new Exception("Application with the same name already exists");
+            }
+
+            return package.Prefix;
+        }
+
+        var count = 1;
+        var applicationName = package.Name;
+        while (state.Applications.Any(application => application.Name == applicationName))
+        {
+            count++;
+            applicationName = $"{package.Name}{count}";
+        }
+
+        return applicationName;
     }
 
     /// <summary>

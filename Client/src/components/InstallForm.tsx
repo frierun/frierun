@@ -1,91 +1,53 @@
-﻿import {useCallback, useContext, useState} from "react";
-import StateContext from "@/providers/StateContext.tsx";
-import {useQueryClient} from "@tanstack/react-query";
-import {useNavigate} from "react-router-dom";
+﻿import {useCallback, useState} from "react";
 import Button from "@/components/Button.tsx";
-import HttpEndpointForm from "@/components/contracts/HttpEndpointForm.tsx";
 import PortEndpointForm from "@/components/contracts/PortEndpointForm.tsx";
 import Debug from "@/components/Debug";
 import ParameterForm from "@/components/contracts/ParameterForm.tsx";
-import {GetPackagesIdPlan200Item, Package,} from "@/api/schemas";
+import {Package} from "@/api/schemas";
 import VolumeForm from "@/components/contracts/VolumeForm.tsx";
 import SelectorForm from "@/components/contracts/SelectorForm.tsx";
-import {usePostPackagesIdInstall} from "@/api/endpoints/packages.ts";
-import {getGetApplicationsQueryKey} from "@/api/endpoints/applications.ts";
+import ContractForm, {Contract} from "@/components/contracts/ContractForm.tsx";
+import useInstall from "@/hooks/useInstall.tsx";
 
 type Props = {
-    contracts: GetPackagesIdPlan200Item[];
+    packageContract: Package;
+    contracts: Contract[];
+    alternatives: Contract[];
     name: string;
+    setError: (error: string | null) => void;
+    refetch: (overrides: Contract[]) => void;
 }
 
-type Overrides = {
-    [key: string]: Package['contracts']
-}
+export default function InstallForm({packageContract, contracts, alternatives, name, setError, refetch}: Props) {
+    const [prefix, setPrefix] = useState(packageContract.prefix ?? '');
+    const [overrides, setOverrides] = useState<Contract[]>([]);
 
-export default function InstallForm({contracts, name}: Props) {
-    const {waitForReady} = useContext(StateContext);
-    const {mutateAsync, isPending} = usePostPackagesIdInstall();
-    const [error, setError] = useState<string | null>(null);
-    const queryClient = useQueryClient()
-    const navigate = useNavigate();
+    const {install, isPending: isInstallPending} = useInstall({
+        packageContract,
+        overrides,
+        prefix,
+        setError
+    })
 
-    const pkg = contracts.find(contract => contract.type === 'Package');
-    const [prefix, setPrefix] = useState(pkg?.prefix ?? '');
-    const [overrides, setOverrides] = useState<Overrides>({});
+    const updateContract = useCallback((contract: Contract, isRefetch?: boolean) => {
+        setOverrides(overrides => {
+            const newOverrides = [
+                ...overrides.filter(c => c.type !== contract.type || c.name !== contract.name),
+            ]
 
-    const packageContract = contracts.find(contract => contract.type === 'Package');
-
-    const install = async () => {
-        setError(null);
-        const result = await mutateAsync({
-            id: name, data: {
-                type: 'Package',
-                name,
-                prefix,
-                tags: [],
-                contracts: Object.entries(overrides).flatMap(([, value]) => value),
-                
+            if (contracts.find(c => c.type === contract.type && c.name === contract.name) !== contract) {
+                newOverrides.push(contract);
             }
+
+            if (isRefetch) {
+                refetch(newOverrides);
+            }
+            return newOverrides;
         });
-
-        if (result.status === 404) {
-            setError("Package not found");
-            return;
-        }
-
-        if (result.status === 409) {
-            setError(`${result.data.message} ${result.data.solution}`);
-            return;
-        }
-
-        const state = await waitForReady();
-        if (state.error) {
-            setError(`${state.error.message} ${state.error.solution}`);
-            return;
-        }
-        await queryClient.invalidateQueries({queryKey: getGetApplicationsQueryKey()});
-        navigate('/');
-    };
-
-    const updateContracts = useCallback((contracts: Package['contracts']) => {
-        const contract = contracts[0];
-        const key = `${contract.type}:${contract.name}`;
-        setOverrides(overrides => ({
-                ...overrides,
-                [key]: contracts
-            })
-        )
-    }, []);
-
-    const updateContract = useCallback((contract: Package['contracts'][0]) => {
-        updateContracts([contract]);
-    }, [updateContracts]);
+    }, [contracts, refetch]);
 
     return (
         <>
-            <div className={"text-red-error font-bold my-2"}>
-                {error}
-            </div>
             <div className={"lg:w-1/2 my-6 border-primary border-b-2 px-1"}>
                 <div className={"flex justify-between items-center px-1"}>
                     <div className={"flex gap-2 mb-2"}>
@@ -93,7 +55,7 @@ export default function InstallForm({contracts, name}: Props) {
                             <img
                                 className={"rounded"}
                                 alt={name}
-                                src={pkg?.iconUrl ?? `https://cdn.jsdelivr.net/gh/selfhst/icons/png/${name}.png`}
+                                src={packageContract.iconUrl ?? `https://cdn.jsdelivr.net/gh/selfhst/icons/png/${name}.png`}
                             />
                         </div>
                         <h1>
@@ -101,13 +63,13 @@ export default function InstallForm({contracts, name}: Props) {
                         </h1>
                     </div>
                     <div>
-                        <Button onClick={install} disabled={isPending} type={"primary"}>
-                        Install
+                        <Button onClick={install} disabled={isInstallPending} type={"primary"}>
+                            Install
                         </Button>
                     </div>
                 </div>
                 <div className={"my-3"}>
-                    {packageContract?.fullDescription ?? ''}
+                    {packageContract.fullDescription ?? ''}
                 </div>
             </div>
             <div className={"lg:w-1/2"}>
@@ -121,6 +83,15 @@ export default function InstallForm({contracts, name}: Props) {
                             setPrefix(e.target.value);
                         }}/>
                     </div>
+                    {contracts.map(contract => (
+                        <ContractForm
+                            key={`${contract.type}:${contract.name}`}
+                            contract={contract}
+                            alternatives={alternatives}
+                            updateContract={updateContract}
+                            allContracts={contracts}
+                        />
+                    ))}
                     {contracts
                         .filter(contract => contract.type === 'Parameter')
                         .map(contract => (
@@ -144,24 +115,7 @@ export default function InstallForm({contracts, name}: Props) {
                         ))
                     }
                     {contracts
-                        .filter(contract => contract.type === 'HttpEndpoint')
-                        .map(contract => (
-                            <div key={`${contract.type}:${contract.name}`} className={"card"}>
-                                <HttpEndpointForm
-                                    contract={contract}
-                                    contracts={contracts}
-                                    updateContracts={updateContracts}
-                                />
-                            </div>
-                        ))
-                    }
-                    {contracts
                         .filter(contract => contract.type === 'PortEndpoint')
-                        .filter(contract => contracts.find(httpContract =>
-                            httpContract.type === 'HttpEndpoint'
-                            && httpContract.port === contract.port
-                            && httpContract.container === contract.container
-                        ) === undefined)
                         .map(contract => (
                             <div key={`${contract.type}:${contract.name}`} className={"card"}>
                                 <PortEndpointForm
@@ -185,18 +139,11 @@ export default function InstallForm({contracts, name}: Props) {
 
                 </div>
                 <div className={"mt-4 mb-10"}>
-                    <Button onClick={install} disabled={isPending} type={"primary"}>
+                    <Button onClick={install} disabled={isInstallPending} type={"primary"}>
                         Install
                     </Button>
                 </div>
-                <Debug>
-                    {contracts.map(contract => (
-                        <div key={`${contract.type}:${contract.name}`}>
-                            <p>{contract.type}</p>
-                            <pre>{JSON.stringify(contract, null, 2)}</pre>
-                        </div>
-                    ))}
-                </Debug>
+                <Debug contracts={contracts}/>
             </div>
         </>
     );

@@ -1,8 +1,8 @@
-﻿using Autofac;
+﻿using System.Diagnostics;
+using Autofac;
 using Autofac.Features.Indexed;
 using Frierun.Server.Data;
 using Frierun.Server.Handlers;
-using Frierun.Server.Handlers.Base;
 
 namespace Frierun.Server;
 
@@ -11,10 +11,12 @@ public class HandlerRegistry : IDisposable
     private readonly IIndex<string, ProviderScopeBuilder> _scopeBuilders;
     private readonly ILifetimeScope _container;
     private readonly ILifetimeScope _baseScope;
+    private readonly HashSet<Application> _applicationsToLoad = new();
     private readonly Dictionary<Application, ILifetimeScope> _applicationScopes = new();
     private readonly Dictionary<Application, IList<IHandler>> _handlerPerApplication = new();
     private readonly Dictionary<Type, IList<IHandler>> _handlerPerType = new();
     private readonly Dictionary<(string type, string? application), IHandler> _handlers = new();
+    private readonly object _lock = new();
 
     public HandlerRegistry(
         State state,
@@ -34,10 +36,10 @@ public class HandlerRegistry : IDisposable
 
         foreach (var application in state.Applications)
         {
-            AddApplication(application);
+            _applicationsToLoad.Add(application);
         }
 
-        state.ApplicationAdded += AddApplication;
+        state.ApplicationAdded += application => _applicationsToLoad.Add(application);
         state.ApplicationRemoved += RemoveApplication;
     }
 
@@ -56,36 +58,41 @@ public class HandlerRegistry : IDisposable
     /// </summary>
     private void AddApplication(Application application)
     {
-        var packageName = application.Package?.Name;
-        if (packageName == null)
+        lock (_lock)
         {
-            return;
-        }
-
-        if (_scopeBuilders.TryGetValue(packageName, out var scopeBuilder) == false)
-        {
-            return;
-        }
-
-        if (_handlerPerApplication.ContainsKey(application))
-        {
-            throw new Exception("Application already added to the registry");
-        }
-
-        var scope = _container.BeginLifetimeScope(
-            _scopeBuilders[packageName],
-            builder =>
+            _applicationsToLoad.Remove(application);
+        
+            var packageName = application.Package?.Name;
+            if (packageName == null)
             {
-                builder.RegisterInstance(application).AsSelf().SingleInstance();
-                scopeBuilder(builder);
+                return;
             }
-        );
 
-        var handlers = scope.Resolve<IEnumerable<IHandler>>().ToList();
+            if (_scopeBuilders.TryGetValue(packageName, out var scopeBuilder) == false)
+            {
+                return;
+            }
 
-        handlers.ForEach(AddHandler);
-        _handlerPerApplication[application] = handlers;
-        _applicationScopes[application] = scope;
+            if (_handlerPerApplication.ContainsKey(application))
+            {
+                throw new Exception("Application already added to the registry");
+            }
+
+            var scope = _container.BeginLifetimeScope(
+                _scopeBuilders[packageName],
+                builder =>
+                {
+                    builder.RegisterInstance(application).AsSelf().SingleInstance();
+                    scopeBuilder(builder);
+                }
+            );
+
+            var handlers = scope.Resolve<IEnumerable<IHandler>>().ToList();
+
+            handlers.ForEach(AddHandler);
+            _handlerPerApplication[application] = handlers;
+            _applicationScopes[application] = scope;
+        }
     }
 
     /// <summary>
@@ -93,29 +100,34 @@ public class HandlerRegistry : IDisposable
     /// </summary>
     private void RemoveApplication(Application application)
     {
-        var packageName = application.Package?.Name;
-        if (packageName == null)
+        lock (_lock)
         {
-            return;
+            _applicationsToLoad.Remove(application);
+        
+            var packageName = application.Package?.Name;
+            if (packageName == null)
+            {
+                return;
+            }
+
+            if (!_handlerPerApplication.Remove(application, out var handlers))
+            {
+                return;
+            }
+
+            foreach (var handler in handlers)
+            {
+                _handlers.Remove((handler.GetType().Name, application.Name));
+
+                _handlerPerType
+                    .Values
+                    .ToList()
+                    .ForEach(list => list.Remove(handler));
+            }
+
+            _applicationScopes[application].Dispose();
+            _applicationScopes.Remove(application);
         }
-
-        if (!_handlerPerApplication.Remove(application, out var handlers))
-        {
-            return;
-        }
-
-        foreach (var handler in handlers)
-        {
-            _handlers.Remove((handler.GetType().Name, application.Name));
-
-            _handlerPerType
-                .Values
-                .ToList()
-                .ForEach(list => list.Remove(handler));
-        }
-
-        _applicationScopes[application].Dispose();
-        _applicationScopes.Remove(application);
     }
     
     /// <summary>
@@ -125,10 +137,9 @@ public class HandlerRegistry : IDisposable
     {
         _handlers[(handler.GetType().Name, handler.Application?.Name)] = handler;
 
-        var handlerType = handler
-            .GetType()
-            .GetInterfaces()
-            .Single(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IHandler<>));
+        var handlerType = handler.GetType().BaseType;
+        
+        Debug.Assert(handlerType != null);
         
         var contractType = handlerType.GetGenericArguments()[0];
 
@@ -158,7 +169,12 @@ public class HandlerRegistry : IDisposable
             return true;
         }
         
-        if (contractType == typeof(DockerApiConnection) && handlerType != typeof(DockerApiConnectionHandler))
+        if (handlerType == typeof(CloudflareHttpEndpointHandler))
+        {
+            return true;
+        }
+        
+        if (contractType.Name.StartsWith("Fake"))
         {
             return true;
         }
@@ -171,16 +187,34 @@ public class HandlerRegistry : IDisposable
     /// </summary>
     public IEnumerable<IHandler> GetHandlers(Type contractType)
     {
-        if (!_handlerPerType.TryGetValue(contractType, out var handlers))
+        lock (_lock)
         {
-            return Array.Empty<IHandler>();
-        }
+            foreach (var application in _applicationsToLoad)
+            {
+                AddApplication(application);
+            }
+        
+            if (!_handlerPerType.TryGetValue(contractType, out var handlers))
+            {
+                return Array.Empty<IHandler>();
+            }
 
-        return handlers;
+            return handlers;
+        }
     }
 
     public IHandler? GetHandler(string typeName, string? applicationName = null)
     {
-        return _handlers.GetValueOrDefault((typeName, applicationName));
+        lock (_lock)
+        {
+            if (applicationName != null)
+            {
+                foreach (var application in _applicationsToLoad.Where(application => applicationName == application.Name))
+                {
+                    AddApplication(application);
+                }
+            }
+            return _handlers.GetValueOrDefault((typeName, applicationName));
+        }
     }
 }

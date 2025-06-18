@@ -3,9 +3,9 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class PasswordHandler : IHandler<Password>
+public class PasswordHandler : Handler<Password>
 {
-    public IEnumerable<ContractInitializeResult> Initialize(Password contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Password contract, string prefix)
     {
         if (contract.Value != null)
         {

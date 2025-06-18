@@ -2,9 +2,9 @@
 
 namespace Frierun.Server.Handlers.Base;
 
-public class PackageHandler : IHandler<Package>
+public class PackageHandler : Handler<Package>
 {
-    public IEnumerable<ContractInitializeResult> Initialize(Package package, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Package package, string prefix)
     {
         var applicationUrl = package.ApplicationUrl;
 
@@ -39,7 +39,7 @@ public class PackageHandler : IHandler<Package>
         );
     }
 
-    public Package Install(Package package, ExecutionPlan plan)
+    public override Package Install(Package package, ExecutionPlan plan)
     {
         return package with
         {

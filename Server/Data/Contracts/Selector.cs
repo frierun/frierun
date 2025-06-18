@@ -24,7 +24,7 @@ public record Selector(
 
         return this with
         {
-            Value = selector.Value
+            Value = Value ?? selector.Value
         };
     }
 }

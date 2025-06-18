@@ -2,15 +2,13 @@
 using Autofac;
 using Autofac.Core;
 using Autofac.Extensions.DependencyInjection;
-using Autofac.Features.Metadata;
 using Bogus;
 using Docker.DotNet;
-using Docker.DotNet.Models;
 using Frierun.Server;
 using Frierun.Server.Data;
 using Frierun.Server.Handlers;
+using Frierun.Tests.Handlers;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Substitute = NSubstitute.Substitute;
 
 namespace Frierun.Tests;
@@ -19,10 +17,11 @@ public abstract class BaseTests
 {
     private IContainer? Provider { get; set; }
     private ContainerBuilder? ContainerBuilder { get; set; }
-    protected IDockerClient DockerClient { get; } = CreateDockerSubstitute();
+    protected IDockerClient DockerClient => Handler<FakeDockerApiConnectionHandler>().Client;
+    protected ICloudflareClient CloudflareClient => Handler<FakeCloudflareApiConnectionHandler>().Client;
 
     /// <summary>
-    /// Resolves object from the provider.
+    /// Resolve object from the provider.
     /// </summary>
     protected T Resolve<T>()
         where T : notnull
@@ -31,7 +30,7 @@ public abstract class BaseTests
         return Provider.Resolve<T>();
     }
 
-    protected ContainerBuilder GetContainerBuilder()
+    private ContainerBuilder GetContainerBuilder()
     {
         if (Provider != null)
         {
@@ -74,63 +73,49 @@ public abstract class BaseTests
             }
         }
 
-        // mock docker client
-        ContainerBuilder.RegisterInstance(DockerClient)
-            .As<IDockerClient>()
-            .SingleInstance();
-        
+        // register fake handlers
         ContainerBuilder.RegisterDecorator<ProviderScopeBuilder>(
             (_, _, builder) =>
             {
                 return b =>
                 {
                     builder(b);
-                    b.RegisterInstance(DockerClient)
-                        .As<IDockerClient>()
-                        .SingleInstance()
-                        .OnlyIf(registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(IDockerClient))));
                     b.RegisterType<FakeDockerApiConnectionHandler>()
                         .AsImplementedInterfaces()
                         .SingleInstance()
-                        .OnlyIf(registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(IHandler<DockerApiConnection>))));
+                        .OnlyIf(
+                            registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(IDockerApiConnectionHandler)))
+                        );
+                    b.RegisterType<FakeCloudflareApiConnectionHandler>()
+                        .AsImplementedInterfaces()
+                        .SingleInstance()
+                        .OnlyIf(
+                            registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(ICloudflareApiConnectionHandler)))
+                        );
                 };
-            });
-        
+            }
+        );
+
         return ContainerBuilder;
     }
-
+    
     /// <summary>
-    /// Creates substitute for docker client.
-    /// </summary>
-    private static IDockerClient CreateDockerSubstitute()
+    /// Resolve handler of specified type
+    /// </summary> 
+    protected T Handler<T>()
+        where T : IHandler
     {
-        var dockerClient = Substitute.For<IDockerClient>();
-        dockerClient.Containers
-            .CreateContainerAsync(default)
-            .ReturnsForAnyArgs(Task.FromResult(new CreateContainerResponse {ID = "containerId"}));
-        dockerClient.Containers
-            .StartContainerAsync(default, default)
-            .ReturnsForAnyArgs(Task.FromResult(true));
-        dockerClient.Exec
-            .ExecCreateContainerAsync(default, default)
-            .ReturnsForAnyArgs(
-                Task.FromResult(
-                    new ContainerExecCreateResponse()
-                    {
-                        ID = "execId"
-                    }
-                )
-            );
+        var handler = Resolve<HandlerRegistry>().GetHandler(typeof(T).Name);
+        if (handler is not T castedHandler)
+        {
+            throw new Exception($"Handler {typeof(T).Name} not found");
+        }
 
-        dockerClient.Exec
-            .StartAndAttachContainerExecAsync(default, default)
-            .ReturnsForAnyArgs(Task.FromResult(new MultiplexedStream(new MemoryStream(), false)));
-
-        return dockerClient;
-    }
+        return castedHandler;
+    }    
 
     /// <summary>
-    /// Gets factory for generating test data.
+    /// Get factory for generating test data.
     /// </summary>
     protected Faker<T> Factory<T>()
         where T : class
@@ -139,28 +124,19 @@ public abstract class BaseTests
     }
 
     /// <summary>
-    /// Creates mock service and registers it in the container.
+    /// Create mock service and registers it in the container.
     /// </summary>
-    protected T Mock<T>()
-        where T : class
-    {
-        return Mock<T, T>();
-    }
-
-    /// <summary>
-    /// Creates mock service and registers it in the container.
-    /// </summary>
-    protected T Mock<T, TService>()
+    protected T Mock<T, TService>(object?[]? constructorArguments = null)
         where T : class, TService
         where TService : class
     {
-        var mock = Substitute.For<T>();
+        var mock = Substitute.For<T>(constructorArguments);
         GetContainerBuilder().RegisterInstance(mock).As<TService>();
         return mock;
     }
 
     /// <summary>
-    /// Installs package by name and returns application. Throws exception if installation fails.
+    /// Install package by name and returns application. Throw exception if installation fails.
     /// </summary>
     protected Application InstallPackage(string name, IEnumerable<Contract>? overrides = null)
     {
@@ -170,21 +146,40 @@ public abstract class BaseTests
 
         if (overrides != null)
         {
-            var overridePackage = new Package(name) {Contracts = overrides};
+            var overridePackage = new Package(name) { Contracts = overrides };
             package = (Package)package.With(overridePackage);
         }
-        
+
         return InstallPackage(package);
     }
-    
+
     /// <summary>
-    /// Installs package by name and returns application. Throws exception if installation fails.
+    /// Install package by name and returns application. Throw exception if installation fails.
     /// </summary>
     protected Application InstallPackage(Package package)
     {
         var executionService = Resolve<ExecutionService>();
         var installService = Resolve<InstallService>();
         var plan = executionService.Create(package);
-        return installService.Handle(plan) ?? throw new Exception($"Failed to install package {package.Name}");
+        var application = installService.Handle(plan);
+        if (application != null)
+        {
+            return application;
+        }
+
+        var stateManager = Resolve<StateManager>();
+        if (stateManager.Exception != null)
+        {
+            throw stateManager.Exception;
+        }
+        throw new Exception($"Failed to install package {package.Name}");
+    }
+
+    /// <summary>
+    /// Uninstall application.
+    /// </summary>
+    protected void UninstallApplication(Application application)
+    {
+        Resolve<UninstallService>().Handle(application);
     }
 }

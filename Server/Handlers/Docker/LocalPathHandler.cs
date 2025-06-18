@@ -3,25 +3,25 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class LocalPathHandler(Application application) : IHandler<Volume>
+public class LocalPathHandler(Application application) : Handler<Volume>(application)
 {
-    public Application Application => application;
-
-    public IEnumerable<ContractInitializeResult> Initialize(Volume contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Volume contract, string prefix)
     {
-        if (contract.Path != null)
+        if (contract.VolumeName != null)
+        {
+            yield break;
+        }
+        
+        if (contract.LocalPath != null)
         {
             yield return new ContractInitializeResult(contract with { Handler = this });
         }
     }
 
-    public Volume Install(Volume contract, ExecutionPlan plan)
+    public override Volume Install(Volume contract, ExecutionPlan plan)
     {
-        Debug.Assert(contract.Path != null, "Path should not be null");
+        Debug.Assert(contract.LocalPath != null);
 
-        return contract with
-        {
-            Result = new LocalPath { Path = contract.Path }
-        };
+        return contract;
     }
 }

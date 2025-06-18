@@ -1,11 +1,12 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics;
+using System.Text.RegularExpressions;
 using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class SubstituteHandler(ContractRegistry contractRegistry) : IHandler<Substitute>
+public class SubstituteHandler(ContractRegistry contractRegistry) : Handler<Substitute>
 {
-    public IEnumerable<ContractInitializeResult> Initialize(Substitute contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Substitute contract, string prefix)
     {
         var contractIds = contract.Matches
             .SelectMany(pair => pair.Value)
@@ -38,7 +39,7 @@ public class SubstituteHandler(ContractRegistry contractRegistry) : IHandler<Sub
         );
     }
 
-    public Substitute Install(Substitute contract, ExecutionPlan plan)
+    public override Substitute Install(Substitute contract, ExecutionPlan plan)
     {
         var original = plan.GetContract(contract.OriginalId);
         if (original is not IHasStrings hasStrings)
@@ -86,15 +87,8 @@ public class SubstituteHandler(ContractRegistry contractRegistry) : IHandler<Sub
         var contractType = contractRegistry.GetContractType(contractTypeName);
         var contractId = ContractId.Create(contractType, contractName);
         
-        object result;
-        if (contractType.IsAssignableTo(typeof(IHasResult)))
-        {
-            result = plan.GetResource(contractId);
-        }
-        else
-        {
-            result = plan.GetContract(contractId);
-        }
+        Contract result = plan.GetContract(contractId);
+        Debug.Assert(result.Installed);
 
         var propertyInfo = result.GetType().GetProperty(propertyName);
         if (propertyInfo == null)

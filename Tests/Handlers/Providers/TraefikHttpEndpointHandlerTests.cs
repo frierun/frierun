@@ -17,7 +17,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     [InlineData(true)]
     public void Install_ContainerWithHttpEndpoint_InstallTraefikFirst(bool reverseOrder)
     {
-        InstallPackage("static-domain");
+        InstallPackage("static-zone");
         InstallPackage("traefik");
 
         var container = Factory<Container>().Generate();
@@ -46,16 +46,16 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     [Fact]
     public void Install_InternalDomain_InstallHttpEndpoint()
     {
-        InstallPackage("static-domain");
+        InstallPackage("static-zone");
         InstallPackage("traefik");
         var package = Factory<Package>().Generate() with { Contracts = [Factory<HttpEndpoint>().Generate()] };
 
         var application = InstallPackage(package);
 
-        var endpointContract = application.Contracts.OfType<HttpEndpoint>().Single().Result;
-        Assert.NotNull(endpointContract);
-        Assert.Equal(80, endpointContract.Port);
-        Assert.False(endpointContract.Ssl);
+        var endpointContract = application.Contracts.OfType<HttpEndpoint>().Single();
+        Assert.True(endpointContract.Installed);
+        Assert.Equal(80, endpointContract.Url.Port);
+        Assert.Equal("http", endpointContract.Url.Scheme);
         Assert.StartsWith("http://", endpointContract.Url.ToString());
     }
 
@@ -63,7 +63,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     public void Install_ExternalDomain_InstallHttpEndpoint()
     {
         InstallPackage(
-            "static-domain",
+            "static-zone",
             [new Selector("Internal", Value: "No")]
         );
         InstallPackage("traefik");
@@ -71,10 +71,10 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var endpointContract = application.Contracts.OfType<HttpEndpoint>().Single().Result;
-        Assert.NotNull(endpointContract);
-        Assert.Equal(443, endpointContract.Port);
-        Assert.True(endpointContract.Ssl);
+        var endpointContract = application.Contracts.OfType<HttpEndpoint>().Single();
+        Assert.True(endpointContract.Installed);
+        Assert.Equal(443, endpointContract.Url.Port);
+        Assert.Equal("https", endpointContract.Url.Scheme);
         Assert.StartsWith("https://", endpointContract.Url.ToString());
     }
 
@@ -82,24 +82,24 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     public void Install_NonDefaultPorts_SkipsSsl()
     {
         InstallPackage(
-            "static-domain",
+            "static-zone",
             [new Selector("Internal", Value: "No")]
         );
         InstallPackage(
             "traefik",
             [
-                new PortEndpoint(Protocol.Tcp, 80, Name: "Web", DestinationPort: 81),
-                new PortEndpoint(Protocol.Tcp, 443, Name: "WebSecure", DestinationPort: 444),
+                new PortEndpoint(Protocol.Tcp, 80, Name: "Web", ExternalPort: 81),
+                new PortEndpoint(Protocol.Tcp, 443, Name: "WebSecure", ExternalPort: 444),
             ]
         );
         var package = Factory<Package>().Generate() with { Contracts = [Factory<HttpEndpoint>().Generate()] };
 
         var application = InstallPackage(package);
 
-        var endpointContract = application.Contracts.OfType<HttpEndpoint>().Single().Result;
-        Assert.NotNull(endpointContract);
-        Assert.Equal(81, endpointContract.Port);
-        Assert.False(endpointContract.Ssl);
+        var endpointContract = application.Contracts.OfType<HttpEndpoint>().Single();
+        Assert.True(endpointContract.Installed);
+        Assert.Equal(81, endpointContract.Url.Port);
+        Assert.Equal("http", endpointContract.Url.Scheme);
         Assert.StartsWith("http://", endpointContract.Url.ToString());
     }
 
@@ -107,7 +107,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     public void Install_PackageWithTwoContracts_OnlyOneNetworkAttached()
     {
         InstallPackage(
-            "static-domain",
+            "static-zone",
             [new Selector("Internal", Value: "No")]
         );
         InstallPackage("traefik");
@@ -119,10 +119,9 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
         Assert.Equal(2, installedContracts.Count);
         for (var i = 0; i < 2; i++)
         {
-            var contractResult = installedContracts[i].Result;
-            Assert.NotNull(contractResult);
-            var traefikContractResult = (TraefikHttpEndpoint)contractResult;
-            Assert.Equal(application.Name, traefikContractResult.NetworkName);
+            var contract = installedContracts[i];
+            Assert.True(contract.Installed);
+            Assert.Equal(application.Name, contract.NetworkName);
         }
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
             application.Name,
@@ -134,7 +133,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     public void Uninstall_PackageWithTwoContracts_OnlyOneNetworkDetached()
     {
         InstallPackage(
-            "static-domain",
+            "static-zone",
             [new Selector("Internal", Value: "No")]
         );
         InstallPackage("traefik");

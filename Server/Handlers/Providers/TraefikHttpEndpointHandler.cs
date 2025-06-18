@@ -4,25 +4,21 @@ using Frierun.Server.Data;
 namespace Frierun.Server.Handlers;
 
 public class TraefikHttpEndpointHandler(Application application)
-    : IHandler<HttpEndpoint>
+    : Handler<HttpEndpoint>(application)
 {
     private readonly Container _container = application.Contracts.OfType<Container>().First();    
 
     private readonly int _webPort = application.Contracts
         .OfType<PortEndpoint>()
         .FirstOrDefault(endpoint => endpoint.Name == "Web")
-        ?.Result
-        ?.Port ?? 0;
+        ?.ExternalPort ?? 0;
 
     private readonly int _webSecurePort = application.Contracts
         .OfType<PortEndpoint>()
         .FirstOrDefault(endpoint => endpoint.Name == "WebSecure")
-        ?.Result
-        ?.Port ?? 0;
+        ?.ExternalPort ?? 0;
 
-    public Application Application => application;
-
-    public IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
     {
         yield return new ContractInitializeResult(
             contract with
@@ -34,15 +30,15 @@ public class TraefikHttpEndpointHandler(Application application)
         );
     }
 
-    public HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
+    public override HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
     {
         var domainContract = plan.GetContract(contract.Domain);
         Debug.Assert(domainContract.Installed);
         var domain = domainContract.Value;
         var subdomain = domain.Split('.')[0];
 
-        var containerContract = plan.GetContract(contract.Container);
-        var network = plan.GetContract(containerContract.Network);
+        var container = plan.GetContract(contract.Container);
+        var network = plan.GetContract(container.Network);
         Debug.Assert(network.Installed);
 
         _container.AttachNetwork(network.NetworkName);
@@ -61,9 +57,9 @@ public class TraefikHttpEndpointHandler(Application application)
         }
 
         plan.UpdateContract(
-            containerContract with
+            container with
             {
-                Configure = containerContract.Configure.Append(
+                Configure = container.Configure.Append(
                     parameters =>
                     {
                         parameters.Labels["traefik.enable"] = "true";
@@ -81,25 +77,20 @@ public class TraefikHttpEndpointHandler(Application application)
             }
         );
 
-        var url = certResolver == null
-            ? new Uri($"http://{domain}:{_webPort}")
-            : new Uri($"https://{domain}:{_webSecurePort}");
-
         return contract with
         {
-            Result = new TraefikHttpEndpoint
-            {
-                Url = url,
-                NetworkName = network.NetworkName
-            }
+            ResultSsl = certResolver != null,
+            ResultHost = domain,
+            ResultPort = certResolver != null ? _webSecurePort : _webPort,
+            NetworkName = network.NetworkName,
         };
     }
 
-    void IHandler<HttpEndpoint>.Uninstall(HttpEndpoint contract)
+    public override void Uninstall(HttpEndpoint contract)
     {
-        var resource = contract.Result as TraefikHttpEndpoint;
-        Debug.Assert(resource != null);
+        Debug.Assert(contract.Installed);
+        Debug.Assert(contract.NetworkName != null);
         
-        _container.DetachNetwork(resource.NetworkName);
+        _container.DetachNetwork(contract.NetworkName);
     }
 }

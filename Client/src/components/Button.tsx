@@ -1,14 +1,20 @@
 import {PropsWithChildren} from "react";
 
-
 type Props = {
     disabled?: boolean
     onClick?: () => void
     type?: 'default' | 'primary';
 }
-export default function Button({disabled = false, onClick = ()=>{}, type = 'default', children}:PropsWithChildren<Props>)
-{
-    if(type === 'default')
+export default function Button(
+    {
+        disabled = false,
+        onClick = () => {
+        },
+        type = 'default',
+        children
+    }: PropsWithChildren<Props>
+) {
+    if (type === 'default')
         return (
             <button
                 disabled={disabled}
@@ -25,7 +31,7 @@ export default function Button({disabled = false, onClick = ()=>{}, type = 'defa
             disabled={disabled}
             type={"button"}
             className="btn btn-primary rounded font-bold border-2 border-primary bg-primary
-            text-secondary-lighter hover:text-secondary-softer px-5 py-1 text-secondary"
+            text-secondary-lighter hover:text-secondary-softer px-5 py-1"
             onClick={onClick}
         >
             {children}

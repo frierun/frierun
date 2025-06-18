@@ -2,55 +2,55 @@
 
 namespace Frierun.Server.Data;
 
-public class ExecutionPlan : IExecutionPlan
+public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerable<Contract> alternatives) : IExecutionPlan
 {
-    private readonly Dictionary<ContractId, Contract> _contracts;
-    private readonly DirectedAcyclicGraph<ContractId> _graph = new();
     private readonly HashSet<Application> _requiredApplications = [];
 
-    public IReadOnlyDictionary<ContractId, Contract> Contracts => _contracts;
-
-    public ExecutionPlan(
-        Dictionary<ContractId, Contract> contracts
-    )
-    {
-        _contracts = contracts;
-
-        BuildGraph();
-    }
+    public IEnumerable<Contract> Contracts => contracts.Values;
+    
+    /// <summary>
+    /// List of all contracts that are alternatives to the main execution plan.
+    /// </summary>
+    public IEnumerable<Contract> Alternatives => alternatives;
 
     /// <summary>
     /// Builds the graph of contracts.
     /// </summary>
-    private void BuildGraph()
+    private DirectedAcyclicGraph<ContractId> BuildGraph()
     {
-        foreach (var contract in _contracts.Values)
+        var graph = new DirectedAcyclicGraph<ContractId>();
+        foreach (var contract in contracts.Values)
         {
-            _graph.AddVertex(contract.Id);
+            graph.AddVertex(contract.Id);
         }
 
-        foreach (var contract in _contracts.Values)
+        foreach (var contract in contracts.Values)
         {
             foreach (var dependency in contract.DependsOn)
             {
-                _graph.AddEdge(dependency, contract);
+                graph.AddEdge(dependency, contract);
             }
 
             foreach (var dependency in contract.DependencyOf)
             {
-                _graph.AddEdge(contract, dependency);
+                graph.AddEdge(contract, dependency);
             }
         }
+
+        return graph;
     }
 
     /// <summary>
-    /// Gets contract by id.
+    /// Get contract by id.
     /// </summary>
     public Contract GetContract(ContractId contractId)
     {
-        return _contracts[contractId];
+        return contracts[contractId];
     }
 
+    /// <summary>
+    /// Get contract by id.
+    /// </summary>
     public T GetContract<T>(ContractId<T> contractId)
         where T : Contract
     {
@@ -60,11 +60,11 @@ public class ExecutionPlan : IExecutionPlan
     public void UpdateContract(Contract contract)
     {
         Debug.Assert(
-            !_contracts.TryGetValue(contract, out var existing) || !existing.Installed,
+            !contracts.TryGetValue(contract, out var existing) || !existing.Installed,
             $"Contract is already installed"
         );
 
-        _contracts[contract] = contract;
+        contracts[contract] = contract;
     }
 
     /// <summary>
@@ -72,26 +72,24 @@ public class ExecutionPlan : IExecutionPlan
     /// </summary>
     public Application Install()
     {
+        var graph = BuildGraph();
         var installedContracts = new List<Contract>();
-        _graph.RunDfs(
+        graph.RunDfs(
             contractId =>
             {
                 var contract = GetContract(contractId);
                 Debug.Assert(!contract.Installed);
 
                 var installedContract = contract.Install(this);
-                
+
                 Debug.Assert(installedContract.Id == contractId);
-                Debug.Assert(
-                    installedContract is not IHasResult { Result: null },
-                    "Result must be set for installed contract"
-                );
 
                 if (installedContract is not Package)
                 {
                     installedContracts.Add(installedContract);
                 }
-                _contracts[contractId] = installedContract;
+
+                contracts[contractId] = installedContract;
 
                 var handlerApplication = installedContract.Handler?.Application;
                 if (handlerApplication != null)
@@ -101,7 +99,7 @@ public class ExecutionPlan : IExecutionPlan
             }
         );
 
-        var application = _contracts.Values.OfType<Package>().First().Result;
+        var application = contracts.Values.OfType<Package>().First().Result;
         Debug.Assert(application != null);
 
         return new Application
@@ -113,23 +111,5 @@ public class ExecutionPlan : IExecutionPlan
             Contracts = installedContracts,
             RequiredApplications = _requiredApplications.Select(app => app.Name).ToList()
         };
-    }
-
-    public Resource GetResource(ContractId contractId)
-    {
-        return GetResource<Resource>(contractId);
-    }
-
-    public T GetResource<T>(ContractId contractId)
-        where T : Resource
-    {
-        var contract = _contracts[contractId];
-        Debug.Assert(contract.Installed, $"Contract is not installed");
-        Debug.Assert(contract is IHasResult, $"Contract does not have a result");
-
-        var result = ((IHasResult)contract).Result;
-        Debug.Assert(result is T, $"Contract result is of wrong type");
-
-        return (T)result;
     }
 }

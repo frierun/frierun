@@ -19,10 +19,10 @@ export default function ApplicationTips() {
         );
     }
 
-    if (data.data.find((item) => item.packageName === "static-domain") === undefined) {
+    if (data.data.find((item) => item.packageName === "static-zone") === undefined) {
         return (
             <div className={"mb-3"}>
-                → The &quot;static-domain&quot; package must be installed to use Traeffic and route your apps to subdomains.
+                → The &quot;static-zone&quot; package must be installed to use Traeffik and route your apps to subdomains.
             </div>
         );
     }

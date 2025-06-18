@@ -2,9 +2,9 @@
 
 namespace Frierun.Server.Handlers.Base;
 
-public class ParameterHandler : IHandler<Parameter>
+public class ParameterHandler : Handler<Parameter>
 {
-    public IEnumerable<ContractInitializeResult> Initialize(Parameter contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Parameter contract, string prefix)
     {
         var value = contract.Value ?? contract.DefaultValue ?? "";
 

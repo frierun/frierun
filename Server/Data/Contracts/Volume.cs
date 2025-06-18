@@ -3,9 +3,8 @@
 public record Volume(
     string Name,
     string? VolumeName = null,
-    string? Path = null,
-    Resource? Result = null
-) : Contract(Name), IHasResult<Resource>
+    string? LocalPath = null
+) : Contract(Name)
 {
     public override Contract With(Contract other) 
     {
@@ -16,7 +15,8 @@ public record Volume(
 
         return this with
         {
-            VolumeName = volume.VolumeName ?? VolumeName,
+            VolumeName = VolumeName ?? volume.VolumeName,
+            LocalPath = LocalPath ?? volume.LocalPath
         };
     }
 }

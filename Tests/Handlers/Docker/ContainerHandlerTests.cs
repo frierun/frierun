@@ -44,7 +44,7 @@ public class ContainerHandlerTests : BaseTests
     public void Install_RequireDockerWithPodman_MountsSocket()
     {
         var path = "/run/podman/podman.sock";
-        FakeDockerApiConnectionHandler.SocketRootPath = path;
+        Handler<FakeDockerApiConnectionHandler>().SocketRootPath = path;
         InstallPackage("docker");
         var package = Factory<Package>().Generate() with
         {

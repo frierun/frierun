@@ -3,15 +3,13 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class PortEndpointHandler(Application application, State state) : IHandler<PortEndpoint>
+public class PortEndpointHandler(Application application) : Handler<PortEndpoint>(application)
 {
-    public Application Application => application;
-
-    public IEnumerable<ContractInitializeResult> Initialize(PortEndpoint contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(PortEndpoint contract, string prefix)
     {
-        int port = contract.DestinationPort == 0 ? contract.Port : contract.DestinationPort;
+        var port = contract.ExternalPort == 0 ? contract.Port : contract.ExternalPort;
 
-        while (state.Contracts.OfType<PortEndpoint>()
+        while (State.Contracts.OfType<PortEndpoint>()
                .Any(endpoint => endpoint.Port == port && endpoint.Protocol == contract.Protocol))
         {
             port += 1000;
@@ -25,17 +23,17 @@ public class PortEndpointHandler(Application application, State state) : IHandle
             contract with
             {
                 Handler = this,
-                DestinationPort = port,
+                ExternalPort = port,
                 DependencyOf = contract.DependencyOf.Append(contract.Container),
             }
         );
     }
 
-    public PortEndpoint Install(PortEndpoint contract, ExecutionPlan plan)
+    public override PortEndpoint Install(PortEndpoint contract, ExecutionPlan plan)
     {
         var containerContract = plan.GetContract(contract.Container);
 
-        var externalPort = contract.DestinationPort;
+        var externalPort = contract.ExternalPort;
         var internalPort = contract.Port;
 
         plan.UpdateContract(
@@ -60,13 +58,7 @@ public class PortEndpointHandler(Application application, State state) : IHandle
         // TODO: fill the correct ip of the host
         return contract with
         {
-            Result = new DockerPortEndpoint
-            {
-                Name = contract.Name,
-                Ip = "127.0.0.1",
-                Port = externalPort,
-                Protocol = contract.Protocol
-            }
+            ExternalIp = "127.0.0.1",
         };
     }
 }

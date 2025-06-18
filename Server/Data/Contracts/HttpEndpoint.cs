@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace Frierun.Server.Data;
 
@@ -7,9 +8,15 @@ public record HttpEndpoint(
     int Port = 0,
     ContractId<Container>? Container = null,
     ContractId<Domain>? Domain = null,
-    GenericHttpEndpoint? Result = null
-) : Contract(Name ?? $"{Port}{(Container != null ? $" at {Container.Name}" : "")}"), IHasResult<GenericHttpEndpoint>
+    bool? ResultSsl = null,
+    string? ResultHost = null,
+    int? ResultPort = null,
+    string? NetworkName = null, // for Traefik endpoints
+    string? CloudflareZoneId = null // for Cloudflare endpoints
+) : Contract(Name ?? $"{Port}{(Container != null ? $" at {Container.Name}" : "")}")
 {
+    [MemberNotNullWhen(true, nameof(Url))] public override bool Installed { get; init; }
+
     public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");
     public ContractId<Domain> Domain { get; init; } = Domain ?? new ContractId<Domain>(Name ?? "");
 
@@ -22,7 +29,11 @@ public record HttpEndpoint(
 
         return this with
         {
+            ResultHost = ResultHost ?? endpoint.ResultHost,
             Handler = endpoint.Handler,
         };
     }
+
+    [JsonIgnore]
+    public Uri Url => new($"http{(ResultSsl == true ? "s" : "")}://{ResultHost}:{ResultPort}");
 }
