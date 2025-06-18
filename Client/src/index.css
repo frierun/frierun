@@ -26,7 +26,7 @@
   @apply font-bold;
   font-size: 1rem;
 }
-.btn:disabled {
+.btn:disabled, button:disabled, button:disabled:hover {
   @apply bg-gray-disabled border-gray-darker text-gray-darker hover:text-gray-darker;
 }
 .btn a {
