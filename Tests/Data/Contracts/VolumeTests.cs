@@ -16,7 +16,7 @@ public class VolumeTests : BaseTests
                 DependencyOf = [dependency2],
             };
         
-        var result = volume.With(Factory<Volume>().Generate() with { Name = volume.Name});
+        var result = volume.Merge(Factory<Volume>().Generate() with { Name = volume.Name});
 
         Assert.Equal([dependency], result.DependsOn);
         Assert.Equal([dependency2], result.DependencyOf);

@@ -34,7 +34,7 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
             return NotFound();
         }
 
-        package = (Package)package.With(overrides);
+        package = (Package)package.Merge(overrides);
         try
         {
             return Ok(executionService.Create(package));
@@ -67,7 +67,7 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
             return NotFound();
         }
 
-        package = (Package)package.With(overrides);
+        package = (Package)package.Merge(overrides);
 
         try
         {

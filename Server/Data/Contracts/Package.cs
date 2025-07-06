@@ -1,4 +1,6 @@
-﻿namespace Frierun.Server.Data;
+﻿using static Frierun.Server.Data.Merger;
+
+namespace Frierun.Server.Data;
 
 public record Package(
     string Name,
@@ -12,10 +14,10 @@ public record Package(
     IReadOnlyList<string>? Tags = null,
     IEnumerable<Contract>? Contracts = null,
     Application? Result = null
-) : Contract(Name), IHasStrings
+) : Contract(Name), IHasStrings, ICanMerge
 {
-    public IReadOnlyList<string> Tags { get; init; } = Tags ?? Array.Empty<string>();
-    public IEnumerable<Contract> Contracts { get; init; } = Contracts ?? Array.Empty<Contract>();
+    public IReadOnlyList<string> Tags { get; init; } = Tags ?? [];
+    public IEnumerable<Contract> Contracts { get; init; } = Contracts ?? [];
 
     public Contract ApplyStringDecorator(Func<string, string> decorator)
     {
@@ -26,19 +28,18 @@ public record Package(
         };
     }
 
-    public override Contract With(Contract other)
+    public Contract Merge(Contract other)
     {
-        if (other is not Package package || other.Id != Id)
+        var contract = EnsureSame(this, other);
+
+        return MergeCommon(this, contract) with
         {
-            throw new Exception("Invalid contract");
-        }
-        
-        return this with
-        {
-            Prefix = package.Prefix ?? Prefix,
-            Contracts = Contracts.Concat(package.Contracts)
-                .GroupBy(contract => contract.Id)
-                .Select(group => group.Aggregate((a, b) => a.With(b)))
+            Prefix = OnlyOne(Prefix, contract.Prefix),
+            Contracts = Contracts.Concat(contract.Contracts)
+                .GroupBy(c => c.Id)
+                .Select(group =>
+                    group.Aggregate((a, b) => ((ICanMerge)a).Merge(b))
+                )
         };
     }
 }
