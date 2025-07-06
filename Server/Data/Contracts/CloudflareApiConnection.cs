@@ -25,5 +25,5 @@ public record CloudflareApiConnection(
     {
         Debug.Assert(Handler != null);
         return Handler.CreateClient(this);
-    }    
+    }
 }

@@ -1,22 +1,21 @@
-﻿namespace Frierun.Server.Data;
+﻿using static Frierun.Server.Data.Merger;
+
+namespace Frierun.Server.Data;
 
 public record Volume(
     string Name,
     string? VolumeName = null,
     string? LocalPath = null
-) : Contract(Name)
+) : Contract(Name), ICanMerge
 {
-    public override Contract With(Contract other) 
+    public Contract Merge(Contract other) 
     {
-        if (other is not Volume volume || other.Id != Id)
+        var contract = EnsureSame(this, other);
+        
+        return MergeCommon(this, contract) with
         {
-            throw new Exception("Invalid contract");
-        }
-
-        return this with
-        {
-            VolumeName = VolumeName ?? volume.VolumeName,
-            LocalPath = LocalPath ?? volume.LocalPath
+            VolumeName = OnlyOne(VolumeName, contract.VolumeName),
+            LocalPath = OnlyOne(LocalPath, contract.LocalPath)
         };
     }
 }

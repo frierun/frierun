@@ -67,10 +67,6 @@ public abstract record Contract(
 
     public virtual bool Installed { get; init; } = Installed;
 
-    public virtual Contract With(Contract other)
-    {
-        throw new Exception("Not implemented");
-    }
 
     public static implicit operator ContractId(Contract contract) => contract.Id;
 
