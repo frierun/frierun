@@ -57,7 +57,10 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
         return (T)GetContract((ContractId)contractId);
     }
 
-    public void UpdateContract(Contract contract)
+    /// <summary>
+    /// Replaces contract with another one
+    /// </summary>
+    public void ReplaceContract(Contract contract)
     {
         Debug.Assert(
             !contracts.TryGetValue(contract, out var existing) || !existing.Installed,

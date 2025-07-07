@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
+using static Frierun.Server.Data.Merger;
 
 namespace Frierun.Server.Data;
 
@@ -20,20 +21,22 @@ public record HttpEndpoint(
     public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");
     public ContractId<Domain> Domain { get; init; } = Domain ?? new ContractId<Domain>(Name ?? "");
 
-    public override Contract With(Contract other)
+    public override Contract Merge(Contract other)
     {
-        if (other is not HttpEndpoint endpoint || other.Id != Id)
-        {
-            throw new Exception("Invalid contract");
-        }
+        var contract = EnsureSame(this, other);
 
-        return this with
+        return MergeCommon(this, contract) with
         {
-            ResultHost = ResultHost ?? endpoint.ResultHost,
-            Handler = endpoint.Handler,
+            Port = OnlyOne(Port, contract.Port, port => port == 0),
+            Container = OnlyOne(Container, contract.Container),
+            Domain = OnlyOne(Domain, contract.Domain),
+            ResultSsl = OnlyOne(ResultSsl, contract.ResultSsl),
+            ResultHost = OnlyOne(ResultHost, contract.ResultHost),
+            ResultPort = OnlyOne(ResultPort, contract.ResultPort),
+            NetworkName = OnlyOne(NetworkName, contract.NetworkName),
+            CloudflareZoneId = OnlyOne(CloudflareZoneId, contract.CloudflareZoneId)
         };
     }
 
-    [JsonIgnore]
-    public Uri Url => new($"http{(ResultSsl == true ? "s" : "")}://{ResultHost}:{ResultPort}");
+    [JsonIgnore] public Uri Url => new($"http{(ResultSsl == true ? "s" : "")}://{ResultHost}:{ResultPort}");
 }

@@ -7,10 +7,8 @@ tags: [ "dashboard" ]
 contracts:
   - type: "Container"
     imageName: "b4bz/homer:latest"
+    mounts: 
+      /www/assets: "assets"
     
   - type: "HttpEndpoint"
     port: 8080
-    
-  - type: "Mount"
-    volume: "assets"
-    path: "/www/assets"

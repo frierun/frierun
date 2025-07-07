@@ -24,12 +24,8 @@ public class RedisHandler : Handler<Redis>
                     Name: container.Name,
                     ImageName: "redis:7",
                     Network: contract.Network,
-                    ContainerName: contract.Host
-                ),
-                new Mount(
-                    Path: "/data",
-                    Volume: volume,
-                    Container: container
+                    ContainerName: contract.Host,
+                    Mounts: new Dictionary<string, ContainerMount>(){{"/data", new ContainerMount(Volume: volume)}}
                 )
             ]
         );

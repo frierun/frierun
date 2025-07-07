@@ -29,7 +29,7 @@ docker run -d \
   -v frierun-config:/App/Frierun \
   -v /var/run/docker.sock:/var/run/docker.sock \
   --restart always \
-  ghcr.io/frierun/frierun:main
+  ghcr.io/frierun/frierun:latest
 ```
 
 ## Podman
@@ -55,7 +55,7 @@ podman run -d \
   -v frierun-config:/App/Frierun \
   -v /run/podman/podman.sock:/var/run/docker.sock \
   --restart always \
-  ghcr.io/frierun/frierun:main
+  ghcr.io/frierun/frierun:latest
 ```
 
 ### Windows
@@ -69,7 +69,7 @@ podman run -d \
   -v frierun-config:/App/Frierun \
   -v /var/run/docker.sock:/var/run/docker.sock \
   --restart always \
-  ghcr.io/frierun/frierun:main
+  ghcr.io/frierun/frierun:latest
 ```
 
 # Usage

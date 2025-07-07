@@ -22,6 +22,9 @@ contracts:
               GITEA__database__NAME: "{{Mysql::Database}}"
               GITEA__database__USER: "{{Mysql::Username}}"
               GITEA__database__PASSWD: "{{Mysql::Password}}"
+            mounts:
+              /data: "data"
+              
       - name: "PostgreSQL"
         contracts:
           - type: "Container"
@@ -34,6 +37,9 @@ contracts:
               GITEA__database__NAME: "{{Postgresql::Database}}"
               GITEA__database__USER: "{{Postgresql::Username}}"
               GITEA__database__PASSWD: "{{Postgresql::Password}}"
+            mounts:
+              /data: "data"
+              
       - name: "SQLite"
         contracts:
           - type: "Container"
@@ -41,6 +47,8 @@ contracts:
             env:
               USER_UID: "1000"
               USER_GID: "1000"
+            mounts:
+              /data: "data"
               
   - type: "HttpEndpoint"
     port: 3000
@@ -50,6 +58,3 @@ contracts:
     externalPort: 2222
     protocol: "tcp"
     
-  - type: "Mount"
-    volume: "data"
-    path: "/data"

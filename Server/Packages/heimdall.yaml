@@ -7,10 +7,8 @@ tags: [ "dashboard" ]
 contracts:
   - type: "Container"
     imageName: "lscr.io/linuxserver/heimdall:latest"
+    mounts:
+      /config: "config"
     
   - type: "HttpEndpoint"
     port: 80
-    
-  - type: "Mount"
-    volume: "config"
-    path: "/config"

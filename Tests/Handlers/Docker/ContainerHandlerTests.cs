@@ -31,15 +31,17 @@ public class ContainerHandlerTests : BaseTests
         };
 
         InstallPackage(package);
-        
+
         DockerClient.Containers.Received(1)
-            .CreateContainerAsync(Arg.Is<CreateContainerParameters>(p =>
-                p.HostConfig.Mounts.Count == 1 &&
-                p.HostConfig.Mounts[0].Source == "/var/run/docker.sock" &&
-                p.HostConfig.Mounts[0].Target == "/var/run/docker.sock"
-            ));
+            .CreateContainerAsync(
+                Arg.Is<CreateContainerParameters>(p =>
+                    p.HostConfig.Mounts.Count == 1 &&
+                    p.HostConfig.Mounts[0].Source == "/var/run/docker.sock" &&
+                    p.HostConfig.Mounts[0].Target == "/var/run/docker.sock"
+                )
+            );
     }
-    
+
     [Fact]
     public void Install_RequireDockerWithPodman_MountsSocket()
     {
@@ -52,12 +54,34 @@ public class ContainerHandlerTests : BaseTests
         };
 
         InstallPackage(package);
-        
+
         DockerClient.Containers.Received(1)
-            .CreateContainerAsync(Arg.Is<CreateContainerParameters>(p =>
-                p.HostConfig.Mounts.Count == 1 &&
-                p.HostConfig.Mounts[0].Source == path &&
-                p.HostConfig.Mounts[0].Target == "/var/run/docker.sock"
-            ));
-    }    
+            .CreateContainerAsync(
+                Arg.Is<CreateContainerParameters>(p =>
+                    p.HostConfig.Mounts.Count == 1 &&
+                    p.HostConfig.Mounts[0].Source == path &&
+                    p.HostConfig.Mounts[0].Target == "/var/run/docker.sock"
+                )
+            );
+    }
+
+    [Fact]
+    public void Install_ContainerWithMount_CreatesVolume()
+    {
+        InstallPackage("docker");
+        var container = Factory<Container>().Generate();
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts =
+            [
+                container with
+                {
+                    Mounts = new Dictionary<string, ContainerMount> { { "/mnt", new ContainerMount() } }
+                }
+            ]
+        };
+        
+        var application = InstallPackage(package);
+        Assert.True(application.Contracts.OfType<Volume>().Single().Installed);
+    }
 }

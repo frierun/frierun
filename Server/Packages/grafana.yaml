@@ -11,10 +11,8 @@ contracts:
     env:
       LOG_LEVEL: "debug"
       TZ: "Etc/UTC"
+    mounts:
+      /var/lib/grafana: "config"
       
   - type: "HttpEndpoint"
     port: 3000
-    
-  - type: "Mount"
-    volume: "config"
-    path: "/var/lib/grafana"

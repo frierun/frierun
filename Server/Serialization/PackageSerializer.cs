@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Frierun.Server.Data;
@@ -15,6 +14,7 @@ public class PackageSerializer(ILogger<PackageSerializer> logger, ContractRegist
     {
         Converters =
         {
+            new ContainerMountConverter(),
             new ContractIdConverter(contractRegistry),
             new ContractIdOfTConverter(),
             new YamlBoolConverter()
@@ -39,9 +39,7 @@ public class PackageSerializer(ILogger<PackageSerializer> logger, ContractRegist
     /// </summary>
     public IEnumerable<Package> LoadAll()
     {
-        var assemblyLocation = Assembly.GetExecutingAssembly().Location;
-        var assemblyDirectory = Path.GetDirectoryName(assemblyLocation) ?? throw new InvalidOperationException();
-        var packagesDirectory = Path.Combine(assemblyDirectory, "Packages");
+        var packagesDirectory = Path.Combine(AppContext.BaseDirectory, "Packages");
 
         if (!Directory.Exists(packagesDirectory))
         {

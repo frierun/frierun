@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using static Frierun.Server.Data.Merger;
 
 namespace Frierun.Server.Data;
 
@@ -15,16 +16,13 @@ public record Selector(
     
     public IList<SelectorOption> Options { get; init; } = Options ?? new List<SelectorOption>();
     
-    public override Contract With(Contract other)
+    public override Contract Merge(Contract other)
     {
-        if (other is not Selector selector || other.Id != Id)
-        {
-            throw new Exception("Invalid contract");
-        }
+        var contract = EnsureSame(this, other);
 
-        return this with
+        return MergeCommon(this, contract) with
         {
-            Value = Value ?? selector.Value
+            Value = OnlyOne(Value, contract.Value),
         };
     }
 }

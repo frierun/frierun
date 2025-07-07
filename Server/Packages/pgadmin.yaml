@@ -14,6 +14,8 @@ contracts:
       PGADMIN_CONFIG_GLOBALLY_DELIVERABLE: "False"
       PGADMIN_SERVER_JSON_FILE: "/var/lib/pgadmin/servers.json"
       PGPASS_FILE: "/var/lib/pgadmin/pgpass"
+    mounts:
+      /var/lib/pgadmin: "config"
       
   - type: "HttpEndpoint"
     port: 80
@@ -21,11 +23,7 @@ contracts:
   - type: "Postgresql"
     name: "Root"
     admin: true
-    
-  - type: "Mount"
-    volume: "config"
-    path: "/var/lib/pgadmin"
-    
+       
   - type: "File"
     volume: "config"
     path: "servers.json"

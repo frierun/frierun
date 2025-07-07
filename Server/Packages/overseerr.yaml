@@ -10,10 +10,8 @@ contracts:
       PUID: "1000"
       PGID: "1000"
       TZ: "Etc/UTC"
+    mounts:
+      /config: "config"
       
   - type: "HttpEndpoint"
     port: 5055
-    
-  - type: "Mount"
-    volume: "config"
-    path: "/config"

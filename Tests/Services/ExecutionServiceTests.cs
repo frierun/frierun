@@ -8,9 +8,21 @@ namespace Frierun.Tests;
 
 public class ExecutionServiceTests : BaseTests
 {
-    public record Contract1(string? Name = null) : Contract(Name ?? "");
+    public record Contract1(string? Name = null) : Contract(Name ?? "")
+    {
+        public override Contract Merge(Contract other)
+        {
+            throw new NotImplementedException();
+        }
+    }
 
-    public record Contract2(string? Name = null) : Contract(Name ?? "");
+    public record Contract2(string? Name = null) : Contract(Name ?? "")
+    {
+        public override Contract Merge(Contract other)
+        {
+            throw new NotImplementedException();
+        }
+    }
 
     [Fact]
     public void Create_EmptyPackage_ReturnsPlan()

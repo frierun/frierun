@@ -12,18 +12,13 @@ contracts:
       PUID: "1000"
       PGID: "1000"
       TZ: "Etc/UTC"
+    mounts:
+      /config: "config"
+      /data: "data"
       
   - type: "HttpEndpoint"
     port: 8989
-    
-  - type: "Mount"
-    volume: "config"
-    path: "/config"
-    
-  - type: "Mount"
-    volume: "data"
-    path: "/data"
-    
+        
   - type: "File"
     volume: "data"
     path: ""

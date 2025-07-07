@@ -13,6 +13,9 @@ contracts:
       PUID: "1000"
       PGID: "1000"
       TZ: "Etc/UTC"
+    mounts:
+      /data: "data"
+      /config: "config"
       
   - type: "HttpEndpoint"
     port: 8384
@@ -28,14 +31,6 @@ contracts:
   - type: "PortEndpoint"
     port: 21027
     protocol: "udp"
-    
-  - type: "Mount"
-    volume: "data"
-    path: "/data"
-    
-  - type: "Mount"
-    volume: "config"
-    path: "/config"
     
   - type: "File"
     volume: "data"

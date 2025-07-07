@@ -23,6 +23,9 @@ contracts:
               POSTGRES_DB: "{{Postgresql::Database}}"
               POSTGRES_USER: "{{Postgresql::Username}}"
               POSTGRES_PASSWORD: "{{Postgresql::Password}}"
+            mounts:
+              /app/data: "data"
+              
       - name: "SQLite"
         contracts:
           - type: "Container"
@@ -32,10 +35,9 @@ contracts:
               PUID: "1000"
               PGID: "1000"
               TZ: "Etc/UTC"
+            mounts:
+              /app/data: "data"
               
   - type: "HttpEndpoint"
     port: 9000
     
-  - type: "Mount"
-    volume: "data"
-    path: "/app/data"

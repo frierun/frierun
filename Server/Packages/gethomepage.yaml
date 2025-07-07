@@ -12,11 +12,9 @@ contracts:
     requireDocker: true
     env:
       HOMEPAGE_ALLOWED_HOSTS: "{{HttpEndpoint:frontend:ResultHost}}"
+    mounts:
+      /app/config: "config"
       
   - type: "HttpEndpoint"
     name: "frontend"
     port: 3000
-    
-  - type: "Mount"
-    volume: "config"
-    path: "/app/config"

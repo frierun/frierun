@@ -29,7 +29,6 @@ public abstract record Contract<THandler>(
 [JsonDerivedType(typeof(Domain), nameof(Domain))]
 [JsonDerivedType(typeof(File), nameof(File))]
 [JsonDerivedType(typeof(HttpEndpoint), nameof(HttpEndpoint))]
-[JsonDerivedType(typeof(Mount), nameof(Mount))]
 [JsonDerivedType(typeof(Mysql), nameof(Mysql))]
 [JsonDerivedType(typeof(Network), nameof(Network))]
 [JsonDerivedType(typeof(Package), nameof(Package))]
@@ -67,10 +66,10 @@ public abstract record Contract(
 
     public virtual bool Installed { get; init; } = Installed;
 
-    public virtual Contract With(Contract other)
-    {
-        throw new Exception("Not implemented");
-    }
+    /// <summary>
+    /// Merges contracts restrictions of the same type 
+    /// </summary>
+    public abstract Contract Merge(Contract other);
 
     public static implicit operator ContractId(Contract contract) => contract.Id;
 

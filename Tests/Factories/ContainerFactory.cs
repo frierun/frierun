@@ -16,6 +16,6 @@ public sealed class ContainerFactory: Faker<Container>
         RuleFor(p => p.NetworkName, _ => "");
         RuleFor(p => p.Command, f => new List<string>(f.Lorem.Words()));
         RuleFor(p => p.Env, f => new Dictionary<string, string>());
-        RuleFor(p => p.Configure, _ => Array.Empty<Action<CreateContainerParameters>>());
+        RuleFor(p => p.Labels, f => new Dictionary<string, string>());
     }
 }

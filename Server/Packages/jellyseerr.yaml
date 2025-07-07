@@ -10,10 +10,8 @@ contracts:
     env:
       LOG_LEVEL: "debug"
       TZ: "Etc/UTC"
+    mounts: 
+      /app/config: "config"
       
   - type: "HttpEndpoint"
     port: 5055
-    
-  - type: "Mount"
-    volume: "config"
-    path: "/app/config"
