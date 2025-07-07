@@ -11,7 +11,7 @@ public record CloudflareTunnel(
     string? Token = null,
     ContractId<CloudflareApiConnection>? CloudflareApiConnection = null,
     ContractId<Container>? Container = null
-) : Contract(Name ?? ""), ICanMerge
+) : Contract(Name ?? "")
 {
     [MemberNotNullWhen(true, nameof(TunnelId), nameof(Token), nameof(AccountId))]
     public override bool Installed { get; init; }
@@ -21,7 +21,7 @@ public record CloudflareTunnel(
 
     public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");
     
-    public Contract Merge(Contract other) 
+    public override Contract Merge(Contract other)
     {
         var contract = EnsureSame(this, other);
 

@@ -6,9 +6,9 @@ public record Volume(
     string Name,
     string? VolumeName = null,
     string? LocalPath = null
-) : Contract(Name), ICanMerge
+) : Contract(Name)
 {
-    public Contract Merge(Contract other) 
+    public override Contract Merge(Contract other) 
     {
         var contract = EnsureSame(this, other);
         

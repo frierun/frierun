@@ -67,6 +67,10 @@ public abstract record Contract(
 
     public virtual bool Installed { get; init; } = Installed;
 
+    /// <summary>
+    /// Merges contracts restrictions of the same type 
+    /// </summary>
+    public abstract Contract Merge(Contract other);
 
     public static implicit operator ContractId(Contract contract) => contract.Id;
 

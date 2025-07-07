@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Docker.DotNet;
 using Frierun.Server.Handlers;
+using static Frierun.Server.Data.Merger;
 
 namespace Frierun.Server.Data;
 
@@ -17,7 +18,7 @@ public record DockerApiConnection(
             Path = Path != null ? decorator(Path ?? "") : null
         };
     }
-    
+
     /// <summary>
     /// Creates a Docker client using the current configuration.
     /// </summary>
@@ -26,7 +27,7 @@ public record DockerApiConnection(
         Debug.Assert(Handler != null);
         return Handler.CreateClient(this);
     }
-    
+
     /// <summary>
     /// Gets the socket path in the root system, to be mounted in a container to control this docker instance.
     /// </summary>
@@ -34,5 +35,16 @@ public record DockerApiConnection(
     {
         Debug.Assert(Handler != null);
         return Handler.GetSocketRootPath(this);
+    }
+
+    public override Contract Merge(Contract other)
+    {
+        var contract = EnsureSame(this, other);
+
+        return MergeCommon(this, other) with
+        {
+            Path = OnlyOne(Path, contract.Path),
+            IsPodman = OnlyOne(IsPodman, contract.IsPodman)
+        };
     }
 }

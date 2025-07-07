@@ -14,7 +14,7 @@ public record Package(
     IReadOnlyList<string>? Tags = null,
     IEnumerable<Contract>? Contracts = null,
     Application? Result = null
-) : Contract(Name), IHasStrings, ICanMerge
+) : Contract(Name), IHasStrings
 {
     public IReadOnlyList<string> Tags { get; init; } = Tags ?? [];
     public IEnumerable<Contract> Contracts { get; init; } = Contracts ?? [];
@@ -28,7 +28,7 @@ public record Package(
         };
     }
 
-    public Contract Merge(Contract other)
+    public override Contract Merge(Contract other)
     {
         var contract = EnsureSame(this, other);
 
@@ -38,7 +38,7 @@ public record Package(
             Contracts = Contracts.Concat(contract.Contracts)
                 .GroupBy(c => c.Id)
                 .Select(group =>
-                    group.Aggregate((a, b) => ((ICanMerge)a).Merge(b))
+                    group.Aggregate((a, b) => a.Merge(b))
                 )
         };
     }
