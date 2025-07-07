@@ -6,10 +6,8 @@ tags: [ "dashboard", "network" ]
 contracts:
   - type: "Container"
     imageName: "louislam/uptime-kuma:1"
+    mounts:
+      /app/data: "data"
     
   - type: "HttpEndpoint"
     port: 3001
-    
-  - type: "Mount"
-    volume: "data"
-    path: "/app/data"

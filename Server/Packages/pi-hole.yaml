@@ -10,6 +10,9 @@ contracts:
     imageName: "ghcr.io/pi-hole/pihole:latest"
     env:
       FTLCONF_webserver_api_password: "{{Password::Value}}"
+    mounts:
+      /etc/pihole: "config"
+      /etc/dnsmasq.d: "dnsmasq"
       
   - type: "HttpEndpoint"
     port: 80
@@ -21,11 +24,3 @@ contracts:
   - type: "PortEndpoint"
     port: 53
     protocol: "udp"
-    
-  - type: "Mount"
-    volume: "etc-pihole"
-    path: "/etc/pihole"
-    
-  - type: "Mount"
-    volume: "etc-dnsmasq"
-    path: "/etc/dnsmasq.d"

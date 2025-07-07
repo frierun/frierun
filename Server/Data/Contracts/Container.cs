@@ -16,6 +16,8 @@ public record Container(
     ContractId<Network>? Network = null,
     IReadOnlyList<string>? Command = null,
     IReadOnlyDictionary<string, string>? Env = null,
+    IReadOnlyDictionary<string, string>? Labels = null,
+    IReadOnlyDictionary<string, ContainerMount>? Mounts = null,
     IEnumerable<Action<CreateContainerParameters>>? Configure = null
 ) : Contract<IContainerHandler>(Name ?? ""), IHasStrings
 {
@@ -24,6 +26,8 @@ public record Container(
     
     public IReadOnlyList<string> Command { get; init; } = Command ?? [];
     public IReadOnlyDictionary<string, string> Env { get; init; } = Env ?? new Dictionary<string, string>();
+    public IReadOnlyDictionary<string, string> Labels { get; init; } = Labels ?? new Dictionary<string, string>();
+    public IReadOnlyDictionary<string, ContainerMount> Mounts { get; init; } = Mounts ?? new Dictionary<string, ContainerMount>();
     
     [JsonInclude]
     private IDictionary<string, int> ConnectedNetworks { get; init; } = new Dictionary<string, int>();
@@ -109,9 +113,11 @@ public record Container(
             ImageName = OnlyOne(ImageName, contract.ImageName),
             RequireDocker = RequireDocker || contract.RequireDocker,
             Network = OnlyOne(Network, contract.Network),
-            Command = OnlyOne(Command, contract.Command),
-            Env = OnlyOne(Env, contract.Env),
-            Configure = Configure.Concat(contract.Configure)       
+            Command = OnlyOne(Command, contract.Command, command => command.Count == 0),
+            Env = MergeDictionaries(Env, contract.Env),
+            Labels = MergeDictionaries(Labels, contract.Labels),
+            Mounts = MergeDictionaries(Mounts, contract.Mounts),
+            Configure = Configure.Concat(contract.Configure)
         };
     }
 }

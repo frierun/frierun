@@ -9,18 +9,10 @@ contracts:
   - type: "Container"
     imageName: "ghcr.io/ajnart/homarr:latest"
     requireDocker: true
+    mounts:
+      /app/data/configs: "configs"
+      /app/public/icons: "icons"
+      /data: "data"
     
   - type: "HttpEndpoint"
     port: 7575
-    
-  - type: "Mount"
-    volume: "configs"
-    path: "/app/data/configs"
-    
-  - type: "Mount"
-    volume: "icons"
-    path: "/app/public/icons"
-    
-  - type: "Mount"
-    volume: "data"
-    path: "/data"

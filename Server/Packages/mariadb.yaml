@@ -10,7 +10,5 @@ contracts:
     imageName: "mariadb:10"
     env:
       MARIADB_ROOT_PASSWORD: "{{Password::Value}}"
-      
-  - type: "Mount"
-    volume: "data"
-    path: "/var/lib/mysql"
+    mounts:
+      /var/lib/mysql: "data"

@@ -36,7 +36,7 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
         var externalPort = contract.ExternalPort;
         var internalPort = contract.Port;
 
-        plan.UpdateContract(
+        plan.ReplaceContract(
             containerContract with
             {
                 Configure = containerContract.Configure.Append(

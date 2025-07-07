@@ -25,6 +25,10 @@ contracts:
               PAPERLESS_DBNAME: "{{Postgresql::Database}}"
               PAPERLESS_DBUSER: "{{Postgresql::Username}}"
               PAPERLESS_DBPASS: "{{Postgresql::Password}}"
+            mounts:
+              /usr/src/paperless/data: "data"
+              /usr/src/paperless/media: "media"
+
       - name: "SQLite"
         contracts:
           - type: "Container"
@@ -36,17 +40,10 @@ contracts:
               PAPERLESS_AUTO_LOGIN_USERNAME: "admin"
               PAPERLESS_ADMIN_USER: "admin"
               PAPERLESS_ADMIN_PASSWORD: "{{Password::Value}}"
+            mounts:
+              /usr/src/paperless/data: "data"
+              /usr/src/paperless/media: "media"
               
   - type: "HttpEndpoint"
     container: "webserver"
     port: 8000
-    
-  - type: "Mount"
-    container: "webserver"
-    volume: "data"
-    path: "/usr/src/paperless/data"
-    
-  - type: "Mount"
-    container: "webserver"
-    volume: "media"
-    path: "/usr/src/paperless/media"

@@ -7,19 +7,13 @@ tags: [ "storage" ]
 contracts:
   - type: "Container"
     imageName: "jellyfin/jellyfin:latest"
+    mounts:
+      /config: "config"
+      /cache: "cache"
+      /media: 
+        volume: "media"
+        readOnly: true
     
   - type: "HttpEndpoint"
     port: 8096
     
-  - type: "Mount"
-    volume: "config"
-    path: "/config"
-    
-  - type: "Mount"
-    volume: "cache"
-    path: "/cache"
-    
-  - type: "Mount"
-    volume: "media"
-    path: "/media"
-    readOnly: true

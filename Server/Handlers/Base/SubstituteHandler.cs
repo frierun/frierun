@@ -64,7 +64,7 @@ public class SubstituteHandler(ContractRegistry contractRegistry) : Handler<Subs
                 return s;
             }
         );
-        plan.UpdateContract(changedContract);
+        plan.ReplaceContract(changedContract);
 
         return contract;
     }

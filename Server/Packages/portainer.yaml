@@ -7,10 +7,8 @@ contracts:
   - type: "Container"
     imageName: "portainer/portainer-ce:latest"
     requireDocker: true
+    mounts:
+      /data: "data"
     
   - type: "HttpEndpoint"
     port: 9000
-    
-  - type: "Mount"
-    volume: "data"
-    path: "/data"

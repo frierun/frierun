@@ -9,7 +9,6 @@ public class ContractRegistryTests : BaseTests
     [Theory]
     [InlineData(typeof(Container))]
     [InlineData(typeof(HttpEndpoint))]
-    [InlineData(typeof(Mount))]
     public void GetContractType_ExistingType_ReturnsCorrectType(Type type)
     {
         var contractRegistry = Resolve<ContractRegistry>();
@@ -52,7 +51,6 @@ public class ContractRegistryTests : BaseTests
     
     [Theory]
     [InlineData("NonExistingType")]
-    [InlineData(nameof(Mount))]
     public void CreateContract_InvalidType_ThrowsException(string invalidType)
     {
         var contractRegistry = Resolve<ContractRegistry>();
