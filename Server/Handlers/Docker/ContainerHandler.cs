@@ -89,17 +89,18 @@ public class ContainerHandler(Application application, DockerService dockerServi
             var dockerMount = new Mount()
             {
                 Target = path,
-                Type = "volume",
                 ReadOnly = mount.ReadOnly
             };
             
             if (volume.VolumeName != null)
             {
                 dockerMount.Source = volume.VolumeName;
+                dockerMount.Type = "volume";
             }
             else if (volume.LocalPath != null)
             {
                 dockerMount.Source = volume.LocalPath;
+                dockerMount.Type = "bind";
             }
             else
             {
