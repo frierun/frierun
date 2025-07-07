@@ -9,14 +9,14 @@ public record Selector(
     string Name,
     IList<SelectorOption>? Options = null,
     string? Value = null
-) : Contract(Name ?? ""), ICanMerge
+) : Contract(Name ?? "")
 {
     [MemberNotNullWhen(true, nameof(Value))]
     public override bool Installed { get; init; }
     
     public IList<SelectorOption> Options { get; init; } = Options ?? new List<SelectorOption>();
     
-    public Contract Merge(Contract other)
+    public override Contract Merge(Contract other)
     {
         var contract = EnsureSame(this, other);
 

@@ -14,14 +14,14 @@ public record HttpEndpoint(
     int? ResultPort = null,
     string? NetworkName = null, // for Traefik endpoints
     string? CloudflareZoneId = null // for Cloudflare endpoints
-) : Contract(Name ?? $"{Port}{(Container != null ? $" at {Container.Name}" : "")}"), ICanMerge
+) : Contract(Name ?? $"{Port}{(Container != null ? $" at {Container.Name}" : "")}")
 {
     [MemberNotNullWhen(true, nameof(Url))] public override bool Installed { get; init; }
 
     public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");
     public ContractId<Domain> Domain { get; init; } = Domain ?? new ContractId<Domain>(Name ?? "");
 
-    public Contract Merge(Contract other)
+    public override Contract Merge(Contract other)
     {
         var contract = EnsureSame(this, other);
 

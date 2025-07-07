@@ -7,12 +7,12 @@ public record Parameter(
     string Name,
     string? DefaultValue = null,
     string? Value = null 
-) : Contract(Name), ICanMerge
+) : Contract(Name)
 {
     [MemberNotNullWhen(true, nameof(Value))]
     public override bool Installed { get; init; }
     
-    public Contract Merge(Contract other)
+    public override Contract Merge(Contract other)
     {
         var contract = EnsureSame(this, other);
 

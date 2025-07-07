@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using Docker.DotNet.Models;
 using Frierun.Server.Handlers;
+using static Frierun.Server.Data.Merger;
 
 namespace Frierun.Server.Data;
 
@@ -21,16 +22,14 @@ public record Container(
     [MemberNotNullWhen(true, nameof(ContainerName), nameof(NetworkName))]
     public override bool Installed { get; init; }
     
-    public IReadOnlyList<string> Command { get; init; } = Command ?? Array.Empty<string>();
+    public IReadOnlyList<string> Command { get; init; } = Command ?? [];
     public IReadOnlyDictionary<string, string> Env { get; init; } = Env ?? new Dictionary<string, string>();
     
     [JsonInclude]
     private IDictionary<string, int> ConnectedNetworks { get; init; } = new Dictionary<string, int>();
 
     [JsonIgnore]
-    public IEnumerable<Action<CreateContainerParameters>> Configure { get; init; } =
-        Configure ?? Array.Empty<Action<CreateContainerParameters>>();
-    
+    public IEnumerable<Action<CreateContainerParameters>> Configure { get; init; } = Configure ?? [];
     
     public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>("");
     
@@ -97,5 +96,22 @@ public record Container(
     {
         Debug.Assert(Handler != null);
         return Handler.ExecInContainer(this, command);
-    }    
+    }
+
+    public override Contract Merge(Contract other)
+    {
+        var contract = EnsureSame(this, other);
+
+        return MergeCommon(this, other) with
+        {
+            ContainerName = OnlyOne(ContainerName, contract.ContainerName),
+            NetworkName = OnlyOne(NetworkName, contract.NetworkName),
+            ImageName = OnlyOne(ImageName, contract.ImageName),
+            RequireDocker = RequireDocker || contract.RequireDocker,
+            Network = OnlyOne(Network, contract.Network),
+            Command = OnlyOne(Command, contract.Command),
+            Env = OnlyOne(Env, contract.Env),
+            Configure = Configure.Concat(contract.Configure)       
+        };
+    }
 }

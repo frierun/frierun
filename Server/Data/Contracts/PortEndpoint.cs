@@ -11,14 +11,17 @@ public record PortEndpoint(
     ContractId<Container>? Container = null,
     int ExternalPort = 0,
     string? ExternalIp = null
-) : Contract(Name ?? $"{(Container != null ? Container.Name + ":" : "")}{Port}/{Protocol}"), ICanMerge
+) : Contract(Name ?? $"{(Container != null ? Container.Name + ":" : "")}{Port}/{Protocol}")
 {
     [MemberNotNullWhen(true, nameof(ExternalIp))]
     public override bool Installed { get; init; }
     
     public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");    
 
-    public Contract Merge(Contract other)
+    [JsonIgnore]
+    public string Url => $"{Protocol.ToString().ToLower()}://{ExternalIp}:{ExternalPort}";
+    
+    public override Contract Merge(Contract other)
     {
         var contract = EnsureSame(this, other);
 
@@ -30,7 +33,4 @@ public record PortEndpoint(
             ExternalIp = OnlyOne(ExternalIp, contract.ExternalIp),
         };
     }
-    
-    [JsonIgnore]
-    public string Url => $"{Protocol.ToString().ToLower()}://{ExternalIp}:{ExternalPort}";
 }
