@@ -7,14 +7,10 @@ tags: [ "storage" ]
 contracts:
   - type: "Container"
     imageName: "deluan/navidrome:latest"
+    mounts:
+      /data: "data"
+      /music: "music"
     
   - type: "HttpEndpoint"
     port: 4533
     
-  - type: "Mount"
-    volume: "data"
-    path: "/data"
-    
-  - type: "Mount"
-    volume: "music"
-    path: "/music"

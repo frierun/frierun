@@ -1,4 +1,6 @@
-﻿namespace Frierun.Server.Data;
+﻿using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
+
+namespace Frierun.Server.Data;
 
 public static class Merger
 {
@@ -11,6 +13,7 @@ public static class Merger
         {
             throw new Exception("Invalid contract");
         }
+
         return t;
     }
 
@@ -23,7 +26,7 @@ public static class Merger
         {
             throw new Exception("Can't merge installed contracts");
         }
-        
+
         return contract with
         {
             Name = OnlyOne(contract.Name, other.Name),
@@ -39,7 +42,7 @@ public static class Merger
     public static T OnlyOne<T>(T value1, T value2, Func<T, bool>? isUnset = null)
     {
         isUnset ??= value => value is null;
-        
+
         if (isUnset(value1))
         {
             return value2;
@@ -54,7 +57,32 @@ public static class Merger
         {
             return value1;
         }
-        
+
         throw new Exception("Can't merge two different values");
+    }
+
+    public static Dictionary<TKey, TValue> MergeDictionaries<TKey, TValue>(
+        IEnumerable<KeyValuePair<TKey, TValue>> dict1,
+        IEnumerable<KeyValuePair<TKey, TValue>> dict2
+    ) where TKey : notnull
+    {
+        var result = new Dictionary<TKey, TValue>(dict1);
+        foreach (var (key, value2) in dict2)
+        {
+            if (!result.TryGetValue(key, out var value1) || value1 is null)
+            {
+                result[key] = value2;
+                continue;
+            }
+            
+            if (value1.Equals(value2))
+            {
+                continue;
+            }
+            
+            throw new Exception("Can't merge two different values");
+        }
+
+        return result;
     }
 }

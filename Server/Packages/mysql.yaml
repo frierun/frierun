@@ -9,7 +9,5 @@ contracts:
     imageName: "mysql:8"
     env:
       MYSQL_ROOT_PASSWORD: "{{Password::Value}}"
-      
-  - type: "Mount"
-    volume: "data"
-    path: "/var/lib/mysql"
+    mounts:
+      /var/lib/mysql: "data"

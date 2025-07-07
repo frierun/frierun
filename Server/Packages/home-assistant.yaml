@@ -7,13 +7,11 @@ tags: [ "smart home", "dashboard" ]
 contracts:
   - type: "Container"
     imageName: "ghcr.io/home-assistant/home-assistant:stable"
+    mounts:
+      /config: "config"
     
   - type: "HttpEndpoint"
     port: 8123
-    
-  - type: "Mount"
-    volume: "config"
-    path: "/config"
     
   - type: "File"
     volume: "config"

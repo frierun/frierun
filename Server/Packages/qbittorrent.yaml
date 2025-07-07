@@ -12,18 +12,13 @@ contracts:
       PGID: "1000"
       TZ: "Etc/UTC"
       WEBUI_PORT: "8080"
+    mounts:
+      /config: "config"
+      /downloads: "downloads"
       
   - type: "HttpEndpoint"
     port: 8080
-    
-  - type: "Mount"
-    volume: "config"
-    path: "/config"
-    
-  - type: "Mount"
-    volume: "downloads"
-    path: "/downloads"
-    
+        
   - type: "File"
     volume: "config"
     path: "qBittorrent/qBittorrent.conf"

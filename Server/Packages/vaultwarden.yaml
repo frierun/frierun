@@ -6,10 +6,8 @@ tags: [ "security" ]
 contracts:
   - type: "Container"
     imageName: "ghcr.io/dani-garcia/vaultwarden:latest"
+    mounts:
+      /data: "data"
     
   - type: "HttpEndpoint"
     port: 80
-    
-  - type: "Mount"
-    volume: "data"
-    path: "/data"

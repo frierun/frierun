@@ -14,24 +14,18 @@ contracts:
       DB_DATABASE_NAME: "immich"
       REDIS_HOSTNAME: "{{Redis::Host}}"
     dependsOn: [ "Container:database" ]
+    mounts:
+      /usr/src/app/upload: "upload"
     
   - type: "HttpEndpoint"
     container: "server"
     port: 2283
-    
-  - type: "Mount"
-    container: "server"
-    volume: "upload"
-    path: "/usr/src/app/upload"
-    
+        
   - type: "Container"
     name: "machine-learning"
     imageName: "ghcr.io/immich-app/immich-machine-learning:release"
-    
-  - type: "Mount"
-    container: "machine-learning"
-    volume: "model-cache"
-    path: "/cache"
+    mounts:
+      /cache: "model-cache"
     
   - type: "Container"
     name: "database"
@@ -55,8 +49,5 @@ contracts:
       POSTGRES_USER: "postgres"
       POSTGRES_DB: "immich"
       POSTGRES_INITDB_ARGS: "--data-checksums"
-      
-  - type: "Mount"
-    container: "database"
-    volume: "db"
-    path: "/var/lib/postgresql/data"
+    mounts:
+      /var/lib/postgresql/data: db

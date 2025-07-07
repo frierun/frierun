@@ -21,6 +21,9 @@ contracts:
               WEBHOOK_URL: "{{HttpEndpoint:5678:Url}}"
               N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
               N8N_RUNNERS_ENABLED: "true"
+            mounts:
+              /home/node/.n8n: "data"
+              
       - name: "SQLite"
         contracts:
           - type: "Container"
@@ -30,13 +33,11 @@ contracts:
               WEBHOOK_URL: "{{HttpEndpoint:5678:Url}}"
               N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
               N8N_RUNNERS_ENABLED: "true"
+            mounts:
+              /home/node/.n8n: "data"
             
   - type: "HttpEndpoint"
     port: 5678
-    
-  - type: "Mount"
-    volume: "data"
-    path: "/home/node/.n8n"
     
   - type: "File"
     volume: "data"

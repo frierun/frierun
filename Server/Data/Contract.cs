@@ -29,7 +29,6 @@ public abstract record Contract<THandler>(
 [JsonDerivedType(typeof(Domain), nameof(Domain))]
 [JsonDerivedType(typeof(File), nameof(File))]
 [JsonDerivedType(typeof(HttpEndpoint), nameof(HttpEndpoint))]
-[JsonDerivedType(typeof(Mount), nameof(Mount))]
 [JsonDerivedType(typeof(Mysql), nameof(Mysql))]
 [JsonDerivedType(typeof(Network), nameof(Network))]
 [JsonDerivedType(typeof(Package), nameof(Package))]
