@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
-using Docker.DotNet.Models;
 using Frierun.Server.Handlers;
 using static Frierun.Server.Data.Merger;
 
@@ -17,8 +16,7 @@ public record Container(
     IReadOnlyList<string>? Command = null,
     IReadOnlyDictionary<string, string>? Env = null,
     IReadOnlyDictionary<string, string>? Labels = null,
-    IReadOnlyDictionary<string, ContainerMount>? Mounts = null,
-    IEnumerable<Action<CreateContainerParameters>>? Configure = null
+    IReadOnlyDictionary<string, ContainerMount>? Mounts = null
 ) : Contract<IContainerHandler>(Name ?? ""), IHasStrings
 {
     [MemberNotNullWhen(true, nameof(ContainerName), nameof(NetworkName))]
@@ -32,8 +30,6 @@ public record Container(
     [JsonInclude]
     private IDictionary<string, int> ConnectedNetworks { get; init; } = new Dictionary<string, int>();
 
-    [JsonIgnore]
-    public IEnumerable<Action<CreateContainerParameters>> Configure { get; init; } = Configure ?? [];
     
     public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>("");
     
@@ -42,7 +38,7 @@ public record Container(
         return this with
         {
             Command = Command.Select(decorator).ToList(),
-            Env = Env.ToDictionary(kv => decorator(kv.Key), kv => decorator(kv.Value)),
+            Env = Env.ToDictionary(kv => decorator(kv.Key), kv => decorator(kv.Value))
         };
     }
     
@@ -117,7 +113,6 @@ public record Container(
             Env = MergeDictionaries(Env, contract.Env),
             Labels = MergeDictionaries(Labels, contract.Labels),
             Mounts = MergeDictionaries(Mounts, contract.Mounts),
-            Configure = Configure.Concat(contract.Configure)
         };
     }
 }

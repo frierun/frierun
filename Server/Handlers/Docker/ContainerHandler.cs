@@ -46,9 +46,9 @@ public class ContainerHandler(Application application, DockerService dockerServi
             Image = contract.ImageName,
             HostConfig = new HostConfig
             {
-                RestartPolicy = new RestartPolicy()
+                RestartPolicy = new RestartPolicy
                 {
-                    Name = RestartPolicyKind.UnlessStopped,
+                    Name = RestartPolicyKind.UnlessStopped
                 },
                 Mounts = new List<Mount>(),
                 PortBindings = new Dictionary<string, IList<PortBinding>>()
@@ -69,6 +69,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
             }
         };
 
+        // docker socket
         if (contract.RequireDocker)
         {
             dockerParameters.HostConfig.Mounts.Add(
@@ -81,12 +82,13 @@ public class ContainerHandler(Application application, DockerService dockerServi
             );
         }
 
+        // mounts
         foreach (var (path, mount) in contract.Mounts)
         {
             var volume = plan.GetContract(mount.Volume);
             Debug.Assert(volume.Installed);
             
-            var dockerMount = new Mount()
+            var dockerMount = new Mount
             {
                 Target = path,
                 ReadOnly = mount.ReadOnly
@@ -109,10 +111,20 @@ public class ContainerHandler(Application application, DockerService dockerServi
 
             dockerParameters.HostConfig.Mounts.Add(dockerMount);
         }
-
-        foreach (var action in contract.Configure)
+        
+        // exposes ports
+        var endpoints = plan.Contracts.OfType<PortEndpoint>().Where(ep => ep.Container == contract);
+        foreach (var endpoint in endpoints)
         {
-            action(dockerParameters);
+            Debug.Assert(endpoint.Installed);
+            dockerParameters.HostConfig.PortBindings[$"{endpoint.Port}/{endpoint.Protocol.ToString().ToLower()}"] =
+                new List<PortBinding>
+                {
+                    new()
+                    {
+                        HostPort = endpoint.ExternalPort.ToString()
+                    }
+                };            
         }
 
         var result = dockerService.StartContainer(dockerParameters).Result;

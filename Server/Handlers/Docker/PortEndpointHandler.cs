@@ -1,5 +1,4 @@
-﻿using Docker.DotNet.Models;
-using Frierun.Server.Data;
+﻿using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Docker;
 
@@ -31,30 +30,6 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
 
     public override PortEndpoint Install(PortEndpoint contract, ExecutionPlan plan)
     {
-        var containerContract = plan.GetContract(contract.Container);
-
-        var externalPort = contract.ExternalPort;
-        var internalPort = contract.Port;
-
-        plan.ReplaceContract(
-            containerContract with
-            {
-                Configure = containerContract.Configure.Append(
-                    parameters =>
-                    {
-                        parameters.HostConfig.PortBindings[$"{internalPort}/{contract.Protocol.ToString().ToLower()}"] =
-                            new List<PortBinding>
-                            {
-                                new()
-                                {
-                                    HostPort = externalPort.ToString()
-                                }
-                            };
-                    }
-                ),
-            }
-        );
-
         // TODO: fill the correct ip of the host
         return contract with
         {
