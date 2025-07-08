@@ -3,7 +3,7 @@ url: "https://github.com/frierun/frierun"
 iconUrl: "/packages/frierun.png"
 contracts:
   - type: "Container"
-    imageName: "ghcr.io/frierun/frierun:main"
+    imageName: "ghcr.io/frierun/frierun:latest"
     requireDocker: true
     
   - type: "HttpEndpoint"
