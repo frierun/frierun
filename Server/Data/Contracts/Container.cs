@@ -112,7 +112,7 @@ public record Container(
             Command = OnlyOne(Command, contract.Command, command => command.Count == 0),
             Env = MergeDictionaries(Env, contract.Env),
             Labels = MergeDictionaries(Labels, contract.Labels),
-            Mounts = MergeDictionaries(Mounts, contract.Mounts),
+            Mounts = MergeDictionaries(Mounts, contract.Mounts)
         };
     }
 }
