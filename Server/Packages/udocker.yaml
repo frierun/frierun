@@ -1,0 +1,8 @@
+﻿name: "udocker"
+shortDescription: "Udocker executable"
+fullDescription: "Link to udocker package. It is a tool to execute containers in user space without root privileges."
+tags: [ "provider" ]
+contracts:
+  - type: "Parameter"
+    name: "Path"
+    defaultValue: "docker"

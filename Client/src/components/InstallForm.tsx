@@ -4,7 +4,6 @@ import PortEndpointForm from "@/components/contracts/PortEndpointForm.tsx";
 import Debug from "@/components/Debug";
 import ParameterForm from "@/components/contracts/ParameterForm.tsx";
 import {Package} from "@/api/schemas";
-import VolumeForm from "@/components/contracts/VolumeForm.tsx";
 import SelectorForm from "@/components/contracts/SelectorForm.tsx";
 import ContractForm, {Contract} from "@/components/contracts/ContractForm.tsx";
 import useInstall from "@/hooks/useInstall.tsx";
@@ -125,18 +124,6 @@ export default function InstallForm({packageContract, contracts, alternatives, n
                             </div>
                         ))
                     }
-                    {contracts
-                        .filter(contract => contract.type === 'Volume')
-                        .map(contract => (
-                            <div key={`${contract.type}:${contract.name}`} className={"card"}>
-                                <VolumeForm
-                                    contract={contract}
-                                    updateContract={updateContract}
-                                />
-                            </div>
-                        ))
-                    }
-
                 </div>
                 <div className={"mt-4 mb-10"}>
                     <Button onClick={install} disabled={isInstallPending} type={"primary"}>

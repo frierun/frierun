@@ -3,6 +3,7 @@ using Autofac;
 using Autofac.Features.Indexed;
 using Frierun.Server.Data;
 using Frierun.Server.Handlers;
+using Frierun.Server.Handlers.Docker;
 
 namespace Frierun.Server;
 
@@ -170,6 +171,11 @@ public class HandlerRegistry : IDisposable
         }
         
         if (handlerType == typeof(CloudflareHttpEndpointHandler))
+        {
+            return true;
+        }
+
+        if (handlerType == typeof(NewVolumeHandler))
         {
             return true;
         }
