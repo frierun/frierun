@@ -7,14 +7,14 @@ public record SelectorOption(string Name, List<Contract> Contracts);
 
 public record Selector(
     string Name,
-    IList<SelectorOption>? Options = null,
+    IReadOnlyList<SelectorOption>? Options = null,
     string? Value = null
 ) : Contract(Name ?? "")
 {
     [MemberNotNullWhen(true, nameof(Value))]
     public override bool Installed { get; init; }
     
-    public IList<SelectorOption> Options { get; init; } = Options ?? new List<SelectorOption>();
+    public IReadOnlyList<SelectorOption> Options { get; init; } = Options ?? [];
     
     public override Contract Merge(Contract other)
     {
