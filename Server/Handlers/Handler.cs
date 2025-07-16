@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Text.RegularExpressions;
 using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers;
@@ -32,39 +31,7 @@ public class Handler<TContract>(Application? application = null) : IHandler
 
     IEnumerable<ContractInitializeResult> IHandler.Initialize(Contract contract, string prefix)
     {
-        foreach (var result in Initialize((TContract)contract, prefix))
-        {
-            Debug.Assert(result.Contract.Handler != null);
-
-            if (result.Contract is IHasStrings hasStrings)
-            {
-                var matches = new Dictionary<string, MatchCollection>();
-
-                hasStrings.ApplyStringDecorator(
-                    s =>
-                    {
-                        var matchCollection = Substitute.InsertionRegex.Matches(s);
-                        if (matchCollection.Count > 0)
-                        {
-                            matches[s] = matchCollection;
-                        }
-
-                        return s;
-                    }
-                );
-
-                if (matches.Count > 0)
-                {
-                    yield return result with
-                    {
-                        AdditionalContracts = result.AdditionalContracts.Append(new Substitute(contract, matches))
-                    };
-                    continue;
-                }
-            }
-
-            yield return result;
-        }
+        return Initialize((TContract)contract, prefix);
     }
 
     [DebuggerStepThrough]

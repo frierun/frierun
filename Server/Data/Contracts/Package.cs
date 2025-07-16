@@ -35,6 +35,8 @@ public record Package(
         return MergeCommon(this, contract) with
         {
             Prefix = OnlyOne(Prefix, contract.Prefix),
+            ApplicationUrl = OnlyOne(ApplicationUrl, contract.ApplicationUrl),
+            ApplicationDescription = OnlyOne(ApplicationDescription, contract.ApplicationDescription),
             Contracts = Contracts.Concat(contract.Contracts)
                 .GroupBy(c => c.Id)
                 .Select(group =>

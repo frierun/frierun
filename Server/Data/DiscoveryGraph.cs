@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text.RegularExpressions;
 using Frierun.Server.Handlers;
 
 namespace Frierun.Server.Data;
@@ -12,7 +13,7 @@ public class DiscoveryGraph
     public DiscoveryGraph()
     {
     }
-    
+
     public DiscoveryGraph(DiscoveryGraph graph)
     {
         Contracts = new Dictionary<ContractId, Contract>(graph.Contracts);
@@ -53,21 +54,64 @@ public class DiscoveryGraph
 
         return (null, null);
     }
-    
+
+    /// <summary>
+    /// Saves contract as initialized
+    /// </summary>
+    private void SetInitializedContract(Contract contract)
+    {
+        Debug.Assert(contract.Handler != null, "Initialized contract must have a handler");
+
+        Contracts[contract] = contract;
+
+        if (contract is not IHasStrings hasStrings)
+        {
+            return;
+        }
+
+        var substitute = new Substitute(contract);
+
+        // remove old substitutes
+        Contracts.Remove(substitute);
+
+        var matches = new Dictionary<string, MatchCollection>();
+
+        hasStrings.ApplyStringDecorator(s =>
+            {
+                var matchCollection = Substitute.InsertionRegex.Matches(s);
+                if (matchCollection.Count > 0)
+                {
+                    matches[s] = matchCollection;
+                }
+
+                return s;
+            }
+        );
+
+        if (matches.Count == 0)
+        {
+            _uninitializedContracts.Remove(substitute);
+            return;
+        }
+
+        _uninitializedContracts[substitute] = substitute with
+        {
+            Matches = matches
+        };
+    }
+
     /// <summary>
     /// Applies contract initialization result.
     /// </summary>
     public void Apply(ContractInitializeResult result)
     {
-        Debug.Assert(result.Contract.Handler != null, "Contract handler is null");
-        
-        Contracts[result.Contract] = result.Contract;
-        
+        SetInitializedContract(result.Contract);
+
         foreach (var additionalContract in result.AdditionalContracts)
         {
             if (Contracts.TryGetValue(additionalContract, out var initializedContract))
             {
-                Contracts[additionalContract] = initializedContract.Merge(additionalContract);
+                SetInitializedContract(initializedContract.Merge(additionalContract));
                 continue;
             }
 
@@ -88,7 +132,7 @@ public class DiscoveryGraph
                 _emptyContracts.Add(contractId);
             }
         }
-        
+
         foreach (var contractId in result.Contract.DependencyOf)
         {
             if (!Contracts.ContainsKey(contractId))

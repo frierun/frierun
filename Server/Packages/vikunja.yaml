@@ -41,6 +41,7 @@ contracts:
               VIKUNJA_DATABASE_TYPE: "sqlite"
             mounts:
               /db: "db"
+              # TODO: container won't initialize additional mounts after merge. So we leave this select as is. 
               /app/vikunja/files: "files"
           - type: "File"
             volume: "db"

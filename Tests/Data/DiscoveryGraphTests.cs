@@ -22,8 +22,8 @@ public class DiscoveryGraphTests : BaseTests
             )
         );
 
-        Assert.Equal((queuedContract.Id, queuedContract), graph.Next());
-        Assert.Equal((emptyContract.Id, null), graph.Next());
+        Assert.Equal((queuedContract, queuedContract), graph.Next());
+        Assert.Equal((emptyContract, null), graph.Next());
         Assert.Equal((null, null), graph.Next());
     }
 
@@ -81,5 +81,73 @@ public class DiscoveryGraphTests : BaseTests
 
         var initializedRoot = (Package)graph.Contracts[rootContract];
         Assert.Equal(prefix, initializedRoot.Prefix);
+    }
+
+    [Fact]
+    public void Apply_ContractWithIHasStrings_AddedSubstitute()
+    {
+        var rootContract = Factory<Package>().Generate() with
+        {
+            Handler = Handler<PackageHandler>(),
+            ApplicationDescription = "{{Parameter:Test:Value}}"
+        };
+        var rootSubstitute = new Substitute(rootContract);
+        var graph = new DiscoveryGraph();
+
+        graph.Apply(new ContractInitializeResult(rootContract));
+
+        var (substituteId, substitute) = graph.Next();
+        Assert.Equal(rootSubstitute.Id, substituteId);
+        Assert.NotNull(substitute);
+        Assert.Single(((Substitute)substitute).Matches);
+        Assert.Equal((null, null), graph.Next());
+    }
+
+    [Fact]
+    public void Apply_ContractWithIHasStringsWithoutSubstitutes_NoSubstituteAdded()
+    {
+        var rootContract = Factory<Package>().Generate() with
+        {
+            Handler = Handler<PackageHandler>()
+        };
+        var graph = new DiscoveryGraph();
+
+        graph.Apply(new ContractInitializeResult(rootContract));
+
+        Assert.Equal((null, null), graph.Next());
+    }
+
+    [Fact]
+    public void Apply_ContractWithIHasStringsIsUpdated_SubstituteRefreshed()
+    {
+        var rootContract = Factory<Package>().Generate() with
+        {
+            Handler = Handler<PackageHandler>(),
+            ApplicationUrl = null,
+            ApplicationDescription = null,
+        };
+        var rootSubstitute = new Substitute(rootContract);
+        var graph = new DiscoveryGraph();
+
+        graph.Apply(
+            new ContractInitializeResult(
+                rootContract with
+                {
+                    ApplicationDescription = "{{Parameter:Description:Value}}"
+                }
+            )
+        );
+        graph.Apply(
+            new ContractInitializeResult(
+                new Selector("") with { Handler = Handler<SelectorHandler>() },
+                [rootContract with { ApplicationUrl = "{{Parameter:Url:Value}}" }]
+            )
+        );
+
+        var (substituteId, substitute) = graph.Next();
+        Assert.Equal(rootSubstitute.Id, substituteId);
+        Assert.NotNull(substitute);
+        Assert.Equal(2, ((Substitute)substitute).Matches.Count);
+        Assert.Equal((null, null), graph.Next());
     }
 }

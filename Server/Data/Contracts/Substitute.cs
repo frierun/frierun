@@ -6,11 +6,15 @@ namespace Frierun.Server.Data;
 
 public record Substitute(
     ContractId OriginalId,
-    [property: JsonIgnore] IReadOnlyDictionary<string, MatchCollection> Matches
+    IReadOnlyDictionary<string, MatchCollection>? Matches = null
 ) : Contract(OriginalId.ToString())
 {
     public static readonly Regex InsertionRegex = new(@"{{([^}]+)}}", RegexOptions.Compiled);
     public static readonly Regex VariableRegex = new(@"^(\w+):([\w/ ]*):(\w+)$", RegexOptions.Compiled);
+
+    [JsonIgnore]
+    public IReadOnlyDictionary<string, MatchCollection> Matches { get; init; } =
+        Matches ?? new Dictionary<string, MatchCollection>();
 
     public override Contract Merge(Contract other)
     {

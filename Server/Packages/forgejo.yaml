@@ -5,46 +5,36 @@ fullDescription: "Take back control of your software development process,
   self-host your projects and get everyone involved in delivering quality software on the same page."
 tags: [ "dev" ]
 contracts:
+  - type: "Container"
+    imageName: "codeberg.org/forgejo/forgejo:10"
+    env:
+      USER_UID: "1000"
+      USER_GID: "1000"
+    mounts:
+      /data: "data"
+ 
   - type: "Selector"
     name: "Database"
     options:
       - name: "MySQL"
         contracts:
           - type: "Container"
-            imageName: "codeberg.org/forgejo/forgejo:10"
             env:
-              USER_UID: "1000"
-              USER_GID: "1000"
               FORGEJO__database__DB_TYPE: "mysql"
               FORGEJO__database__HOST: "{{Mysql::Host}}"
               FORGEJO__database__NAME: "{{Mysql::Database}}"
               FORGEJO__database__USER: "{{Mysql::Username}}"
               FORGEJO__database__PASSWD: "{{Mysql::Password}}"
-            mounts:
-              /data: "data"
       - name: "PostgreSQL"
         contracts:
           - type: "Container"
-            imageName: "codeberg.org/forgejo/forgejo:10"
             env:
-              USER_UID: "1000"
-              USER_GID: "1000"
               FORGEJO__database__DB_TYPE: "postgres"
               FORGEJO__database__HOST: "{{Postgresql::Host}}"
               FORGEJO__database__NAME: "{{Postgresql::Database}}"
               FORGEJO__database__USER: "{{Postgresql::Username}}"
               FORGEJO__database__PASSWD: "{{Postgresql::Password}}"
-            mounts:
-              /data: "data"
       - name: "SQLite"
-        contracts:
-          - type: "Container"
-            imageName: "codeberg.org/forgejo/forgejo:10"
-            env:
-              USER_UID: "1000"
-              USER_GID: "1000"
-            mounts:
-              /data: "data"
               
   - type: "HttpEndpoint"
     port: 3000
