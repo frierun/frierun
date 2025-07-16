@@ -11,7 +11,7 @@ public static class Merger
     {
         if (other is not TContract t || other.Id != contract.Id)
         {
-            throw new Exception("Invalid contract");
+            throw new MergeException("Invalid contract");
         }
 
         return t;
@@ -24,7 +24,7 @@ public static class Merger
     {
         if (contract.Installed || other.Installed)
         {
-            throw new Exception("Can't merge installed contracts");
+            throw new MergeException("Can't merge installed contracts");
         }
 
         return contract with
@@ -58,7 +58,7 @@ public static class Merger
             return value1;
         }
 
-        throw new Exception("Can't merge two different values");
+        throw new MergeException("Can't merge two different values");
     }
 
     public static Dictionary<TKey, TValue> MergeDictionaries<TKey, TValue>(
@@ -80,7 +80,7 @@ public static class Merger
                 continue;
             }
             
-            throw new Exception("Can't merge two different values");
+            throw new MergeException("Can't merge two different values");
         }
 
         return result;

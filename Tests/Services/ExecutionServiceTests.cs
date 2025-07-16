@@ -12,7 +12,7 @@ public class ExecutionServiceTests : BaseTests
     {
         public override Contract Merge(Contract other)
         {
-            throw new NotImplementedException();
+            return this;
         }
     }
 

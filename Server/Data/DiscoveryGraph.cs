@@ -1,11 +1,12 @@
-﻿using Frierun.Server.Handlers;
+﻿using System.Diagnostics;
+using Frierun.Server.Handlers;
 
 namespace Frierun.Server.Data;
 
 public class DiscoveryGraph
 {
     private readonly HashSet<ContractId> _emptyContracts = new();
-    private readonly Queue<Contract> _uninitializedContracts = new();
+    private readonly Dictionary<ContractId, Contract> _uninitializedContracts = new();
     public Dictionary<ContractId, Contract> Contracts { get; } = new();
 
     public DiscoveryGraph()
@@ -16,7 +17,7 @@ public class DiscoveryGraph
     {
         Contracts = new Dictionary<ContractId, Contract>(graph.Contracts);
         _emptyContracts = [..graph._emptyContracts];
-        _uninitializedContracts = new Queue<Contract>(graph._uninitializedContracts);
+        _uninitializedContracts = new Dictionary<ContractId, Contract>(graph._uninitializedContracts);
     }
 
     /// <summary>
@@ -31,13 +32,11 @@ public class DiscoveryGraph
 
         while (_uninitializedContracts.Count > 0)
         {
-            var contract = _uninitializedContracts.Dequeue();
-            if (Contracts.ContainsKey(contract))
-            {
-                continue;
-            }
+            var (contractId, contract) = _uninitializedContracts.First();
+            _uninitializedContracts.Remove(contractId);
+            Debug.Assert(!Contracts.ContainsKey(contractId));
 
-            return (contract, contract);
+            return (contractId, contract);
         }
 
         while (_emptyContracts.Count > 0)
@@ -60,11 +59,26 @@ public class DiscoveryGraph
     /// </summary>
     public void Apply(ContractInitializeResult result)
     {
-        Contracts[result.Contract.Id] = result.Contract;
+        Debug.Assert(result.Contract.Handler != null, "Contract handler is null");
+        
+        Contracts[result.Contract] = result.Contract;
         
         foreach (var additionalContract in result.AdditionalContracts)
         {
-            _uninitializedContracts.Enqueue(additionalContract);
+            if (Contracts.TryGetValue(additionalContract, out var initializedContract))
+            {
+                Contracts[additionalContract] = initializedContract.Merge(additionalContract);
+                continue;
+            }
+
+            if (_uninitializedContracts.TryGetValue(additionalContract, out var uninitializedContract))
+            {
+                _uninitializedContracts[additionalContract] = uninitializedContract.Merge(additionalContract);
+            }
+            else
+            {
+                _uninitializedContracts[additionalContract] = additionalContract;
+            }
         }
 
         foreach (var contractId in result.Contract.DependsOn)
