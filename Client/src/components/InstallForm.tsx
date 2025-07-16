@@ -4,7 +4,6 @@ import PortEndpointForm from "@/components/contracts/PortEndpointForm.tsx";
 import Debug from "@/components/Debug";
 import ParameterForm from "@/components/contracts/ParameterForm.tsx";
 import {Package} from "@/api/schemas";
-import SelectorForm from "@/components/contracts/SelectorForm.tsx";
 import ContractForm, {Contract} from "@/components/contracts/ContractForm.tsx";
 import useInstall from "@/hooks/useInstall.tsx";
 
@@ -96,17 +95,6 @@ export default function InstallForm({packageContract, contracts, alternatives, n
                         .map(contract => (
                             <div key={`${contract.type}:${contract.name}`} className={"card"}>
                                 <ParameterForm
-                                    contract={contract}
-                                    updateContract={updateContract}
-                                />
-                            </div>
-                        ))
-                    }
-                    {contracts
-                        .filter(contract => contract.type === 'Selector')
-                        .map(contract => (
-                            <div key={`${contract.type}:${contract.name}`} className={"card"}>
-                                <SelectorForm
                                     contract={contract}
                                     updateContract={updateContract}
                                 />

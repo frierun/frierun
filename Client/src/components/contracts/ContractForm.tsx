@@ -1,8 +1,9 @@
-﻿import {Domain, ExecutionPlanContractsItem, HttpEndpoint, Volume} from "@/api/schemas";
+﻿import {Domain, ExecutionPlanContractsItem, HttpEndpoint, Selector, Volume} from "@/api/schemas";
 import {useEffect, useState} from "react";
 import HttpEndpointForm from "@/components/contracts/HttpEndpointForm.tsx";
 import DomainForm from "@/components/contracts/DomainForm.tsx";
 import VolumeForm from "@/components/contracts/VolumeForm.tsx";
+import SelectorForm from "@/components/contracts/SelectorForm.tsx";
 
 export type Contract = ExecutionPlanContractsItem;
 
@@ -60,6 +61,14 @@ export default function ContractForm({contract, alternatives, updateContract, al
                 <VolumeForm
                     contract={contract}
                     variants={variants as Volume[]}
+                    updateContract={updateContract}
+                />
+            );
+        case 'Selector':
+            return (
+                <SelectorForm
+                    contract={contract}
+                    variants={variants as Selector[]}
                     updateContract={updateContract}
                 />
             );
