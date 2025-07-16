@@ -12,7 +12,7 @@ public sealed class ContainerFactory: Faker<Container>
         RuleFor(p => p.Name, f => f.Lorem.Word());
         RuleFor(p => p.ContainerName, f => f.Lorem.Word());
         RuleFor(p => p.ImageName, f => f.Internet.Url());
-        RuleFor(p => p.RequireDocker, f => f.Random.Bool());
+        RuleFor(p => p.MountDockerSocket, f => f.Random.Bool());
         RuleFor(p => p.NetworkName, _ => "");
         RuleFor(p => p.Command, f => new List<string>(f.Lorem.Words()));
         RuleFor(p => p.Env, f => new Dictionary<string, string>());

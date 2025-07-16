@@ -9,11 +9,16 @@ tags: [ "dashboard" ]
 contracts:
   - type: "Container"
     imageName: "ghcr.io/gethomepage/homepage:latest"
-    requireDocker: true
     env:
       HOMEPAGE_ALLOWED_HOSTS: "{{HttpEndpoint:frontend:ResultHost}}"
     mounts:
       /app/config: "config"
+      
+  - type: "Optional"
+    name: "Docker socket"
+    contracts:
+      - type: "Container"
+        mountDockerSocket: true
       
   - type: "HttpEndpoint"
     name: "frontend"

@@ -70,7 +70,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
         };
 
         // docker socket
-        if (contract.RequireDocker)
+        if (contract.MountDockerSocket)
         {
             dockerParameters.HostConfig.Mounts.Add(
                 new Mount

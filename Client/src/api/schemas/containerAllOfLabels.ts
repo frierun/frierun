@@ -5,9 +5,4 @@
  * OpenAPI spec version: 1.0
  */
 
-export type MountAllOf = {
-  path: string;
-  readOnly: boolean;
-  volume: string;
-  container: string;
-};
+export type ContainerAllOfLabels = { [key: string]: string };

@@ -27,7 +27,7 @@ public class ContainerHandlerTests : BaseTests
         InstallPackage("docker");
         var package = Factory<Package>().Generate() with
         {
-            Contracts = [Factory<Container>().Generate() with { RequireDocker = true }]
+            Contracts = [Factory<Container>().Generate() with { MountDockerSocket = true }]
         };
 
         InstallPackage(package);
@@ -50,7 +50,7 @@ public class ContainerHandlerTests : BaseTests
         InstallPackage("docker");
         var package = Factory<Package>().Generate() with
         {
-            Contracts = [Factory<Container>().Generate() with { RequireDocker = true }]
+            Contracts = [Factory<Container>().Generate() with { MountDockerSocket = true }]
         };
 
         InstallPackage(package);

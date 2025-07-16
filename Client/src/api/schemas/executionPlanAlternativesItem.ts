@@ -12,9 +12,9 @@ import type { DockerApiConnection } from "./dockerApiConnection";
 import type { Domain } from "./domain";
 import type { File } from "./file";
 import type { HttpEndpoint } from "./httpEndpoint";
-import type { Mount } from "./mount";
 import type { Mysql } from "./mysql";
 import type { Network } from "./network";
+import type { Optional } from "./optional";
 import type { Package } from "./package";
 import type { Parameter } from "./parameter";
 import type { Password } from "./password";
@@ -34,9 +34,9 @@ export type ExecutionPlanAlternativesItem =
   | Domain
   | File
   | HttpEndpoint
-  | Mount
   | Mysql
   | Network
+  | Optional
   | Package
   | Parameter
   | Password

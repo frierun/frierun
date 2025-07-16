@@ -3,18 +3,16 @@ using static Frierun.Server.Data.Merger;
 
 namespace Frierun.Server.Data;
 
-public record SelectorOption(string Name, IReadOnlyList<Contract> Contracts);
-
-public record Selector(
+public record Optional(
     string Name,
-    IReadOnlyList<SelectorOption>? Options = null,
-    string? Value = null
+    IReadOnlyList<Contract>? Contracts = null,
+    bool? Value = null
 ) : Contract(Name ?? "")
 {
     [MemberNotNullWhen(true, nameof(Value))]
     public override bool Installed { get; init; }
     
-    public IReadOnlyList<SelectorOption> Options { get; init; } = Options ?? [];
+    public IReadOnlyList<Contract> Contracts { get; init; } = Contracts ?? [];
     
     public override Contract Merge(Contract other)
     {

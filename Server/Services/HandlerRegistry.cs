@@ -189,7 +189,7 @@ public class HandlerRegistry : IDisposable
     }
 
     /// <summary>
-    /// Gets possible handlers for the resource type
+    /// Gets possible handlers for the contract type
     /// </summary>
     public IEnumerable<IHandler> GetHandlers(Type contractType)
     {
@@ -209,6 +209,9 @@ public class HandlerRegistry : IDisposable
         }
     }
 
+    /// <summary>
+    /// Gets specific handler
+    /// </summary>
     public IHandler? GetHandler(string typeName, string? applicationName = null)
     {
         lock (_lock)

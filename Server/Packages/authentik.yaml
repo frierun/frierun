@@ -33,7 +33,7 @@ contracts:
     mounts:
       /media: "media"
       /certs: "certs"
-    requireDocker: true
+    mountDockerSocket: true
     
   - type: "HttpEndpoint"
     name: "frontend"

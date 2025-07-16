@@ -1,5 +1,5 @@
 ﻿name: "homarr"
-url: "https://homarr.dev/docs/getting-started/installation/"
+url: "https://homarr.dev/docs/getting-started/installation/docker"
 shortDescription: "App dashboard with drag-n-drop"
 fullDescription: "A sleek, modern dashboard that puts all of your apps and services at your fingertips.
   Control everything in one convenient location.
@@ -7,12 +7,17 @@ fullDescription: "A sleek, modern dashboard that puts all of your apps and servi
 tags: [ "dashboard" ]
 contracts:
   - type: "Container"
-    imageName: "ghcr.io/ajnart/homarr:latest"
-    requireDocker: true
+    imageName: "ghcr.io/homarr-labs/homarr:latest"
     mounts:
       /app/data/configs: "configs"
       /app/public/icons: "icons"
       /data: "data"
     
+  - type: "Optional"
+    name: "Docker socket"
+    contracts:
+      - type: "Container"
+        mountDockerSocket: true
+        
   - type: "HttpEndpoint"
     port: 7575

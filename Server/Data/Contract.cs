@@ -31,6 +31,7 @@ public abstract record Contract<THandler>(
 [JsonDerivedType(typeof(HttpEndpoint), nameof(HttpEndpoint))]
 [JsonDerivedType(typeof(Mysql), nameof(Mysql))]
 [JsonDerivedType(typeof(Network), nameof(Network))]
+[JsonDerivedType(typeof(Optional), nameof(Optional))]
 [JsonDerivedType(typeof(Package), nameof(Package))]
 [JsonDerivedType(typeof(Parameter), nameof(Parameter))]
 [JsonDerivedType(typeof(Password), nameof(Password))]

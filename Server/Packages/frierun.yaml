@@ -6,7 +6,12 @@ contracts:
     imageName: "ghcr.io/frierun/frierun:latest"
     mounts:
       /App/Frierun: "config"
-    requireDocker: true
+    
+  - type: "Optional"
+    name: "Docker socket"
+    contracts: 
+      - type: "Container"
+        mountDockerSocket: true
     
   - type: "HttpEndpoint"
     port: 8080
