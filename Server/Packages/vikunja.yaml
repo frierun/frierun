@@ -4,21 +4,23 @@ shortDescription: "To-do lists"
 fullDescription: "Vikunja, the fluffy, open-source, self-hostable to-do app."
 tags: [ "dashboard" ]
 contracts:
+  - type: "Container"
+    imageName: "vikunja/vikunja:latest"
+    mounts:
+      /app/vikunja/files: "files"
+ 
   - type: "Selector"
     name: "Database"
     options:
       - name: "MySQL"
         contracts:
           - type: "Container"
-            imageName: "vikunja/vikunja:latest"
             env:
               VIKUNJA_DATABASE_TYPE: "mysql"
               VIKUNJA_DATABASE_HOST: "{{Mysql::Host}}"
               VIKUNJA_DATABASE_DATABASE: "{{Mysql::Database}}"
               VIKUNJA_DATABASE_USER: "{{Mysql::Username}}"
               VIKUNJA_DATABASE_PASSWORD: "{{Mysql::Password}}"
-            mounts:
-              /app/vikunja/files: "files"
               
       - name: "PostgreSQL"
         contracts:
@@ -30,19 +32,14 @@ contracts:
               VIKUNJA_DATABASE_DATABASE: "{{Postgresql::Database}}"
               VIKUNJA_DATABASE_USER: "{{Postgresql::Username}}"
               VIKUNJA_DATABASE_PASSWORD: "{{Postgresql::Password}}"
-            mounts:
-              /app/vikunja/files: "files"
               
       - name: "SQLite"
         contracts:
           - type: "Container"
-            imageName: "vikunja/vikunja:latest"
             env:
               VIKUNJA_DATABASE_TYPE: "sqlite"
             mounts:
               /db: "db"
-              # TODO: container won't initialize additional mounts after merge. So we leave this select as is. 
-              /app/vikunja/files: "files"
           - type: "File"
             volume: "db"
             path: ""

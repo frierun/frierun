@@ -98,7 +98,7 @@ public class ExecutionServiceTests : BaseTests
     }
 
     [Fact]
-    public void Create_RecursiveHandler_InitializesPlan()
+    public void Create_RecursiveHandler_ThrowsException()
     {
         var handler = Mock<Handler<Contract1>, IHandler>([null]);
 
@@ -108,12 +108,7 @@ public class ExecutionServiceTests : BaseTests
             .Initialize(Arg.Any<Contract1>(), Arg.Any<string>())
             .Returns([new ContractInitializeResult(contract with { Handler = handler }, [contract])]);
 
-        var plan = Service.Create(package);
-
-        Assert.NotNull(plan);
-        Assert.Equal(2, plan.Contracts.Count());
-        Assert.NotNull(plan.GetContract(package));
-        Assert.NotNull(plan.GetContract(contract));
+        Assert.Throws<Exception>(() => Service.Create(package));
     }
 
     [Fact]
@@ -130,7 +125,10 @@ public class ExecutionServiceTests : BaseTests
             .Returns(info =>
                 [
                     new ContractInitializeResult(info.Arg<Contract1>() with { Handler = handler }, [unknownContract]),
-                    new ContractInitializeResult(info.Arg<Contract1>() with { Handler = handler }, [knownContract])
+                    new ContractInitializeResult(
+                        info.Arg<Contract1>() with { Handler = handler },
+                        info.Arg<Contract1>() == contract ? [knownContract] : []
+                    )
                 ]
             );
 
@@ -164,7 +162,10 @@ public class ExecutionServiceTests : BaseTests
             .Initialize(Arg.Any<Contract1>(), Arg.Any<string>())
             .Returns(info =>
                 [
-                    new ContractInitializeResult(info.Arg<Contract1>() with { Handler = handler2 }, [knownContract])
+                    new ContractInitializeResult(
+                        info.Arg<Contract1>() with { Handler = handler2 },
+                        info.Arg<Contract1>() == contract ? [knownContract] : []
+                    )
                 ]
             );
 
@@ -222,7 +223,7 @@ public class ExecutionServiceTests : BaseTests
         };
 
         var plan = Service.Create(package);
-        
+
         var parameter = plan.GetContract(new ContractId<Parameter>("Test"));
         Assert.NotNull(parameter.Value);
     }

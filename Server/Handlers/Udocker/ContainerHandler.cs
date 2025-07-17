@@ -11,6 +11,11 @@ public class ContainerHandler(Application application)
     
     public override IEnumerable<ContractInitializeResult> Initialize(Container contract, string prefix)
     {
+        if (contract.MountDockerSocket)
+        {
+            yield break;
+        }
+        
         yield return new ContractInitializeResult(
             contract with
             {
