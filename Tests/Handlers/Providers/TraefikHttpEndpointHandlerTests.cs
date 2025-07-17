@@ -147,4 +147,22 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
             Arg.Any<NetworkDisconnectParameters>()
         );
     }
+    
+    [Fact]
+    public void Install_HttpEndpoint_ContainerIsLabeled()
+    {
+        InstallPackage("static-zone");
+        InstallPackage("traefik");
+        var package = Factory<Package>().Generate() with { Contracts = [Factory<HttpEndpoint>().Generate()] };
+        
+        var application = InstallPackage(package);
+
+        var installedContracts = application.Contracts.OfType<HttpEndpoint>().ToList();
+        Assert.Single(installedContracts);
+        
+        DockerClient.Containers.Received(1).CreateContainerAsync(
+            Arg.Is<CreateContainerParameters>(p => p.Labels.ContainsKey("traefik.enable")),
+            Arg.Any<CancellationToken>()
+        );
+    }    
 }

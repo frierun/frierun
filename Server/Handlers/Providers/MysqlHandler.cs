@@ -29,9 +29,10 @@ public class MysqlHandler(Application application)
             yield return new ContractInitializeResult(
                 contract with
                 {
+                    Handler = this,
                     Username = "root",
                     Password = _rootPassword,
-                    Handler = this,
+                    Host = _container.ContainerName,
                     DependsOn = contract.DependsOn.Append(contract.Network)
                 }
             );
@@ -43,16 +44,21 @@ public class MysqlHandler(Application application)
                 Handler = this,
                 Database = contract.Database ?? FindUniqueName(
                     prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
-                    c => c.Database
+                    c => c.Database,
+                    "",
+                    ["mysql"]
                 ),
                 Username = contract.Username ?? FindUniqueName(
                     prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
-                    c => c.Username
+                    c => c.Username,
+                    "",
+                    ["root"]
                 ),
                 Password = contract.Password ?? RandomNumberGenerator.GetString(
                     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
                     16
                 ),
+                Host = _container.ContainerName,
                 DependsOn = contract.DependsOn.Append(contract.Network)
             }
         );
@@ -67,11 +73,6 @@ public class MysqlHandler(Application application)
         var network = plan.GetContract(contract.Network);
         Debug.Assert(network.Installed);
 
-        if (contract.Host != null && contract.Host != _container.ContainerName)
-        {
-            throw new Exception("Host cannot be set");
-        }
-
         if (contract.NetworkName != null && contract.NetworkName != network.NetworkName)
         {
             throw new Exception("NetworkName cannot be set");
@@ -83,20 +84,12 @@ public class MysqlHandler(Application application)
         {
             return contract with
             {
-                Username = "root",
-                Password = _rootPassword,
-                Host = _container.ContainerName,
                 NetworkName = network.NetworkName
             };
         }
 
         Debug.Assert(contract.Database != null);
-
-        if (contract.Username == "root")
-        {
-            throw new Exception("Username cannot be root");
-        }
-
+        
         RunSql(
             $"""
              CREATE DATABASE `{contract.Database}`;
@@ -105,11 +98,9 @@ public class MysqlHandler(Application application)
              FLUSH PRIVILEGES;
              """
         );
-
-
+        
         return contract with
         {
-            Host = _container.ContainerName,
             NetworkName = network.NetworkName
         };
     }

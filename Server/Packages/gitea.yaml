@@ -7,40 +7,38 @@ fullDescription: "Gitea is a painless self-hosted all-in-one software developmen
   making it an ideal choice for both small teams and large organizations."
 tags: [ "dev" ]
 contracts:
+  - type: "Container"
+    imageName: "docker.gitea.com/gitea:1"
+    env:
+      USER_UID: "1000"
+      USER_GID: "1000"
+    mounts:
+      /data: "data"
+ 
   - type: "Selector"
     name: "Database"
     options:
       - name: "MySQL"
         contracts:
           - type: "Container"
-            imageName: "docker.gitea.com/gitea:1"
             env:
-              USER_UID: "1000"
-              USER_GID: "1000"
               GITEA__database__DB_TYPE: "mysql"
               GITEA__database__HOST: "{{Mysql::Host}}"
               GITEA__database__NAME: "{{Mysql::Database}}"
               GITEA__database__USER: "{{Mysql::Username}}"
               GITEA__database__PASSWD: "{{Mysql::Password}}"
+              
       - name: "PostgreSQL"
         contracts:
           - type: "Container"
-            imageName: "docker.gitea.com/gitea:1"
             env:
-              USER_UID: "1000"
-              USER_GID: "1000"
               GITEA__database__DB_TYPE: "postgres"
               GITEA__database__HOST: "{{Postgresql::Host}}"
               GITEA__database__NAME: "{{Postgresql::Database}}"
               GITEA__database__USER: "{{Postgresql::Username}}"
               GITEA__database__PASSWD: "{{Postgresql::Password}}"
+              
       - name: "SQLite"
-        contracts:
-          - type: "Container"
-            imageName: "docker.gitea.com/gitea:1"
-            env:
-              USER_UID: "1000"
-              USER_GID: "1000"
               
   - type: "HttpEndpoint"
     port: 3000
@@ -50,6 +48,3 @@ contracts:
     externalPort: 2222
     protocol: "tcp"
     
-  - type: "Mount"
-    volume: "data"
-    path: "/data"

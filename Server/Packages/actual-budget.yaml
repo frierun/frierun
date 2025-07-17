@@ -6,10 +6,8 @@ tags: [ "finance" ]
 contracts:
   - type: "Container"
     imageName: "ghcr.io/actualbudget/actual:latest"
-    
+    mounts:
+      /data: "data"
+  
   - type: "HttpEndpoint"
     port: 5006
-    
-  - type: "Mount"
-    volume: "data"
-    path: "/data"

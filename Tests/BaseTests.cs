@@ -100,12 +100,12 @@ public abstract class BaseTests
     }
     
     /// <summary>
-    /// Resolve handler of specified type
+    /// Resolve handler of the specified type
     /// </summary> 
-    protected T Handler<T>()
+    protected T Handler<T>(Application? application = null)
         where T : IHandler
     {
-        var handler = Resolve<HandlerRegistry>().GetHandler(typeof(T).Name);
+        var handler = Resolve<HandlerRegistry>().GetHandler(typeof(T).Name, application?.Name);
         if (handler is not T castedHandler)
         {
             throw new Exception($"Handler {typeof(T).Name} not found");
@@ -147,7 +147,7 @@ public abstract class BaseTests
         if (overrides != null)
         {
             var overridePackage = new Package(name) { Contracts = overrides };
-            package = (Package)package.With(overridePackage);
+            package = (Package)package.Merge(overridePackage);
         }
 
         return InstallPackage(package);

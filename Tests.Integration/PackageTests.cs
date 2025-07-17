@@ -19,6 +19,7 @@ public class PackageTests : TestWithDocker
             "static-zone",
             "docker",
             "cloudflare-tunnel",
+            "udocker",
             
             // skip due to port 53 already in use
             "adguard-home",

@@ -1,4 +1,6 @@
-﻿using Frierun.Server.Data;
+﻿using Docker.DotNet.Models;
+using Frierun.Server.Data;
+using NSubstitute;
 
 namespace Frierun.Tests.Handlers.Docker;
 
@@ -19,7 +21,8 @@ public class PortEndpointHandlerTests : BaseTests
         if (reverseOrder)
         {
             contracts.Reverse();
-        }        
+        }
+
         var package = Factory<Package>().Generate() with { Contracts = contracts };
 
         var application = InstallPackage(package);
@@ -29,6 +32,33 @@ public class PortEndpointHandlerTests : BaseTests
         var containerIndex = installedContainers.FindIndex(r => r is Container);
         Assert.NotEqual(-1, endpointIndex);
         Assert.NotEqual(-1, containerIndex);
-        Assert.True(endpointIndex < containerIndex);        
+        Assert.True(endpointIndex < containerIndex);
+    }
+
+    [Fact]
+    public void Install_ContainerWithPortEndpoint_PassesPortToContainer()
+    {
+        InstallPackage("docker");
+        var container = Factory<Container>().Generate();
+        List<Contract> contracts =
+        [
+            container,
+            Factory<PortEndpoint>().Generate() with { Container = (ContractId<Container>)container.Id }
+        ];
+        var package = Factory<Package>().Generate() with { Contracts = contracts };
+
+        var application = InstallPackage(package);
+
+        var endpoint = application.Contracts.OfType<PortEndpoint>().Single();
+        Assert.True(endpoint.Installed);
+
+        DockerClient.Containers.Received(1).CreateContainerAsync(
+            Arg.Is<CreateContainerParameters>(p =>
+                p.HostConfig
+                    .PortBindings[$"{endpoint.Port}/{endpoint.Protocol.ToString().ToLower()}"][0]
+                    .HostPort == endpoint.Port.ToString()
+            ),
+            Arg.Any<CancellationToken>()
+        );
     }
 }

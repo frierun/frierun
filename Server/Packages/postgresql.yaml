@@ -11,7 +11,5 @@ contracts:
     imageName: "postgres:17"
     env:
       POSTGRES_PASSWORD: "{{Password::Value}}"
-      
-  - type: "Mount"
-    volume: "data"
-    path: "/var/lib/postgresql/data"
+    mounts:
+      /var/lib/postgresql/data: "data"

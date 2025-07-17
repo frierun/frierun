@@ -6,7 +6,7 @@ namespace Frierun.Server.Handlers;
 public class TraefikHttpEndpointHandler(Application application)
     : Handler<HttpEndpoint>(application)
 {
-    private readonly Container _container = application.Contracts.OfType<Container>().First();    
+    private readonly Container _container = application.Contracts.OfType<Container>().First();
 
     private readonly int _webPort = application.Contracts
         .OfType<PortEndpoint>()
@@ -56,25 +56,26 @@ public class TraefikHttpEndpointHandler(Application application)
             }
         }
 
-        plan.UpdateContract(
-            container with
-            {
-                Configure = container.Configure.Append(
-                    parameters =>
-                    {
-                        parameters.Labels["traefik.enable"] = "true";
-                        parameters.Labels[$"traefik.http.routers.{subdomain}.rule"] = $"Host(`{domain}`)";
-                        parameters.Labels[$"traefik.http.services.{subdomain}.loadbalancer.server.port"] =
-                            contract.Port.ToString();
+        var labels = new Dictionary<string, string>
+        {
+            ["traefik.enable"] = "true",
+            [$"traefik.http.routers.{subdomain}.rule"] = $"Host(`{domain}`)",
+            [$"traefik.http.services.{subdomain}.loadbalancer.server.port"] = contract.Port.ToString()
+        };
 
-                        if (certResolver != null)
-                        {
-                            parameters.Labels[$"traefik.http.routers.{subdomain}.tls"] = "true";
-                            parameters.Labels[$"traefik.http.routers.{subdomain}.tls.certresolver"] = certResolver;
-                        }
-                    }
-                ),
-            }
+        if (certResolver != null)
+        {
+            labels[$"traefik.http.routers.{subdomain}.tls"] = "true";
+            labels[$"traefik.http.routers.{subdomain}.tls.certresolver"] = certResolver;
+        }
+
+        plan.ReplaceContract(
+            container.Merge(
+                new Container(
+                    Name: container.Name,
+                    Labels: labels
+                )
+            )
         );
 
         return contract with
@@ -90,7 +91,7 @@ public class TraefikHttpEndpointHandler(Application application)
     {
         Debug.Assert(contract.Installed);
         Debug.Assert(contract.NetworkName != null);
-        
+
         _container.DetachNetwork(contract.NetworkName);
     }
 }

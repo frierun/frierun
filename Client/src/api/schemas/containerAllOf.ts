@@ -5,6 +5,8 @@
  * OpenAPI spec version: 1.0
  */
 import type { ContainerAllOfEnv } from "./containerAllOfEnv";
+import type { ContainerAllOfLabels } from "./containerAllOfLabels";
+import type { ContainerAllOfMounts } from "./containerAllOfMounts";
 
 export type ContainerAllOf = {
   /** @nullable */
@@ -13,9 +15,11 @@ export type ContainerAllOf = {
   networkName?: string | null;
   /** @nullable */
   imageName?: string | null;
-  requireDocker: boolean;
+  mountDockerSocket: boolean;
   installed?: boolean;
   command: string[];
   env: ContainerAllOfEnv;
+  labels: ContainerAllOfLabels;
+  mounts: ContainerAllOfMounts;
   network: string;
 };

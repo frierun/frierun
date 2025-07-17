@@ -81,5 +81,20 @@ public class PostgresqlHandlerTests : BaseTests
             application.Name,
             Arg.Any<NetworkDisconnectParameters>()
         );
-    }        
+    }
+    
+    [Fact]
+    public void Initialize_PrefixIsPostgres_UserIsNotPostgres()
+    {
+        var package = Factory<Package>().Generate() with
+        {
+            Prefix = "postgres",
+            Contracts = [new Postgresql()]
+        };
+
+        var application = InstallPackage(package);
+
+        var database = application.Contracts.OfType<Postgresql>().Single();
+        Assert.NotEqual(package.Name, database.Username);
+    }    
 }

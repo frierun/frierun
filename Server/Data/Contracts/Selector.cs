@@ -1,30 +1,28 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using static Frierun.Server.Data.Merger;
 
 namespace Frierun.Server.Data;
 
-public record SelectorOption(string Name, List<Contract> Contracts);
+public record SelectorOption(string Name, IReadOnlyList<Contract> Contracts);
 
 public record Selector(
     string Name,
-    IList<SelectorOption>? Options = null,
+    IReadOnlyList<SelectorOption>? Options = null,
     string? Value = null
 ) : Contract(Name ?? "")
 {
     [MemberNotNullWhen(true, nameof(Value))]
     public override bool Installed { get; init; }
     
-    public IList<SelectorOption> Options { get; init; } = Options ?? new List<SelectorOption>();
+    public IReadOnlyList<SelectorOption> Options { get; init; } = Options ?? [];
     
-    public override Contract With(Contract other)
+    public override Contract Merge(Contract other)
     {
-        if (other is not Selector selector || other.Id != Id)
-        {
-            throw new Exception("Invalid contract");
-        }
+        var contract = EnsureSame(this, other);
 
-        return this with
+        return MergeCommon(this, contract) with
         {
-            Value = Value ?? selector.Value
+            Value = OnlyOne(Value, contract.Value),
         };
     }
 }

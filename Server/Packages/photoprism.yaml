@@ -12,14 +12,9 @@ contracts:
     env:
       PHOTOPRISM_UPLOAD_NSFW: "true"
       PHOTOPRISM_ADMIN_PASSWORD: "{{Password::Value}}"
+    mounts:
+      /photoprism/originals: "originals"
+      /photoprism/storage: "storage"
       
   - type: "HttpEndpoint"
     port: 2342
-    
-  - type: "Mount"
-    volume: "originals"
-    path: "/photoprism/originals"
-    
-  - type: "Mount"
-    volume: "storage"
-    path: "/photoprism/storage"

@@ -7,5 +7,5 @@ public record ContractInitializeResult(
     IEnumerable<Contract>? AdditionalContracts = null
 )
 {
-    public IEnumerable<Contract> AdditionalContracts { get; init; } = AdditionalContracts ?? Array.Empty<Contract>();
+    public IEnumerable<Contract> AdditionalContracts { get; init; } = AdditionalContracts ?? [];
 }

@@ -6,47 +6,34 @@ fullDescription: "Paperless-ngx is a community-supported open-source document ma
 tags: [ "storage" ]
 applicationDescription: "Login: admin\nPassword: {{Password::Value}}"
 contracts:
+  - type: "Container"
+    name: "webserver"
+    imageName: "ghcr.io/paperless-ngx/paperless-ngx:latest"
+    env:
+      PAPERLESS_SECRET_KEY: "{{Password:SecretKey:Value}}"
+      PAPERLESS_REDIS: "redis://{{Redis::Host}}:6379"
+      PAPERLESS_AUTO_LOGIN_USERNAME: "admin"
+      PAPERLESS_ADMIN_USER: "admin"
+      PAPERLESS_ADMIN_PASSWORD: "{{Password::Value}}"
+    mounts:
+      /usr/src/paperless/data: "data"
+      /usr/src/paperless/media: "media"
+ 
   - type: "Selector"
     name: "Database"
     options:
       - name: "PostgreSQL"
         contracts:
           - type: "Container"
-            name: "webserver"
-            imageName: "ghcr.io/paperless-ngx/paperless-ngx:latest"
             env:
-              PAPERLESS_SECRET_KEY: "{{Password:SecretKey:Value}}"
-              PAPERLESS_REDIS: "redis://{{Redis::Host}}:6379"
-              PAPERLESS_AUTO_LOGIN_USERNAME: "admin"
-              PAPERLESS_ADMIN_USER: "admin"
-              PAPERLESS_ADMIN_PASSWORD: "{{Password::Value}}"
               PAPERLESS_DBENGINE: "postgresql"
               PAPERLESS_DBHOST: "{{Postgresql::Host}}"
               PAPERLESS_DBNAME: "{{Postgresql::Database}}"
               PAPERLESS_DBUSER: "{{Postgresql::Username}}"
               PAPERLESS_DBPASS: "{{Postgresql::Password}}"
+
       - name: "SQLite"
-        contracts:
-          - type: "Container"
-            name: "webserver"
-            imageName: "ghcr.io/paperless-ngx/paperless-ngx:latest"
-            env:
-              PAPERLESS_SECRET_KEY: "{{Password:SecretKey:Value}}"
-              PAPERLESS_REDIS: "redis://{{Redis::Host}}:6379"
-              PAPERLESS_AUTO_LOGIN_USERNAME: "admin"
-              PAPERLESS_ADMIN_USER: "admin"
-              PAPERLESS_ADMIN_PASSWORD: "{{Password::Value}}"
               
   - type: "HttpEndpoint"
     container: "webserver"
     port: 8000
-    
-  - type: "Mount"
-    container: "webserver"
-    volume: "data"
-    path: "/usr/src/paperless/data"
-    
-  - type: "Mount"
-    container: "webserver"
-    volume: "media"
-    path: "/usr/src/paperless/media"

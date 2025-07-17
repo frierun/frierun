@@ -6,22 +6,11 @@ tags: [ "storage" ]
 contracts:
   - type: "Container"
     imageName: "ghcr.io/advplyr/audiobookshelf:latest"
+    mounts:
+      /audiobooks: "audiobooks"
+      /podcasts: "podcasts"
+      /config: "config"
+      /metadata: "metadata"
     
   - type: "HttpEndpoint"
     port: 80
-    
-  - type: "Mount"
-    volume: "audiobooks"
-    path: "/audiobooks"
-    
-  - type: "Mount"
-    volume: "podcasts"
-    path: "/podcasts"
-    
-  - type: "Mount"
-    volume: "config"
-    path: "/config"
-    
-  - type: "Mount"
-    volume: "metadata"
-    path: "/metadata"

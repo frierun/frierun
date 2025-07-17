@@ -5,9 +5,9 @@
  * OpenAPI spec version: 1.0
  */
 
-export type MountType = (typeof MountType)[keyof typeof MountType];
+export type OptionalType = (typeof OptionalType)[keyof typeof OptionalType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const MountType = {
-  Mount: "Mount",
+export const OptionalType = {
+  Optional: "Optional",
 } as const;

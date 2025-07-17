@@ -6,11 +6,14 @@ tags: [ "dev" ]
 contracts:
   - type: "Container"
     imageName: "portainer/portainer-ce:latest"
-    requireDocker: true
+    mounts:
+      /data: "data"
+      
+  - type: "Optional"
+    name: "Docker socket"
+    contracts:
+      - type: "Container"
+        mountDockerSocket: true      
     
   - type: "HttpEndpoint"
     port: 9000
-    
-  - type: "Mount"
-    volume: "data"
-    path: "/data"

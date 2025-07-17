@@ -28,8 +28,7 @@ public class AutofacModule : Module
         builder.RegisterInstance<ProviderScopeBuilder>(
                 static builder =>
                 {
-                    var assembly = Assembly.GetExecutingAssembly();
-                    builder.RegisterAssemblyTypes(assembly)
+                    builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
                         .Where(type => type.Namespace?.StartsWith("Frierun.Server.Handlers.Docker") == true)
                         .AsImplementedInterfaces()
                         .SingleInstance();
@@ -47,6 +46,18 @@ public class AutofacModule : Module
                 }
             )
             .Named<ProviderScopeBuilder>("docker")
+            .SingleInstance();
+        
+        builder.RegisterInstance<ProviderScopeBuilder>(
+                static builder =>
+                {
+                    builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
+                        .Where(type => type.Namespace?.StartsWith("Frierun.Server.Handlers.Udocker") == true)
+                        .AsImplementedInterfaces()
+                        .SingleInstance();
+                }
+            )
+            .Named<ProviderScopeBuilder>("udocker")
             .SingleInstance();
 
         builder.RegisterInstance<ProviderScopeBuilder>(

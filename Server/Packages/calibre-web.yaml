@@ -12,14 +12,9 @@ contracts:
       PGID: "1000"
       TZ: "Etc/UTC"
       DOCKER_MODS: "linuxserver/mods:universal-calibre"
+    mounts:
+      /books: "books"
+      /config: "config"
       
   - type: "HttpEndpoint"
     port: 8083
-    
-  - type: "Mount"
-    volume: "books"
-    path: "/books"
-    
-  - type: "Mount"
-    volume: "config"
-    path: "/config"
