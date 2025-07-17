@@ -8,7 +8,7 @@ namespace Frierun.Tests.Handlers;
 public class MysqlHandlerTests : BaseTests
 {
     private readonly Application _providerApplication;
-    
+
     public MysqlHandlerTests()
     {
         InstallPackage("docker");
@@ -70,9 +70,41 @@ public class MysqlHandlerTests : BaseTests
 
         Resolve<UninstallService>().Handle(application);
 
-         DockerClient.Networks.Received(1).DisconnectNetworkAsync(
+        DockerClient.Networks.Received(1).DisconnectNetworkAsync(
             application.Name,
             Arg.Any<NetworkDisconnectParameters>()
         );
     }
+
+    [Fact]
+    public void Initialize_PrefixIsRoot_UserIsNotRoot()
+    {
+        var package = Factory<Package>().Generate() with
+        {
+            Prefix = "root",
+            Contracts = [new Mysql()]
+        };
+
+        var application = InstallPackage(package);
+
+        var database = application.Contracts.OfType<Mysql>().Single();
+        Assert.NotEqual(package.Name, database.Username);
+    }
+    
+    [Fact]
+    public void Initialize_PrefixIsMysql_DatabaseIsNotMysql()
+    {
+        UninstallApplication(_providerApplication);
+        InstallPackage("mariadb");
+        var package = Factory<Package>().Generate() with
+        {
+            Prefix = "mysql",
+            Contracts = [new Mysql()]
+        };
+
+        var application = InstallPackage(package);
+
+        var database = application.Contracts.OfType<Mysql>().Single();
+        Assert.NotEqual(package.Name, database.Database);
+    }    
 }
