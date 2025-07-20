@@ -22,6 +22,7 @@ import type { PortEndpoint } from "./portEndpoint";
 import type { Postgresql } from "./postgresql";
 import type { Redis } from "./redis";
 import type { Selector } from "./selector";
+import type { SshConnection } from "./sshConnection";
 import type { Substitute } from "./substitute";
 import type { Volume } from "./volume";
 
@@ -44,5 +45,6 @@ export type HandlerExceptionResultContract =
   | Postgresql
   | Redis
   | Selector
+  | SshConnection
   | Substitute
   | Volume;

@@ -5,6 +5,7 @@ import DomainForm from "@/components/contracts/DomainForm.tsx";
 import VolumeForm from "@/components/contracts/VolumeForm.tsx";
 import SelectorForm from "@/components/contracts/SelectorForm.tsx";
 import OptionalForm from "@/components/contracts/OptionalForm.tsx";
+import SshConnectionForm from "@/components/contracts/SshConnectionForm.tsx";
 
 export type Contract = ExecutionPlanContractsItem;
 
@@ -78,6 +79,13 @@ export default function ContractForm({contract, alternatives, updateContract, al
                 <OptionalForm
                     contract={contract}
                     variants={variants as Optional[]}
+                    updateContract={updateContract}
+                />
+            );
+        case 'SshConnection':
+            return (
+                <SshConnectionForm
+                    contract={contract}
                     updateContract={updateContract}
                 />
             );

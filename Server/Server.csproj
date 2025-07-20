@@ -22,6 +22,7 @@
         <PackageReference Include="Docker.DotNet" Version="3.125.15"/>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0"/>
         <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="9.0.0"/>
+        <PackageReference Include="SSH.NET" Version="2025.0.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="7.1.0"/>
         <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.1.0"/>
         <InternalsVisibleTo Include="Tests.Integration"/>
@@ -42,7 +43,7 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
           <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
         </None>
-        <None Update="Packages\udocker.yaml">
+        <None Update="Packages\termux-udocker.yaml">
           <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
           <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

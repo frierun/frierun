@@ -39,6 +39,7 @@ public abstract record Contract<THandler>(
 [JsonDerivedType(typeof(Postgresql), nameof(Postgresql))]
 [JsonDerivedType(typeof(Redis), nameof(Redis))]
 [JsonDerivedType(typeof(Selector), nameof(Selector))]
+[JsonDerivedType(typeof(SshConnection), nameof(SshConnection))]
 [JsonDerivedType(typeof(Substitute), nameof(Substitute))]
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
 public abstract record Contract(

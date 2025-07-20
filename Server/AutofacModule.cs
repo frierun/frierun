@@ -57,7 +57,7 @@ public class AutofacModule : Module
                         .SingleInstance();
                 }
             )
-            .Named<ProviderScopeBuilder>("udocker")
+            .Named<ProviderScopeBuilder>("termux-udocker")
             .SingleInstance();
 
         builder.RegisterInstance<ProviderScopeBuilder>(
