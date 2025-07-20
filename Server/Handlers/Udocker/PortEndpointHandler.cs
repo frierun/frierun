@@ -6,23 +6,42 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
 {
     public override IEnumerable<ContractInitializeResult> Initialize(PortEndpoint contract, string prefix)
     {
-        var port = contract.ExternalPort == 0 ? contract.Port : contract.ExternalPort;
-
-        while (State.Contracts.OfType<PortEndpoint>()
-               .Any(endpoint => endpoint.Port == port && endpoint.Protocol == contract.Protocol))
+        if (contract.ExternalPort is > 0 and < 1024)
         {
-            port += 1000;
-            if (port > 65535)
+            yield break;
+        }
+
+        if (contract.ExternalPort != 0)
+        {
+            if (State.Contracts.OfType<PortEndpoint>()
+                .Any(endpoint => endpoint.Port == contract.ExternalPort && endpoint.Protocol == contract.Protocol))
             {
-                throw new Exception("No more ports available");
+                yield break;
             }
+        }
+        else
+        {
+            var port = contract.ExternalPort == 0 ? contract.Port : contract.ExternalPort;
+
+            while (port >= 1024
+                   && State.Contracts.OfType<PortEndpoint>()
+                       .Any(endpoint => endpoint.Port == port && endpoint.Protocol == contract.Protocol)
+                  )
+            {
+                port += 1000;
+                if (port > 65535)
+                {
+                    yield break;
+                }
+            }
+
+            contract = contract with { ExternalPort = port };
         }
 
         yield return new ContractInitializeResult(
             contract with
             {
                 Handler = this,
-                ExternalPort = port,
                 DependencyOf = contract.DependencyOf.Append(contract.Container),
             }
         );
