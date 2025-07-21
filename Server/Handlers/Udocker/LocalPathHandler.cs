@@ -5,6 +5,9 @@ namespace Frierun.Server.Handlers.Udocker;
 
 public class LocalPathHandler(Application application) : Handler<Volume>(application)
 {
+    private const string HomePath = "/data/data/com.termux/files/home";
+
+    
     public override IEnumerable<ContractInitializeResult> Initialize(Volume contract, string prefix)
     {
         if (contract.VolumeName != null)
@@ -14,7 +17,7 @@ public class LocalPathHandler(Application application) : Handler<Volume>(applica
         
         yield return new ContractInitializeResult(contract with
         {
-            LocalPath = contract.LocalPath ?? $"/data/{prefix}/{contract.Name}",
+            LocalPath = contract.LocalPath ?? $"{HomePath}/frierun/{prefix}/{contract.Name}",
             Handler = this
         });
     }

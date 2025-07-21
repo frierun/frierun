@@ -24,6 +24,7 @@ public abstract record Contract<THandler>(
 [JsonDerivedType(typeof(CloudflareApiConnection), nameof(CloudflareApiConnection))]
 [JsonDerivedType(typeof(CloudflareTunnel), nameof(CloudflareTunnel))]
 [JsonDerivedType(typeof(Container), nameof(Container))]
+[JsonDerivedType(typeof(Daemon), nameof(Daemon))]
 [JsonDerivedType(typeof(Dependency), nameof(Dependency))]
 [JsonDerivedType(typeof(DockerApiConnection), nameof(DockerApiConnection))]
 [JsonDerivedType(typeof(Domain), nameof(Domain))]

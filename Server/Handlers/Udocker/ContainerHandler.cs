@@ -7,15 +7,15 @@ namespace Frierun.Server.Handlers.Udocker;
 public class ContainerHandler(Application application)
     : Handler<Container>(application), IContainerHandler
 {
-    private readonly string _executablePath = application.Contracts.OfType<Parameter>().First(parameter => parameter.Name == "Path").Value ?? "";
-    
     public override IEnumerable<ContractInitializeResult> Initialize(Container contract, string prefix)
     {
         if (contract.MountDockerSocket)
         {
             yield break;
         }
-        
+
+        var daemon = new Daemon(contract.Name);
+
         yield return new ContractInitializeResult(
             contract with
             {
@@ -25,8 +25,10 @@ public class ContainerHandler(Application application)
                 ),
                 DependsOn = contract.DependsOn.Append(contract.Network)
                     .Concat(contract.Mounts.Values.Select(mount => mount.Volume)),
+                DependencyOf = contract.DependencyOf.Append(daemon),
                 Handler = this
-            }
+            },
+            [daemon]
         );
     }
 
@@ -35,45 +37,53 @@ public class ContainerHandler(Application application)
         Debug.Assert(contract.ContainerName != null);
         Debug.Assert(contract.ImageName != null);
 
-        var args = new List<string>();
-        args.Add("run");
-        args.Add("-d"); // not supported by udocker
-        args.Add("--name");
-        args.Add(contract.ContainerName);
-        args.Add("--pull");
-        args.Add("always");
-        
+        var preCommands = new List<IReadOnlyList<string>>();
+        preCommands.Add(new List<string> { "udocker", "rm", contract.ContainerName });
+
+        var command = new List<string>();
+        command.Add("udocker");
+        command.Add("run");
+        command.Add("--rm");
+        command.Add($"--name={contract.ContainerName}");
+        command.Add("--pull=always");
+
         // mounts
         foreach (var (path, mount) in contract.Mounts)
         {
             var volume = plan.GetContract(mount.Volume);
             Debug.Assert(volume.Installed);
             Debug.Assert(volume.LocalPath != null);
-            
-            args.Add("--volume");
-            args.Add($"{volume.LocalPath}:{path}");
+
+            command.Add($"--volume={volume.LocalPath}:{path}");
+            preCommands.Add(new List<string> { "mkdir", "-p", volume.LocalPath });
         }
-        
+
         // exposes ports
         var endpoints = plan.Contracts.OfType<PortEndpoint>().Where(ep => ep.Container == contract);
         foreach (var endpoint in endpoints)
         {
             Debug.Assert(endpoint.Installed);
 
-            args.Add("--publish");
-            args.Add($"{endpoint.ExternalPort}:{endpoint.Port}");
+            command.Add($"--publish={endpoint.ExternalPort}:{endpoint.Port}");
         }
-
-        args.Add(contract.ImageName);
-
-        var startInfo = new ProcessStartInfo(_executablePath, args);
-        var process = Process.Start(startInfo);
-        if (process == null)
-        {
-            throw new Exception("Failed to start process");
-        }
-        process.WaitForExit();
         
+        // envs
+        foreach (var pair in contract.Env)
+        {
+            command.Add($"--env=\"{pair.Key}={pair.Value}\"");
+        }
+
+        command.Add(contract.ImageName);
+
+        var daemon = plan.GetContract(new ContractId<Daemon>(contract.Name));
+        plan.ReplaceContract(
+            daemon with
+            {
+                Command = command,
+                PreCommands = preCommands
+            }
+        );
+
         return contract with { NetworkName = "udocker" };
     }
 

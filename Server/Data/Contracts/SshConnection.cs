@@ -1,4 +1,7 @@
-﻿using static Frierun.Server.Data.Merger;
+﻿using System.Diagnostics;
+using Frierun.Server.Handlers;
+using Renci.SshNet;
+using static Frierun.Server.Data.Merger;
 
 namespace Frierun.Server.Data;
 
@@ -9,8 +12,26 @@ public record SshConnection(
     string? Username = null,
     string? Password = null
 )
-    : Contract(Name ?? ""), IHasStrings
+    : Contract<ISshConnectionHandler>(Name ?? ""), IHasStrings
 {
+    /// <summary>
+    /// Create an ssh client from the contract.
+    /// </summary>
+    public ISshClient CreateSshClient()
+    {
+        Debug.Assert(Handler != null);
+        return Handler.CreateSshClient(this);
+    }
+
+    /// <summary>
+    /// Creates a sftp client from the contract.
+    /// </summary>
+    public ISftpClient CreateSftpClient()
+    {
+        Debug.Assert(Handler != null);
+        return Handler.CreateSftpClient(this);
+    }
+    
     public override Contract Merge(Contract other)
     {
         var contract = EnsureSame(this, other);
