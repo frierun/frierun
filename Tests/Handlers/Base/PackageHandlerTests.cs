@@ -16,7 +16,7 @@ public class PackageHandlerTests : BaseTests
         {
             Contracts = new List<Contract>
             {
-                new HttpEndpoint(),
+                new HttpEndpoint(Port: 80),
                 new PortEndpoint(
                     Protocol.Tcp,
                     2222
@@ -29,7 +29,7 @@ public class PackageHandlerTests : BaseTests
 
         Assert.Equal(package.ApplicationUrl, application.Url);
     }
-    
+
     [Fact]
     public void ApplicationUrl_WithHttpAndPortEndpoint_HttpEndpointHasPriority()
     {
@@ -38,7 +38,7 @@ public class PackageHandlerTests : BaseTests
             ApplicationUrl = null,
             Contracts = new List<Contract>
             {
-                new HttpEndpoint(),
+                new HttpEndpoint(Port: 80),
                 new PortEndpoint(
                     Protocol.Tcp,
                     2222
@@ -50,7 +50,7 @@ public class PackageHandlerTests : BaseTests
 
         Assert.Equal("http://127.0.0.1/", application.Url);
     }
-    
+
     [Fact]
     public void ApplicationUrl_WithPortEndpoint_AutoDetectPortEndpoint()
     {
@@ -69,5 +69,5 @@ public class PackageHandlerTests : BaseTests
         var application = InstallPackage(package);
 
         Assert.Equal("tcp://127.0.0.1:2222", application.Url);
-    }    
+    }
 }

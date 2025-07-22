@@ -8,6 +8,11 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
     
     public override IEnumerable<ContractInitializeResult> Initialize(PortEndpoint contract, string prefix)
     {
+        if (contract.Port == 0)
+        {
+            yield break;
+        }
+        
         if (contract.ExternalPort is > 0 and < 1024)
         {
             yield break;
@@ -23,7 +28,7 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
         }
         else
         {
-            var port = contract.ExternalPort == 0 ? contract.Port : contract.ExternalPort;
+            var port = contract.Port;
 
             while (port < 1024
                    || State.Contracts.OfType<PortEndpoint>()

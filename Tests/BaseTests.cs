@@ -92,6 +92,12 @@ public abstract class BaseTests
                         .OnlyIf(
                             registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(ICloudflareApiConnectionHandler)))
                         );
+                    b.RegisterType<FakeSshConnectionHandler>()
+                        .AsImplementedInterfaces()
+                        .SingleInstance()
+                        .OnlyIf(
+                            registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(ISshConnectionHandler)))
+                        );
                 };
             }
         );

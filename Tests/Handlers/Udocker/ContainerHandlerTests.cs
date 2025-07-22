@@ -8,7 +8,7 @@ public class ContainerHandlerTests : BaseTests
     [Fact]
     public void Initialize_ContractWithMountDockerSocket_ReturnsEmpty()
     {
-        var udocker = InstallPackage("udocker");
+        var udocker = InstallPackage("termux-udocker");
         var container = Factory<Container>().Generate() with { MountDockerSocket = true };
         var handler = Handler<ContainerHandler>(udocker);
 
