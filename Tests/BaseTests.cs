@@ -9,6 +9,7 @@ using Frierun.Server.Data;
 using Frierun.Server.Handlers;
 using Frierun.Tests.Handlers;
 using Microsoft.Extensions.DependencyInjection;
+using Renci.SshNet;
 using Substitute = NSubstitute.Substitute;
 
 namespace Frierun.Tests;
@@ -19,6 +20,8 @@ public abstract class BaseTests
     private ContainerBuilder? ContainerBuilder { get; set; }
     protected IDockerClient DockerClient => Handler<FakeDockerApiConnectionHandler>().Client;
     protected ICloudflareClient CloudflareClient => Handler<FakeCloudflareApiConnectionHandler>().Client;
+    protected ISshClient SshClient => Handler<FakeSshConnectionHandler>().SshClient;
+    protected ISftpClient SftpClient => Handler<FakeSshConnectionHandler>().SftpClient;
 
     /// <summary>
     /// Resolve object from the provider.

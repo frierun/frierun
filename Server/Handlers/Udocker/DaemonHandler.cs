@@ -62,13 +62,14 @@ public class DaemonHandler(Application application)
 
         using var sshClient = _connection.CreateSshClient();
         sshClient.RunCommand("sv-disable " + EscapeArgument(contract.DaemonName)).Dispose();
+        sshClient.RunCommand("sv force-stop " + EscapeArgument(contract.DaemonName)).Dispose();
         sshClient.RunCommand("rm -rf " + EscapeArgument(DaemonsPath + "/" + contract.DaemonName)).Dispose();
     }
 
     /// <summary>
     /// Escapes argument for shell using single quoting
     /// </summary>
-    private string EscapeArgument(string arg)
+    private static string EscapeArgument(string arg)
     {
         return "'" + arg.Replace("'", "'\''") + "'";
     }
