@@ -92,7 +92,7 @@ public record Container(
     /// <summary>
     /// Executes a command in the container.
     /// </summary>
-    public Task<(string stdout, string stderr)> ExecInContainer(IList<string> command)
+    public (string stdout, string stderr) ExecInContainer(IList<string> command)
     {
         Debug.Assert(Handler != null);
         return Handler.ExecInContainer(this, command);

@@ -37,7 +37,6 @@ public class DaemonHandlerTests : BaseTests
         UninstallApplication(application);
         
         SshClient.Received(1).RunCommand(Arg.Is<string>(arg => arg.StartsWith("sv-disable") && arg.Contains(daemon.DaemonName)));
-        SshClient.Received(1).RunCommand(Arg.Is<string>(arg => arg.StartsWith("sv force-stop") && arg.Contains(daemon.DaemonName)));
         SshClient.Received(1).RunCommand(Arg.Is<string>(arg => arg.StartsWith("rm -rf") && arg.Contains(directory)));
     }
 }

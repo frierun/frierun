@@ -130,7 +130,7 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
         var command = new List<string> { "psql", "-U", "postgres" };
         command.AddRange(sqlList.SelectMany(sql => new[] { "-c", sql }));
 
-        var result = _container.ExecInContainer(command).Result;
+        var result = _container.ExecInContainer(command);
 
         logger.LogDebug(
             "Executed sql: {Sql}\nStdout: {Stdout}\nStderr: {Stderr}",

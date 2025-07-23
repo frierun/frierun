@@ -155,9 +155,9 @@ public class ContainerHandler(Application application, DockerService dockerServi
         dockerService.DetachNetwork(networkName, container.ContainerName).Wait();
     }
 
-    public Task<(string stdout, string stderr)> ExecInContainer(Container container, IList<string> command)
+    public (string stdout, string stderr) ExecInContainer(Container container, IList<string> command)
     {
         Debug.Assert(container.Installed);
-        return dockerService.ExecInContainer(container.ContainerName, command);
+        return dockerService.ExecInContainer(container.ContainerName, command).Result;
     }
 }

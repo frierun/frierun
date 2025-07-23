@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using Frierun.Server.Data;
-using Renci.SshNet.Common;
 
 namespace Frierun.Server.Handlers.Udocker;
 
@@ -38,9 +37,9 @@ public class DaemonHandler(Application application)
         runContent.Append("#!/data/data/com.termux/files/usr/bin/sh\n\n");
         foreach (var commandPre in contract.PreCommands)
         {
-            runContent.Append($"{string.Join(' ', commandPre.Select(EscapeArgument))} 2>&1\n");
+            runContent.Append($"{string.Join(' ', commandPre.Select(SshConnection.EscapeArgument))} 2>&1\n");
         }
-        runContent.Append($"exec {string.Join(' ', contract.Command.Select(EscapeArgument))} 2>&1\n");
+        runContent.Append($"exec {string.Join(' ', contract.Command.Select(SshConnection.EscapeArgument))} 2>&1\n");
         
         sftpClient.WriteAllText(DaemonsPath + "/" + contract.DaemonName + "/run", runContent.ToString());
         sftpClient.ChangePermissions(DaemonsPath + "/" + contract.DaemonName + "/run", 0755);
@@ -51,7 +50,7 @@ public class DaemonHandler(Application application)
         );
 
         using var sshClient = _connection.CreateSshClient();
-        sshClient.RunCommand("sv-enable " + EscapeArgument(contract.DaemonName)).Dispose();
+        sshClient.RunCommand("sv-enable " + SshConnection.EscapeArgument(contract.DaemonName)).Dispose();
 
         return contract;
     }
@@ -61,16 +60,8 @@ public class DaemonHandler(Application application)
         Debug.Assert(contract.Installed);
 
         using var sshClient = _connection.CreateSshClient();
-        sshClient.RunCommand("sv-disable " + EscapeArgument(contract.DaemonName)).Dispose();
-        sshClient.RunCommand("sv force-stop " + EscapeArgument(contract.DaemonName)).Dispose();
-        sshClient.RunCommand("rm -rf " + EscapeArgument(DaemonsPath + "/" + contract.DaemonName)).Dispose();
+        sshClient.RunCommand("sv-disable " + SshConnection.EscapeArgument(contract.DaemonName)).Dispose();
+        sshClient.RunCommand("rm -rf " + SshConnection.EscapeArgument(DaemonsPath + "/" + contract.DaemonName)).Dispose();
     }
 
-    /// <summary>
-    /// Escapes argument for shell using single quoting
-    /// </summary>
-    private static string EscapeArgument(string arg)
-    {
-        return "'" + arg.Replace("'", "'\''") + "'";
-    }
 }

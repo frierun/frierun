@@ -7,6 +7,8 @@ namespace Frierun.Server.Handlers.Udocker;
 public class ContainerHandler(Application application)
     : Handler<Container>(application), IContainerHandler
 {
+    private readonly SshConnection _connection = application.Contracts.OfType<SshConnection>().Single();
+
     public override IEnumerable<ContractInitializeResult> Initialize(Container contract, string prefix)
     {
         if (contract.MountDockerSocket)
@@ -39,13 +41,14 @@ public class ContainerHandler(Application application)
 
         var preCommands = new List<IReadOnlyList<string>>();
         preCommands.Add(new List<string> { "udocker", "rm", contract.ContainerName });
+        preCommands.Add(new List<string> { "udocker", "pull", contract.ImageName});
+        
+        // create container explicitly, otherwise it would spawn dangling containers
+        preCommands.Add(new List<string> { "udocker", "create", $"--name={contract.ContainerName}", contract.ImageName});
 
         var command = new List<string>();
         command.Add("udocker");
         command.Add("run");
-        command.Add("--rm");
-        command.Add($"--name={contract.ContainerName}");
-        command.Add("--pull=always");
 
         // mounts
         foreach (var (path, mount) in contract.Mounts)
@@ -70,10 +73,10 @@ public class ContainerHandler(Application application)
         // envs
         foreach (var pair in contract.Env)
         {
-            command.Add($"--env=\"{pair.Key}={pair.Value}\"");
+            command.Add($"--env={pair.Key}={pair.Value}");
         }
 
-        command.Add(contract.ImageName);
+        command.Add(contract.ContainerName);
 
         var daemon = plan.GetContract(new ContractId<Daemon>(contract.Name));
         plan.ReplaceContract(
@@ -99,8 +102,21 @@ public class ContainerHandler(Application application)
     {
     }
 
-    public Task<(string stdout, string stderr)> ExecInContainer(Container container, IList<string> command)
+    public (string stdout, string stderr) ExecInContainer(Container container, IList<string> command)
     {
-        throw new NotImplementedException();
+        Debug.Assert(container.Installed);
+        
+        // TODO we should mount same volumes
+        var runCommand = new List<string>
+        {
+            "udocker",
+            "run",
+            container.ContainerName
+        };
+        runCommand.AddRange(command);
+
+        using var sshClient = _connection.CreateSshClient();
+        using var sshCommand = sshClient.RunCommand(String.Join(' ', runCommand.Select(SshConnection.EscapeArgument)));
+        return (sshCommand.Result, sshCommand.Error);
     }
 }

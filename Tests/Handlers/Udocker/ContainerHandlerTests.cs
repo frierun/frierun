@@ -26,23 +26,26 @@ public class ContainerHandlerTests : BaseTests
     [Fact]
     public void Install_Container_CreatesDaemon()
     {
-        var container = Factory<Container>().Generate() with { MountDockerSocket = false };
+        var container = Factory<Container>().Generate("udocker");
         var package = Factory<Package>().Generate() with { Contracts = [container] };
 
         var application = InstallPackage(package);
 
         var daemon = application.Contracts.OfType<Daemon>().Single();
         Assert.Contains("udocker", daemon.Command);
-        Assert.Contains("--name=" + container.ContainerName, daemon.Command);
-        Assert.Contains(container.ImageName, daemon.Command);
+        Assert.Contains(container.ContainerName, daemon.Command);
+
+        var preCommand =
+            daemon.PreCommands.Single(command => command.Contains("udocker") && command.Contains("create"));
+        Assert.Contains($"--name={container.ContainerName}", preCommand);
+        Assert.Contains(container.ImageName, preCommand);
     }
 
     [Fact]
     public void Install_ContainerWithVolume_CreatesPath()
     {
-        var container = Factory<Container>().Generate() with
+        var container = Factory<Container>().Generate("udocker") with
         {
-            MountDockerSocket = false,
             Mounts = new Dictionary<string, ContainerMount> { { "/test", new ContainerMount() } }
         };
         var package = Factory<Package>().Generate() with { Contracts = [container] };
@@ -60,10 +63,7 @@ public class ContainerHandlerTests : BaseTests
     [Fact]
     public void Install_ContainerWithPort_PublishesPort()
     {
-        var container = Factory<Container>().Generate() with
-        {
-            MountDockerSocket = false,
-        };
+        var container = Factory<Container>().Generate("udocker");
         var package = Factory<Package>().Generate() with
         {
             Contracts =
@@ -83,12 +83,11 @@ public class ContainerHandlerTests : BaseTests
     [Fact]
     public void Install_ContainerWithEnv_PassesEnv()
     {
-        var container = Factory<Container>().Generate() with
+        var container = Factory<Container>().Generate("udocker") with
         {
-            MountDockerSocket = false,
             Env = new Dictionary<string, string>
             {
-                {"name", "value"}
+                { "name", "value" }
             }
         };
         var package = Factory<Package>().Generate() with { Contracts = [container] };
@@ -96,6 +95,6 @@ public class ContainerHandlerTests : BaseTests
         var application = InstallPackage(package);
 
         var daemon = application.Contracts.OfType<Daemon>().Single();
-        Assert.Contains($"--env=\"name=value\"", daemon.Command);
+        Assert.Contains($"--env=name=value", daemon.Command);
     }
 }

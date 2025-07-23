@@ -54,4 +54,12 @@ public record SshConnection(
             Password = Password == null ? null : decorator(Password)
         };
     }
+    
+    /// <summary>
+    /// Escapes argument for shell using single quoting
+    /// </summary>
+    public static string EscapeArgument(string arg)
+    {
+        return "'" + arg.Replace("'", "'\''") + "'";
+    }
 }

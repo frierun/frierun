@@ -89,7 +89,7 @@ public class MysqlHandler(Application application)
         }
 
         Debug.Assert(contract.Database != null);
-        
+
         RunSql(
             $"""
              CREATE DATABASE `{contract.Database}`;
@@ -98,7 +98,7 @@ public class MysqlHandler(Application application)
              FLUSH PRIVILEGES;
              """
         );
-        
+
         return contract with
         {
             NetworkName = network.NetworkName
@@ -127,6 +127,6 @@ public class MysqlHandler(Application application)
     /// </summary>
     private void RunSql(string sql)
     {
-        _container.ExecInContainer(["mysql", "-u", "root", $"-p{_rootPassword}", "-e", sql]).Wait();
+        _container.ExecInContainer(["mysql", "-hlocalhost", "-uroot", $"-p{_rootPassword}", "-e", sql]);
     }
 }

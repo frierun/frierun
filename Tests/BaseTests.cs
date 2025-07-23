@@ -129,11 +129,11 @@ public abstract class BaseTests
     protected Faker<T> Factory<T>()
         where T : class
     {
-        return Resolve<Faker<T>>().Clone();
+        return Resolve<Faker<T>>();
     }
 
     /// <summary>
-    /// Create mock service and registers it in the container.
+    /// Create a mock service and registers it in the container.
     /// </summary>
     protected T Mock<T, TService>(object?[]? constructorArguments = null)
         where T : class, TService
