@@ -41,7 +41,7 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_WithoutHandler_ThrowsException()
     {
-        var contract = Substitute.For<Contract>("", false, null, null, null);
+        var contract = Substitute.For<Contract>("", false, null, null, null, null);
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
 
         Assert.Throws<HandlerNotFoundException>(() => Service.Create(package));
@@ -226,5 +226,42 @@ public class ExecutionServiceTests : BaseTests
 
         var parameter = plan.GetContract(new ContractId<Parameter>("Test"));
         Assert.NotNull(parameter.Value);
+    }
+
+    [Fact]
+    public void Create_ContractWithoutRestrictedApplicationHandler_ReturnsBothVariants()
+    {
+        InstallPackage("docker");
+        InstallPackage("docker");
+        var container = Factory<Container>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [container] };
+
+        var plan = Service.Create(package);
+
+        Assert.Single(plan.Alternatives, contract => contract.Id == container.Id);
+    }
+
+    [Fact]
+    public void Create_ContractWithRestrictedApplicationHandler_ReturnsSingleVariant()
+    {
+        var docker1 = InstallPackage("docker");
+        var docker2 = InstallPackage("docker");
+        var container = Factory<Container>().Generate();
+
+        var plan1 = Service.Create(
+            Factory<Package>().Generate() with
+            {
+                Contracts = [container with { HandlerApplication = docker1.Name }]
+            }
+        );
+        var plan2 = Service.Create(
+            Factory<Package>().Generate() with
+            {
+                Contracts = [container with { HandlerApplication = docker2.Name }]
+            }
+        );
+
+        Assert.DoesNotContain(plan1.Alternatives, contract => contract.Id == container.Id);
+        Assert.DoesNotContain(plan2.Alternatives, contract => contract.Id == container.Id);
     }
 }

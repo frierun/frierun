@@ -79,30 +79,38 @@ public class DiscoveryGraph
     /// <summary>
     /// Applies contract initialization result.
     /// </summary>
-    public void Apply(ContractInitializeResult result)
+    /// <returns>True if the result is not conflicting with the graph</returns>
+    public bool Apply(ContractInitializeResult result)
     {
         Debug.Assert(result.Contract.Handler != null, "Initialized contract must have a handler");
         
         Contracts[result.Contract] = result.Contract;
 
-        foreach (var additionalContract in result.AdditionalContracts)
+        try
         {
-            if (Contracts.TryGetValue(additionalContract, out var initializedContract))
+            foreach (var additionalContract in result.AdditionalContracts)
             {
-                var contract = initializedContract.Merge(additionalContract);
-                Contracts[contract] = contract;
-                _toReinitialize.Add(contract);
-                continue;
-            }
+                if (Contracts.TryGetValue(additionalContract, out var initializedContract))
+                {
+                    var contract = initializedContract.Merge(additionalContract);
+                    Contracts[contract] = contract;
+                    _toReinitialize.Add(contract);
+                    continue;
+                }
 
-            if (_uninitializedContracts.TryGetValue(additionalContract, out var uninitializedContract))
-            {
-                _uninitializedContracts[additionalContract] = uninitializedContract.Merge(additionalContract);
+                if (_uninitializedContracts.TryGetValue(additionalContract, out var uninitializedContract))
+                {
+                    _uninitializedContracts[additionalContract] = uninitializedContract.Merge(additionalContract);
+                }
+                else
+                {
+                    _uninitializedContracts[additionalContract] = additionalContract;
+                }
             }
-            else
-            {
-                _uninitializedContracts[additionalContract] = additionalContract;
-            }
+        }
+        catch (MergeException)
+        {
+            return false;
         }
 
         foreach (var contractId in result.Contract.DependsOn)
@@ -124,7 +132,7 @@ public class DiscoveryGraph
         // Check for Substitute contract
         if (result.Contract is not IHasStrings hasStrings)
         {
-            return;
+            return true;
         }
 
         var substitute = new Substitute(result.Contract);
@@ -149,12 +157,13 @@ public class DiscoveryGraph
         if (matches.Count == 0)
         {
             _uninitializedContracts.Remove(substitute);
-            return;
+            return true;
         }
 
         _uninitializedContracts[substitute] = substitute with
         {
             Matches = matches
         };
+        return true;
     }
 }

@@ -2,6 +2,7 @@
 using Docker.DotNet.Models;
 using Frierun.Server.Data;
 using Mount = Docker.DotNet.Models.Mount;
+using Network = Frierun.Server.Data.Network;
 
 namespace Frierun.Server.Handlers.Docker;
 
@@ -25,11 +26,20 @@ public class ContainerHandler(Application application, DockerService dockerServi
                     ["com.docker.compose.project"] = prefix,
                     ["com.docker.compose.service"] = contract.Name
                 },
-                DependsOn = contract.DependsOn
-                    .Append(contract.Network)
-                    .Concat(contract.Mounts.Values.Select(mount => mount.Volume)),
                 Handler = this
-            }
+            },
+            [
+                new Network(contract.Network.Name)
+                {
+                    HandlerApplication = Application?.Name,
+                    DependencyOf = [contract]
+                },
+                ..contract.Mounts.Values.Select(mount => new Volume(mount.Volume.Name)
+                {
+                    HandlerApplication = Application?.Name,
+                    DependencyOf = [contract]
+                }),
+            ]
         );
     }
 

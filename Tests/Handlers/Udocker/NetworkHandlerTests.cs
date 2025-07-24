@@ -22,6 +22,4 @@ public class NetworkHandlerTests : BaseTests
         var network2 = application2.Contracts.OfType<Network>().Single();
         Assert.Equal(network1.NetworkName, network2.NetworkName);
     }
-    
-    
 }

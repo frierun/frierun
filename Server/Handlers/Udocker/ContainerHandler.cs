@@ -16,8 +16,6 @@ public class ContainerHandler(Application application)
             yield break;
         }
 
-        var daemon = new Daemon(contract.Name);
-
         yield return new ContractInitializeResult(
             contract with
             {
@@ -25,12 +23,26 @@ public class ContainerHandler(Application application)
                     prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
                     c => c.ContainerName
                 ),
-                DependsOn = contract.DependsOn.Append(contract.Network)
-                    .Concat(contract.Mounts.Values.Select(mount => mount.Volume)),
-                DependencyOf = contract.DependencyOf.Append(daemon),
                 Handler = this
             },
-            [daemon]
+            [
+                new Daemon(contract.Name)
+                {
+                    HandlerApplication = Application?.Name,
+                    DependsOn = [contract]
+                },
+                new Network(contract.Network.Name)
+                {
+                    HandlerApplication = Application?.Name,
+                    DependencyOf = [contract]
+                },
+                ..contract.Mounts.Values.Select(mount => new Volume(mount.Volume.Name)
+                    {
+                        HandlerApplication = Application?.Name,
+                        DependencyOf = [contract]
+                    }
+                )
+            ]
         );
     }
 
@@ -41,10 +53,12 @@ public class ContainerHandler(Application application)
 
         var preCommands = new List<IReadOnlyList<string>>();
         preCommands.Add(new List<string> { "udocker", "rm", contract.ContainerName });
-        preCommands.Add(new List<string> { "udocker", "pull", contract.ImageName});
-        
+        preCommands.Add(new List<string> { "udocker", "pull", contract.ImageName });
+
         // create container explicitly, otherwise it would spawn dangling containers
-        preCommands.Add(new List<string> { "udocker", "create", $"--name={contract.ContainerName}", contract.ImageName});
+        preCommands.Add(
+            new List<string> { "udocker", "create", $"--name={contract.ContainerName}", contract.ImageName }
+        );
 
         var command = new List<string>();
         command.Add("udocker");
@@ -69,7 +83,7 @@ public class ContainerHandler(Application application)
 
             command.Add($"--publish={endpoint.ExternalPort}:{endpoint.Port}");
         }
-        
+
         // envs
         foreach (var pair in contract.Env)
         {
@@ -105,7 +119,7 @@ public class ContainerHandler(Application application)
     public (string stdout, string stderr) ExecInContainer(Container container, IList<string> command)
     {
         Debug.Assert(container.Installed);
-        
+
         // TODO we should mount same volumes
         var runCommand = new List<string>
         {

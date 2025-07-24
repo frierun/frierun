@@ -15,13 +15,14 @@ public class DiscoveryGraphTests : BaseTests
         var queuedContract = Factory<Package>().Generate();
         var graph = new DiscoveryGraph();
 
-        graph.Apply(
+        var result = graph.Apply(
             new ContractInitializeResult(
                 rootContract with { DependsOn = [emptyContract], Handler = Handler<PackageHandler>() },
                 [queuedContract]
             )
         );
 
+        Assert.True(result);
         Assert.Equal((queuedContract, queuedContract), graph.Next());
         Assert.Equal((emptyContract, null), graph.Next());
         Assert.Equal((null, null), graph.Next());
@@ -33,12 +34,13 @@ public class DiscoveryGraphTests : BaseTests
         var rootContract = Factory<Package>().Generate();
         var graph = new DiscoveryGraph();
 
-        graph.Apply(
+        var result = graph.Apply(
             new ContractInitializeResult(
                 rootContract with { DependsOn = [rootContract], Handler = Handler<PackageHandler>() }
             )
         );
 
+        Assert.True(result);
         Assert.Equal((null, null), graph.Next());
     }
 
@@ -48,26 +50,26 @@ public class DiscoveryGraphTests : BaseTests
         var rootContract = Factory<Package>().Generate() with { Handler = Handler<PackageHandler>() };
         var graph = new DiscoveryGraph();
 
-        graph.Apply(new ContractInitializeResult(rootContract, [rootContract]));
-        
+        Assert.True(graph.Apply(new ContractInitializeResult(rootContract, [rootContract])));
+
         var (contractId, contract) = graph.Next();
         Assert.Equal(rootContract.Id, contractId);
         Assert.NotNull(contract);
     }
-    
+
     [Fact]
     public void Next_ContractReinitializationRecursion_ThrowsException()
     {
         var rootContract = Factory<Package>().Generate() with { Handler = Handler<PackageHandler>() };
         var graph = new DiscoveryGraph();
 
-        graph.Apply(new ContractInitializeResult(rootContract, [rootContract]));
+        Assert.True(graph.Apply(new ContractInitializeResult(rootContract, [rootContract])));
         graph.Next();
-        graph.Apply(new ContractInitializeResult(rootContract, [rootContract]));
-        
+        Assert.True(graph.Apply(new ContractInitializeResult(rootContract, [rootContract])));
+
         Assert.Throws<Exception>(() => graph.Next());
     }
-    
+
     [Fact]
     public void Apply_UpdatedContract_ContractIsReinitialized()
     {
@@ -76,18 +78,20 @@ public class DiscoveryGraphTests : BaseTests
         var prefix = Resolve<Faker>().Lorem.Word();
         var graph = new DiscoveryGraph();
 
-        graph.Apply(
+        var result = graph.Apply(
             new ContractInitializeResult(
                 rootContract with { Prefix = null, Handler = Handler<PackageHandler>() }
             )
         );
+        Assert.True(result);
 
-        graph.Apply(
+        result = graph.Apply(
             new ContractInitializeResult(
                 childContract with { Handler = Handler<ParameterHandler>() },
                 [rootContract with { Prefix = prefix }]
             )
         );
+        Assert.True(result);
 
         var (contractId, contract) = graph.Next();
         Assert.Equal(rootContract.Id, contractId);
@@ -106,7 +110,7 @@ public class DiscoveryGraphTests : BaseTests
         var rootSubstitute = new Substitute(rootContract);
         var graph = new DiscoveryGraph();
 
-        graph.Apply(new ContractInitializeResult(rootContract));
+        Assert.True(graph.Apply(new ContractInitializeResult(rootContract)));
 
         var (substituteId, substitute) = graph.Next();
         Assert.Equal(rootSubstitute.Id, substituteId);
@@ -124,7 +128,7 @@ public class DiscoveryGraphTests : BaseTests
         };
         var graph = new DiscoveryGraph();
 
-        graph.Apply(new ContractInitializeResult(rootContract));
+        Assert.True(graph.Apply(new ContractInitializeResult(rootContract)));
 
         Assert.Equal((null, null), graph.Next());
     }
@@ -141,12 +145,13 @@ public class DiscoveryGraphTests : BaseTests
         var rootSubstitute = new Substitute(rootContract);
         var graph = new DiscoveryGraph();
 
-        graph.Apply(new ContractInitializeResult(rootContract));
-        graph.Apply(
+        Assert.True(graph.Apply(new ContractInitializeResult(rootContract)));
+        var result = graph.Apply(
             new ContractInitializeResult(
                 rootContract with { ApplicationUrl = "{{Parameter:Url:Value}}" }
             )
         );
+        Assert.True(result);
 
         var (contractId, contract) = graph.Next();
         Assert.Equal(rootSubstitute.Id, contractId);
@@ -156,4 +161,21 @@ public class DiscoveryGraphTests : BaseTests
         Assert.Equal((null, null), graph.Next());
     }
 
+    [Fact]
+    public void Apply_ConflictingContracts_ReturnsFalse()
+    {
+        var rootContract = Factory<Package>().Generate() with { Handler = Handler<PackageHandler>() };
+        var childContract = Factory<Parameter>().Generate() with { Handler = Handler<ParameterHandler>() };
+        var graph = new DiscoveryGraph();
+
+        Assert.True(graph.Apply(new ContractInitializeResult(rootContract)));
+        var result = graph.Apply(
+            new ContractInitializeResult(
+                childContract, 
+                [rootContract with { Prefix = rootContract.Prefix + "_conflict" }]
+            )
+        );
+
+        Assert.False(result);
+    }
 }

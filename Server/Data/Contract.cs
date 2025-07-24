@@ -48,13 +48,14 @@ public abstract record Contract(
     bool Installed = false,
     IEnumerable<ContractId>? DependsOn = null,
     IEnumerable<ContractId>? DependencyOf = null,
-    Lazy<IHandler?>? LazyHandler = null
+    Lazy<IHandler?>? LazyHandler = null,
+    [property: JsonIgnore] string? HandlerApplication = null
 )
 {
     [JsonIgnore] public ContractId Id => ContractId.Create(GetType(), Name);
 
-    [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = DependsOn ?? Array.Empty<ContractId>();
-    [JsonIgnore] public IEnumerable<ContractId> DependencyOf { get; init; } = DependencyOf ?? Array.Empty<ContractId>();
+    [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = DependsOn ?? [];
+    [JsonIgnore] public IEnumerable<ContractId> DependencyOf { get; init; } = DependencyOf ?? [];
 
     [JsonPropertyName("handler")]
     [JsonInclude]

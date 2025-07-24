@@ -27,13 +27,22 @@ public static class Merger
             throw new MergeException("Can't merge installed contracts");
         }
 
-        return contract with
+        var result = contract with
         {
             Name = OnlyOne(contract.Name, other.Name),
             Handler = OnlyOne(contract.Handler, other.Handler),
+            HandlerApplication = OnlyOne(contract.HandlerApplication, other.HandlerApplication),
             DependsOn = contract.DependsOn.Concat(other.DependsOn),
             DependencyOf = contract.DependencyOf.Concat(other.DependencyOf),
         };
+
+        if (result is { Handler: not null, HandlerApplication: not null } &&
+            result.Handler.Application?.Name != result.HandlerApplication)
+        {
+            throw new MergeException("Handler application does not match HandlerApplication restriction");
+        }
+
+        return result;
     }
 
     /// <summary>

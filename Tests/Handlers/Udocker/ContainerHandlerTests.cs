@@ -97,4 +97,93 @@ public class ContainerHandlerTests : BaseTests
         var daemon = application.Contracts.OfType<Daemon>().Single();
         Assert.Contains($"--env=name=value", daemon.Command);
     }
+    
+    [Fact]
+    public void Install_ContainerWithSpecifiedApplication_InstallsCorrectNetworks()
+    {
+        var udocker1 = InstallPackage("termux-udocker");
+        var udocker2 = InstallPackage("termux-udocker");
+        var container = Factory<Container>().Generate("udocker");
+
+        var application1 = InstallPackage(
+            Factory<Package>().Generate() with { Contracts = [container with { HandlerApplication = udocker1.Name }] }
+        );
+        var application2 = InstallPackage(
+            Factory<Package>().Generate() with { Contracts = [container with { HandlerApplication = udocker2.Name }] }
+        );
+
+        var network1 = application1.Contracts.OfType<Network>().Single();
+        var network2 = application2.Contracts.OfType<Network>().Single();
+        Assert.Equal(Handler<NetworkHandler>(udocker1), network1.Handler);
+        Assert.Equal(Handler<NetworkHandler>(udocker2), network2.Handler);
+        Assert.NotEqual(network1.Handler, network2.Handler);
+    }
+
+    [Fact]
+    public void Install_ContainerWithSpecifiedApplication_InstallsCorrectVolumes()
+    {
+        var udocker1 = InstallPackage("termux-udocker");
+        var udocker2 = InstallPackage("termux-udocker");
+        var container = Factory<Container>().Generate("udocker") with
+        {
+            Mounts = new Dictionary<string, ContainerMount> { { "/mnt", new ContainerMount() } }
+        };
+
+        var application1 = InstallPackage(
+            Factory<Package>().Generate() with { Contracts = [container with { HandlerApplication = udocker1.Name }] }
+        );
+        var application2 = InstallPackage(
+            Factory<Package>().Generate() with { Contracts = [container with { HandlerApplication = udocker2.Name }] }
+        );
+
+        var volume1 = application1.Contracts.OfType<Volume>().Single();
+        var volume2 = application2.Contracts.OfType<Volume>().Single();
+        Assert.Equal(Handler<LocalPathHandler>(udocker1), volume1.Handler);
+        Assert.Equal(Handler<LocalPathHandler>(udocker2), volume2.Handler);
+        Assert.NotEqual(volume1.Handler, volume2.Handler);
+    }
+    
+    [Fact]
+    public void Install_ContainerWithSpecifiedApplication_InstallsCorrectPorts()
+    {
+        var udocker1 = InstallPackage("termux-udocker");
+        var udocker2 = InstallPackage("termux-udocker");
+        var container = Factory<Container>().Generate("udocker");
+        var port = Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Name) };
+
+        var application1 = InstallPackage(
+            Factory<Package>().Generate() with { Contracts = [port, container with { HandlerApplication = udocker1.Name }] }
+        );
+        var application2 = InstallPackage(
+            Factory<Package>().Generate() with { Contracts = [port, container with { HandlerApplication = udocker2.Name }] }
+        );
+
+        var port1 = application1.Contracts.OfType<PortEndpoint>().Single();
+        var port2 = application2.Contracts.OfType<PortEndpoint>().Single();
+        Assert.Equal(Handler<PortEndpointHandler>(udocker1), port1.Handler);
+        Assert.Equal(Handler<PortEndpointHandler>(udocker2), port2.Handler);
+        Assert.NotEqual(port1.Handler, port2.Handler);
+    }
+    
+    [Fact]
+    public void Install_ContainerWithSpecifiedApplication_InstallsCorrectDaemons()
+    {
+        var udocker1 = InstallPackage("termux-udocker");
+        var udocker2 = InstallPackage("termux-udocker");
+        var container = Factory<Container>().Generate("udocker");
+
+        var application1 = InstallPackage(
+            Factory<Package>().Generate() with { Contracts = [container with { HandlerApplication = udocker1.Name }] }
+        );
+        var application2 = InstallPackage(
+            Factory<Package>().Generate() with { Contracts = [container with { HandlerApplication = udocker2.Name }] }
+        );
+
+        var daemon1 = application1.Contracts.OfType<Daemon>().Single();
+        var daemon2 = application2.Contracts.OfType<Daemon>().Single();
+        Assert.Equal(Handler<DaemonHandler>(udocker1), daemon1.Handler);
+        Assert.Equal(Handler<DaemonHandler>(udocker2), daemon2.Handler);
+        Assert.NotEqual(daemon1.Handler, daemon2.Handler);
+    }
+    
 }

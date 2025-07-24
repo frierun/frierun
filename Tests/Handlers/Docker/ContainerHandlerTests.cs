@@ -1,5 +1,6 @@
 ﻿using Docker.DotNet.Models;
 using Frierun.Server.Data;
+using Frierun.Server.Handlers.Docker;
 using NSubstitute;
 using Network = Frierun.Server.Data.Network;
 
@@ -80,8 +81,76 @@ public class ContainerHandlerTests : BaseTests
                 }
             ]
         };
-        
+
         var application = InstallPackage(package);
         Assert.True(application.Contracts.OfType<Volume>().Single().Installed);
+    }
+
+
+    [Fact]
+    public void Install_ContainerWithSpecifiedApplication_InstallsCorrectNetworks()
+    {
+        var docker1 = InstallPackage("docker");
+        var docker2 = InstallPackage("docker");
+        var container = Factory<Container>().Generate();
+
+        var application1 = InstallPackage(
+            Factory<Package>().Generate() with { Contracts = [container with { HandlerApplication = docker1.Name }] }
+        );
+        var application2 = InstallPackage(
+            Factory<Package>().Generate() with { Contracts = [container with { HandlerApplication = docker2.Name }] }
+        );
+
+        var network1 = application1.Contracts.OfType<Network>().Single();
+        var network2 = application2.Contracts.OfType<Network>().Single();
+        Assert.Equal(Handler<NetworkHandler>(docker1), network1.Handler);
+        Assert.Equal(Handler<NetworkHandler>(docker2), network2.Handler);
+        Assert.NotEqual(network1.Handler, network2.Handler);
+    }
+
+    [Fact]
+    public void Install_ContainerWithSpecifiedApplication_InstallsCorrectVolumes()
+    {
+        var docker1 = InstallPackage("docker");
+        var docker2 = InstallPackage("docker");
+        var container = Factory<Container>().Generate() with
+        {
+            Mounts = new Dictionary<string, ContainerMount> { { "/mnt", new ContainerMount() } }
+        };
+
+        var application1 = InstallPackage(
+            Factory<Package>().Generate() with { Contracts = [container with { HandlerApplication = docker1.Name }] }
+        );
+        var application2 = InstallPackage(
+            Factory<Package>().Generate() with { Contracts = [container with { HandlerApplication = docker2.Name }] }
+        );
+
+        var volume1 = application1.Contracts.OfType<Volume>().Single();
+        var volume2 = application2.Contracts.OfType<Volume>().Single();
+        Assert.Equal(Handler<NewVolumeHandler>(docker1), volume1.Handler);
+        Assert.Equal(Handler<NewVolumeHandler>(docker2), volume2.Handler);
+        Assert.NotEqual(volume1.Handler, volume2.Handler);
+    }
+    
+    [Fact]
+    public void Install_ContainerWithSpecifiedApplication_InstallsCorrectPorts()
+    {
+        var docker1 = InstallPackage("docker");
+        var docker2 = InstallPackage("docker");
+        var container = Factory<Container>().Generate();
+        var port = Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Name) };
+
+        var application1 = InstallPackage(
+            Factory<Package>().Generate() with { Contracts = [port, container with { HandlerApplication = docker1.Name }] }
+        );
+        var application2 = InstallPackage(
+            Factory<Package>().Generate() with { Contracts = [port, container with { HandlerApplication = docker2.Name }] }
+        );
+
+        var port1 = application1.Contracts.OfType<PortEndpoint>().Single();
+        var port2 = application2.Contracts.OfType<PortEndpoint>().Single();
+        Assert.Equal(Handler<PortEndpointHandler>(docker1), port1.Handler);
+        Assert.Equal(Handler<PortEndpointHandler>(docker2), port2.Handler);
+        Assert.NotEqual(port1.Handler, port2.Handler);
     }
 }

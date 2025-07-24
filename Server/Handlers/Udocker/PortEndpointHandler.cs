@@ -49,8 +49,14 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
             contract with
             {
                 Handler = this,
-                DependencyOf = contract.DependencyOf.Append(contract.Container),
-            }
+            },
+            [
+                new Container(contract.Container.Name)
+                {
+                    HandlerApplication = Application?.Name,
+                    DependsOn = [contract]
+                }
+            ]
         );
     }
 
