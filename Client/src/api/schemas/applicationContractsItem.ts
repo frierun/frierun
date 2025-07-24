@@ -7,6 +7,7 @@
 import type { CloudflareApiConnection } from "./cloudflareApiConnection";
 import type { CloudflareTunnel } from "./cloudflareTunnel";
 import type { Container } from "./container";
+import type { Daemon } from "./daemon";
 import type { Dependency } from "./dependency";
 import type { DockerApiConnection } from "./dockerApiConnection";
 import type { Domain } from "./domain";
@@ -30,6 +31,7 @@ export type ApplicationContractsItem =
   | CloudflareApiConnection
   | CloudflareTunnel
   | Container
+  | Daemon
   | Dependency
   | DockerApiConnection
   | Domain

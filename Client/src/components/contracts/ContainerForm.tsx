@@ -1,17 +1,17 @@
 ﻿import {useEffect, useState} from "react";
-import {Selector} from "@/api/schemas";
+import {Container} from "@/api/schemas";
 
 type Props = {
-    contract: Selector;
-    variants: Selector[];
-    updateContract: (contract: Selector, isRefetch?: boolean) => void;
+    contract: Container;
+    variants: Container[];
+    updateContract: (contract: Container, isRefetch?: boolean) => void;
 }
 
-function VariantName(contract: Selector): string {
-    return contract.value ?? "";
+function VariantName(contract: Container): string {
+    return contract.handler?.applicationName ?? "";
 }
 
-export default function SelectorForm({contract, variants, updateContract}: Props) {
+export default function ContainerForm({contract, variants, updateContract}: Props) {
     const [selected, setSelected] = useState<number>(0);
     useEffect(() => {
         setSelected(0);
@@ -21,12 +21,12 @@ export default function SelectorForm({contract, variants, updateContract}: Props
     {
         return <></>;
     }
-
+    
     return (
         <div className="card">
             <div className={"my-1.5"}>
                 <label className={"inline-block w-48"}>
-                    Selector
+                    Container
                 </label>
                 {contract.name}
             </div>

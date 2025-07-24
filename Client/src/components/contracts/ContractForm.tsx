@@ -1,4 +1,4 @@
-﻿import {Domain, ExecutionPlanContractsItem, HttpEndpoint, Optional, Selector, Volume} from "@/api/schemas";
+﻿import {Container, Domain, ExecutionPlanContractsItem, HttpEndpoint, Optional, Selector, Volume} from "@/api/schemas";
 import {useEffect, useState} from "react";
 import HttpEndpointForm from "@/components/contracts/HttpEndpointForm.tsx";
 import DomainForm from "@/components/contracts/DomainForm.tsx";
@@ -6,6 +6,7 @@ import VolumeForm from "@/components/contracts/VolumeForm.tsx";
 import SelectorForm from "@/components/contracts/SelectorForm.tsx";
 import OptionalForm from "@/components/contracts/OptionalForm.tsx";
 import SshConnectionForm from "@/components/contracts/SshConnectionForm.tsx";
+import ContainerForm from "@/components/contracts/ContainerForm.tsx";
 
 export type Contract = ExecutionPlanContractsItem;
 
@@ -41,13 +42,12 @@ export default function ContractForm({contract, alternatives, updateContract, al
     }
 
     switch (contract.type) {
-        case 'HttpEndpoint':
+        case 'Container':
             return (
-                <HttpEndpointForm
+                <ContainerForm
                     contract={contract}
-                    variants={variants as HttpEndpoint[]}
+                    variants={variants as Container[]}
                     updateContract={updateContract}
-                    allContracts={allContracts}
                 />
             );
         case 'Domain':
@@ -58,11 +58,20 @@ export default function ContractForm({contract, alternatives, updateContract, al
                     updateContract={updateContract}
                 />
             );
-        case 'Volume':
+        case 'HttpEndpoint':
             return (
-                <VolumeForm
+                <HttpEndpointForm
                     contract={contract}
-                    variants={variants as Volume[]}
+                    variants={variants as HttpEndpoint[]}
+                    updateContract={updateContract}
+                    allContracts={allContracts}
+                />
+            );
+        case 'Optional':
+            return (
+                <OptionalForm
+                    contract={contract}
+                    variants={variants as Optional[]}
                     updateContract={updateContract}
                 />
             );
@@ -74,18 +83,18 @@ export default function ContractForm({contract, alternatives, updateContract, al
                     updateContract={updateContract}
                 />
             );
-        case 'Optional':
-            return (
-                <OptionalForm
-                    contract={contract}
-                    variants={variants as Optional[]}
-                    updateContract={updateContract}
-                />
-            );
         case 'SshConnection':
             return (
                 <SshConnectionForm
                     contract={contract}
+                    updateContract={updateContract}
+                />
+            );
+        case 'Volume':
+            return (
+                <VolumeForm
+                    contract={contract}
+                    variants={variants as Volume[]}
                     updateContract={updateContract}
                 />
             );

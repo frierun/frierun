@@ -33,22 +33,24 @@ export default function VolumeForm({contract, variants, updateContract}: Props) 
                 </label>
                 {contract.name}
             </div>
-            <fieldset className="flex gap-4">
-                {variants.map((variant, idx) => (
-                    <label key={idx} className="flex items-center gap-2">
-                        <input
-                            type="radio"
-                            value={idx}
-                            checked={idx === selected}
-                            onChange={() => {
-                                setSelected(idx);
-                                updateContract(variant, true);
-                            }}
-                        />
-                        {VariantName(variant)}
-                    </label>
-                ))}
-            </fieldset>
+            {variants.length > 1 && (
+                <fieldset className="flex gap-4">
+                    {variants.map((variant, idx) => (
+                        <label key={idx} className="flex items-center gap-2">
+                            <input
+                                type="radio"
+                                value={idx}
+                                checked={idx === selected}
+                                onChange={() => {
+                                    setSelected(idx);
+                                    updateContract(variant, true);
+                                }}
+                            />
+                            {VariantName(variant)}
+                        </label>
+                    ))}
+                </fieldset>
+            )}
             {contract.handler?.typeName == 'ExistingVolumeHandler' &&
                 (
                     <div>
