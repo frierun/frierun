@@ -58,7 +58,13 @@ public class Handler<TContract>(Application? application = null) : IHandler
     {
         var count = 1;
         var name = $"{baseName}{suffix}";
-        while (forbidden?.Contains(name) == true || State.Contracts.OfType<TContract>().Any(c => predicate(c) == name))
+
+        while (forbidden?.Contains(name) == true
+               || State.Contracts
+                   .OfType<TContract>()
+                   .Where(c => c.Handler?.Application == Application)
+                   .Any(c => predicate(c) == name)
+              )
         {
             count++;
             name = $"{baseName}{count}{suffix}";

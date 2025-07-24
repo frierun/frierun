@@ -8,6 +8,11 @@ public class NetworkHandler(Application application) : Handler<Network>(applicat
 {
     public override IEnumerable<ContractInitializeResult> Initialize(Network contract, string prefix)
     {
+        if (contract.NetworkName != null && contract.NetworkName != "udocker")
+        {
+            yield break;
+        }
+
         yield return new ContractInitializeResult(
             contract with
             {

@@ -1,4 +1,5 @@
 ﻿using Frierun.Server.Data;
+using Frierun.Server.Handlers;
 
 namespace Frierun.Tests.Handlers.Udocker;
 
@@ -14,12 +15,23 @@ public class NetworkHandlerTests : BaseTests
     {
         var package1 = Factory<Package>().Generate() with { Contracts = [Factory<Container>().Generate("udocker")] };
         var package2 = Factory<Package>().Generate() with { Contracts = [Factory<Container>().Generate("udocker")] };
-        
+
         var application1 = InstallPackage(package1);
         var application2 = InstallPackage(package2);
-        
+
         var network1 = application1.Contracts.OfType<Network>().Single();
         var network2 = application2.Contracts.OfType<Network>().Single();
         Assert.Equal(network1.NetworkName, network2.NetworkName);
+    }
+
+    [Fact]
+    public void Install_WithNetworkName_FailsToInstall()
+    {
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts = [Factory<Network>().Generate() with { NetworkName = "test" }]
+        };
+
+        Assert.Throws<HandlerNotFoundException>(() => InstallPackage(package));
     }
 }
