@@ -91,7 +91,7 @@ export default function SshConnectionForm({contract, updateContract}: Props) {
                     Password:
                 </label>
                 <input
-                    type="text"
+                    type="password"
                     value={password}
                     onChange={e => {
                         setPassword(e.target.value);

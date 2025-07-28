@@ -1,5 +1,6 @@
 import {PropsWithChildren, useContext} from "react";
 import StateContext from "@/providers/StateContext.tsx";
+import IndicatorStripe from "@/components/IndicatorStripe.tsx";
 
 export default function Layout({children}: PropsWithChildren) {
     const {ready} = useContext(StateContext);
@@ -19,6 +20,7 @@ export default function Layout({children}: PropsWithChildren) {
                 <img src={'/svg/deco.svg'} alt={'Decoration'}/>
             </div>
         </div>
+        <IndicatorStripe running={!ready}/>
         <div className={"frame my-6"}>
             {children}
         </div>
