@@ -74,7 +74,7 @@ podman run -d \
 
 ## Android
 
-See [Termux documentation](/docs/Termux.md)
+See [Termux documentation](Docs/Termux.md)
 
 # Usage
 
