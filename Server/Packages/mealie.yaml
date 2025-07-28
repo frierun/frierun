@@ -6,36 +6,31 @@ fullDescription: "Mealie is an intuitive and easy to use recipe management app.
   and providing you with an easy to use interface to manage your growing collection of recipes."
 tags: [ "storage" ]
 contracts:
+  - type: "Container"
+    imageName: "ghcr.io/mealie-recipes/mealie:latest"
+    env:
+      ALLOW_SIGNUP: "false"
+      PUID: "1000"
+      PGID: "1000"
+      TZ: "Etc/UTC"
+    mounts:
+      /app/data: "data"
+ 
   - type: "Selector"
     name: "Database"
     options:
       - name: "PostgreSQL"
         contracts:
           - type: "Container"
-            imageName: "ghcr.io/mealie-recipes/mealie:latest"
             env:
-              ALLOW_SIGNUP: "false"
-              PUID: "1000"
-              PGID: "1000"
-              TZ: "Etc/UTC"
               DB_ENGINE: "postgres"
               POSTGRES_SERVER: "{{Postgresql::Host}}"
               POSTGRES_DB: "{{Postgresql::Database}}"
               POSTGRES_USER: "{{Postgresql::Username}}"
               POSTGRES_PASSWORD: "{{Postgresql::Password}}"
+              
       - name: "SQLite"
-        contracts:
-          - type: "Container"
-            imageName: "ghcr.io/mealie-recipes/mealie:latest"
-            env:
-              ALLOW_SIGNUP: "false"
-              PUID: "1000"
-              PGID: "1000"
-              TZ: "Etc/UTC"
               
   - type: "HttpEndpoint"
     port: 9000
     
-  - type: "Mount"
-    volume: "data"
-    path: "/app/data"

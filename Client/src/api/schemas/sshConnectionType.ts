@@ -5,9 +5,10 @@
  * OpenAPI spec version: 1.0
  */
 
-export type MountType = (typeof MountType)[keyof typeof MountType];
+export type SshConnectionType =
+  (typeof SshConnectionType)[keyof typeof SshConnectionType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const MountType = {
-  Mount: "Mount",
+export const SshConnectionType = {
+  SshConnection: "SshConnection",
 } as const;

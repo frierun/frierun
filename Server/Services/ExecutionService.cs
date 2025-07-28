@@ -16,7 +16,7 @@ public class ExecutionService(
     public ExecutionPlan Create(Package package)
     {
         var branchesStack = new Stack<(DiscoveryGraph graph, Queue<ContractInitializeResult> queue)>();
-        var discoveryGraph = new DiscoveryGraph();
+        DiscoveryGraph? currentGraph = new DiscoveryGraph();
         var applicationName = GetApplicationName(package);
 
         ContractId? nextId = package.Id;
@@ -27,26 +27,25 @@ public class ExecutionService(
             nextContract ??= contractRegistry.CreateContract(nextId);
 
             var branches = new Queue<ContractInitializeResult>(DiscoverContract(nextContract, applicationName));
-            if (branches.Count == 0)
+            if (branches.Count != 0)
             {
-                // no variants found for that contract, rollback to the previous branching point
-                if (branchesStack.Count == 0)
+                branchesStack.Push((currentGraph, branches));
+            }
+
+            while (true)
+            {
+                (currentGraph, var branch) = PopNextBranch(branchesStack);
+                if (branch == null || currentGraph == null)
                 {
                     throw new HandlerNotFoundException(nextContract);
                 }
 
-                (discoveryGraph, branches) = branchesStack.Pop();
+                if (currentGraph.Apply(branch))
+                {
+                    break;
+                }
             }
-
-            var branch = branches.Dequeue();
-
-            if (branches.Count > 0)
-            {
-                branchesStack.Push((new DiscoveryGraph(discoveryGraph), branches));
-            }
-
-            discoveryGraph.Apply(branch);
-            (nextId, nextContract) = discoveryGraph.Next();
+            (nextId, nextContract) = currentGraph.Next();
         }
 
         var alternatives = branchesStack
@@ -54,9 +53,33 @@ public class ExecutionService(
             .Select(result => result.Contract)
             .ToList();
         
-        return new ExecutionPlan(discoveryGraph.Contracts, alternatives);
+        return new ExecutionPlan(currentGraph.Contracts, alternatives);
     }
 
+    /// <summary>
+    /// Pops the next branch from the stack.
+    /// </summary>
+    /// <returns>nulls if no more branches found</returns>
+    private (DiscoveryGraph? graph, ContractInitializeResult? branch) PopNextBranch(Stack<(DiscoveryGraph graph, Queue<ContractInitializeResult> queue)> branchesStack)
+    {
+        // no variants found for that contract, rollback to the previous branching point
+        if (branchesStack.Count == 0)
+        {
+            return (null, null);
+        }
+
+        var (graph, branches) = branchesStack.Pop();
+
+        var branch = branches.Dequeue();
+
+        if (branches.Count > 0)
+        {
+            branchesStack.Push((new DiscoveryGraph(graph), branches));
+        }
+
+        return (graph, branch);
+    }
+    
     /// <summary>
     /// Gets the application name from the package.
     /// </summary>
@@ -95,6 +118,7 @@ public class ExecutionService(
         
         return handlerRegistry
             .GetHandlers(contract.GetType())
+            .Where(handler => contract.HandlerApplication == null || handler.Application?.Name == contract.HandlerApplication)
             .SelectMany(handler => handler.Initialize(contract, prefix ?? ""));
     }
 }

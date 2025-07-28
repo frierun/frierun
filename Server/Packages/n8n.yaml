@@ -4,39 +4,33 @@ shortDescription: "Building workflows/integrations"
 fullDescription: "Stop struggling with your scripts, start creating workflows 10X faster — with n8n"
 tags: [ "network" ]
 contracts:
+  - type: "Container"
+    imageName: "docker.n8n.io/n8nio/n8n:latest"
+    env:
+      VUE_APP_URL_BASE_API: "{{HttpEndpoint:5678:ResultHost}}"
+      WEBHOOK_URL: "{{HttpEndpoint:5678:Url}}"
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+      N8N_RUNNERS_ENABLED: "true"
+    mounts:
+      /home/node/.n8n: "data"
+ 
   - type: "Selector"
     name: "Database"
     options:
       - name: "PostgreSQL"
         contracts:
           - type: "Container"
-            imageName: "docker.n8n.io/n8nio/n8n:latest"
             env:
               DB_TYPE: "postgresdb"
               DB_POSTGRESDB_HOST: "{{Postgresql::Host}}"
               DB_POSTGRESDB_DATABASE: "{{Postgresql::Database}}"
               DB_POSTGRESDB_USER: "{{Postgresql::Username}}"
               DB_POSTGRESDB_PASSWORD: "{{Postgresql::Password}}"
-              VUE_APP_URL_BASE_API: "{{HttpEndpoint:5678:ResultHost}}"
-              WEBHOOK_URL: "{{HttpEndpoint:5678:Url}}"
-              N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
-              N8N_RUNNERS_ENABLED: "true"
+              
       - name: "SQLite"
-        contracts:
-          - type: "Container"
-            imageName: "docker.n8n.io/n8nio/n8n:latest"
-            env:
-              VUE_APP_URL_BASE_API: "{{HttpEndpoint:5678:ResultHost}}"
-              WEBHOOK_URL: "{{HttpEndpoint:5678:Url}}"
-              N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
-              N8N_RUNNERS_ENABLED: "true"
             
   - type: "HttpEndpoint"
     port: 5678
-    
-  - type: "Mount"
-    volume: "data"
-    path: "/home/node/.n8n"
     
   - type: "File"
     volume: "data"

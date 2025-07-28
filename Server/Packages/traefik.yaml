@@ -15,7 +15,7 @@ contracts:
       - "--entryPoints.websecure.address=:443"
       - "--certificatesresolvers.httpchallenge.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.tlschallenge.acme.tlschallenge=true"
-    requireDocker: true
+    mountDockerSocket: true
     
   - type: "PortEndpoint"
     name: "Web"

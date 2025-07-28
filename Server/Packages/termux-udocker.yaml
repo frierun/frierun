@@ -1,0 +1,7 @@
+﻿name: "termux-udocker"
+iconUrl: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/android.png"
+shortDescription: "Connection to Udocker on Termux"
+fullDescription: "Runs containers using Udocker on Termux"
+tags: [ "provider" ]
+contracts:
+  - type: "SshConnection"

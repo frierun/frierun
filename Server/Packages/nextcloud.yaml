@@ -6,43 +6,40 @@ fullDescription: "Store your documents, calendar, contacts, and photos securely 
 tags: [ "storage" ]
 applicationDescription: "Login: admin\nPassword: {{Password::Value}}"
 contracts:
+  - type: "Container"
+    imageName: "nextcloud:latest"
+    env:
+      NEXTCLOUD_ADMIN_USER: "admin"
+      NEXTCLOUD_ADMIN_PASSWORD: "{{Password::Value}}"
+    mounts:
+      /var/www/html: "data"
+ 
   - type: "Selector"
     name: "Database"
     options:
       - name: "MySQL"
         contracts:
           - type: "Container"
-            imageName: "nextcloud:latest"
             env:
               MYSQL_HOST: "{{Mysql::Host}}"
               MYSQL_DATABASE: "{{Mysql::Database}}"
               MYSQL_USER: "{{Mysql::Username}}"
               MYSQL_PASSWORD: "{{Mysql::Password}}"
-              NEXTCLOUD_ADMIN_USER: "admin"
-              NEXTCLOUD_ADMIN_PASSWORD: "{{Password::Value}}"
+              
       - name: "PostgreSQL"
         contracts:
           - type: "Container"
-            imageName: "nextcloud:latest"
             env:
               POSTGRES_HOST: "{{Postgresql::Host}}"
               POSTGRES_DB: "{{Postgresql::Database}}"
               POSTGRES_USER: "{{Postgresql::Username}}"
               POSTGRES_PASSWORD: "{{Postgresql::Password}}"
-              NEXTCLOUD_ADMIN_USER: "admin"
-              NEXTCLOUD_ADMIN_PASSWORD: "{{Password::Value}}"
+              
       - name: "SQLite"
         contracts:
           - type: "Container"
-            imageName: "nextcloud:latest"
             env:
               SQLITE_DATABASE: "nextcloud"
-              NEXTCLOUD_ADMIN_USER: "admin"
-              NEXTCLOUD_ADMIN_PASSWORD: "{{Password::Value}}"
               
   - type: "HttpEndpoint"
     port: 80
-    
-  - type: "Mount"
-    volume: "data"
-    path: "/var/www/html"

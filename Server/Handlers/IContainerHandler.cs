@@ -17,5 +17,5 @@ public interface IContainerHandler : IHandler
     /// <summary>
     /// Executes a command in the container.
     /// </summary>
-    Task<(string stdout, string stderr)> ExecInContainer(Container container, IList<string> command);
+    (string stdout, string stderr) ExecInContainer(Container container, IList<string> command);
 }

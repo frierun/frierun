@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
+using static Frierun.Server.Data.Merger;
 
 namespace Frierun.Server.Data;
 
@@ -17,19 +18,19 @@ public record PortEndpoint(
     
     public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");    
 
-    public override Contract With(Contract other)
-    {
-        if (other is not PortEndpoint endpoint || other.Id != Id)
-        {
-            throw new Exception("Invalid contract");
-        }
-        
-        return this with
-        {
-            ExternalPort = ExternalPort == 0 ? endpoint.ExternalPort : ExternalPort,
-        };
-    }
-    
     [JsonIgnore]
     public string Url => $"{Protocol.ToString().ToLower()}://{ExternalIp}:{ExternalPort}";
+    
+    public override Contract Merge(Contract other)
+    {
+        var contract = EnsureSame(this, other);
+
+        return MergeCommon(this, contract) with
+        {
+            Port = OnlyOne(Port, contract.Port, port => port == 0),
+            Container = OnlyOne(Container, contract.Container),
+            ExternalPort = OnlyOne(ExternalPort, contract.ExternalPort, port => port == 0),
+            ExternalIp = OnlyOne(ExternalIp, contract.ExternalIp),
+        };
+    }
 }

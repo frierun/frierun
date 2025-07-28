@@ -3,50 +3,49 @@ import {Selector} from "@/api/schemas";
 
 type Props = {
     contract: Selector;
-    updateContract: (contract: Selector) => void;
+    variants: Selector[];
+    updateContract: (contract: Selector, isRefetch?: boolean) => void;
 }
 
-export default function SelectorForm({contract, updateContract}: Props) {
-    const [value, setValue] = useState(contract.value ?? '');
+function VariantName(contract: Selector): string {
+    return contract.value ?? "";
+}
 
+export default function SelectorForm({contract, variants, updateContract}: Props) {
+    const [selected, setSelected] = useState<number>(0);
     useEffect(() => {
-        setValue(contract.value ?? '');
-    }, [contract]);
+        setSelected(0);
+    }, [variants]);
 
-    const updateValue = (value: string) => {
-        setValue(value);
-        updateContract({
-            ...contract,
-            value: value
-        });
+    if(variants.length === 0)
+    {
+        return <></>;
     }
 
     return (
-        <>
-            <div>
-                <div className={"my-1.5"}>
-                    <label className={"inline-block w-48"}>
-                        Selector {contract.name}
-                    </label>
-                </div>
-                <fieldset className={"flex gap-4"}>
-                    {contract.options.map(option => (
-                        <div key={option.name}>
-                            <input
-                                type="radio"
-                                id={`Selector${contract.name}${option.name}Radio`}
-                                value={option.name}
-                                checked={value === option.name}
-                                onChange={() => { updateValue(option.name); }}
-                            >
-                            </input>
-                            <label htmlFor={`Selector${contract.name}${option.name}Radio`}>
-                                {option.name}
-                            </label>
-                        </div>
-                    ))}
-                </fieldset>
+        <div className="card">
+            <div className={"my-1.5"}>
+                <label className={"inline-block w-48"}>
+                    Selector
+                </label>
+                {contract.name}
             </div>
-        </>
+            <fieldset className="flex gap-4">
+                {variants.map((variant, idx) => (
+                    <label key={idx} className="flex items-center gap-2">
+                        <input
+                            type="radio"
+                            value={idx}
+                            checked={idx === selected}
+                            onChange={() => {
+                                setSelected(idx);
+                                updateContract(variant, true);
+                            }}
+                        />
+                        {VariantName(variant)}
+                    </label>
+                ))}
+            </fieldset>
+        </div>
     );
 }

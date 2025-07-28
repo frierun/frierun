@@ -19,7 +19,7 @@ public sealed class PackageFactory : Faker<Package>
         RuleFor(p => p.ShortDescription, f => f.Lorem.Sentence());
         RuleFor(p => p.FullDescription, f => f.Lorem.Paragraph());
         RuleFor(p => p.Tags, f => new List<string>(f.Lorem.Words()));
-        RuleFor(p => p.Contracts, _ => Array.Empty<Contract>());
+        RuleFor(p => p.Contracts, _ => []);
         FinishWith((_, package) => packageRegistry.Packages.Add(package));
     }
 }

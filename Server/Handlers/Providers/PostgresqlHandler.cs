@@ -32,9 +32,10 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
             yield return new ContractInitializeResult(
                 contract with
                 {
+                    Handler = this,
                     Username = "postgres",
                     Password = _rootPassword,
-                    Handler = this,
+                    Host = _container.ContainerName,
                     DependsOn = contract.DependsOn.Append(contract.Network)
                 }
             );
@@ -50,12 +51,15 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
                 ),
                 Username = contract.Username ?? FindUniqueName(
                     prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
-                    c => c.Username
+                    c => c.Username,
+                    "",
+                    ["postgres"]
                 ),
                 Password = contract.Password ?? RandomNumberGenerator.GetString(
                     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
                     16
                 ),
+                Host = _container.ContainerName,
                 DependsOn = contract.DependsOn.Append(contract.Network)
             }
         );
@@ -69,12 +73,7 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
 
         var network = plan.GetContract(contract.Network);
         Debug.Assert(network.Installed);
-
-        if (contract.Host != null && contract.Host != _container.ContainerName)
-        {
-            throw new Exception("Host cannot be set");
-        }
-
+        
         if (contract.NetworkName != null && contract.NetworkName != network.NetworkName)
         {
             throw new Exception("NetworkName cannot be set");
@@ -86,17 +85,11 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
         {
             return contract with
             {
-                Host = _container.ContainerName,
                 NetworkName = network.NetworkName
             };
         }
 
         Debug.Assert(contract.Database != null);
-
-        if (contract.Username == "postgres")
-        {
-            throw new Exception("Username cannot be root");
-        }
 
         RunSql(
             [
@@ -108,7 +101,6 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
 
         return contract with
         {
-            Host = _container.ContainerName,
             NetworkName = network.NetworkName
         };
     }
@@ -131,14 +123,14 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
     }
 
     /// <summary>
-    /// Run sql with admin privileges on the installed postgresql server
+    /// Runs the SQL query with admin privileges on the installed postgresql server
     /// </summary>
     private void RunSql(IList<string> sqlList)
     {
         var command = new List<string> { "psql", "-U", "postgres" };
         command.AddRange(sqlList.SelectMany(sql => new[] { "-c", sql }));
 
-        var result = _container.ExecInContainer(command).Result;
+        var result = _container.ExecInContainer(command);
 
         logger.LogDebug(
             "Executed sql: {Sql}\nStdout: {Stdout}\nStderr: {Stderr}",

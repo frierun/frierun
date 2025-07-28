@@ -8,14 +8,10 @@ tags: [ "storage" ]
 contracts:
   - type: "Container"
     imageName: "emby/embyserver:latest"
+    mounts:
+      /mnt/media: "media"
+      /config: "config"
     
   - type: "HttpEndpoint"
     port: 8096
     
-  - type: "Mount"
-    volume: "media"
-    path: "/mnt/media"
-    
-  - type: "Mount"
-    volume: "config"
-    path: "/config"

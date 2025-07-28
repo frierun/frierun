@@ -3,6 +3,7 @@ using Autofac;
 using Autofac.Features.Indexed;
 using Frierun.Server.Data;
 using Frierun.Server.Handlers;
+using Frierun.Server.Handlers.Docker;
 
 namespace Frierun.Server;
 
@@ -173,6 +174,11 @@ public class HandlerRegistry : IDisposable
         {
             return true;
         }
+
+        if (handlerType == typeof(NewVolumeHandler))
+        {
+            return true;
+        }
         
         if (contractType.Name.StartsWith("Fake"))
         {
@@ -183,7 +189,7 @@ public class HandlerRegistry : IDisposable
     }
 
     /// <summary>
-    /// Gets possible handlers for the resource type
+    /// Gets possible handlers for the contract type
     /// </summary>
     public IEnumerable<IHandler> GetHandlers(Type contractType)
     {
@@ -203,6 +209,9 @@ public class HandlerRegistry : IDisposable
         }
     }
 
+    /// <summary>
+    /// Gets specific handler
+    /// </summary>
     public IHandler? GetHandler(string typeName, string? applicationName = null)
     {
         lock (_lock)

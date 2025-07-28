@@ -6,10 +6,8 @@ tags: [ "dashboard" ]
 contracts:
   - type: "Container"
     imageName: "lissy93/dashy:latest"
+    mounts: 
+      /app/user-data: "data"
     
   - type: "HttpEndpoint"
     port: 8080
-    
-  - type: "Mount"
-    volume: "data"
-    path: "/app/user-data"

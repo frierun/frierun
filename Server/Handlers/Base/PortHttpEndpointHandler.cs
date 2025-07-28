@@ -35,7 +35,7 @@ public class PortHttpEndpointHandler : Handler<HttpEndpoint>
     private static PortEndpoint CreatePortEndpoint(HttpEndpoint contract)
     {
         return new PortEndpoint(
-            Protocol.Tcp, contract.Port, Container: contract.Container, ExternalPort: 80
+            Protocol.Tcp, contract.Port, Container: contract.Container
         );
     }
 }

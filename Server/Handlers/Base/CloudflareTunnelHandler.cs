@@ -90,7 +90,7 @@ public class CloudflareTunnelHandler : Handler<CloudflareTunnel>
         }
 
         var container = plan.GetContract(contract.Container);
-        plan.UpdateContract(
+        plan.ReplaceContract(
             container with
             {
                 Command = ["tunnel", "--no-autoupdate", "run", "--token", tunnel.token]

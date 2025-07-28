@@ -12,10 +12,11 @@ public class LocalPathHandler(Application application) : Handler<Volume>(applica
             yield break;
         }
         
-        if (contract.LocalPath != null)
+        yield return new ContractInitializeResult(contract with
         {
-            yield return new ContractInitializeResult(contract with { Handler = this });
-        }
+            LocalPath = contract.LocalPath ?? $"/data/{prefix}/{contract.Name}",
+            Handler = this
+        });
     }
 
     public override Volume Install(Volume contract, ExecutionPlan plan)

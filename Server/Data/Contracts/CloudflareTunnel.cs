@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using static Frierun.Server.Data.Merger;
 
 namespace Frierun.Server.Data;
 
@@ -20,16 +21,18 @@ public record CloudflareTunnel(
 
     public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");
     
-    public override Contract With(Contract other) 
+    public override Contract Merge(Contract other)
     {
-        if (other is not CloudflareTunnel cloudflareTunnel || other.Id != Id)
-        {
-            throw new Exception("Invalid contract");
-        }
+        var contract = EnsureSame(this, other);
 
-        return this with
+        return MergeCommon(this, other) with
         {
-            AccountId = AccountId ?? cloudflareTunnel.AccountId
+            AccountId = OnlyOne(AccountId, contract.AccountId),
+            CloudflareApiConnection = OnlyOne(CloudflareApiConnection, contract.CloudflareApiConnection),
+            Container = OnlyOne(Container, contract.Container),
+            TunnelId = OnlyOne(TunnelId, contract.TunnelId),
+            TunnelName = OnlyOne(TunnelName, contract.TunnelName),
+            Token = OnlyOne(Token, contract.Token)
         };
     }
 }

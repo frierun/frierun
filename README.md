@@ -72,6 +72,10 @@ podman run -d \
   ghcr.io/frierun/frierun:latest
 ```
 
+## Android
+
+See [Termux documentation](/docs/Termux.md)
+
 # Usage
 
 Open your browser and go to `http://localhost:8080`.

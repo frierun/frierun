@@ -10,6 +10,10 @@ contracts:
     imageName: "plexinc/pms-docker:latest"
     env:
       PLEX_CLAIM: "{{Parameter:PlexClaim:Value}}"
+    mounts:
+      /config: "database"
+      /transcode: "transcode"
+      /data: "media"
 
   - type: "HttpEndpoint"
     port: 32400
@@ -41,15 +45,3 @@ contracts:
   - type: "PortEndpoint"
     port: 32414
     protocol: "udp"
-
-  - type: "Mount"
-    volume: "database"
-    path: "/config"
-
-  - type: "Mount"
-    volume: "transcode"
-    path: "/transcode"
-
-  - type: "Mount"
-    volume: "media"
-    path: "/data"

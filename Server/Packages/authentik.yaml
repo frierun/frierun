@@ -16,6 +16,9 @@ contracts:
       AUTHENTIK_POSTGRESQL__USER: "{{Postgresql::Username}}"
       AUTHENTIK_POSTGRESQL__PASSWORD: "{{Postgresql::Password}}"
       AUTHENTIK_SECRET_KEY: "{{Password:SecretKey:Value}}"
+    mounts:
+      /media: "media"
+      
   - type: "Container"
     name: "worker"
     imageName: "ghcr.io/goauthentik/server:latest"
@@ -27,20 +30,12 @@ contracts:
       AUTHENTIK_POSTGRESQL__USER: "{{Postgresql::Username}}"
       AUTHENTIK_POSTGRESQL__PASSWORD: "{{Postgresql::Password}}"
       AUTHENTIK_SECRET_KEY: "{{Password:SecretKey:Value}}"
-    requireDocker: true
+    mounts:
+      /media: "media"
+      /certs: "certs"
+    mountDockerSocket: true
+    
   - type: "HttpEndpoint"
     name: "frontend"
     container: "server"
     port: 9000
-  - type: "Mount"
-    volume: "media"
-    container: "server"
-    path: "/media"
-  - type: "Mount"
-    volume: "media"
-    container: "worker"
-    path: "/media"
-  - type: "Mount"
-    volume: "certs"
-    container: "worker"
-    path: "/certs"

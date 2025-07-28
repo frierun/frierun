@@ -24,14 +24,15 @@ public abstract record Contract<THandler>(
 [JsonDerivedType(typeof(CloudflareApiConnection), nameof(CloudflareApiConnection))]
 [JsonDerivedType(typeof(CloudflareTunnel), nameof(CloudflareTunnel))]
 [JsonDerivedType(typeof(Container), nameof(Container))]
+[JsonDerivedType(typeof(Daemon), nameof(Daemon))]
 [JsonDerivedType(typeof(Dependency), nameof(Dependency))]
 [JsonDerivedType(typeof(DockerApiConnection), nameof(DockerApiConnection))]
 [JsonDerivedType(typeof(Domain), nameof(Domain))]
 [JsonDerivedType(typeof(File), nameof(File))]
 [JsonDerivedType(typeof(HttpEndpoint), nameof(HttpEndpoint))]
-[JsonDerivedType(typeof(Mount), nameof(Mount))]
 [JsonDerivedType(typeof(Mysql), nameof(Mysql))]
 [JsonDerivedType(typeof(Network), nameof(Network))]
+[JsonDerivedType(typeof(Optional), nameof(Optional))]
 [JsonDerivedType(typeof(Package), nameof(Package))]
 [JsonDerivedType(typeof(Parameter), nameof(Parameter))]
 [JsonDerivedType(typeof(Password), nameof(Password))]
@@ -39,6 +40,7 @@ public abstract record Contract<THandler>(
 [JsonDerivedType(typeof(Postgresql), nameof(Postgresql))]
 [JsonDerivedType(typeof(Redis), nameof(Redis))]
 [JsonDerivedType(typeof(Selector), nameof(Selector))]
+[JsonDerivedType(typeof(SshConnection), nameof(SshConnection))]
 [JsonDerivedType(typeof(Substitute), nameof(Substitute))]
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
 public abstract record Contract(
@@ -46,13 +48,14 @@ public abstract record Contract(
     bool Installed = false,
     IEnumerable<ContractId>? DependsOn = null,
     IEnumerable<ContractId>? DependencyOf = null,
-    Lazy<IHandler?>? LazyHandler = null
+    Lazy<IHandler?>? LazyHandler = null,
+    [property: JsonIgnore] string? HandlerApplication = null
 )
 {
     [JsonIgnore] public ContractId Id => ContractId.Create(GetType(), Name);
 
-    [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = DependsOn ?? Array.Empty<ContractId>();
-    [JsonIgnore] public IEnumerable<ContractId> DependencyOf { get; init; } = DependencyOf ?? Array.Empty<ContractId>();
+    [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = DependsOn ?? [];
+    [JsonIgnore] public IEnumerable<ContractId> DependencyOf { get; init; } = DependencyOf ?? [];
 
     [JsonPropertyName("handler")]
     [JsonInclude]
@@ -67,10 +70,10 @@ public abstract record Contract(
 
     public virtual bool Installed { get; init; } = Installed;
 
-    public virtual Contract With(Contract other)
-    {
-        throw new Exception("Not implemented");
-    }
+    /// <summary>
+    /// Merges contracts restrictions of the same type 
+    /// </summary>
+    public abstract Contract Merge(Contract other);
 
     public static implicit operator ContractId(Contract contract) => contract.Id;
 

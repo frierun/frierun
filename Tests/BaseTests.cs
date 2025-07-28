@@ -9,6 +9,7 @@ using Frierun.Server.Data;
 using Frierun.Server.Handlers;
 using Frierun.Tests.Handlers;
 using Microsoft.Extensions.DependencyInjection;
+using Renci.SshNet;
 using Substitute = NSubstitute.Substitute;
 
 namespace Frierun.Tests;
@@ -19,6 +20,8 @@ public abstract class BaseTests
     private ContainerBuilder? ContainerBuilder { get; set; }
     protected IDockerClient DockerClient => Handler<FakeDockerApiConnectionHandler>().Client;
     protected ICloudflareClient CloudflareClient => Handler<FakeCloudflareApiConnectionHandler>().Client;
+    protected ISshClient SshClient => Handler<FakeSshConnectionHandler>().SshClient;
+    protected ISftpClient SftpClient => Handler<FakeSshConnectionHandler>().SftpClient;
 
     /// <summary>
     /// Resolve object from the provider.
@@ -92,6 +95,12 @@ public abstract class BaseTests
                         .OnlyIf(
                             registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(ICloudflareApiConnectionHandler)))
                         );
+                    b.RegisterType<FakeSshConnectionHandler>()
+                        .AsImplementedInterfaces()
+                        .SingleInstance()
+                        .OnlyIf(
+                            registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(ISshConnectionHandler)))
+                        );
                 };
             }
         );
@@ -100,12 +109,12 @@ public abstract class BaseTests
     }
     
     /// <summary>
-    /// Resolve handler of specified type
+    /// Resolve handler of the specified type
     /// </summary> 
-    protected T Handler<T>()
+    protected T Handler<T>(Application? application = null)
         where T : IHandler
     {
-        var handler = Resolve<HandlerRegistry>().GetHandler(typeof(T).Name);
+        var handler = Resolve<HandlerRegistry>().GetHandler(typeof(T).Name, application?.Name);
         if (handler is not T castedHandler)
         {
             throw new Exception($"Handler {typeof(T).Name} not found");
@@ -120,11 +129,11 @@ public abstract class BaseTests
     protected Faker<T> Factory<T>()
         where T : class
     {
-        return Resolve<Faker<T>>().Clone();
+        return Resolve<Faker<T>>();
     }
 
     /// <summary>
-    /// Create mock service and registers it in the container.
+    /// Create a mock service and registers it in the container.
     /// </summary>
     protected T Mock<T, TService>(object?[]? constructorArguments = null)
         where T : class, TService
@@ -147,7 +156,7 @@ public abstract class BaseTests
         if (overrides != null)
         {
             var overridePackage = new Package(name) { Contracts = overrides };
-            package = (Package)package.With(overridePackage);
+            package = (Package)package.Merge(overridePackage);
         }
 
         return InstallPackage(package);

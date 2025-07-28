@@ -7,7 +7,7 @@ public interface IHandler
     public Application? Application { get; }
     
     /// <summary>
-    /// Returns all possible ways to initializes contract
+    /// Returns all possible ways to initialize contract
     /// </summary>
     public IEnumerable<ContractInitializeResult> Initialize(Contract contract, string prefix);
 

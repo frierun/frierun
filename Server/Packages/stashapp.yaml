@@ -13,18 +13,11 @@ contracts:
       STASH_METADATA: "/cache/metadata/"
       STASH_CACHE: "/cache/cache/"
       STASH_BLOBS: "/cache/blobs/"
+    mounts:
+      /data: "data"
+      /cache: "cache"
+      /root/.stash: "config"
       
   - type: "HttpEndpoint"
     port: 9999
     
-  - type: "Mount"
-    volume: "data"
-    path: "/data"
-    
-  - type: "Mount"
-    volume: "cache"
-    path: "/cache"
-    
-  - type: "Mount"
-    volume: "config"
-    path: "/root/.stash"

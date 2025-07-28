@@ -10,6 +10,8 @@ contracts:
     imageName: "technitium/dns-server:latest"
     env:
       DNS_SERVER_ADMIN_PASSWORD: "{{Password::Value}}"
+    mounts:
+      /etc/dns: "config"
       
   - type: "HttpEndpoint"
     port: 5380
@@ -22,6 +24,3 @@ contracts:
     port: 53
     protocol: "udp"
     
-  - type: "Mount"
-    volume: "config"
-    path: "/etc/dns"

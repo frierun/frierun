@@ -4,11 +4,14 @@ iconUrl: "/packages/frierun.png"
 contracts:
   - type: "Container"
     imageName: "ghcr.io/frierun/frierun:latest"
-    requireDocker: true
+    mounts:
+      /App/Frierun: "config"
+    
+  - type: "Optional"
+    name: "Docker socket"
+    contracts: 
+      - type: "Container"
+        mountDockerSocket: true
     
   - type: "HttpEndpoint"
     port: 8080
-    
-  - type: "Mount"
-    volume: "config"
-    path: "/App/Frierun"
