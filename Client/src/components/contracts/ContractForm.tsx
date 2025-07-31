@@ -1,5 +1,5 @@
-﻿import {Container, Domain, ExecutionPlanContractsItem, HttpEndpoint, Optional, Selector, Volume} from "@/api/schemas";
-import {useEffect, useState} from "react";
+﻿import {ExecutionPlanContractsItem} from "@/api/schemas";
+import React, {useEffect, useState} from "react";
 import HttpEndpointForm from "@/components/contracts/HttpEndpointForm.tsx";
 import DomainForm from "@/components/contracts/DomainForm.tsx";
 import VolumeForm from "@/components/contracts/VolumeForm.tsx";
@@ -7,8 +7,19 @@ import SelectorForm from "@/components/contracts/SelectorForm.tsx";
 import OptionalForm from "@/components/contracts/OptionalForm.tsx";
 import SshConnectionForm from "@/components/contracts/SshConnectionForm.tsx";
 import ContainerForm from "@/components/contracts/ContainerForm.tsx";
+import ParameterForm from "@/components/contracts/ParameterForm.tsx";
+import PortEndpointForm from "@/components/contracts/PortEndpointForm.tsx";
+import DockerApiConnectionForm from "@/components/contracts/DockerApiConnectionForm.tsx";
+import CloudflareApiConnectionForm from "@/components/contracts/CloudflareApiConnectionForm.tsx";
 
 export type Contract = ExecutionPlanContractsItem;
+
+export type ContractProps<TContract extends Contract> = {
+    contract: TContract;
+    variants: TContract[];
+    allContracts: Contract[];
+    updateContract: (contract: Contract, isRefetch?: boolean) => void;
+}
 
 type Props = {
     contract: Contract;
@@ -19,6 +30,26 @@ type Props = {
 
 const sameContract = (a: Contract, b: Contract) => {
     return a.type === b.type && a.name === b.name;
+}
+
+type ContractsByTypeName = {
+    [P in Contract['type']]: Extract<Contract, { type: P }>
+}
+type FormsByTypeName = {
+    [P in Contract['type']]: (props: ContractProps<ContractsByTypeName[P]>) => React.JSX.Element;
+}
+const contractForms: Partial<FormsByTypeName> = {
+    CloudflareApiConnection: CloudflareApiConnectionForm,
+    Container: ContainerForm,
+    DockerApiConnection: DockerApiConnectionForm,
+    Domain: DomainForm,
+    HttpEndpoint: HttpEndpointForm,
+    Optional: OptionalForm,
+    Parameter: ParameterForm,
+    PortEndpoint: PortEndpointForm,
+    Selector: SelectorForm,
+    SshConnection: SshConnectionForm,
+    Volume: VolumeForm,
 }
 
 export default function ContractForm({contract, alternatives, updateContract, allContracts}: Props) {
@@ -41,64 +72,19 @@ export default function ContractForm({contract, alternatives, updateContract, al
         return <></>
     }
 
-    switch (contract.type) {
-        case 'Container':
-            return (
-                <ContainerForm
-                    contract={contract}
-                    variants={variants as Container[]}
-                    updateContract={updateContract}
-                />
-            );
-        case 'Domain':
-            return (
-                <DomainForm
-                    contract={contract}
-                    variants={variants as Domain[]}
-                    updateContract={updateContract}
-                />
-            );
-        case 'HttpEndpoint':
-            return (
-                <HttpEndpointForm
-                    contract={contract}
-                    variants={variants as HttpEndpoint[]}
-                    updateContract={updateContract}
-                    allContracts={allContracts}
-                />
-            );
-        case 'Optional':
-            return (
-                <OptionalForm
-                    contract={contract}
-                    variants={variants as Optional[]}
-                    updateContract={updateContract}
-                />
-            );
-        case 'Selector':
-            return (
-                <SelectorForm
-                    contract={contract}
-                    variants={variants as Selector[]}
-                    updateContract={updateContract}
-                />
-            );
-        case 'SshConnection':
-            return (
-                <SshConnectionForm
-                    contract={contract}
-                    updateContract={updateContract}
-                />
-            );
-        case 'Volume':
-            return (
-                <VolumeForm
-                    contract={contract}
-                    variants={variants as Volume[]}
-                    updateContract={updateContract}
-                />
-            );
-        default:
-            return <></>
+    const ContractForm = contractForms[contract.type];
+    if (!ContractForm) {
+        return <></>;
     }
+
+    return (
+        <ContractForm
+            // @ts-expect-error contract is typed as never
+            contract={contract}
+            // @ts-expect-error variants are typed as never[]
+            variants={variants}
+            updateContract={updateContract}
+            allContracts={allContracts}
+        />
+    )
 }

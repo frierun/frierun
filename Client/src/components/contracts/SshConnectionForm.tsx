@@ -1,12 +1,9 @@
 ﻿import {useEffect, useState} from "react";
 import {SshConnection,} from "@/api/schemas";
+import {ContractProps} from "@/components/contracts/ContractForm.tsx";
+import BaseForm from "@/components/contracts/BaseForm.tsx";
 
-type Props = {
-    contract: SshConnection;
-    updateContract: (contract: SshConnection, isRefetch?: boolean) => void;
-}
-
-export default function SshConnectionForm({contract, updateContract}: Props) {
+export default function SshConnectionForm({contract, updateContract}: ContractProps<SshConnection>) {
     const [host, setHost] = useState('');
     const [port, setPort] = useState(22);
     const [username, setUsername] = useState('');
@@ -19,14 +16,19 @@ export default function SshConnectionForm({contract, updateContract}: Props) {
         setPassword(contract.password ?? '');
     }, [contract]);
     
+    const updateContractValues = (changed: Partial<SshConnection>) => {
+        updateContract({
+            ...contract,
+            host,
+            port,
+            username,
+            password,
+            ...changed
+        });
+    }
+
     return (
-        <div className="card">
-            <div className={"my-1.5"}>
-                <label className={"inline-block w-48"}>
-                    Ssh connection
-                </label>
-                {contract.name}
-            </div>
+        <BaseForm contract={contract} updateContract={updateContract}>
             <div className={"my-1.5"}>
                 <label className={"inline-block w-48"}>
                     Host:
@@ -36,12 +38,8 @@ export default function SshConnectionForm({contract, updateContract}: Props) {
                     value={host}
                     onChange={e => {
                         setHost(e.target.value);
-                        updateContract({
-                            ...contract,
+                        updateContractValues({
                             host: e.target.value,
-                            port,
-                            username,
-                            password,
                         });
                     }}
                 />
@@ -57,12 +55,8 @@ export default function SshConnectionForm({contract, updateContract}: Props) {
                         let port = parseInt(e.target.value);
                         port = isNaN(port) ? 0 : port;
                         setPort(port);
-                        updateContract({
-                            ...contract,
-                            host,
+                        updateContractValues({
                             port,
-                            username,
-                            password
                         });
                     }}
                 />
@@ -76,12 +70,8 @@ export default function SshConnectionForm({contract, updateContract}: Props) {
                     value={username}
                     onChange={e => {
                         setUsername(e.target.value);
-                        updateContract({
-                            ...contract,
-                            host,
-                            port,
+                        updateContractValues({
                             username: e.target.value,
-                            password
                         });
                     }}
                 />
@@ -95,16 +85,12 @@ export default function SshConnectionForm({contract, updateContract}: Props) {
                     value={password}
                     onChange={e => {
                         setPassword(e.target.value);
-                        updateContract({
-                            ...contract,
-                            host,
-                            port,
-                            username,
+                        updateContractValues({
                             password: e.target.value
                         });
                     }}
                 />
             </div>
-        </div>
+        </BaseForm>
     );
 }

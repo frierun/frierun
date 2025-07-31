@@ -1,12 +1,9 @@
 ﻿import {useEffect, useState} from "react";
 import {Parameter} from "@/api/schemas";
+import {ContractProps} from "@/components/contracts/ContractForm.tsx";
+import BaseForm from "@/components/contracts/BaseForm.tsx";
 
-type Props = {
-    contract: Parameter;
-    updateContract: (contract: Parameter) => void;
-}
-
-export default function ParameterForm({contract, updateContract}: Props) {
+export default function ParameterForm({contract, updateContract}: ContractProps<Parameter>) {
     const [value, setValue] = useState(contract.defaultValue ?? '');
 
     useEffect(() => {
@@ -22,23 +19,19 @@ export default function ParameterForm({contract, updateContract}: Props) {
     }
 
     return (
-        <>
-            <div>
-                <div className={"my-1.5"}>
-                    <label className={"inline-block w-48"}>
-                        Parameter {contract.name}
-                    </label>
-                </div>
-                <label className={"inline-block w-48"}>
-                    Value:
-                </label>
-                <input
-                    value={value}
-                    onChange={e => {
-                        updateValue(e.target.value);
-                    }}
-                />
-            </div>
-        </>
+        <BaseForm
+            contract={contract}
+            updateContract={updateContract}
+        >
+            <label className={"inline-block w-48"}>
+                Value:
+            </label>
+            <input
+                value={value}
+                onChange={e => {
+                    updateValue(e.target.value);
+                }}
+            />
+        </BaseForm>
     );
 }

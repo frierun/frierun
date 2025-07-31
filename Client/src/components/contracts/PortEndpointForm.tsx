@@ -1,18 +1,15 @@
 ﻿import {useEffect, useState} from "react";
 import {PortEndpoint} from "@/api/schemas";
+import {ContractProps} from "@/components/contracts/ContractForm.tsx";
+import BaseForm from "@/components/contracts/BaseForm.tsx";
 
-type Props = {
-    contract: PortEndpoint;
-    updateContract: (contract: PortEndpoint) => void;
-}
-
-export default function PortEndpointForm({contract, updateContract}: Props) {
+export default function PortEndpointForm({contract, updateContract}: ContractProps<PortEndpoint>) {
     const [port, setPort] = useState(contract.externalPort);
 
     useEffect(() => {
         setPort(contract.externalPort);
     }, [contract]);
-    
+
     const updatePort = (port: string) => {
         let intPort = parseInt(port);
         if (isNaN(intPort)) {
@@ -21,7 +18,7 @@ export default function PortEndpointForm({contract, updateContract}: Props) {
         if (intPort < 0 || intPort > 65535) {
             intPort = 0;
         }
-        
+
         setPort(intPort);
         updateContract({
             ...contract,
@@ -30,23 +27,20 @@ export default function PortEndpointForm({contract, updateContract}: Props) {
     }
 
     return (
-        <>
-            <div>
-                <div className={"my-1.5"}>
-                    <label className={"inline-block w-48"}>
-                        {contract.protocol} endpoint to port 
-                    </label>
-                    {contract.port}
-                    {contract.container && ` in container ${contract.container}`}
-                </div>
-                <label className={"inline-block w-48"}>
-                    Destination port:
-                </label>
-                <input
-                    value={port}
-                    onChange={e => { updatePort(e.target.value); }}
-                />
-            </div>
-        </>
+        <BaseForm
+            contract={contract}
+            updateContract={updateContract}
+            contractName={contract => `from ${contract.port.toString()}/${contract.protocol}` + (contract.container && ` in container ${contract.container}`)}
+        >
+            <label className={"inline-block w-48"}>
+                Destination port:
+            </label>
+            <input
+                value={port}
+                onChange={e => {
+                    updatePort(e.target.value);
+                }}
+            />
+        </BaseForm>
     );
 }

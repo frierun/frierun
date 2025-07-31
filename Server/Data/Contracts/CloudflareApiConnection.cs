@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Frierun.Server.Handlers;
 using static Frierun.Server.Data.Merger;
 
@@ -9,13 +10,14 @@ public record CloudflareApiConnection(
     string? Token = null
 ) : Contract<ICloudflareApiConnectionHandler>(Name ?? ""), IHasStrings
 {
-    public string Token { get; init; } = Token ?? "";
+    [MemberNotNullWhen(true, nameof(Token))]
+    public override bool Installed { get; init; }
     
     public Contract ApplyStringDecorator(Func<string, string> decorator)
     {
         return this with
         {
-            Token = decorator(Token)
+            Token = Token != null ? decorator(Token) : Token
         };
     }
 

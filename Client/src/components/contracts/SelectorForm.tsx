@@ -1,51 +1,14 @@
-﻿import {useEffect, useState} from "react";
-import {Selector} from "@/api/schemas";
+﻿import {Selector} from "@/api/schemas";
+import {ContractProps} from "@/components/contracts/ContractForm.tsx";
+import BaseForm from "@/components/contracts/BaseForm.tsx";
 
-type Props = {
-    contract: Selector;
-    variants: Selector[];
-    updateContract: (contract: Selector, isRefetch?: boolean) => void;
-}
-
-function VariantName(contract: Selector): string {
-    return contract.value ?? "";
-}
-
-export default function SelectorForm({contract, variants, updateContract}: Props) {
-    const [selected, setSelected] = useState<number>(0);
-    useEffect(() => {
-        setSelected(0);
-    }, [variants]);
-
-    if(variants.length === 0)
-    {
-        return <></>;
-    }
-
+export default function SelectorForm({contract, variants, updateContract}: ContractProps<Selector>) {
     return (
-        <div className="card">
-            <div className={"my-1.5"}>
-                <label className={"inline-block w-48"}>
-                    Selector
-                </label>
-                {contract.name}
-            </div>
-            <fieldset className="flex gap-4">
-                {variants.map((variant, idx) => (
-                    <label key={idx} className="flex items-center gap-2">
-                        <input
-                            type="radio"
-                            value={idx}
-                            checked={idx === selected}
-                            onChange={() => {
-                                setSelected(idx);
-                                updateContract(variant, true);
-                            }}
-                        />
-                        {VariantName(variant)}
-                    </label>
-                ))}
-            </fieldset>
-        </div>
+        <BaseForm
+            contract={contract}
+            variants={variants}
+            variantName={contract => contract.value ?? ""}
+            updateContract={updateContract}
+        />
     );
 }
