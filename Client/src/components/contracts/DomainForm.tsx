@@ -18,8 +18,7 @@ export default function DomainForm({contract, variants, updateContract}: Contrac
                     Domain:
                 </label>
                 <input
-                    value={subdomain}
-                    onChange={e => {
+                    value={subdomain} onChange={e => {
                         setSubdomain(e.target.value);
                         updateContract({
                             ...contract,

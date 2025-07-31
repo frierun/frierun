@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Data;
+﻿using System.Diagnostics;
+using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
@@ -28,6 +29,8 @@ public class CloudflareApiConnectionHandler : Handler<CloudflareApiConnection>, 
 
     public ICloudflareClient CreateClient(CloudflareApiConnection contract)
     {
+        Debug.Assert(contract.Installed);
+        
         return new CloudflareClient(contract.Token);
     }
 }

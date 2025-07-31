@@ -9,6 +9,8 @@ import SshConnectionForm from "@/components/contracts/SshConnectionForm.tsx";
 import ContainerForm from "@/components/contracts/ContainerForm.tsx";
 import ParameterForm from "@/components/contracts/ParameterForm.tsx";
 import PortEndpointForm from "@/components/contracts/PortEndpointForm.tsx";
+import DockerApiConnectionForm from "@/components/contracts/DockerApiConnectionForm.tsx";
+import CloudflareApiConnectionForm from "@/components/contracts/CloudflareApiConnectionForm.tsx";
 
 export type Contract = ExecutionPlanContractsItem;
 
@@ -37,7 +39,9 @@ type FormsByTypeName = {
     [P in Contract['type']]: (props: ContractProps<ContractsByTypeName[P]>) => React.JSX.Element;
 }
 const contractForms: Partial<FormsByTypeName> = {
+    CloudflareApiConnection: CloudflareApiConnectionForm,
     Container: ContainerForm,
+    DockerApiConnection: DockerApiConnectionForm,
     Domain: DomainForm,
     HttpEndpoint: HttpEndpointForm,
     Optional: OptionalForm,
