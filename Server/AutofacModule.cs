@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.CommandLine;
+using System.Reflection;
 using Autofac;
 using Docker.DotNet;
 using Frierun.Server.Data;
@@ -11,6 +12,11 @@ public class AutofacModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
+        // Commands
+        builder.RegisterType<Run>().AsSelf().SingleInstance();
+        builder.RegisterType<Init>().As<Command>().SingleInstance();
+        builder.RegisterType<Serve>().As<Command>().SingleInstance();
+        
         // Handlers
         builder.RegisterInstance<ProviderScopeBuilder>(
                 static builder =>

@@ -11,7 +11,7 @@ public class MysqlHandlerTests : TestWithDocker
     [InlineData("mariadb")]
     public async Task Install_MysqlContract_CredentialsAreCorrect(string packageName)
     {
-        var dbPackage = Services.GetRequiredService<PackageRegistry>().Find(packageName);
+        var dbPackage = Resolve<PackageRegistry>().Find(packageName);
         Assert.NotNull(dbPackage);
 
         var dbApplication = InstallPackage(dbPackage);
@@ -63,7 +63,7 @@ public class MysqlHandlerTests : TestWithDocker
     [InlineData("mariadb")]
     public async Task Install_MysqlAdminContract_CredentialsAreCorrect(string packageName)
     {
-        var dbPackage = Services.GetRequiredService<PackageRegistry>().Find(packageName);
+        var dbPackage = Resolve<PackageRegistry>().Find(packageName);
         Assert.NotNull(dbPackage);
 
         var dbApplication = InstallPackage(dbPackage);

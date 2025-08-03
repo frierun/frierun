@@ -24,7 +24,7 @@ public abstract class BaseTests
     protected ISftpClient SftpClient => Handler<FakeSshConnectionHandler>().SftpClient;
 
     /// <summary>
-    /// Resolve object from the provider.
+    /// Resolve an object from the provider.
     /// </summary>
     protected T Resolve<T>()
         where T : notnull

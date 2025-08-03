@@ -31,5 +31,5 @@ RUN chmod 0755 /entrypoint.sh
 
 EXPOSE 8080
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["dotnet", "Frierun.Server.dll"]
+CMD ["dotnet", "Frierun.Server.dll", "serve"]
 

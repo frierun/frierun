@@ -3,6 +3,7 @@
   "profiles": {
     "local": {
       "commandName": "Project",
+      "commandLineArgs": "serve",
       "dotnetRunMessages": true,
       "launchBrowser": false,
       "applicationUrl": "http://localhost:5000",
@@ -13,6 +14,7 @@
     },
     "external": {
       "commandName": "Project",
+      "commandLineArgs": "serve",
       "dotnetRunMessages": true,
       "launchBrowser": false,
       "applicationUrl": "http://0.0.0.0:5000",
@@ -20,6 +22,13 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy"
       }
+    },
+    "init": {
+      "commandName": "Project",
+      "commandLineArgs": "init",
+      "dotnetRunMessages": true,
+      "launchBrowser": false
     }
   }
 }
+

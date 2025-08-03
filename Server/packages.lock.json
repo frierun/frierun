@@ -78,6 +78,12 @@
           "Swashbuckle.AspNetCore.SwaggerGen": "7.1.0"
         }
       },
+      "System.CommandLine": {
+        "type": "Direct",
+        "requested": "[2.0.0-beta6.25358.103, )",
+        "resolved": "2.0.0-beta6.25358.103",
+        "contentHash": "YE8bPzXelsU4Fm4mHIFKwPHYJ1RT0hr1b5+tiyjFk4YYpA+WKzdYxrvdJVJIoC+2vbtffajA928Qe7xUj0WR4g=="
+      },
       "YamlDotNet": {
         "type": "Direct",
         "requested": "[16.3.0, )",
