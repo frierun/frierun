@@ -1,5 +1,4 @@
-﻿using System.CommandLine;
-using Autofac;
+﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Frierun.Server.Data;
 using Microsoft.AspNetCore.Antiforgery;
@@ -9,21 +8,18 @@ using Microsoft.OpenApi.Models;
 
 namespace Frierun.Server;
 
-public class Serve : Command
+public class Serve(ILifetimeScope root) : BaseCommand("serve", "Start webserver")
 {
-    private readonly ILifetimeScope _root;
-
-    public Serve(ILifetimeScope root) : base("serve", "Start webserver")
+    protected override void Execute()
     {
-        _root = root;
-        SetAction(_ => CreateWebApplication().Run());
+        CreateWebApplication().Run();
     }
 
     public IHost CreateWebApplication(Action<WebApplicationBuilder>? configure = null)
     {
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions { ApplicationName = "Frierun.Server" });
 
-        builder.Host.UseServiceProviderFactory(new AutofacChildLifetimeScopeServiceProviderFactory(_root));
+        builder.Host.UseServiceProviderFactory(new AutofacChildLifetimeScopeServiceProviderFactory(root));
 
         builder.Logging.ClearProviders();
         

@@ -12,7 +12,7 @@ public abstract class BaseTests : IDisposable
     
     protected BaseTests()
     {
-        _host = Program.CreateHost([]);
+        _host = Program.CreateHost();
 
         // clear state
         var state = Resolve<State>();

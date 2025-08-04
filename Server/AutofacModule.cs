@@ -13,8 +13,8 @@ public class AutofacModule : Module
     protected override void Load(ContainerBuilder builder)
     {
         // Commands
-        builder.RegisterType<Run>().AsSelf().SingleInstance();
-        builder.RegisterType<Init>().As<Command>().SingleInstance();
+        builder.RegisterType<Console>().AsSelf().SingleInstance();
+        builder.RegisterType<Discover>().As<Command>().SingleInstance();
         builder.RegisterType<Serve>().As<Command>().SingleInstance();
         
         // Handlers

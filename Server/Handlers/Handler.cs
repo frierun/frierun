@@ -9,6 +9,11 @@ public class Handler<TContract>(Application? application = null) : IHandler
     public required State State { protected get; init; }
     public Application? Application => application;
 
+    public virtual IEnumerable<TContract> Discover()
+    {
+        return [];
+    }
+
     public virtual IEnumerable<ContractInitializeResult> Initialize(TContract contract, string prefix)
     {
         yield return new ContractInitializeResult(
@@ -29,6 +34,13 @@ public class Handler<TContract>(Application? application = null) : IHandler
         // do nothing
     }
 
+    [DebuggerStepThrough]
+    IEnumerable<Contract> IHandler.Discover()
+    {
+        return Discover();
+    }
+
+    [DebuggerStepThrough]
     IEnumerable<ContractInitializeResult> IHandler.Initialize(Contract contract, string prefix)
     {
         return Initialize((TContract)contract, prefix);
