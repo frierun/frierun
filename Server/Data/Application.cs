@@ -7,8 +7,8 @@ public class Application
     public Package? Package { get; init; }
     public string? Url { get; init; }
     public string? Description { get; init; }
-    public IReadOnlyList<Contract> Contracts { get; init; } = Array.Empty<Contract>();
-    public IReadOnlyList<string> RequiredApplications { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<Contract> Contracts { get; init; } = [];
+    public IReadOnlyList<string> RequiredApplications { get; init; } = [];
     
     /// <summary>
     /// Get contract by id.

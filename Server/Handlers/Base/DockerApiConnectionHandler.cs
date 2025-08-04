@@ -1,24 +1,59 @@
 ﻿using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.Json.Nodes;
 using Docker.DotNet;
 using Frierun.Server.Data;
+using File = System.IO.File;
 
 namespace Frierun.Server.Handlers.Base;
 
 public class DockerApiConnectionHandler : Handler<DockerApiConnection>, IDockerApiConnectionHandler
 {
+    public override IEnumerable<DockerApiConnection> Discover()
+    {
+        var protocol = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "npipe" : "unix";
+        var paths = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? new[] { "//./pipe/docker_engine", "//./pipe/podman-machine-default" }
+            : new[] { "/var/run/docker.sock", "/run/podman/podman.sock" };
+
+        foreach (var filePath in paths)
+        {
+            var socketPath = $"{protocol}:{filePath}";
+            if (State.Contracts.OfType<DockerApiConnection>().Any(contract => contract.Path == socketPath))
+            {
+                continue;
+            }
+
+            if (!File.Exists(filePath))
+            {
+                continue;
+            }
+
+            DockerApiConnection? contract;
+            try
+            {
+                contract = Verify(
+                    new DockerApiConnection
+                    {
+                        Path = socketPath,
+                        Handler = this
+                    }
+                );
+            }
+            catch (Exception)
+            {
+                continue;
+            }
+
+            yield return contract;
+        }
+    }
+
     public override DockerApiConnection Install(DockerApiConnection contract, ExecutionPlan plan)
     {
         try
         {
-            var client = CreateClient(contract);
-            var version = client.System.GetVersionAsync().Result;
-            var isPodman = version.Components[0].Name == "Podman Engine";
-
-            return contract with
-            {
-                IsPodman = isPodman
-            };
+            return Verify(contract);
         }
         catch (Exception e)
         {
@@ -29,6 +64,21 @@ public class DockerApiConnectionHandler : Handler<DockerApiConnection>, IDockerA
                 e
             );
         }
+    }
+
+    /// <summary>
+    /// Verifies the contract socket path and used engine
+    /// </summary>
+    private DockerApiConnection Verify(DockerApiConnection contract)
+    {
+        var client = CreateClient(contract);
+        var version = client.System.GetVersionAsync().Result;
+        var isPodman = version.Components[0].Name == "Podman Engine";
+
+        return contract with
+        {
+            IsPodman = isPodman
+        };
     }
 
     public IDockerClient CreateClient(DockerApiConnection contract)
@@ -53,8 +103,8 @@ public class DockerApiConnectionHandler : Handler<DockerApiConnection>, IDockerA
             .GetType()
             .GetField("_endpointBaseUri", BindingFlags.NonPublic | BindingFlags.Instance)!
             .GetValue(client)!;
-        
-        var httpClient = (HttpClient)client 
+
+        var httpClient = (HttpClient)client
             .GetType()
             .GetField("_client", BindingFlags.NonPublic | BindingFlags.Instance)!
             .GetValue(client)!;
@@ -75,9 +125,9 @@ public class DockerApiConnectionHandler : Handler<DockerApiConnection>, IDockerA
 
         if (path.StartsWith("unix://"))
         {
-            path = path.Substring("unix://".Length);
+            path = path["unix://".Length..];
         }
-        
+
         return path;
     }
 }

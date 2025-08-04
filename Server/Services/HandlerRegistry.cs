@@ -17,7 +17,7 @@ public class HandlerRegistry : IDisposable
     private readonly Dictionary<Application, IList<IHandler>> _handlerPerApplication = new();
     private readonly Dictionary<Type, IList<IHandler>> _handlerPerType = new();
     private readonly Dictionary<(string type, string? application), IHandler> _handlers = new();
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
 
     public HandlerRegistry(
         State state,
@@ -55,6 +55,23 @@ public class HandlerRegistry : IDisposable
     }
 
     /// <summary>
+    /// Loads deferred applications
+    /// </summary>
+    private void LoadApplication(string? applicationName = null)
+    {
+        lock (_lock)
+        {
+            foreach (var application in _applicationsToLoad)
+            {
+                if (applicationName != null && applicationName != application.Name)
+                    continue;
+                
+                AddApplication(application);
+            }
+        }
+    }
+
+    /// <summary>
     /// Adds handlers from the application to the registry.
     /// </summary>
     private void AddApplication(Application application)
@@ -62,7 +79,7 @@ public class HandlerRegistry : IDisposable
         lock (_lock)
         {
             _applicationsToLoad.Remove(application);
-        
+
             var packageName = application.Package?.Name;
             if (packageName == null)
             {
@@ -104,7 +121,7 @@ public class HandlerRegistry : IDisposable
         lock (_lock)
         {
             _applicationsToLoad.Remove(application);
-        
+
             var packageName = application.Package?.Name;
             if (packageName == null)
             {
@@ -130,18 +147,18 @@ public class HandlerRegistry : IDisposable
             _applicationScopes.Remove(application);
         }
     }
-    
+
     /// <summary>
-    /// Adds handler to the registry.
+    /// Adds a handler to the registry.
     /// </summary>
     private void AddHandler(IHandler handler)
     {
         _handlers[(handler.GetType().Name, handler.Application?.Name)] = handler;
 
         var handlerType = handler.GetType().BaseType;
-        
+
         Debug.Assert(handlerType != null);
-        
+
         var contractType = handlerType.GetGenericArguments()[0];
 
         if (!_handlerPerType.ContainsKey(contractType))
@@ -169,7 +186,7 @@ public class HandlerRegistry : IDisposable
         {
             return true;
         }
-        
+
         if (handlerType == typeof(CloudflareHttpEndpointHandler))
         {
             return true;
@@ -179,7 +196,7 @@ public class HandlerRegistry : IDisposable
         {
             return true;
         }
-        
+
         if (contractType.Name.StartsWith("Fake"))
         {
             return true;
@@ -195,17 +212,9 @@ public class HandlerRegistry : IDisposable
     {
         lock (_lock)
         {
-            foreach (var application in _applicationsToLoad)
-            {
-                AddApplication(application);
-            }
-        
-            if (!_handlerPerType.TryGetValue(contractType, out var handlers))
-            {
-                return Array.Empty<IHandler>();
-            }
+            LoadApplication();
 
-            return handlers;
+            return _handlerPerType.GetValueOrDefault(contractType) ?? [];
         }
     }
 
@@ -218,12 +227,23 @@ public class HandlerRegistry : IDisposable
         {
             if (applicationName != null)
             {
-                foreach (var application in _applicationsToLoad.Where(application => applicationName == application.Name))
-                {
-                    AddApplication(application);
-                }
+                LoadApplication(applicationName);
             }
+
             return _handlers.GetValueOrDefault((typeName, applicationName));
+        }
+    }
+
+    /// <summary>
+    /// Gets all handlers
+    /// </summary>
+    public IEnumerable<IHandler> GetAllHandlers()
+    {
+        lock (_lock)
+        {
+            LoadApplication();
+            
+            return _handlers.Values;
         }
     }
 }

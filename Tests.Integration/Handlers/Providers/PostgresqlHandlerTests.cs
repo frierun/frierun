@@ -9,7 +9,7 @@ public class PostgresqlHandlerTests : TestWithDocker
     [Fact]
     public async Task Install_PostgresqlContract_CredentialsAreCorrect()
     {
-        var dbPackage = Services.GetRequiredService<PackageRegistry>().Find("postgresql");
+        var dbPackage = Resolve<PackageRegistry>().Find("postgresql");
         Assert.NotNull(dbPackage);
 
         var dbApplication = InstallPackage(dbPackage);
@@ -55,7 +55,7 @@ public class PostgresqlHandlerTests : TestWithDocker
     [Fact]
     public async Task Install_PostgresqlAdminContract_CredentialsAreCorrect()
     {
-        var dbPackage = Services.GetRequiredService<PackageRegistry>().Find("postgresql");
+        var dbPackage = Resolve<PackageRegistry>().Find("postgresql");
         Assert.NotNull(dbPackage);
 
         var dbApplication = InstallPackage(dbPackage);

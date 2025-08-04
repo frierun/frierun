@@ -10,22 +10,25 @@ public abstract class TestWithDocker : BaseTests, IDisposable
 {
     private readonly Application _docker;
     protected readonly DockerService DockerService;
-    protected readonly DockerClient DockerClient;
+    protected readonly IDockerClient DockerClient;
 
     protected TestWithDocker()
     {
         _docker = InstallPackage("docker");
-        DockerClient = new DockerClientConfiguration().CreateClient();
+        DockerClient = _docker.Contracts.OfType<DockerApiConnection>().Single().CreateClient();
         DockerService = new DockerService(
-            Services.GetRequiredService<ILogger<DockerService>>(),
+            Resolve<ILogger<DockerService>>(),
             DockerClient
         );
     }
 
-    public void Dispose()
+    public new void Dispose()
     {
         UninstallApplication(_docker);
-        Assert.Empty(Services.GetRequiredService<State>().Applications);
+        Assert.Empty(Resolve<State>().Applications);
         DockerService.Prune().Wait();
+        
+        base.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
