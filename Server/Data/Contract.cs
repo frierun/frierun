@@ -82,12 +82,9 @@ public abstract record Contract(
     /// </summary>
     public Contract Install(ExecutionPlan plan)
     {
-        if (Handler == null)
-        {
-            throw new Exception($"No handler for {Name}");
-        }
-
-        return Handler.Install(this, plan) with { Installed = true };
+        Debug.Assert(!Installed);
+        Debug.Assert(LazyHandler.Value != null, "Handler must be initialized");
+        return LazyHandler.Value.Install(this, plan) with { Installed = true };
     }
 
     /// <summary>
@@ -96,6 +93,6 @@ public abstract record Contract(
     public void Uninstall()
     {
         Debug.Assert(Installed, "Contract is not installed");
-        Handler?.Uninstall(this);
+        LazyHandler.Value?.Uninstall(this);
     }
 }

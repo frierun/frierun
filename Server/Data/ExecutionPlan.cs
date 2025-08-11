@@ -81,8 +81,7 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
             contractId =>
             {
                 var contract = GetContract(contractId);
-                Debug.Assert(!contract.Installed);
-
+                
                 var installedContract = contract.Install(this);
 
                 Debug.Assert(installedContract.Id == contractId);
