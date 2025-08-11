@@ -15,13 +15,14 @@ contracts:
     mounts:
       /config: "config"
       /data: "data"
+    dependsOn: [ "File:data" ]      
       
   - type: "HttpEndpoint"
     port: 8989
         
   - type: "File"
+    name: "data"
     volume: "data"
     path: ""
     owner: 1000
     group: 1000
-    dependencyOf: [ "Container" ]

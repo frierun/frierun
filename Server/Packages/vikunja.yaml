@@ -8,7 +8,8 @@ contracts:
     imageName: "vikunja/vikunja:latest"
     mounts:
       /app/vikunja/files: "files"
- 
+    dependsOn: [ "File:files" ]
+    
   - type: "Selector"
     name: "Database"
     options:
@@ -40,19 +41,20 @@ contracts:
               VIKUNJA_DATABASE_TYPE: "sqlite"
             mounts:
               /db: "db"
+            dependsOn: [ "File:db" ]
           - type: "File"
+            name: "db"
             volume: "db"
             path: ""
             owner: 1000
             group: 1000
-            dependencyOf: [ "Container" ]
             
   - type: "HttpEndpoint"
     port: 3456
     
   - type: "File"
+    name: "files"
     volume: "files"
     path: ""
     owner: 1000
     group: 1000
-    dependencyOf: [ "Container" ]

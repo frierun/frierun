@@ -13,6 +13,7 @@ contracts:
       N8N_RUNNERS_ENABLED: "true"
     mounts:
       /home/node/.n8n: "data"
+    dependsOn: [ "File:data" ]
  
   - type: "Selector"
     name: "Database"
@@ -33,8 +34,8 @@ contracts:
     port: 5678
     
   - type: "File"
+    name: "data"
     volume: "data"
     path: ""
     owner: 1000
     group: 1000
-    dependencyOf: [ "Container" ]    
