@@ -71,6 +71,31 @@ public class DiscoveryGraphTests : BaseTests
     }
 
     [Fact]
+    public void Apply_ExistingContract_MergeContract()
+    {
+        var contract = Factory<Parameter>().Generate() with { Handler = Handler<ParameterHandler>() };
+        var graph = new DiscoveryGraph();
+
+        Assert.True(graph.Apply(new ContractInitializeResult(contract with { Value = null })));
+        Assert.True(graph.Apply(new ContractInitializeResult(contract with { DefaultValue = null })));
+
+        var resultContract = (Parameter)graph.Contracts[contract];
+        Assert.Equal(contract.Value, resultContract.Value);
+        Assert.Equal(contract.DefaultValue, resultContract.DefaultValue);
+    }
+    
+    [Fact]
+    public void Apply_ExistingConflictingContract_ReturnsFalse()
+    {
+        var contract = Factory<Parameter>().Generate() with { Handler = Handler<ParameterHandler>() };
+        var graph = new DiscoveryGraph();
+
+        Assert.True(graph.Apply(new ContractInitializeResult(contract)));
+        Assert.False(graph.Apply(new ContractInitializeResult(contract with { Value = contract.Value + "conflict" })));
+    }
+    
+
+    [Fact]
     public void Apply_UpdatedContract_ContractIsReinitialized()
     {
         var rootContract = Factory<Package>().Generate();
@@ -171,7 +196,7 @@ public class DiscoveryGraphTests : BaseTests
         Assert.True(graph.Apply(new ContractInitializeResult(rootContract)));
         var result = graph.Apply(
             new ContractInitializeResult(
-                childContract, 
+                childContract,
                 [rootContract with { Prefix = rootContract.Prefix + "_conflict" }]
             )
         );
