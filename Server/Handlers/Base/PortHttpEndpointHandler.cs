@@ -12,9 +12,14 @@ public class PortHttpEndpointHandler : Handler<HttpEndpoint>
             {
                 Handler = this,
                 DependsOn = contract.DependsOn.Append(portEndpoint),
-                DependencyOf = contract.DependencyOf.Append(contract.Container),
             },
-            [portEndpoint]
+            [
+                portEndpoint,
+                new Container(contract.Container.Name)
+                {
+                    DependsOn = [contract]
+                }
+            ]
         );
     }
 
@@ -31,7 +36,7 @@ public class PortHttpEndpointHandler : Handler<HttpEndpoint>
             ResultPort = portEndpoint.ExternalPort,
         };
     }
-    
+
     private static PortEndpoint CreatePortEndpoint(HttpEndpoint contract)
     {
         return new PortEndpoint(

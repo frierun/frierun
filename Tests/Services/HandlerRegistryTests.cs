@@ -11,7 +11,6 @@ namespace Frierun.Tests;
 public class HandlerRegistryTests : BaseTests
 {
     [Theory]
-    [InlineData(typeof(Dependency), typeof(DependencyHandler))]
     [InlineData(typeof(HttpEndpoint), typeof(PortHttpEndpointHandler))]
     [InlineData(typeof(Parameter), typeof(ParameterHandler))]
     [InlineData(typeof(Package), typeof(PackageHandler))]
@@ -143,7 +142,6 @@ public class HandlerRegistryTests : BaseTests
     }
 
     [Theory]
-    [InlineData(typeof(DependencyHandler))]
     [InlineData(typeof(PackageHandler))]
     [InlineData(typeof(ParameterHandler))]
     [InlineData(typeof(PasswordHandler))]

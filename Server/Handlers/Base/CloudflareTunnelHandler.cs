@@ -16,13 +16,15 @@ public class CloudflareTunnelHandler : Handler<CloudflareTunnel>
                     tunnel => tunnel.TunnelName
                 ),
                 DependsOn = [contract.CloudflareApiConnection],
-                DependencyOf = [contract.Container],
             },
             [
                 new Container(
                     Name: contract.Container.Name,
                     ImageName: "cloudflare/cloudflared:latest"
                 )
+                {
+                    DependsOn = [contract]
+                }
             ]
         );
     }

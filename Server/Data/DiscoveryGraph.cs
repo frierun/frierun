@@ -9,13 +9,13 @@ public class DiscoveryGraph
     private readonly HashSet<ContractId> _toReinitialize = [];
     private readonly HashSet<ContractId> _emptyContracts = [];
     private readonly Dictionary<ContractId, Contract> _uninitializedContracts = new();
-    
+
     /// <summary>
     /// Prevents infinite recursion during reinitialization
     /// </summary>
     private readonly HashSet<ContractId> _reinitializeRecursion = [];
 
-    
+
     public Dictionary<ContractId, Contract> Contracts { get; } = new();
 
     public DiscoveryGraph()
@@ -45,6 +45,7 @@ public class DiscoveryGraph
             {
                 throw new Exception("Infinite recursion found during contract reinitialization");
             }
+
             return (contractId, Contracts[contractId]);
         }
 
@@ -75,7 +76,7 @@ public class DiscoveryGraph
 
         return (null, null);
     }
-    
+
     /// <summary>
     /// Applies contract initialization result.
     /// </summary>
@@ -83,8 +84,21 @@ public class DiscoveryGraph
     public bool Apply(ContractInitializeResult result)
     {
         Debug.Assert(result.Contract.Handler != null, "Initialized contract must have a handler");
-        
-        Contracts[result.Contract] = result.Contract;
+
+        try
+        {
+            var contract = result.Contract;
+            if (Contracts.TryGetValue(contract, out var initializedContract))
+            {
+                contract = contract.Merge(initializedContract);
+            }
+
+            Contracts[contract] = contract;
+        }
+        catch (MergeException)
+        {
+            return false;
+        }
 
         try
         {
@@ -128,7 +142,7 @@ public class DiscoveryGraph
                 _emptyContracts.Add(contractId);
             }
         }
-        
+
         // Check for Substitute contract
         if (result.Contract is not IHasStrings hasStrings)
         {

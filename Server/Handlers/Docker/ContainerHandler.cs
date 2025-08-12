@@ -26,18 +26,20 @@ public class ContainerHandler(Application application, DockerService dockerServi
                     ["com.docker.compose.project"] = prefix,
                     ["com.docker.compose.service"] = contract.Name
                 },
-                Handler = this
+                Handler = this,
+                DependsOn = [
+                    contract.Network,
+                    ..contract.Mounts.Values.Select(mount => mount.Volume)
+                ] 
             },
             [
                 new Network(contract.Network.Name)
                 {
                     HandlerApplication = Application?.Name,
-                    DependencyOf = [contract]
                 },
                 ..contract.Mounts.Values.Select(mount => new Volume(mount.Volume.Name)
                 {
                     HandlerApplication = Application?.Name,
-                    DependencyOf = [contract]
                 }),
             ]
         );

@@ -56,9 +56,14 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
                 ResultSsl = true,
                 ResultPort = 443,
                 CloudflareZoneId = zone.id,
-                DependsOn = contract.DependsOn.Append(new Network("")),
-                DependencyOf = contract.DependencyOf.Append(contract.Container),
-            }
+                DependsOn = [new Network("")],
+            },
+            [
+                new Container(contract.Container.Name)
+                {
+                    DependsOn = [contract]
+                }
+            ]
         );
     }
 

@@ -23,7 +23,11 @@ public class ContainerHandler(Application application)
                     prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
                     c => c.ContainerName
                 ),
-                Handler = this
+                Handler = this,
+                DependsOn = [
+                    contract.Network,
+                    ..contract.Mounts.Values.Select(mount => mount.Volume)
+                ]
             },
             [
                 new Daemon(contract.Name)
@@ -34,12 +38,10 @@ public class ContainerHandler(Application application)
                 new Network(contract.Network.Name)
                 {
                     HandlerApplication = Application?.Name,
-                    DependencyOf = [contract]
                 },
                 ..contract.Mounts.Values.Select(mount => new Volume(mount.Volume.Name)
                     {
                         HandlerApplication = Application?.Name,
-                        DependencyOf = [contract]
                     }
                 )
             ]

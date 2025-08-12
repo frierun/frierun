@@ -25,8 +25,13 @@ public class TraefikHttpEndpointHandler(Application application)
             {
                 Handler = this,
                 DependsOn = contract.DependsOn.Append(new Network("")).Append(contract.Domain),
-                DependencyOf = contract.DependencyOf.Append(contract.Container),
-            }
+            },
+            [
+                new Container(contract.Container.Name)
+                {
+                    DependsOn = [contract]
+                }
+            ]
         );
     }
 

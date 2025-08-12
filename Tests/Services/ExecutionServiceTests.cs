@@ -41,7 +41,7 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_WithoutHandler_ThrowsException()
     {
-        var contract = Substitute.For<Contract>("", false, null, null, null, null);
+        var contract = Substitute.For<Contract>("");
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
 
         Assert.Throws<HandlerNotFoundException>(() => Service.Create(package));

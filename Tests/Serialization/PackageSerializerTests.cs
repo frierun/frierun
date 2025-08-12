@@ -26,16 +26,13 @@ public class PackageSerializerTests : BaseTests
             """
             {
                 "name":"frierun",
-                "dependsOn": ["Container:container1"],
-                "dependencyOf": ["Container:container2"]
+                "dependsOn": ["Container:container"],
             }
             """u8;
         var package = packageSerializer.Load(new MemoryStream(json.ToArray()));
         Assert.NotNull(package);
         Assert.Equal("frierun", package.Name);
         Assert.Single(package.DependsOn);
-        Assert.Equal(new ContractId<Container>("container1"), package.DependsOn.First());
-        Assert.Single(package.DependencyOf);
-        Assert.Equal(new ContractId<Container>("container2"), package.DependencyOf.First());
+        Assert.Equal(new ContractId<Container>("container"), package.DependsOn.First());
     }
 }

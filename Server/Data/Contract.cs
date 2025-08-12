@@ -5,12 +5,8 @@ using Frierun.Server.Handlers;
 namespace Frierun.Server.Data;
 
 public abstract record Contract<THandler>(
-    string Name,
-    bool Installed = false,
-    IEnumerable<ContractId>? DependsOn = null,
-    IEnumerable<ContractId>? DependencyOf = null,
-    Lazy<IHandler?>? LazyHandler = null)
-    : Contract(Name, Installed, DependsOn, DependencyOf, LazyHandler) where THandler : IHandler
+    string Name)
+    : Contract(Name) where THandler : IHandler
 {
     [JsonIgnore]
     public new THandler? Handler
@@ -25,7 +21,6 @@ public abstract record Contract<THandler>(
 [JsonDerivedType(typeof(CloudflareTunnel), nameof(CloudflareTunnel))]
 [JsonDerivedType(typeof(Container), nameof(Container))]
 [JsonDerivedType(typeof(Daemon), nameof(Daemon))]
-[JsonDerivedType(typeof(Dependency), nameof(Dependency))]
 [JsonDerivedType(typeof(DockerApiConnection), nameof(DockerApiConnection))]
 [JsonDerivedType(typeof(Domain), nameof(Domain))]
 [JsonDerivedType(typeof(File), nameof(File))]
@@ -43,23 +38,16 @@ public abstract record Contract<THandler>(
 [JsonDerivedType(typeof(SshConnection), nameof(SshConnection))]
 [JsonDerivedType(typeof(Substitute), nameof(Substitute))]
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
-public abstract record Contract(
-    string Name,
-    bool Installed = false,
-    IEnumerable<ContractId>? DependsOn = null,
-    IEnumerable<ContractId>? DependencyOf = null,
-    Lazy<IHandler?>? LazyHandler = null,
-    [property: JsonIgnore] string? HandlerApplication = null
-)
+public abstract record Contract(string Name)
 {
     [JsonIgnore] public ContractId Id => ContractId.Create(GetType(), Name);
 
-    [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = DependsOn ?? [];
-    [JsonIgnore] public IEnumerable<ContractId> DependencyOf { get; init; } = DependencyOf ?? [];
+    [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = [];
+    [JsonIgnore] public IEnumerable<ContractId> DependencyOf { get; init; } = [];
 
     [JsonPropertyName("handler")]
     [JsonInclude]
-    public Lazy<IHandler?> LazyHandler { get; protected init; } = LazyHandler ?? new Lazy<IHandler?>((IHandler?)null);
+    public Lazy<IHandler?> LazyHandler { get; protected init; } = new((IHandler?)null);
 
     [JsonIgnore]
     public IHandler? Handler
@@ -68,7 +56,9 @@ public abstract record Contract(
         init => LazyHandler = new Lazy<IHandler?>(value);
     }
 
-    public virtual bool Installed { get; init; } = Installed;
+    [JsonIgnore] public string? HandlerApplication { get; init; }
+    
+    public virtual bool Installed { get; init; }
 
     /// <summary>
     /// Merges contracts restrictions of the same type 
