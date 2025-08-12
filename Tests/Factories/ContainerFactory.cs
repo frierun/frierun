@@ -6,10 +6,12 @@ namespace Frierun.Tests.Factories;
 
 public sealed class ContainerFactory : Faker<Container>
 {
+    private readonly HashSet<string?> _uniqueNames = [];
+    
     public ContainerFactory()
     {
         CustomInstantiator(_ => new Container(""));
-        RuleFor(p => p.Name, f => f.Lorem.Word());
+        this.UniqueRuleFor(p => p.Name, f => f.Lorem.Word(), _uniqueNames);
         RuleFor(p => p.ContainerName, f => f.Lorem.Word());
         RuleFor(p => p.ImageName, f => f.Internet.Url());
         RuleFor(p => p.MountDockerSocket, f => f.Random.Bool());

@@ -6,10 +6,12 @@ namespace Frierun.Tests.Factories;
 
 public sealed class DaemonFactory : Faker<Daemon>
 {
+    private readonly HashSet<string?> _uniqueNames = [];
+    
     public DaemonFactory()
     {
         CustomInstantiator(_ => new Daemon(""));
-        RuleFor(p => p.Name, f => f.Lorem.Word());
+        this.UniqueRuleFor(p => p.Name, f => f.Lorem.Word(), _uniqueNames);
         RuleFor(p => p.Command, f => new List<string>(f.Lorem.Words()));
         RuleFor(
             p => p.PreCommands,

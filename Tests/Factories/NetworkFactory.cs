@@ -5,10 +5,12 @@ namespace Frierun.Tests.Factories;
 
 public sealed class NetworkFactory: Faker<Network>
 {
+    private readonly HashSet<string?> _uniqueNames = [];
+    
     public NetworkFactory()
     {
         CustomInstantiator(_ => new Network(""));
-        RuleFor(p => p.Name, f => f.Lorem.Word());
+        this.UniqueRuleFor(p => p.Name, f => f.Lorem.Word(), _uniqueNames);
         RuleFor(p => p.NetworkName, f => f.Lorem.Word());
 
         RuleSet(
