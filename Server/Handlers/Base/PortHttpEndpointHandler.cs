@@ -27,8 +27,6 @@ public class PortHttpEndpointHandler : Handler<HttpEndpoint>
     {
         var portEndpoint = plan.GetContract((ContractId<PortEndpoint>)CreatePortEndpoint(contract).Id);
 
-        var url = new Uri($"http://{portEndpoint.ExternalIp}:{portEndpoint.ExternalPort}");
-
         return contract with
         {
             ResultSsl = false,
