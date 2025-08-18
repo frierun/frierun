@@ -1,4 +1,5 @@
-﻿using Docker.DotNet.Models;
+﻿using Bogus;
+using Docker.DotNet.Models;
 using Frierun.Server.Data;
 using Frierun.Server.Handlers.Docker;
 using NSubstitute;
@@ -131,7 +132,7 @@ public class ContainerHandlerTests : BaseTests
         Assert.Equal(Handler<NewVolumeHandler>(docker2), volume2.Handler);
         Assert.NotEqual(volume1.Handler, volume2.Handler);
     }
-    
+
     [Fact]
     public void Install_ContainerWithSpecifiedApplication_InstallsCorrectPorts()
     {
@@ -141,10 +142,16 @@ public class ContainerHandlerTests : BaseTests
         var port = Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Name) };
 
         var application1 = InstallPackage(
-            Factory<Package>().Generate() with { Contracts = [port, container with { HandlerApplication = docker1.Name }] }
+            Factory<Package>().Generate() with
+            {
+                Contracts = [port, container with { HandlerApplication = docker1.Name }]
+            }
         );
         var application2 = InstallPackage(
-            Factory<Package>().Generate() with { Contracts = [port, container with { HandlerApplication = docker2.Name }] }
+            Factory<Package>().Generate() with
+            {
+                Contracts = [port, container with { HandlerApplication = docker2.Name }]
+            }
         );
 
         var port1 = application1.Contracts.OfType<PortEndpoint>().Single();
@@ -152,5 +159,60 @@ public class ContainerHandlerTests : BaseTests
         Assert.Equal(Handler<PortEndpointHandler>(docker1), port1.Handler);
         Assert.Equal(Handler<PortEndpointHandler>(docker2), port2.Handler);
         Assert.NotEqual(port1.Handler, port2.Handler);
+    }
+
+    [Fact]
+    public void Install_ContainerWithEnv_PassesEnv()
+    {
+        var name = Resolve<Faker>().Lorem.Word();
+        var value = Resolve<Faker>().Lorem.Word();
+        InstallPackage("docker");
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts =
+            [
+                Factory<Container>().Generate() with
+                {
+                    Env = new Dictionary<string, Argument<string>> { [name] = value }
+                },
+            ]
+        };
+        
+        InstallPackage(package);
+        
+        DockerClient.Containers.Received(1)
+            .CreateContainerAsync(
+                Arg.Is<CreateContainerParameters>(p =>
+                    p.Env.Contains($"{name}={value}")
+                )
+            );
+    }    
+    
+    [Fact]
+    public void Install_ContainerWithTemplateEnv_EvaluatesEnv()
+    {
+        var name = Resolve<Faker>().Lorem.Word();
+        var value = Resolve<Faker>().Lorem.Word();
+        InstallPackage("docker");
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts =
+            [
+                Factory<Container>().Generate() with
+                {
+                    Env = new Dictionary<string, Argument<string>> { [name] = "{{Parameter:Test:Value}}" }
+                },
+                new Parameter("Test", Value: value)
+            ]
+        };
+        
+        InstallPackage(package);
+        
+        DockerClient.Containers.Received(1)
+            .CreateContainerAsync(
+                Arg.Is<CreateContainerParameters>(p =>
+                    p.Env.Contains($"{name}={value}")
+                )
+            );
     }
 }

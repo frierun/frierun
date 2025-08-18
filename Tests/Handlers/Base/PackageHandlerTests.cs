@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Data;
+﻿using Bogus;
+using Frierun.Server.Data;
 
 namespace Frierun.Tests.Handlers.Base;
 
@@ -10,7 +11,7 @@ public class PackageHandlerTests : BaseTests
     }
 
     [Fact]
-    public void ApplicationUrl_Complete_ApplicationUrlHasPriority()
+    public void Install_CompletePackage_ApplicationUrlHasPriority()
     {
         var package = Factory<Package>().Generate() with
         {
@@ -31,7 +32,7 @@ public class PackageHandlerTests : BaseTests
     }
 
     [Fact]
-    public void ApplicationUrl_WithHttpAndPortEndpoint_HttpEndpointHasPriority()
+    public void Install_PackageWithHttpAndPortEndpoint_HttpEndpointHasPriority()
     {
         var package = Factory<Package>().Generate() with
         {
@@ -52,7 +53,7 @@ public class PackageHandlerTests : BaseTests
     }
 
     [Fact]
-    public void ApplicationUrl_WithPortEndpoint_AutoDetectPortEndpoint()
+    public void Install_PackageWithPortEndpoint_AutoDetectPortEndpoint()
     {
         var package = Factory<Package>().Generate() with
         {
@@ -70,4 +71,40 @@ public class PackageHandlerTests : BaseTests
 
         Assert.Equal("tcp://127.0.0.1:2222", application.Url);
     }
+
+    [Fact]
+    public void Install_ApplicationUrlWithTemplate_ResolvesTemplate()
+    {
+        var value = Resolve<Faker>().Lorem.Word();
+        var package = Factory<Package>().Generate() with
+        {
+            ApplicationUrl = new Argument<string>("{{Parameter:Test:Value}}"),
+            Contracts = new List<Contract>
+            {
+                new Parameter("Test", Value: value)
+            }
+        };
+
+        var application = InstallPackage(package);
+
+        Assert.Equal(value, application.Url);
+    }
+    
+    [Fact]
+    public void Install_ApplicationDescriptionWithTemplate_ResolvesTemplate()
+    {
+        var value = Resolve<Faker>().Lorem.Word();
+        var package = Factory<Package>().Generate() with
+        {
+            ApplicationDescription = new Argument<string>("{{Parameter:Test:Value}}"),
+            Contracts = new List<Contract>
+            {
+                new Parameter("Test", Value: value)
+            }
+        };
+
+        var application = InstallPackage(package);
+
+        Assert.Equal(value, application.Description);
+    }    
 }

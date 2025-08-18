@@ -54,7 +54,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
         var dockerParameters = new CreateContainerParameters
         {
             Cmd = contract.Command.ToList(),
-            Env = contract.Env.Select(kv => $"{kv.Key}={kv.Value.Value}").ToList(),
+            Env = contract.Env.Select(kv => $"{kv.Key}={kv.Value}").ToList(),
             Image = contract.ImageName,
             HostConfig = new HostConfig
             {

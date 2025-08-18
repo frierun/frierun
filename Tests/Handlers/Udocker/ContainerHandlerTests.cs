@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Data;
+﻿using Bogus;
+using Frierun.Server.Data;
 using Frierun.Server.Handlers.Udocker;
 
 namespace Frierun.Tests.Handlers.Udocker;
@@ -83,11 +84,14 @@ public class ContainerHandlerTests : BaseTests
     [Fact]
     public void Install_ContainerWithEnv_PassesEnv()
     {
+        var name = Resolve<Faker>().Lorem.Word();
+        var value = Resolve<Faker>().Lorem.Word();
+
         var container = Factory<Container>().Generate("udocker") with
         {
             Env = new Dictionary<string, Argument<string>>
             {
-                { "name", "value" }
+                { name, value }
             }
         };
         var package = Factory<Package>().Generate() with { Contracts = [container] };
@@ -95,9 +99,33 @@ public class ContainerHandlerTests : BaseTests
         var application = InstallPackage(package);
 
         var daemon = application.Contracts.OfType<Daemon>().Single();
-        Assert.Contains($"--env=name=value", daemon.Command);
+        Assert.Contains($"--env={name}={value}", daemon.Command);
     }
-    
+
+    [Fact]
+    public void Install_ContainerWithTemplateEnv_EvaluatesEnv()
+    {
+        var name = Resolve<Faker>().Lorem.Word();
+        var value = Resolve<Faker>().Lorem.Word();
+
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts =
+            [
+                Factory<Container>().Generate("udocker") with
+                {
+                    Env = new Dictionary<string, Argument<string>> { { name, "{{Parameter:Test:Value}}" } }
+                },
+                new Parameter("Test", Value: value)
+            ]
+        };
+
+        var application = InstallPackage(package);
+
+        var daemon = application.Contracts.OfType<Daemon>().Single();
+        Assert.Contains($"--env={name}={value}", daemon.Command);
+    }
+
     [Fact]
     public void Install_ContainerWithSpecifiedApplication_InstallsCorrectNetworks()
     {
@@ -142,7 +170,7 @@ public class ContainerHandlerTests : BaseTests
         Assert.Equal(Handler<LocalPathHandler>(udocker2), volume2.Handler);
         Assert.NotEqual(volume1.Handler, volume2.Handler);
     }
-    
+
     [Fact]
     public void Install_ContainerWithSpecifiedApplication_InstallsCorrectPorts()
     {
@@ -152,10 +180,16 @@ public class ContainerHandlerTests : BaseTests
         var port = Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Name) };
 
         var application1 = InstallPackage(
-            Factory<Package>().Generate() with { Contracts = [port, container with { HandlerApplication = udocker1.Name }] }
+            Factory<Package>().Generate() with
+            {
+                Contracts = [port, container with { HandlerApplication = udocker1.Name }]
+            }
         );
         var application2 = InstallPackage(
-            Factory<Package>().Generate() with { Contracts = [port, container with { HandlerApplication = udocker2.Name }] }
+            Factory<Package>().Generate() with
+            {
+                Contracts = [port, container with { HandlerApplication = udocker2.Name }]
+            }
         );
 
         var port1 = application1.Contracts.OfType<PortEndpoint>().Single();
@@ -164,7 +198,7 @@ public class ContainerHandlerTests : BaseTests
         Assert.Equal(Handler<PortEndpointHandler>(udocker2), port2.Handler);
         Assert.NotEqual(port1.Handler, port2.Handler);
     }
-    
+
     [Fact]
     public void Install_ContainerWithSpecifiedApplication_InstallsCorrectDaemons()
     {
@@ -185,5 +219,4 @@ public class ContainerHandlerTests : BaseTests
         Assert.Equal(Handler<DaemonHandler>(udocker2), daemon2.Handler);
         Assert.NotEqual(daemon1.Handler, daemon2.Handler);
     }
-    
 }

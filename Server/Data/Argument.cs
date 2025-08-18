@@ -161,4 +161,14 @@ public class Argument<T> : IEquatable<Argument<T>>, IArgument
 
         return EqualityComparer<T?>.Default.Equals(Value, other.Value) && Equals(Resolver, other.Resolver);
     }
+
+    public override string? ToString()
+    {
+        if (Resolved && Value is not null)
+        {
+            return Value.ToString();
+        }
+        
+        return "Unresolved";
+    }
 }
