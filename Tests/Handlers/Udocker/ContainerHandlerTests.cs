@@ -38,7 +38,7 @@ public class ContainerHandlerTests : BaseTests
         var preCommand =
             daemon.PreCommands.Single(command => command.Contains("udocker") && command.Contains("create"));
         Assert.Contains($"--name={container.ContainerName}", preCommand);
-        Assert.Contains(container.ImageName, preCommand);
+        Assert.Contains(container.ImageName?.Value, preCommand);
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class ContainerHandlerTests : BaseTests
     {
         var container = Factory<Container>().Generate("udocker") with
         {
-            Env = new Dictionary<string, string>
+            Env = new Dictionary<string, Argument<string>>
             {
                 { "name", "value" }
             }

@@ -9,16 +9,8 @@ public record DockerApiConnection(
     string? Name = null,
     string? Path = null,
     bool? IsPodman = null
-) : Contract<IDockerApiConnectionHandler>(Name ?? ""), IHasStrings
+) : Contract<IDockerApiConnectionHandler>(Name ?? "")
 {
-    public Contract ApplyStringDecorator(Func<string, string> decorator)
-    {
-        return this with
-        {
-            Path = Path != null ? decorator(Path ?? "") : null
-        };
-    }
-
     /// <summary>
     /// Creates a Docker client using the current configuration.
     /// </summary>

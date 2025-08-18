@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Frierun.Server.Data;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
 
 namespace Frierun.Server.Handlers.Udocker;
 
@@ -50,16 +49,17 @@ public class ContainerHandler(Application application)
 
     public override Container Install(Container contract, ExecutionPlan plan)
     {
+        var imageName = contract.ImageName.Value;
         Debug.Assert(contract.ContainerName != null);
-        Debug.Assert(contract.ImageName != null);
+        Debug.Assert(imageName != null);
 
         var preCommands = new List<IReadOnlyList<string>>();
         preCommands.Add(new List<string> { "udocker", "rm", contract.ContainerName });
-        preCommands.Add(new List<string> { "udocker", "pull", contract.ImageName });
+        preCommands.Add(new List<string> { "udocker", "pull", imageName });
 
-        // create container explicitly, otherwise it would spawn dangling containers
+        // create a container explicitly, otherwise it would spawn dangling containers
         preCommands.Add(
-            new List<string> { "udocker", "create", $"--name={contract.ContainerName}", contract.ImageName }
+            new List<string> { "udocker", "create", $"--name={contract.ContainerName}", imageName }
         );
 
         var command = new List<string>();
@@ -89,7 +89,7 @@ public class ContainerHandler(Application application)
         // envs
         foreach (var pair in contract.Env)
         {
-            command.Add($"--env={pair.Key}={pair.Value}");
+            command.Add($"--env={pair.Key}={pair.Value.Value}");
         }
 
         command.Add(contract.ContainerName);

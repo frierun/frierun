@@ -17,6 +17,7 @@ public class PackageSerializer(ILogger<PackageSerializer> logger, ContractRegist
             new ContainerMountConverter(),
             new ContractIdConverter(contractRegistry),
             new ContractIdOfTConverter(),
+            new ArgumentOfTConverter(),
             new YamlBoolConverter()
         },
         NumberHandling = JsonNumberHandling.AllowReadingFromString,

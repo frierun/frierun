@@ -9,7 +9,7 @@ public class PackageHandler : Handler<Package>
         var applicationUrl = package.ApplicationUrl;
 
         // auto-detect application URL
-        if (applicationUrl == null)
+        if (applicationUrl.Empty)
         {
             var httpEndpoint = package.Contracts.OfType<HttpEndpoint>().FirstOrDefault();
             if (httpEndpoint != null)
@@ -19,7 +19,7 @@ public class PackageHandler : Handler<Package>
         }
 
         // use the first endpoint if not found any other
-        if (applicationUrl == null)
+        if (applicationUrl.Empty)
         {
             var endpoint = package.Contracts.OfType<PortEndpoint>().FirstOrDefault();
             if (endpoint != null)

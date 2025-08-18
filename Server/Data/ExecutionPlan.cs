@@ -35,6 +35,14 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
             {
                 graph.AddEdge(contract, dependency);
             }
+
+            foreach (var argument in contract.GetArguments())
+            {
+                foreach (var dependency in argument.RequiredContracts)
+                {
+                    graph.AddEdge(dependency, contract);
+                }
+            }
         }
 
         return graph;
@@ -81,6 +89,11 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
             contractId =>
             {
                 var contract = GetContract(contractId);
+                
+                foreach (var argument in contract.GetArguments())
+                {
+                    argument.Resolve(this);
+                }
                 
                 var installedContract = contract.Install(this);
 

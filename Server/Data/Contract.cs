@@ -36,7 +36,6 @@ public abstract record Contract<THandler>(
 [JsonDerivedType(typeof(Redis), nameof(Redis))]
 [JsonDerivedType(typeof(Selector), nameof(Selector))]
 [JsonDerivedType(typeof(SshConnection), nameof(SshConnection))]
-[JsonDerivedType(typeof(Substitute), nameof(Substitute))]
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
 public abstract record Contract(string Name)
 {
@@ -59,6 +58,7 @@ public abstract record Contract(string Name)
     [JsonIgnore] public string? HandlerApplication { get; init; }
     
     public virtual bool Installed { get; init; }
+    public virtual IEnumerable<IArgument> GetArguments() => [];
 
     /// <summary>
     /// Merges contracts restrictions of the same type 

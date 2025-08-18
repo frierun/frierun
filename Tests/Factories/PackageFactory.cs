@@ -14,8 +14,8 @@ public sealed class PackageFactory : Faker<Package>
         this.UniqueRuleFor(p => p.Name, f => f.Lorem.Word(), _uniqueNames);
         RuleFor(p => p.Prefix, (_, p) => p.Name);
         RuleFor(p => p.Url, f => f.Internet.Url());
-        RuleFor(p => p.ApplicationUrl, f => f.Internet.Url());
-        RuleFor(p => p.ApplicationDescription, f => f.Lorem.Sentence());
+        RuleFor(p => p.ApplicationUrl, f => new Argument<string>(f.Internet.Url()));
+        RuleFor(p => p.ApplicationDescription, f => new Argument<string>(f.Lorem.Sentence()));
         RuleFor(p => p.ShortDescription, f => f.Lorem.Sentence());
         RuleFor(p => p.FullDescription, f => f.Lorem.Paragraph());
         RuleFor(p => p.Tags, f => new List<string>(f.Lorem.Words()));

@@ -143,41 +143,17 @@ public class DiscoveryGraph
             }
         }
 
-        // Check for Substitute contract
-        if (result.Contract is not IHasStrings hasStrings)
+        foreach (var argument in result.Contract.GetArguments())
         {
-            return true;
-        }
-
-        var substitute = new Substitute(result.Contract);
-
-        // remove old substitutes
-        Contracts.Remove(substitute);
-
-        var matches = new Dictionary<string, MatchCollection>();
-
-        hasStrings.ApplyStringDecorator(s =>
+            foreach (var contractId in argument.RequiredContracts)
             {
-                var matchCollection = Substitute.InsertionRegex.Matches(s);
-                if (matchCollection.Count > 0)
+                if (!Contracts.ContainsKey(contractId))
                 {
-                    matches[s] = matchCollection;
+                    _emptyContracts.Add(contractId);
                 }
-
-                return s;
             }
-        );
-
-        if (matches.Count == 0)
-        {
-            _uninitializedContracts.Remove(substitute);
-            return true;
         }
 
-        _uninitializedContracts[substitute] = substitute with
-        {
-            Matches = matches
-        };
         return true;
     }
 }

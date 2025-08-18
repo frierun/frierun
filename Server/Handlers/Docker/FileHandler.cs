@@ -64,9 +64,9 @@ public class FileHandler(Application application, DockerService dockerService) :
 
         var path = $"/mnt/{contract.Path}";
 
-        if (contract.Text != null)
+        if (contract.Text.Value != null)
         {
-            dockerService.PutFile(containerId, path, contract.Text).Wait();
+            dockerService.PutFile(containerId, path, contract.Text.Value).Wait();
         }
 
         if (contract.Owner != null)

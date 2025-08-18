@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
+﻿using System.Reflection;
 
 namespace Frierun.Server.Data;
 
@@ -78,14 +78,25 @@ public static class Merger
         var result = new Dictionary<TKey, TValue>(dict1);
         foreach (var (key, value2) in dict2)
         {
+            if (value2 is null)
+            {
+                continue;
+            }
+            
             if (!result.TryGetValue(key, out var value1) || value1 is null)
             {
                 result[key] = value2;
                 continue;
             }
-            
+
             if (value1.Equals(value2))
             {
+                continue;
+            }
+
+            if (value1 is IArgument argument)
+            {
+                result[key] = (TValue)argument.Merge(value2);
                 continue;
             }
             

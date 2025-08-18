@@ -8,19 +8,11 @@ namespace Frierun.Server.Data;
 public record CloudflareApiConnection(
     string? Name = null,
     string? Token = null
-) : Contract<ICloudflareApiConnectionHandler>(Name ?? ""), IHasStrings
+) : Contract<ICloudflareApiConnectionHandler>(Name ?? "")
 {
     [MemberNotNullWhen(true, nameof(Token))]
     public override bool Installed { get; init; }
     
-    public Contract ApplyStringDecorator(Func<string, string> decorator)
-    {
-        return this with
-        {
-            Token = Token != null ? decorator(Token) : Token
-        };
-    }
-
     /// <summary>
     /// Create a cloudflare client from the contract.
     /// </summary>

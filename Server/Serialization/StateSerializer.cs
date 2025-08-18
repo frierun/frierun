@@ -21,6 +21,7 @@ public class StateSerializer(
         {
             new ContractIdConverter(contractRegistry),
             new ContractIdOfTConverter(),
+            new ArgumentOfTConverter(),
             new LazyHandlerConverter(lazyHandlerRegistry),
             new PackageConverter(packageRegistry)
         },

@@ -10,20 +10,20 @@ public record Container(
     string? Name = null,
     string? ContainerName = null,
     string? NetworkName = null,
-    string? ImageName = null,
+    Argument<string>? ImageName = null,
     bool MountDockerSocket = false,
     ContractId<Network>? Network = null,
     IReadOnlyList<string>? Command = null,
-    IReadOnlyDictionary<string, string>? Env = null,
+    IReadOnlyDictionary<string, Argument<string>>? Env = null,
     IReadOnlyDictionary<string, string>? Labels = null,
     IReadOnlyDictionary<string, ContainerMount>? Mounts = null
-) : Contract<IContainerHandler>(Name ?? ""), IHasStrings
+) : Contract<IContainerHandler>(Name ?? "")
 {
     [MemberNotNullWhen(true, nameof(ContainerName), nameof(NetworkName))]
     public override bool Installed { get; init; }
     
     public IReadOnlyList<string> Command { get; init; } = Command ?? [];
-    public IReadOnlyDictionary<string, string> Env { get; init; } = Env ?? new Dictionary<string, string>();
+    public IReadOnlyDictionary<string, Argument<string>> Env { get; init; } = Env ?? new Dictionary<string, Argument<string>>();
     public IReadOnlyDictionary<string, string> Labels { get; init; } = Labels ?? new Dictionary<string, string>();
     public IReadOnlyDictionary<string, ContainerMount> Mounts { get; init; } = Mounts ?? new Dictionary<string, ContainerMount>();
     
@@ -32,16 +32,17 @@ public record Container(
 
     
     public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>("");
+    public Argument<string> ImageName { get; init; } = ImageName ?? new Argument<string>();
     
-    Contract IHasStrings.ApplyStringDecorator(Func<string, string> decorator)
+    public override IEnumerable<IArgument> GetArguments()
     {
-        return this with
+        yield return ImageName;
+        foreach (var pair in Env)
         {
-            Command = Command.Select(decorator).ToList(),
-            Env = Env.ToDictionary(kv => decorator(kv.Key), kv => decorator(kv.Value))
-        };
+            yield return pair.Value;
+        }
     }
-    
+
     /// <summary>
     /// Attaches the container to a network.
     /// </summary>
@@ -106,7 +107,7 @@ public record Container(
         {
             ContainerName = OnlyOne(ContainerName, contract.ContainerName),
             NetworkName = OnlyOne(NetworkName, contract.NetworkName),
-            ImageName = OnlyOne(ImageName, contract.ImageName),
+            ImageName = ImageName.Merge(contract.ImageName),
             MountDockerSocket = MountDockerSocket || contract.MountDockerSocket,
             Network = OnlyOne(Network, contract.Network),
             Command = OnlyOne(Command, contract.Command, command => command.Count == 0),

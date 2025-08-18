@@ -184,7 +184,7 @@ public class ExecutionServiceTests : BaseTests
         InstallPackage("docker");
         var container = Factory<Container>().Generate() with
         {
-            Env = new Dictionary<string, string> { { "key", "{{Parameter:Test:Value}}" } }
+            Env = new Dictionary<string, Argument<string>> { { "key", "{{Parameter:Test:Value}}" } }
         };
         var package = Factory<Package>().Generate() with { Contracts = [container] };
 
@@ -213,7 +213,7 @@ public class ExecutionServiceTests : BaseTests
                             [
                                 container with
                                 {
-                                    Env = new Dictionary<string, string> { { "key", "{{Parameter:Test:Value}}" } }
+                                    Env = new Dictionary<string, Argument<string>> { { "key", "{{Parameter:Test:Value}}" } }
                                 }
                             ]
                         )

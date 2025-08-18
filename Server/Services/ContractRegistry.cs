@@ -5,7 +5,7 @@ namespace Frierun.Server;
 
 public class ContractRegistry
 {
-    public Type GetContractType(string contractTypeName)
+    public static Type GetContractType(string contractTypeName)
     {
         var contractType = Type.GetType($"Frierun.Server.Data.{contractTypeName}");
         if (contractType == null)
@@ -21,7 +21,7 @@ public class ContractRegistry
         return CreateContract(contractId.Type.Name, contractId.Name);
     }
     
-    public Contract CreateContract(string typeName, string name)
+    public static Contract CreateContract(string typeName, string name)
     {
         return typeName switch
         {

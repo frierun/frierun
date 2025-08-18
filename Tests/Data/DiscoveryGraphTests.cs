@@ -125,68 +125,6 @@ public class DiscoveryGraphTests : BaseTests
     }
 
     [Fact]
-    public void Apply_ContractWithIHasStrings_AddedSubstitute()
-    {
-        var rootContract = Factory<Package>().Generate() with
-        {
-            Handler = Handler<PackageHandler>(),
-            ApplicationDescription = "{{Parameter:Test:Value}}"
-        };
-        var rootSubstitute = new Substitute(rootContract);
-        var graph = new DiscoveryGraph();
-
-        Assert.True(graph.Apply(new ContractInitializeResult(rootContract)));
-
-        var (substituteId, substitute) = graph.Next();
-        Assert.Equal(rootSubstitute.Id, substituteId);
-        Assert.NotNull(substitute);
-        Assert.Single(((Substitute)substitute).Matches);
-        Assert.Equal((null, null), graph.Next());
-    }
-
-    [Fact]
-    public void Apply_ContractWithIHasStringsWithoutSubstitutes_NoSubstituteAdded()
-    {
-        var rootContract = Factory<Package>().Generate() with
-        {
-            Handler = Handler<PackageHandler>()
-        };
-        var graph = new DiscoveryGraph();
-
-        Assert.True(graph.Apply(new ContractInitializeResult(rootContract)));
-
-        Assert.Equal((null, null), graph.Next());
-    }
-
-    [Fact]
-    public void Apply_ContractWithIHasStringsIsUpdated_SubstituteRefreshed()
-    {
-        var rootContract = Factory<Package>().Generate() with
-        {
-            Handler = Handler<PackageHandler>(),
-            ApplicationDescription = "{{Parameter:Description:Value}}",
-            ApplicationUrl = null,
-        };
-        var rootSubstitute = new Substitute(rootContract);
-        var graph = new DiscoveryGraph();
-
-        Assert.True(graph.Apply(new ContractInitializeResult(rootContract)));
-        var result = graph.Apply(
-            new ContractInitializeResult(
-                rootContract with { ApplicationUrl = "{{Parameter:Url:Value}}" }
-            )
-        );
-        Assert.True(result);
-
-        var (contractId, contract) = graph.Next();
-        Assert.Equal(rootSubstitute.Id, contractId);
-        Assert.NotNull(contract);
-        Assert.Equal(2, ((Substitute)contract).Matches.Count);
-
-        Assert.Equal((null, null), graph.Next());
-    }
-
-    [Fact]
     public void Apply_ConflictingContracts_ReturnsFalse()
     {
         var rootContract = Factory<Package>().Generate() with { Handler = Handler<PackageHandler>() };

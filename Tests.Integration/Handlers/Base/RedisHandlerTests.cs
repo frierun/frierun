@@ -13,9 +13,11 @@ public class RedisHandlerTests : TestWithDocker
             [
                 new Redis(),
                 new Container(
-                    Name: "redis-client",
-                    ImageName: "redis:7"
+                    Name: "redis-client"
                 )
+                {
+                    ImageName = "redis:7"
+                }
             ]
         );
         var application = InstallPackage(package);

@@ -21,7 +21,7 @@ public class CloudflareTunnelHandlerTests : BaseTests
         Assert.Equal("tunnel token", cloudflareTunnel.Token);
         
         var container = application.Contracts.OfType<Container>().Single();
-        Assert.Equal("cloudflare/cloudflared:latest", container.ImageName);
+        Assert.Equal("cloudflare/cloudflared:latest", container.ImageName?.Value);
         Assert.Equal(["tunnel", "--no-autoupdate", "run", "--token", "tunnel token"], container.Command);
     }
 
@@ -29,7 +29,7 @@ public class CloudflareTunnelHandlerTests : BaseTests
     public void Install_NoAccounts_ThrowsHandlerException()
     {
         InstallPackage("docker");
-        CloudflareClient.GetAccounts().Returns(Array.Empty<(string id, string name)>());
+        CloudflareClient.GetAccounts().Returns([]);
 
         var exception = Assert.Throws<HandlerException>(() => InstallPackage("cloudflare-tunnel"));
         Assert.Equal("No Cloudflare accounts found.", exception.Message);

@@ -12,7 +12,7 @@ public record SshConnection(
     string? Username = null,
     string? Password = null
 )
-    : Contract<ISshConnectionHandler>(Name ?? ""), IHasStrings
+    : Contract<ISshConnectionHandler>(Name ?? "")
 {
     /// <summary>
     /// Create an ssh client from the contract.
@@ -42,16 +42,6 @@ public record SshConnection(
             Port = OnlyOne(Port, contract.Port, port => port == 0),
             Username = OnlyOne(Username, contract.Username),
             Password = OnlyOne(Password, contract.Password)
-        };
-    }
-
-    Contract IHasStrings.ApplyStringDecorator(Func<string, string> decorator)
-    {
-        return this with
-        {
-            Host = Host == null ? null : decorator(Host),
-            Username = Username == null ? null : decorator(Username),
-            Password = Password == null ? null : decorator(Password)
         };
     }
     

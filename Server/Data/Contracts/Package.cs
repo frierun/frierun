@@ -7,25 +7,24 @@ public record Package(
     string? Url = null,
     string? Prefix = null,
     string? IconUrl = null,
-    string? ApplicationUrl = null,
-    string? ApplicationDescription = null,
+    Argument<string>? ApplicationUrl = null,
+    Argument<string>? ApplicationDescription = null,
     string? ShortDescription = null,
     string? FullDescription = null,
     IReadOnlyList<string>? Tags = null,
     IEnumerable<Contract>? Contracts = null,
     Application? Result = null
-) : Contract(Name), IHasStrings
+) : Contract(Name)
 {
     public IReadOnlyList<string> Tags { get; init; } = Tags ?? [];
     public IEnumerable<Contract> Contracts { get; init; } = Contracts ?? [];
+    public Argument<string> ApplicationUrl { get; init; } = ApplicationUrl ?? new Argument<string>();
+    public Argument<string> ApplicationDescription { get; init; } = ApplicationDescription ?? new Argument<string>();
 
-    public Contract ApplyStringDecorator(Func<string, string> decorator)
+    public override IEnumerable<IArgument> GetArguments()
     {
-        return this with
-        {
-            ApplicationUrl = ApplicationUrl != null ? decorator(ApplicationUrl) : null,
-            ApplicationDescription = ApplicationDescription != null ? decorator(ApplicationDescription) : null,
-        };
+        yield return ApplicationUrl;
+        yield return ApplicationDescription;
     }
 
     public override Contract Merge(Contract other)
@@ -35,8 +34,8 @@ public record Package(
         return MergeCommon(this, contract) with
         {
             Prefix = OnlyOne(Prefix, contract.Prefix),
-            ApplicationUrl = OnlyOne(ApplicationUrl, contract.ApplicationUrl),
-            ApplicationDescription = OnlyOne(ApplicationDescription, contract.ApplicationDescription),
+            ApplicationUrl = ApplicationUrl.Merge(contract.ApplicationUrl),
+            ApplicationDescription = ApplicationDescription.Merge(contract.ApplicationDescription),
             Contracts = Contracts.Concat(contract.Contracts)
                 .GroupBy(c => c.Id)
                 .Select(group =>

@@ -23,11 +23,11 @@ public class PackageHandlerTests : BaseTests
                 )
             }
         };
-        Assert.NotNull(package.ApplicationUrl);
+        Assert.NotNull(package.ApplicationUrl.Value);
 
         var application = InstallPackage(package);
 
-        Assert.Equal(package.ApplicationUrl, application.Url);
+        Assert.Equal(package.ApplicationUrl.Value, application.Url);
     }
 
     [Fact]
@@ -35,7 +35,7 @@ public class PackageHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            ApplicationUrl = null,
+            ApplicationUrl = new Argument<string>(),
             Contracts = new List<Contract>
             {
                 new HttpEndpoint(Port: 80),
@@ -56,7 +56,7 @@ public class PackageHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            ApplicationUrl = null,
+            ApplicationUrl = new Argument<string>(),
             Contracts = new List<Contract>
             {
                 new PortEndpoint(

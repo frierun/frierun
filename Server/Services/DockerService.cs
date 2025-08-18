@@ -115,7 +115,7 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
             return true;
         }
 
-        if (container.State == "running")
+        if (container.State == "running" || container.State == "restarting")
         {
             logger.LogDebug("Stopping container {ContainerName}", containerName);
             if (!await client.Containers.StopContainerAsync(container.ID, new ContainerStopParameters()))

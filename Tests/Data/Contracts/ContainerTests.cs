@@ -27,7 +27,7 @@ public class ContainerTests : BaseTests
 
         var result = (Container)container.Merge(container2);
         Assert.Empty(result.Name);
-        Assert.Null(result.ImageName);
+        Assert.Null(result.ImageName.Value);
         Assert.Null(result.NetworkName);
         Assert.Null(result.ContainerName);
         Assert.Empty(result.Command);
@@ -59,9 +59,9 @@ public class ContainerTests : BaseTests
     {
         var container = Factory<Container>().Generate() with
         {
-            Env = new Dictionary<string, string> { { "key1", "value1" } }
+            Env = new Dictionary<string, Argument<string>> { { "key1", "value1" } }
         };
-        var container2 = container with { Env = new Dictionary<string, string> { { "key2", "value2" } } };
+        var container2 = container with { Env = new Dictionary<string, Argument<string>> { { "key2", "value2" } } };
 
         var result = (Container)container.Merge(container2);
 
@@ -75,9 +75,9 @@ public class ContainerTests : BaseTests
     {
         var container = Factory<Container>().Generate() with
         {
-            Env = new Dictionary<string, string> { { "key1", "value1" } }
+            Env = new Dictionary<string, Argument<string>> { { "key1", "value1" } }
         };
-        var container2 = container with { Env = new Dictionary<string, string> { { "key1", "value1" } } };
+        var container2 = container with { Env = new Dictionary<string, Argument<string>> { { "key1", "value1" } } };
 
         var result = (Container)container.Merge(container2);
 
@@ -90,9 +90,9 @@ public class ContainerTests : BaseTests
     {
         var container = Factory<Container>().Generate() with
         {
-            Env = new Dictionary<string, string> { { "key1", "value1" } }
+            Env = new Dictionary<string, Argument<string>> { { "key1", "value1" } }
         };
-        var container2 = container with { Env = new Dictionary<string, string> { { "key1", "value2" } } };
+        var container2 = container with { Env = new Dictionary<string, Argument<string>> { { "key1", "value2" } } };
 
         Assert.Throws<MergeException>(() => container.Merge(container2));
     }

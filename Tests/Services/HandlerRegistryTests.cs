@@ -15,7 +15,6 @@ public class HandlerRegistryTests : BaseTests
     [InlineData(typeof(Parameter), typeof(ParameterHandler))]
     [InlineData(typeof(Package), typeof(PackageHandler))]
     [InlineData(typeof(Password), typeof(PasswordHandler))]
-    [InlineData(typeof(Substitute), typeof(SubstituteHandler))]
     public void GetHandlers_StaticHandler_ReturnsHandler(Type contractType, Type handlerType)
     {
         var registry = Resolve<HandlerRegistry>();
@@ -148,7 +147,6 @@ public class HandlerRegistryTests : BaseTests
     [InlineData(typeof(PortHttpEndpointHandler))]
     [InlineData(typeof(RedisHandler))]
     [InlineData(typeof(SelectorHandler))]
-    [InlineData(typeof(SubstituteHandler))]
     public void GetHandler_StaticHandler_ReturnsHandler(Type handlerType)
     {
         var registry = Resolve<HandlerRegistry>();
