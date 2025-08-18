@@ -6,12 +6,19 @@ namespace Frierun.Server.Data;
 public record Parameter(
     string Name,
     string? DefaultValue = null,
-    string? Value = null 
+    Argument<string>? Value = null 
 ) : Contract(Name)
 {
     [MemberNotNullWhen(true, nameof(Value))]
     public override bool Installed { get; init; }
-    
+
+    public Argument<string> Value { get; init; } = Value ?? new Argument<string>();
+
+    public override IEnumerable<IArgument> GetArguments()
+    {
+        yield return Value;
+    }
+
     public override Contract Merge(Contract other)
     {
         var contract = EnsureSame(this, other);

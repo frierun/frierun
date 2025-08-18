@@ -12,6 +12,6 @@ public sealed class ParameterFactory: Faker<Parameter>
         CustomInstantiator(_ => new Parameter(""));
         this.UniqueRuleFor(p => p.Name, f => f.Lorem.Word(), _uniqueNames);
         RuleFor(p => p.DefaultValue, f => f.Lorem.Word());
-        RuleFor(p => p.Value, f => f.Lorem.Word());
+        RuleFor(p => p.Value, f => new Argument<string>(f.Lorem.Word()));
     }
 }
