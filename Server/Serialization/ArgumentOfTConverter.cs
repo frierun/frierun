@@ -36,6 +36,7 @@ public class ArgumentOfTConverter : JsonConverterFactory
     private class ArgumentOfTConverterInner<T>(JsonSerializerOptions options) : JsonConverter<Argument<T>>
     {
         private readonly JsonConverter<T?> _valueConverter = (JsonConverter<T?>)options.GetConverter(typeof(T?));
+        public override bool HandleNull => true;
 
         public override void Write(Utf8JsonWriter writer, Argument<T> value, JsonSerializerOptions options)
         {

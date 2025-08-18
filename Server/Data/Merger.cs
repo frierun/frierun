@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace Frierun.Server.Data;
+﻿namespace Frierun.Server.Data;
 
 public static class Merger
 {
@@ -82,7 +80,7 @@ public static class Merger
             {
                 continue;
             }
-            
+
             if (!result.TryGetValue(key, out var value1) || value1 is null)
             {
                 result[key] = value2;
@@ -99,7 +97,7 @@ public static class Merger
                 result[key] = (TValue)argument.Merge(value2);
                 continue;
             }
-            
+
             throw new MergeException("Can't merge two different values");
         }
 

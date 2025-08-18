@@ -11,7 +11,7 @@ public static class Argument
 public class Argument<T> : IEquatable<Argument<T>>, IArgument
 {
     public T? Value { get; private set; }
-    private Func<ExecutionPlan, T>? Resolver { get; set; }
+    public Func<ExecutionPlan, T>? Resolver { get; private set; }
     public IEnumerable<ContractId> RequiredContracts { get; private set; } = [];
     private bool Resolved => !Equals(Value, default(T));
     public bool Empty => !Resolved && Resolver == null;
@@ -85,7 +85,7 @@ public class Argument<T> : IEquatable<Argument<T>>, IArgument
     /// <summary>
     /// Resolves insertion value.
     /// </summary>
-    private string ResolveInsertion(string insertion, ExecutionPlan plan)
+    private static string ResolveInsertion(string insertion, ExecutionPlan plan)
     {
         var match = Argument.VariableRegex.Match(insertion);
         if (!match.Success)
@@ -100,7 +100,7 @@ public class Argument<T> : IEquatable<Argument<T>>, IArgument
         var contractType = ContractRegistry.GetContractType(contractTypeName);
         var contractId = ContractId.Create(contractType, contractName);
 
-        Contract result = plan.GetContract(contractId);
+        var result = plan.GetContract(contractId);
 
         var propertyInfo = result.GetType().GetProperty(propertyName);
         if (propertyInfo == null)
