@@ -25,7 +25,7 @@ public record Parameter(
 
         return MergeCommon(this, contract) with
         {
-            Value = OnlyOne(Value, contract.Value),
+            Value = Value.Merge(contract.Value),
             DefaultValue = OnlyOne(DefaultValue, contract.DefaultValue)
         };
     }

@@ -76,7 +76,7 @@ public class DiscoveryGraphTests : BaseTests
         var contract = Factory<Parameter>().Generate() with { Handler = Handler<ParameterHandler>() };
         var graph = new DiscoveryGraph();
 
-        Assert.True(graph.Apply(new ContractInitializeResult(contract with { Value = null })));
+        Assert.True(graph.Apply(new ContractInitializeResult(contract with { Value = new Argument<string>() })));
         Assert.True(graph.Apply(new ContractInitializeResult(contract with { DefaultValue = null })));
 
         var resultContract = (Parameter)graph.Contracts[contract];
