@@ -6,12 +6,10 @@ public class ParameterHandler : Handler<Parameter>
 {
     public override IEnumerable<ContractInitializeResult> Initialize(Parameter contract, string prefix)
     {
-        var value = contract.Value ?? contract.DefaultValue ?? "";
-
         yield return new ContractInitializeResult(
             contract with
             {
-                Value = value, 
+                Value = contract.Value.Empty ? new Argument<string>(contract.DefaultValue) : contract.Value, 
                 Handler = this
             }
         );

@@ -1,5 +1,5 @@
 ﻿import {ContractProps} from "@/components/contracts/ContractForm.tsx";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Domain} from "@/api/schemas";
 import BaseForm from "@/components/contracts/BaseForm.tsx";
 
@@ -7,6 +7,10 @@ export default function DomainForm({contract, variants, updateContract}: Contrac
     const [subdomain, setSubdomain] = useState<string>('');
     const domainName = contract.value?.split('.').slice(1).join('.') ?? '';
 
+    useEffect(() => {
+        setSubdomain(contract.value?.split('.')[0] ?? '');
+    }, [contract]);
+    
     return (
         <BaseForm
             contract={contract}
