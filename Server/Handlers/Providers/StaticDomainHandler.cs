@@ -8,6 +8,7 @@ public class StaticDomainHandler(Application application)
     private readonly string _domainName = application.Contracts
         .OfType<Parameter>()
         .First(parameter => parameter.Name == "Domain")
+        .Value
         .Value ?? "";
 
     private readonly bool _isInternal = application.Contracts
@@ -54,7 +55,7 @@ public class StaticDomainHandler(Application application)
     }
 
     /// <summary>
-    /// Checks if subdomain is already in use
+    /// Checks if a subdomain is already in use
     /// </summary>
     private bool IsDomainExist(string domain)
     {

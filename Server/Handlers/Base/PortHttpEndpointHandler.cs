@@ -10,6 +10,13 @@ public class PortHttpEndpointHandler : Handler<HttpEndpoint>
         yield return new ContractInitializeResult(
             contract with
             {
+                ResultSsl = false,
+                ResultHost = new Argument<string>(plan =>
+                    plan.GetContract((ContractId<PortEndpoint>)portEndpoint.Id).ExternalIp
+                ),
+                ResultPort = new Argument<int>(plan =>
+                    plan.GetContract((ContractId<PortEndpoint>)portEndpoint.Id).ExternalPort
+                ),
                 Handler = this,
                 DependsOn = contract.DependsOn.Append(portEndpoint),
             },
@@ -21,18 +28,6 @@ public class PortHttpEndpointHandler : Handler<HttpEndpoint>
                 }
             ]
         );
-    }
-
-    public override HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
-    {
-        var portEndpoint = plan.GetContract((ContractId<PortEndpoint>)CreatePortEndpoint(contract).Id);
-
-        return contract with
-        {
-            ResultSsl = false,
-            ResultHost = portEndpoint.ExternalIp,
-            ResultPort = portEndpoint.ExternalPort,
-        };
     }
 
     private static PortEndpoint CreatePortEndpoint(HttpEndpoint contract)

@@ -27,10 +27,11 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
             .UpdateTunnelConfiguration(tunnel.AccountId, tunnel.TunnelId, Arg.Any<JsonObject>());
 
         CloudflareClient.Received(1).CreateDnsRecord(
-            httpEndpoint.CloudflareZoneId, Arg.Is<JsonObject>(
-                arg => arg["type"]!.GetValue<string>() == "CNAME" &&
-                       arg["name"]!.GetValue<string>() == httpEndpoint.ResultHost &&
-                       arg["content"]!.GetValue<string>() == $"{tunnel.TunnelId}.cfargotunnel.com"
+            httpEndpoint.CloudflareZoneId, Arg.Is<JsonObject>(arg => arg["type"]!.GetValue<string>() == "CNAME" &&
+                                                                     arg["name"]!.GetValue<string>() ==
+                                                                     httpEndpoint.ResultHost &&
+                                                                     arg["content"]!.GetValue<string>() ==
+                                                                     $"{tunnel.TunnelId}.cfargotunnel.com"
             )
         );
 
@@ -173,12 +174,11 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
         var container = application.Contracts.OfType<Container>().Single();
         var host = $"http://{container.ContainerName}:{httpEndpoint.Port}";
         CloudflareClient.UpdateTunnelConfiguration(
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Is<JsonObject>(
-                config =>
-                    config["ingress"]!.AsArray().Count == 2
-                    && config["ingress"]!.AsArray()[0]!["hostname"]!.GetValue<string>() == httpEndpoint.ResultHost
-                    && config["ingress"]!.AsArray()[0]!["service"]!.GetValue<string>() == host
-                    && config["ingress"]!.AsArray()[1]!["service"]!.GetValue<string>() == "http_status:404"
+            Arg.Any<string>(), Arg.Any<string>(), Arg.Is<JsonObject>(config =>
+                config["ingress"]!.AsArray().Count == 2
+                && config["ingress"]!.AsArray()[0]!["hostname"]!.GetValue<string>() == httpEndpoint.ResultHost
+                && config["ingress"]!.AsArray()[0]!["service"]!.GetValue<string>() == host
+                && config["ingress"]!.AsArray()[1]!["service"]!.GetValue<string>() == "http_status:404"
             )
         );
     }
@@ -218,14 +218,13 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
         var container = application.Contracts.OfType<Container>().Single();
         var host = $"http://{container.ContainerName}:{httpEndpoint.Port}";
         CloudflareClient.UpdateTunnelConfiguration(
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Is<JsonObject>(
-                config =>
-                    config["ingress"]!.AsArray().Count == 3
-                    && config["ingress"]!.AsArray()[0]!["hostname"]!.GetValue<string>() == httpEndpoint.ResultHost
-                    && config["ingress"]!.AsArray()[0]!["service"]!.GetValue<string>() == host
-                    && config["ingress"]!.AsArray()[1]!["hostname"]!.GetValue<string>() == "existing.domain"
-                    && config["ingress"]!.AsArray()[1]!["service"]!.GetValue<string>() == "http://existing.service:80"
-                    && config["ingress"]!.AsArray()[2]!["service"]!.GetValue<string>() == "http_status:404"
+            Arg.Any<string>(), Arg.Any<string>(), Arg.Is<JsonObject>(config =>
+                config["ingress"]!.AsArray().Count == 3
+                && config["ingress"]!.AsArray()[0]!["hostname"]!.GetValue<string>() == httpEndpoint.ResultHost
+                && config["ingress"]!.AsArray()[0]!["service"]!.GetValue<string>() == host
+                && config["ingress"]!.AsArray()[1]!["hostname"]!.GetValue<string>() == "existing.domain"
+                && config["ingress"]!.AsArray()[1]!["service"]!.GetValue<string>() == "http://existing.service:80"
+                && config["ingress"]!.AsArray()[2]!["service"]!.GetValue<string>() == "http_status:404"
             )
         );
     }
@@ -279,8 +278,8 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
         CloudflareClient.GetDnsRecords(httpEndpoint.CloudflareZoneId).Returns(
             new List<JsonObject>
             {
-                new() { ["id"] = "recordId1", ["name"] = httpEndpoint.ResultHost },
-                new() { ["id"] = "recordId2", ["name"] = httpEndpoint.ResultHost },
+                new() { ["id"] = "recordId1", ["name"] = httpEndpoint.ResultHost.Value },
+                new() { ["id"] = "recordId2", ["name"] = httpEndpoint.ResultHost.Value },
                 new() { ["id"] = "recordId3", ["name"] = "other.domain" },
                 new() { ["id"] = "recordId4" }
             }
@@ -312,8 +311,8 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
                     ["ingress"] = new JsonArray
                     {
                         new JsonObject { ["hostname"] = "other.domain", ["service"] = "http://other.service:80" },
-                        new JsonObject { ["hostname"] = httpEndpoint.ResultHost, ["service"] = "http://endpoint:80" },
-                        new JsonObject { ["hostname"] = httpEndpoint.ResultHost, ["service"] = "http://old:80" },
+                        new JsonObject { ["hostname"] = httpEndpoint.ResultHost.Value, ["service"] = "http://endpoint:80" },
+                        new JsonObject { ["hostname"] = httpEndpoint.ResultHost.Value, ["service"] = "http://old:80" },
                         new JsonObject { ["service"] = "http_status:404" }
                     }
                 }
@@ -323,12 +322,11 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
         UninstallApplication(application);
 
         CloudflareClient.Received(1).UpdateTunnelConfiguration(
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Is<JsonObject>(
-                config =>
-                    config["ingress"]!.AsArray().Count == 2
-                    && config["ingress"]!.AsArray()[0]!["hostname"]!.GetValue<string>() == "other.domain"
-                    && config["ingress"]!.AsArray()[0]!["service"]!.GetValue<string>() == "http://other.service:80"
-                    && config["ingress"]!.AsArray()[1]!["service"]!.GetValue<string>() == "http_status:404"
+            Arg.Any<string>(), Arg.Any<string>(), Arg.Is<JsonObject>(config =>
+                config["ingress"]!.AsArray().Count == 2
+                && config["ingress"]!.AsArray()[0]!["hostname"]!.GetValue<string>() == "other.domain"
+                && config["ingress"]!.AsArray()[0]!["service"]!.GetValue<string>() == "http://other.service:80"
+                && config["ingress"]!.AsArray()[1]!["service"]!.GetValue<string>() == "http_status:404"
             )
         );
     }

@@ -15,7 +15,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void Install_ContainerWithHttpEndpoint_InstallTraefikFirst(bool reverseOrder)
+    public void Install_ContainerWithHttpEndpoint_InstallsTraefikFirst(bool reverseOrder)
     {
         InstallPackage("static-zone");
         InstallPackage("traefik");
@@ -44,7 +44,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     }
 
     [Fact]
-    public void Install_InternalDomain_InstallHttpEndpoint()
+    public void Install_InternalDomain_InstallsHttpEndpoint()
     {
         InstallPackage("static-zone");
         InstallPackage("traefik");
@@ -60,7 +60,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     }
 
     [Fact]
-    public void Install_ExternalDomain_InstallHttpEndpoint()
+    public void Install_ExternalDomain_InstallsHttpEndpoint()
     {
         InstallPackage(
             "static-zone",
@@ -104,7 +104,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     }
 
     [Fact]
-    public void Install_PackageWithTwoContracts_OnlyOneNetworkAttached()
+    public void Install_PackageWithTwoContracts_AttachesOnlyOneNetwork()
     {
         InstallPackage(
             "static-zone",
@@ -130,7 +130,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     }
 
     [Fact]
-    public void Uninstall_PackageWithTwoContracts_OnlyOneNetworkDetached()
+    public void Uninstall_PackageWithTwoContracts_DetachesOnlyOneNetwork()
     {
         InstallPackage(
             "static-zone",
@@ -149,7 +149,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     }
     
     [Fact]
-    public void Install_HttpEndpoint_ContainerIsLabeled()
+    public void Install_HttpEndpoint_AddsContainerLabel()
     {
         InstallPackage("static-zone");
         InstallPackage("traefik");

@@ -14,7 +14,7 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
     {
         var zones = client.GetZones();
         (string id, string name) zone;
-        if (contract.ResultHost == null)
+        if (contract.ResultHost.Value == null)
         {
             zone = zones.FirstOrDefault();
             if (zone == default)
@@ -37,7 +37,7 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
         }
         else
         {
-            var rootDomain = contract.ResultHost.Split('.', 2).Last();
+            var rootDomain = contract.ResultHost.Value.Split('.', 2).Last();
             zone = zones.FirstOrDefault(tuple => tuple.name == rootDomain || tuple.name == contract.ResultHost);
             if (zone == default)
             {
@@ -92,7 +92,7 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
             0,
             new JsonObject
             {
-                ["hostname"] = contract.ResultHost,
+                ["hostname"] = contract.ResultHost.Value,
                 ["service"] = $"http://{container.ContainerName}:{contract.Port}"
             }
         );
@@ -107,7 +107,7 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
         client.CreateDnsRecord(contract.CloudflareZoneId, new JsonObject
         {
             ["type"] = "CNAME",
-            ["name"] = contract.ResultHost,
+            ["name"] = contract.ResultHost.Value,
             ["content"] = $"{_tunnel.TunnelId}.cfargotunnel.com",
             ["proxied"] = true
         });

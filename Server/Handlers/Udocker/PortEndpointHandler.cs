@@ -48,6 +48,7 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
         yield return new ContractInitializeResult(
             contract with
             {
+                ExternalIp = _connection.Host,
                 Handler = this,
             },
             [
@@ -58,13 +59,5 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
                 }
             ]
         );
-    }
-
-    public override PortEndpoint Install(PortEndpoint contract, ExecutionPlan plan)
-    {
-        return contract with
-        {
-            ExternalIp = _connection.Host,
-        };
     }
 }

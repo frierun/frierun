@@ -4,6 +4,27 @@ namespace Frierun.Tests.Handlers.Base;
 
 public class PortHttpEndpointHandlerTests : BaseTests
 {
+    [Fact]
+    public void Install_ContainerWithHttpEndpoint_CreatesEndpoint()
+    {
+        InstallPackage("docker");
+        var container = Factory<Container>().Generate();
+        var httpEndpoint = Factory<HttpEndpoint>().Generate() with { Container = (ContractId<Container>)container.Id };
+        List<Contract> contracts =
+        [
+            container,
+            httpEndpoint
+        ];
+        var package = Factory<Package>().Generate() with { Contracts = contracts };
+
+        var application = InstallPackage(package);
+
+        var resultHttpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
+        Assert.False(resultHttpEndpoint.ResultSsl.Value);
+        Assert.Equal(httpEndpoint.Port, resultHttpEndpoint.ResultPort.Value);
+        Assert.NotNull(resultHttpEndpoint.ResultHost.Value);
+    }
+    
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

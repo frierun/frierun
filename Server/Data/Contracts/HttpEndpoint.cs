@@ -9,9 +9,9 @@ public record HttpEndpoint(
     int Port = 0,
     ContractId<Container>? Container = null,
     ContractId<Domain>? Domain = null,
-    bool? ResultSsl = null,
-    string? ResultHost = null,
-    int? ResultPort = null,
+    Argument<bool?>? ResultSsl = null,
+    Argument<string>? ResultHost = null,
+    Argument<int>? ResultPort = null,
     string? NetworkName = null, // for Traefik endpoints
     string? CloudflareZoneId = null // for Cloudflare endpoints
 ) : Contract(Name ?? $"{Port}{(Container != null ? $" at {Container.Name}" : "")}")
@@ -20,6 +20,16 @@ public record HttpEndpoint(
 
     public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");
     public ContractId<Domain> Domain { get; init; } = Domain ?? new ContractId<Domain>(Name ?? "");
+    public Argument<bool?> ResultSsl { get; init; } = ResultSsl ?? new Argument<bool?>();
+    public Argument<string> ResultHost { get; init; } = ResultHost ?? new Argument<string>();
+    public Argument<int> ResultPort { get; init; } = ResultPort ?? new Argument<int>();
+
+    public override IEnumerable<IArgument> GetArguments()
+    {
+        yield return ResultSsl;
+        yield return ResultHost;
+        yield return ResultPort;
+    }
 
     public override Contract Merge(Contract other)
     {
@@ -30,9 +40,9 @@ public record HttpEndpoint(
             Port = OnlyOne(Port, contract.Port, port => port == 0),
             Container = OnlyOne(Container, contract.Container),
             Domain = OnlyOne(Domain, contract.Domain),
-            ResultSsl = OnlyOne(ResultSsl, contract.ResultSsl),
-            ResultHost = OnlyOne(ResultHost, contract.ResultHost),
-            ResultPort = OnlyOne(ResultPort, contract.ResultPort),
+            ResultSsl = ResultSsl.Merge(contract.ResultSsl),
+            ResultHost = ResultHost.Merge(contract.ResultHost),
+            ResultPort = ResultPort.Merge(contract.ResultPort),
             NetworkName = OnlyOne(NetworkName, contract.NetworkName),
             CloudflareZoneId = OnlyOne(CloudflareZoneId, contract.CloudflareZoneId)
         };

@@ -23,8 +23,17 @@ public class TraefikHttpEndpointHandler(Application application)
         yield return new ContractInitializeResult(
             contract with
             {
+                ResultSsl = new Argument<bool?>(plan =>
+                    GetCertificateResolver(plan.GetContract(contract.Domain)) != null
+                ),
+                ResultHost = new Argument<string>(plan => plan.GetContract(contract.Domain).Value),
+                ResultPort = new Argument<int>(plan =>
+                    GetCertificateResolver(plan.GetContract(contract.Domain)) == null ? _webPort : _webSecurePort
+                ),
                 Handler = this,
-                DependsOn = contract.DependsOn.Append(new Network("")).Append(contract.Domain),
+                DependsOn = contract.DependsOn
+                    .Append(new Network(""))
+                    .Append(contract.Domain),
             },
             [
                 new Container(contract.Container.Name)
@@ -48,18 +57,7 @@ public class TraefikHttpEndpointHandler(Application application)
 
         _container.AttachNetwork(network.NetworkName);
 
-        string? certResolver = null;
-        if (domainContract.IsInternal == false)
-        {
-            if (_webPort == 80)
-            {
-                certResolver = "httpchallenge";
-            }
-            else if (_webSecurePort == 443)
-            {
-                certResolver = "tlschallenge";
-            }
-        }
+        var certResolver = GetCertificateResolver(domainContract);
 
         var labels = new Dictionary<string, string>
         {
@@ -85,9 +83,6 @@ public class TraefikHttpEndpointHandler(Application application)
 
         return contract with
         {
-            ResultSsl = certResolver != null,
-            ResultHost = domain,
-            ResultPort = certResolver != null ? _webSecurePort : _webPort,
             NetworkName = network.NetworkName,
         };
     }
@@ -98,5 +93,30 @@ public class TraefikHttpEndpointHandler(Application application)
         Debug.Assert(contract.NetworkName != null);
 
         _container.DetachNetwork(contract.NetworkName);
+    }
+
+    /// <summary>
+    /// Gets traefik certificate resolver, which can be used for the specific domain
+    /// </summary>
+    private string? GetCertificateResolver(Domain domain)
+    {
+        if (domain.IsInternal != false)
+        {
+            return null;
+        }
+
+        if (_webPort == 80)
+        {
+            // ReSharper disable once StringLiteralTypo
+            return "httpchallenge";
+        }
+
+        if (_webSecurePort == 443)
+        {
+            // ReSharper disable once StringLiteralTypo
+            return "tlschallenge";
+        }
+
+        return null;
     }
 }

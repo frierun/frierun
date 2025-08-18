@@ -11,7 +11,7 @@ public static class Argument
 public class Argument<T> : IEquatable<Argument<T>>, IArgument
 {
     public T? Value { get; private set; }
-    public Func<ExecutionPlan, T>? Resolver { get; private set; }
+    public Func<ExecutionPlan, T?>? Resolver { get; private set; }
     public IEnumerable<ContractId> RequiredContracts { get; private set; } = [];
     private bool Resolved => !Equals(Value, default(T));
     public bool Empty => !Resolved && Resolver == null;
@@ -29,7 +29,7 @@ public class Argument<T> : IEquatable<Argument<T>>, IArgument
         }
     }
 
-    public Argument(Func<ExecutionPlan, T> resolver)
+    public Argument(Func<ExecutionPlan, T?> resolver)
     {
         Resolver = resolver;
     }
