@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Frierun.Server.Data;
+﻿using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
@@ -12,12 +11,17 @@ public class RedisHandler : Handler<Redis>
 
         var volume = contract.Volume ?? new ContractId<Volume>(name + "-data");
 
+        if (contract.Host.Empty)
+        {
+            contract = contract with { Host = new Argument<string>(plan => plan.GetContract(container).ContainerName) };
+        }
+
         yield return new ContractInitializeResult(
             contract with
             {
                 Handler = this,
-                DependsOn = contract.DependsOn.Append(container),
-                Container = container
+                DependsOn = [container],
+                Container = container,
             },
             [
                 new Container(
@@ -25,23 +29,9 @@ public class RedisHandler : Handler<Redis>
                     ImageName: "redis:7",
                     Network: contract.Network,
                     ContainerName: contract.Host,
-                    Mounts: new Dictionary<string, ContainerMount>(){{"/data", new ContainerMount(Volume: volume)}}
+                    Mounts: new Dictionary<string, ContainerMount>() { { "/data", new ContainerMount(Volume: volume) } }
                 )
             ]
         );
-    }
-
-    public override Redis Install(Redis contract, ExecutionPlan plan)
-    {
-        Debug.Assert(contract.Container != null);
-        
-        var container = plan.GetContract(contract.Container);
-        Debug.Assert(container.Installed);
-        Debug.Assert(contract.Host == null || contract.Host == container.ContainerName);
-
-        return contract with
-        {
-            Host = container.ContainerName
-        };
     }
 }
