@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace Frierun.Server.Data;
 
@@ -10,11 +11,7 @@ public static class Argument
 
 public class Argument<T> : IEquatable<Argument<T>>, IArgument
 {
-    public T? Value { get; private set; }
-    public Func<ExecutionPlan, T?>? Resolver { get; private set; }
-    public IEnumerable<ContractId> RequiredContracts { get; private set; } = [];
-    private bool Resolved => !Equals(Value, default(T));
-    public bool Empty => !Resolved && Resolver == null;
+    private bool _resolving;
 
     public Argument()
     {
@@ -36,6 +33,31 @@ public class Argument<T> : IEquatable<Argument<T>>, IArgument
 
     public static implicit operator Argument<T>(T? value) => new(value);
     public static implicit operator T?(Argument<T> arg) => arg.Value;
+
+    /// <summary>
+    /// Resolved value of argument. Maybe default if not resolved yet.
+    /// </summary>
+    public T? Value { get; private set; }
+
+    /// <summary>
+    /// Function to resolve argument
+    /// </summary>
+    public Func<ExecutionPlan, T?>? Resolver { get; private set; }
+
+    /// <summary>
+    /// List of contracts which are required to resolve value
+    /// </summary>
+    public IEnumerable<ContractId> RequiredContracts { get; private set; } = [];
+
+    /// <summary>
+    /// Checks if the argument is resolved
+    /// </summary>
+    public bool Resolved => !Equals(Value, default(T));
+
+    /// <summary>
+    /// Checks if the argument is empty, that is it has neither value, nor resolver
+    /// </summary>
+    public bool Empty => !Resolved && Resolver == null;
 
     /// <summary>
     /// Creates a resolver to all variables in templates in form {{Contract:Name:Argument}} 
@@ -85,7 +107,7 @@ public class Argument<T> : IEquatable<Argument<T>>, IArgument
     /// <summary>
     /// Resolves insertion value.
     /// </summary>
-    private static string ResolveInsertion(string insertion, ExecutionPlan plan)
+    private static string? ResolveInsertion(string insertion, ExecutionPlan plan)
     {
         var match = Argument.VariableRegex.Match(insertion);
         if (!match.Success)
@@ -100,17 +122,33 @@ public class Argument<T> : IEquatable<Argument<T>>, IArgument
         var contractType = ContractRegistry.GetContractType(contractTypeName);
         var contractId = ContractId.Create(contractType, contractName);
 
-        var result = plan.GetContract(contractId);
+        var contract = plan.GetContract(contractId);
 
-        var propertyInfo = result.GetType().GetProperty(propertyName);
+        var propertyInfo = contract.GetType().GetProperty(propertyName);
         if (propertyInfo == null)
         {
             throw new Exception($"Property not found: {propertyName} in {contractType}");
         }
 
-        return propertyInfo.GetValue(result)?.ToString() ?? "";
+        if (propertyInfo.PropertyType.IsAssignableTo(typeof(IArgument)))
+        {
+            var argument = (IArgument)propertyInfo.GetValue(contract)!;
+            argument.Resolve(plan);
+            return argument.ToString();
+        }
+
+        // resolve all contract arguments because our property might depend on any of them
+        foreach (var argument in contract.GetArguments())
+        {
+            argument.Resolve(plan);
+        }
+
+        return propertyInfo.GetValue(contract)?.ToString();
     }
 
+    /// <summary>
+    /// Resolves the real value of argument
+    /// </summary>
     public void Resolve(ExecutionPlan plan)
     {
         if (Resolver == null)
@@ -118,7 +156,16 @@ public class Argument<T> : IEquatable<Argument<T>>, IArgument
             return;
         }
 
+        Debug.Assert(!Resolved, "Can't resolve already resolved argument");
+
+        if (_resolving)
+        {
+            throw new Exception("Can't resolve argument recursively");
+        }
+
+        _resolving = true;
         Value = Resolver.Invoke(plan);
+        _resolving = false;
         Resolver = null;
     }
 
@@ -168,7 +215,7 @@ public class Argument<T> : IEquatable<Argument<T>>, IArgument
         {
             return Value.ToString();
         }
-        
+
         return "Unresolved";
     }
 }
