@@ -28,8 +28,7 @@ public class PackageSerializer(ILogger<PackageSerializer> logger, ContractRegist
             {
                 JsonExtensions.UnIgnorePropertiesForDeserialize(
                     typeof(Contract),
-                    nameof(Contract.DependsOn),
-                    nameof(Contract.DependencyOf)
+                    nameof(Contract.DependsOn)
                 )
             }
         }

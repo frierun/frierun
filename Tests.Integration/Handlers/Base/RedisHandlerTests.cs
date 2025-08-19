@@ -28,7 +28,10 @@ public class RedisHandlerTests : TestWithDocker
         var database = application.Contracts.OfType<Redis>().Single();
         Assert.True(container.Installed);
         Assert.True(database.Installed);
-        Assert.Equal("redis-client-redis", database.Host);
+
+        var host = database.Host.Value;
+        Assert.NotNull(host);
+        Assert.Equal("redis-client-redis", host);
 
         // try to connect to the database from the client
         var queries = new[]
@@ -44,7 +47,7 @@ public class RedisHandlerTests : TestWithDocker
             var command = new List<string>
             {
                 "redis-cli",
-                "-h", database.Host,
+                "-h", host,
             };
             command.AddRange(query.Split(" "));
             (stdout, _) = await DockerService.ExecInContainer(

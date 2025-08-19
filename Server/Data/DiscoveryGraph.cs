@@ -135,15 +135,7 @@ public class DiscoveryGraph
                 _emptyContracts.Add(contractId);
             }
         }
-
-        foreach (var contractId in result.Contract.DependencyOf)
-        {
-            if (!Contracts.ContainsKey(contractId))
-            {
-                _emptyContracts.Add(contractId);
-            }
-        }
-
+        
         foreach (var argument in result.Contract.GetArguments())
         {
             foreach (var contractId in argument.RequiredContracts)

@@ -30,11 +30,6 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
             {
                 graph.AddEdge(dependency, contract);
             }
-
-            foreach (var dependency in contract.DependencyOf)
-            {
-                graph.AddEdge(contract, dependency);
-            }
         }
 
         return graph;

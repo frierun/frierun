@@ -42,7 +42,6 @@ public abstract record Contract(string Name)
     [JsonIgnore] public ContractId Id => ContractId.Create(GetType(), Name);
 
     [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = [];
-    [JsonIgnore] public IEnumerable<ContractId> DependencyOf { get; init; } = [];
 
     [JsonPropertyName("handler")]
     [JsonInclude]

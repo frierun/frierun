@@ -31,7 +31,6 @@ public static class Merger
             Handler = OnlyOne(contract.Handler, other.Handler),
             HandlerApplication = OnlyOne(contract.HandlerApplication, other.HandlerApplication),
             DependsOn = contract.DependsOn.Concat(other.DependsOn),
-            DependencyOf = contract.DependencyOf.Concat(other.DependencyOf),
         };
 
         if (result is { Handler: not null, HandlerApplication: not null } &&
