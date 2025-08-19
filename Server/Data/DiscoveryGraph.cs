@@ -58,6 +58,7 @@ public class DiscoveryGraph
             _uninitializedContracts.Remove(contractId);
             Debug.Assert(!Contracts.ContainsKey(contractId));
 
+            Contracts[contractId] = contract;
             return (contractId, contract);
         }
 

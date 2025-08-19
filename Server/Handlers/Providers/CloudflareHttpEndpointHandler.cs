@@ -28,10 +28,12 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
 
             contract = contract with
             {
-                ResultHost = FindUniqueName(
-                    prefix,
-                    c => c.ResultHost,
-                    $".{zone.name}"
+                ResultHost = new Argument<string>(
+                    FindUniqueName(
+                        prefix,
+                        c => c.ResultHost,
+                        $".{zone.name}"
+                    )
                 )
             };
         }
@@ -74,7 +76,7 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
         Debug.Assert(network.Installed);
         Debug.Assert(_tunnel.Installed);
         Debug.Assert(contract.CloudflareZoneId != null);
-        
+
         var config = client.GetTunnelConfiguration(_tunnel.AccountId, _tunnel.TunnelId);
         if (config["ingress"] is not JsonArray ingress || ingress.Count == 0)
         {
@@ -96,21 +98,23 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
                 ["service"] = $"http://{container.ContainerName}:{contract.Port}"
             }
         );
-        
+
         client.UpdateTunnelConfiguration(
             _tunnel.AccountId,
             _tunnel.TunnelId,
             config
         );
-        
+
         DeleteOldDnsRecords(contract.CloudflareZoneId, contract.ResultHost);
-        client.CreateDnsRecord(contract.CloudflareZoneId, new JsonObject
-        {
-            ["type"] = "CNAME",
-            ["name"] = contract.ResultHost.Value,
-            ["content"] = $"{_tunnel.TunnelId}.cfargotunnel.com",
-            ["proxied"] = true
-        });
+        client.CreateDnsRecord(
+            contract.CloudflareZoneId, new JsonObject
+            {
+                ["type"] = "CNAME",
+                ["name"] = contract.ResultHost.Value,
+                ["content"] = $"{_tunnel.TunnelId}.cfargotunnel.com",
+                ["proxied"] = true
+            }
+        );
 
         _container.AttachNetwork(network.NetworkName);
         return contract with
@@ -118,14 +122,14 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
             NetworkName = network.NetworkName
         };
     }
-    
+
     private void DeleteOldDnsRecords(string cloudflareZoneId, string? resultHost)
     {
         if (resultHost == null)
         {
             return;
         }
-        
+
         foreach (var record in client.GetDnsRecords(cloudflareZoneId))
         {
             if (record["name"]?.GetValue<string>() != resultHost)
@@ -138,6 +142,7 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
             {
                 continue;
             }
+
             client.DeleteDnsRecord(cloudflareZoneId, recordId);
         }
     }
@@ -147,10 +152,10 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
         Debug.Assert(contract.Installed);
         Debug.Assert(contract.NetworkName != null);
         Debug.Assert(contract.CloudflareZoneId != null);
-        Debug.Assert(_tunnel.Installed);        
+        Debug.Assert(_tunnel.Installed);
 
         _container.DetachNetwork(contract.NetworkName);
-        
+
         var config = client.GetTunnelConfiguration(_tunnel.AccountId, _tunnel.TunnelId);
         if (config["ingress"] is JsonArray ingress)
         {
@@ -166,7 +171,7 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
                 ingress.RemoveAt(i);
                 i--;
             }
-            
+
             client.UpdateTunnelConfiguration(_tunnel.AccountId, _tunnel.TunnelId, config);
         }
 

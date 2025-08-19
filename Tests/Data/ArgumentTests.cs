@@ -64,6 +64,26 @@ public class ArgumentTests : BaseTests
     }
 
     [Fact]
+    public void Merge_Number_ThreatsZeroAsNull()
+    {
+        var arg1 = new Argument<int>(0);
+        var arg2 = new Argument<int>(1);
+        
+        var result = arg1.Merge(arg2);
+        
+        Assert.Equal(1, result.Value);
+    }
+
+    [Fact]
+    public void Merge_DifferentNumbers_ThrowsException()
+    {
+        var arg1 = new Argument<int>(1);
+        var arg2 = new Argument<int>(2);
+        
+        Assert.Throws<MergeException>(() => arg1.Merge(arg2));
+    }
+
+    [Fact]
     public void Resolve_DependsOnArgument_ResolvesArgument()
     {
         var arg = new Argument<string>("{{Parameter:Test1:Value}}");

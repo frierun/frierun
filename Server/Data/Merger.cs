@@ -48,7 +48,7 @@ public static class Merger
     /// </summary>
     public static T OnlyOne<T>(T value1, T value2, Func<T, bool>? isUnset = null)
     {
-        isUnset ??= value => value is null;
+        isUnset ??= value => Equals(value, default(T));
 
         if (isUnset(value1))
         {

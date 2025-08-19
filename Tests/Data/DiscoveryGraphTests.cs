@@ -71,6 +71,31 @@ public class DiscoveryGraphTests : BaseTests
     }
 
     [Fact]
+    public void Apply_UninitializedContract_MergeContract()
+    {
+        var contract = Factory<Parameter>().Generate() with { Handler = Handler<ParameterHandler>() };
+        var graph = new DiscoveryGraph();
+        var package = Factory<Package>().Generate() with { Handler = Handler<PackageHandler>() };
+        graph.Apply(
+            new ContractInitializeResult(
+                package,
+                [contract with { Value = new Argument<string>() }]
+            )
+        );
+        var (nextContractId, nextContract) = graph.Next();
+        Assert.Equal(contract.Id, nextContractId);
+        Assert.NotNull(nextContract);
+        Assert.Null(((Parameter)nextContract).Value.Value);
+
+        Assert.True(graph.Apply(new ContractInitializeResult(contract with { DefaultValue = null })));
+
+        var resultContract = (Parameter)graph.Contracts[contract];
+        Assert.Equal(contract.Value, resultContract.Value);
+        Assert.Equal(contract.DefaultValue, resultContract.DefaultValue);
+    }
+
+
+    [Fact]
     public void Apply_ExistingContract_MergeContract()
     {
         var contract = Factory<Parameter>().Generate() with { Handler = Handler<ParameterHandler>() };
@@ -83,7 +108,7 @@ public class DiscoveryGraphTests : BaseTests
         Assert.Equal(contract.Value, resultContract.Value);
         Assert.Equal(contract.DefaultValue, resultContract.DefaultValue);
     }
-    
+
     [Fact]
     public void Apply_ExistingConflictingContract_ReturnsFalse()
     {
@@ -93,7 +118,7 @@ public class DiscoveryGraphTests : BaseTests
         Assert.True(graph.Apply(new ContractInitializeResult(contract)));
         Assert.False(graph.Apply(new ContractInitializeResult(contract with { Value = contract.Value + "conflict" })));
     }
-    
+
 
     [Fact]
     public void Apply_UpdatedContract_ContractIsReinitialized()
