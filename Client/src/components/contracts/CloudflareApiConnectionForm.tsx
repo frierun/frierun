@@ -7,7 +7,7 @@ export default function CloudflareApiConnectionForm({contract, updateContract}: 
     const [token, setToken] = useState('');
 
     useEffect(() => {
-        setToken(contract.token);
+        setToken(contract.token ?? '');
     }, [contract]);
 
     return (

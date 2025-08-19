@@ -27,7 +27,7 @@ export default function PackageInstall({name}: Props) {
                 type: 'Package',
                 name,
                 tags: [],
-                contracts: overrides
+                contracts: overrides,
             }
         })
 

@@ -8,7 +8,6 @@ import type { CloudflareApiConnection } from "./cloudflareApiConnection";
 import type { CloudflareTunnel } from "./cloudflareTunnel";
 import type { Container } from "./container";
 import type { Daemon } from "./daemon";
-import type { Dependency } from "./dependency";
 import type { DockerApiConnection } from "./dockerApiConnection";
 import type { Domain } from "./domain";
 import type { File } from "./file";
@@ -24,7 +23,6 @@ import type { Postgresql } from "./postgresql";
 import type { Redis } from "./redis";
 import type { Selector } from "./selector";
 import type { SshConnection } from "./sshConnection";
-import type { Substitute } from "./substitute";
 import type { Volume } from "./volume";
 
 export type SelectorOptionContractsItem =
@@ -32,7 +30,6 @@ export type SelectorOptionContractsItem =
   | CloudflareTunnel
   | Container
   | Daemon
-  | Dependency
   | DockerApiConnection
   | Domain
   | File
@@ -48,5 +45,4 @@ export type SelectorOptionContractsItem =
   | Redis
   | Selector
   | SshConnection
-  | Substitute
   | Volume;

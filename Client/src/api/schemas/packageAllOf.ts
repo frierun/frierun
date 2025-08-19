@@ -15,14 +15,12 @@ export type PackageAllOf = {
   /** @nullable */
   iconUrl?: string | null;
   /** @nullable */
-  applicationUrl?: string | null;
-  /** @nullable */
-  applicationDescription?: string | null;
-  /** @nullable */
   shortDescription?: string | null;
   /** @nullable */
   fullDescription?: string | null;
   result?: Application;
   tags: string[];
   contracts: PackageAllOfContractsItem[];
+  applicationUrl?: string | null;
+  applicationDescription?: string | null;
 };
