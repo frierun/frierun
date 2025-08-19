@@ -25,6 +25,7 @@ contracts:
               FORGEJO__database__NAME: "{{Mysql::Database}}"
               FORGEJO__database__USER: "{{Mysql::Username}}"
               FORGEJO__database__PASSWD: "{{Mysql::Password}}"
+            dependsOn: ["Mysql"]
       - name: "PostgreSQL"
         contracts:
           - type: "Container"
@@ -34,6 +35,7 @@ contracts:
               FORGEJO__database__NAME: "{{Postgresql::Database}}"
               FORGEJO__database__USER: "{{Postgresql::Username}}"
               FORGEJO__database__PASSWD: "{{Postgresql::Password}}"
+            dependsOn: ["Postgresql"]
       - name: "SQLite"
               
   - type: "HttpEndpoint"

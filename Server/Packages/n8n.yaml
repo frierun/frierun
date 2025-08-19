@@ -27,6 +27,7 @@ contracts:
               DB_POSTGRESDB_DATABASE: "{{Postgresql::Database}}"
               DB_POSTGRESDB_USER: "{{Postgresql::Username}}"
               DB_POSTGRESDB_PASSWORD: "{{Postgresql::Password}}"
+            dependsOn: ["Postgresql"]
               
       - name: "SQLite"
             

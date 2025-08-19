@@ -13,6 +13,7 @@ contracts:
       PMA_PMADB: "{{Mysql::Database}}"
       PMA_CONTROLUSER: "{{Mysql::Username}}"
       PMA_CONTROLPASS: "{{Mysql::Password}}"
+    dependsOn: ["Mysql"]
       
   - type: "HttpEndpoint"
     port: 80

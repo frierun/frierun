@@ -16,6 +16,7 @@ contracts:
       AUTHENTIK_POSTGRESQL__USER: "{{Postgresql::Username}}"
       AUTHENTIK_POSTGRESQL__PASSWORD: "{{Postgresql::Password}}"
       AUTHENTIK_SECRET_KEY: "{{Password:SecretKey:Value}}"
+    dependsOn: ["Redis", "Postgresql"]
     mounts:
       /media: "media"
       

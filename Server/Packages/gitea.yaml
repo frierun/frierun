@@ -27,6 +27,7 @@ contracts:
               GITEA__database__NAME: "{{Mysql::Database}}"
               GITEA__database__USER: "{{Mysql::Username}}"
               GITEA__database__PASSWD: "{{Mysql::Password}}"
+            dependsOn: ["Mysql"]
               
       - name: "PostgreSQL"
         contracts:
@@ -37,6 +38,7 @@ contracts:
               GITEA__database__NAME: "{{Postgresql::Database}}"
               GITEA__database__USER: "{{Postgresql::Username}}"
               GITEA__database__PASSWD: "{{Postgresql::Password}}"
+            dependsOn: ["Postgresql"]
               
       - name: "SQLite"
               

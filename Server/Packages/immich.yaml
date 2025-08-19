@@ -13,7 +13,7 @@ contracts:
       DB_PASSWORD: "postgres"
       DB_DATABASE_NAME: "immich"
       REDIS_HOSTNAME: "{{Redis::Host}}"
-    dependsOn: [ "Container:database" ]
+    dependsOn: [ "Container:database", "Redis" ]
     mounts:
       /usr/src/app/upload: "upload"
     

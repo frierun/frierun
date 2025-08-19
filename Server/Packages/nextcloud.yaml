@@ -25,6 +25,7 @@ contracts:
               MYSQL_DATABASE: "{{Mysql::Database}}"
               MYSQL_USER: "{{Mysql::Username}}"
               MYSQL_PASSWORD: "{{Mysql::Password}}"
+            dependsOn: ["Mysql"]
               
       - name: "PostgreSQL"
         contracts:
@@ -34,6 +35,7 @@ contracts:
               POSTGRES_DB: "{{Postgresql::Database}}"
               POSTGRES_USER: "{{Postgresql::Username}}"
               POSTGRES_PASSWORD: "{{Postgresql::Password}}"
+            dependsOn: ["Postgresql"]
               
       - name: "SQLite"
         contracts:

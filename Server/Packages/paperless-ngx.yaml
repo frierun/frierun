@@ -18,6 +18,7 @@ contracts:
     mounts:
       /usr/src/paperless/data: "data"
       /usr/src/paperless/media: "media"
+    dependsOn: ["Redis"]
  
   - type: "Selector"
     name: "Database"
@@ -31,6 +32,7 @@ contracts:
               PAPERLESS_DBNAME: "{{Postgresql::Database}}"
               PAPERLESS_DBUSER: "{{Postgresql::Username}}"
               PAPERLESS_DBPASS: "{{Postgresql::Password}}"
+            dependsOn: ["Postgresql"]
 
       - name: "SQLite"
               

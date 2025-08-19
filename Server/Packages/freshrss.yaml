@@ -23,12 +23,14 @@ contracts:
           - type: "Container"
             env:
               FRESHRSS_INSTALL: "--db-type mysql --language en --default-user admin --db-host {{Mysql::Host}} --db-base {{Mysql::Database}} --db-user {{Mysql::Username}} --db-password {{Mysql::Password}}"
+            dependsOn: ["Mysql"]
               
       - name: "PostgreSQL"
         contracts:
           - type: "Container"
             env:
               FRESHRSS_INSTALL: "--db-type pgsql --language en --default-user admin --db-host {{Postgresql::Host}} --db-base {{Postgresql::Database}} --db-user {{Postgresql::Username}} --db-password {{Postgresql::Password}}"
+            dependsOn: ["Postgresql"]
       
       - name: "SQLite"
         contracts:

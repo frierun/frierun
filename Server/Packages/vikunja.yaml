@@ -22,6 +22,7 @@ contracts:
               VIKUNJA_DATABASE_DATABASE: "{{Mysql::Database}}"
               VIKUNJA_DATABASE_USER: "{{Mysql::Username}}"
               VIKUNJA_DATABASE_PASSWORD: "{{Mysql::Password}}"
+            dependsOn: ["Mysql"]
               
       - name: "PostgreSQL"
         contracts:
@@ -33,6 +34,7 @@ contracts:
               VIKUNJA_DATABASE_DATABASE: "{{Postgresql::Database}}"
               VIKUNJA_DATABASE_USER: "{{Postgresql::Username}}"
               VIKUNJA_DATABASE_PASSWORD: "{{Postgresql::Password}}"
+            dependsOn: ["Postgresql"]
               
       - name: "SQLite"
         contracts:

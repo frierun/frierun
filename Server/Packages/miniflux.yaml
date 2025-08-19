@@ -13,6 +13,7 @@ contracts:
       CREATE_ADMIN: "1"
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "{{Password::Value}}"
+    dependsOn: ["Postgresql"]
       
   - type: "HttpEndpoint"
     name: "frontend"
