@@ -23,6 +23,15 @@ public class CloudflareTunnelHandler : Handler<CloudflareTunnel>
                     ImageName: "cloudflare/cloudflared:latest"
                 )
                 {
+                    Command = new Argument<IEnumerable<string>>(plan =>
+                        [
+                            "tunnel",
+                            "--no-autoupdate",
+                            "run",
+                            "--token",
+                            ((CloudflareTunnel)plan.GetContract(contract)).Token ?? ""
+                        ]
+                    ),
                     DependsOn = [contract]
                 }
             ]
@@ -90,14 +99,6 @@ public class CloudflareTunnelHandler : Handler<CloudflareTunnel>
                 e
             );
         }
-
-        var container = plan.GetContract(contract.Container);
-        plan.ReplaceContract(
-            container with
-            {
-                Command = ["tunnel", "--no-autoupdate", "run", "--token", tunnel.token]
-            }
-        );
 
         return contract with
         {

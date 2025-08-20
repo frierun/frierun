@@ -22,7 +22,7 @@ public class CloudflareTunnelHandlerTests : BaseTests
         
         var container = application.Contracts.OfType<Container>().Single();
         Assert.Equal("cloudflare/cloudflared:latest", container.ImageName?.Value);
-        Assert.Equal(["tunnel", "--no-autoupdate", "run", "--token", "tunnel token"], container.Command);
+        Assert.Equal(["tunnel", "--no-autoupdate", "run", "--token", "tunnel token"], container.Command.Value);
     }
 
     [Fact]

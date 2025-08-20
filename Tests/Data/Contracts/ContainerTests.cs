@@ -30,7 +30,7 @@ public class ContainerTests : BaseTests
         Assert.Null(result.ImageName.Value);
         Assert.Null(result.NetworkName);
         Assert.Null(result.ContainerName);
-        Assert.Empty(result.Command);
+        Assert.Null(result.Command.Value);
         Assert.Empty(result.Env);
         Assert.Empty(result.Labels);
         Assert.Empty(result.Mounts);

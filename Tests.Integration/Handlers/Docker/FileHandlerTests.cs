@@ -11,7 +11,7 @@ public class FileHandlerTests : TestWithDocker
         {
             new Container(
                 ImageName: "alpine:latest",
-                Command: ["tail", "-f", "/dev/null"],
+                Command: new Argument<IEnumerable<string>>(["tail", "-f", "/dev/null"]),
                 Mounts: new Dictionary<string, ContainerMount> { { "/mnt", new ContainerMount() } }
             ),
             contract
@@ -149,7 +149,7 @@ public class FileHandlerTests : TestWithDocker
             [
                 new Container(
                     ImageName: "alpine:latest",
-                    Command: ["tail", "-f", "/dev/null"],
+                    Command: new Argument<IEnumerable<string>>(["tail", "-f", "/dev/null"]),
                     Mounts: new Dictionary<string, ContainerMount> { { "/mnt", new ContainerMount() } }
                 ),
                 new Volume(Name: "", LocalPath: directory.FullName),

@@ -13,7 +13,7 @@ public record Container(
     Argument<string>? ImageName = null,
     bool MountDockerSocket = false,
     ContractId<Network>? Network = null,
-    IReadOnlyList<string>? Command = null,
+    Argument<IEnumerable<string>>? Command = null,
     IReadOnlyDictionary<string, Argument<string>>? Env = null,
     IReadOnlyDictionary<string, Argument<string>>? Labels = null,
     IReadOnlyDictionary<string, ContainerMount>? Mounts = null
@@ -22,7 +22,7 @@ public record Container(
     [MemberNotNullWhen(true, nameof(ContainerName), nameof(NetworkName))]
     public override bool Installed { get; init; }
     
-    public IReadOnlyList<string> Command { get; init; } = Command ?? [];
+    public Argument<IEnumerable<string>> Command { get; init; } = Command ?? new Argument<IEnumerable<string>>();
     public IReadOnlyDictionary<string, Argument<string>> Env { get; init; } = Env ?? new Dictionary<string, Argument<string>>();
     public IReadOnlyDictionary<string, Argument<string>> Labels { get; init; } = Labels ?? new Dictionary<string, Argument<string>>();
     public IReadOnlyDictionary<string, ContainerMount> Mounts { get; init; } = Mounts ?? new Dictionary<string, ContainerMount>();
@@ -37,6 +37,7 @@ public record Container(
     public override IEnumerable<IArgument> GetArguments()
     {
         yield return ImageName;
+        yield return Command;
         foreach (var pair in Env)
         {
             yield return pair.Value;
@@ -46,6 +47,24 @@ public record Container(
             yield return pair.Value;
         }
     }
+    
+    public override Contract Merge(Contract other)
+    {
+        var contract = EnsureSame(this, other);
+
+        return MergeCommon(this, other) with
+        {
+            ContainerName = OnlyOne(ContainerName, contract.ContainerName),
+            NetworkName = OnlyOne(NetworkName, contract.NetworkName),
+            ImageName = ImageName.Merge(contract.ImageName),
+            MountDockerSocket = MountDockerSocket || contract.MountDockerSocket,
+            Network = OnlyOne(Network, contract.Network),
+            Command = Command.Merge(contract.Command),
+            Env = MergeDictionaries(Env, contract.Env),
+            Labels = MergeDictionaries(Labels, contract.Labels),
+            Mounts = MergeDictionaries(Mounts, contract.Mounts)
+        };
+    }    
 
     /// <summary>
     /// Attaches the container to a network.
@@ -101,23 +120,5 @@ public record Container(
     {
         Debug.Assert(Handler != null);
         return Handler.ExecInContainer(this, command);
-    }
-
-    public override Contract Merge(Contract other)
-    {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, other) with
-        {
-            ContainerName = OnlyOne(ContainerName, contract.ContainerName),
-            NetworkName = OnlyOne(NetworkName, contract.NetworkName),
-            ImageName = ImageName.Merge(contract.ImageName),
-            MountDockerSocket = MountDockerSocket || contract.MountDockerSocket,
-            Network = OnlyOne(Network, contract.Network),
-            Command = OnlyOne(Command, contract.Command, command => command.Count == 0),
-            Env = MergeDictionaries(Env, contract.Env),
-            Labels = MergeDictionaries(Labels, contract.Labels),
-            Mounts = MergeDictionaries(Mounts, contract.Mounts)
-        };
     }
 }
