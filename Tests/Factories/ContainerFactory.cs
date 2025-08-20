@@ -17,7 +17,7 @@ public sealed class ContainerFactory : Faker<Container>
         RuleFor(p => p.NetworkName, _ => "");
         RuleFor(p => p.Command, f => new List<string>(f.Lorem.Words()));
         RuleFor(p => p.Env, f => new Dictionary<string, Argument<string>>());
-        RuleFor(p => p.Labels, f => new Dictionary<string, string>());
+        RuleFor(p => p.Labels, f => new Dictionary<string, Argument<string>>());
 
         RuleSet(
             "udocker", set => { set.RuleFor(p => p.MountDockerSocket, false); }

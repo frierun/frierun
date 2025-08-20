@@ -112,7 +112,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
         );
         InstallPackage("traefik");
         var package = Factory<Package>().Generate() with { Contracts = Factory<HttpEndpoint>().Generate(2) };
-        
+
         var application = InstallPackage(package);
 
         var installedContracts = application.Contracts.OfType<HttpEndpoint>().ToList();
@@ -123,6 +123,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
             Assert.True(contract.Installed);
             Assert.Equal(application.Name, contract.NetworkName);
         }
+
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
             application.Name,
             Arg.Any<NetworkConnectParameters>()
@@ -147,21 +148,58 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
             Arg.Any<NetworkDisconnectParameters>()
         );
     }
-    
+
     [Fact]
     public void Install_HttpEndpoint_AddsContainerLabel()
     {
         InstallPackage("static-zone");
         InstallPackage("traefik");
         var package = Factory<Package>().Generate() with { Contracts = [Factory<HttpEndpoint>().Generate()] };
-        
+
         var application = InstallPackage(package);
 
-        var installedContracts = application.Contracts.OfType<HttpEndpoint>().ToList();
-        Assert.Single(installedContracts);
-        
+        var contract = application.Contracts.OfType<HttpEndpoint>().Single();
+        var router = contract.TraefikRouterName;
+        var host = $"Host(`{contract.ResultHost.Value}`)";
+        Assert.NotNull(router);
+
         DockerClient.Containers.Received(1).CreateContainerAsync(
-            Arg.Is<CreateContainerParameters>(p => p.Labels.ContainsKey("traefik.enable")),
+            Arg.Is<CreateContainerParameters>(p =>
+                p.Labels["traefik.enable"] == "true"
+                && p.Labels[$"traefik.http.routers.{router}.rule"] == host
+                && p.Labels[$"traefik.http.services.{router}.loadbalancer.server.port"] == contract.Port.ToString()
+                && p.Labels[$"traefik.http.routers.{router}.tls"] == "false"
+                && !p.Labels.ContainsKey($"traefik.http.routers.{router}.tls.certresolver")
+            ),
+            Arg.Any<CancellationToken>()
+        );
+    }
+    
+    [Fact]
+    public void Install_HttpsEndpoint_AddsContainerLabel()
+    {
+        InstallPackage(
+            "static-zone",
+            [new Selector("Internal", Value: "No")]
+        );
+        InstallPackage("traefik");
+        var package = Factory<Package>().Generate() with { Contracts = [Factory<HttpEndpoint>().Generate()] };
+
+        var application = InstallPackage(package);
+
+        var contract = application.Contracts.OfType<HttpEndpoint>().Single();
+        var router = contract.TraefikRouterName;
+        var host = $"Host(`{contract.ResultHost.Value}`)";
+        Assert.NotNull(router);
+
+        DockerClient.Containers.Received(1).CreateContainerAsync(
+            Arg.Is<CreateContainerParameters>(p =>
+                p.Labels["traefik.enable"] == "true"
+                && p.Labels[$"traefik.http.routers.{router}.rule"] == host
+                && p.Labels[$"traefik.http.services.{router}.loadbalancer.server.port"] == contract.Port.ToString()
+                && p.Labels[$"traefik.http.routers.{router}.tls"] == "true"
+                && p.Labels[$"traefik.http.routers.{router}.tls.certresolver"] == "httpchallenge"
+            ),
             Arg.Any<CancellationToken>()
         );
     }    

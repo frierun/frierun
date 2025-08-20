@@ -113,4 +113,21 @@ public class ContainerTests : BaseTests
         Assert.Contains(arguments, a => a.ToString() == "value1");
         Assert.Contains(arguments, a => a.ToString() == "value2");
     }
+    
+    [Fact]
+    public void GetArguments_SeveralLabelArguments_ReturnsAllArguments()
+    {
+        var container = Factory<Container>().Generate() with
+        {
+            Labels = new Dictionary<string, Argument<string>>
+            {
+                { "key1", "value1" },
+                { "key2", "value2" }
+            }
+        };
+        
+        var arguments = container.GetArguments().ToList();
+        Assert.Contains(arguments, a => a.ToString() == "value1");
+        Assert.Contains(arguments, a => a.ToString() == "value2");
+    }    
 }

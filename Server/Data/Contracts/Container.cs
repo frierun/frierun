@@ -15,7 +15,7 @@ public record Container(
     ContractId<Network>? Network = null,
     IReadOnlyList<string>? Command = null,
     IReadOnlyDictionary<string, Argument<string>>? Env = null,
-    IReadOnlyDictionary<string, string>? Labels = null,
+    IReadOnlyDictionary<string, Argument<string>>? Labels = null,
     IReadOnlyDictionary<string, ContainerMount>? Mounts = null
 ) : Contract<IContainerHandler>(Name ?? "")
 {
@@ -24,7 +24,7 @@ public record Container(
     
     public IReadOnlyList<string> Command { get; init; } = Command ?? [];
     public IReadOnlyDictionary<string, Argument<string>> Env { get; init; } = Env ?? new Dictionary<string, Argument<string>>();
-    public IReadOnlyDictionary<string, string> Labels { get; init; } = Labels ?? new Dictionary<string, string>();
+    public IReadOnlyDictionary<string, Argument<string>> Labels { get; init; } = Labels ?? new Dictionary<string, Argument<string>>();
     public IReadOnlyDictionary<string, ContainerMount> Mounts { get; init; } = Mounts ?? new Dictionary<string, ContainerMount>();
     
     [JsonInclude]
@@ -38,6 +38,10 @@ public record Container(
     {
         yield return ImageName;
         foreach (var pair in Env)
+        {
+            yield return pair.Value;
+        }
+        foreach (var pair in Labels)
         {
             yield return pair.Value;
         }

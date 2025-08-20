@@ -20,9 +20,16 @@ public class TraefikHttpEndpointHandler(Application application)
 
     public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
     {
+        var traefikRouterName = contract.TraefikRouterName
+                                ?? FindUniqueName(
+                                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                                    c => c.TraefikRouterName
+                                );
+
         yield return new ContractInitializeResult(
             contract with
             {
+                TraefikRouterName = traefikRouterName,
                 ResultSsl = new Argument<bool?>(plan =>
                     GetCertificateResolver(plan.GetContract(contract.Domain)) != null
                 ),
@@ -31,14 +38,34 @@ public class TraefikHttpEndpointHandler(Application application)
                     GetCertificateResolver(plan.GetContract(contract.Domain)) == null ? _webPort : _webSecurePort
                 ),
                 Handler = this,
-                DependsOn = contract.DependsOn
-                    .Append(new Network(""))
-                    .Append(contract.Domain),
+                DependsOn =
+                [
+                    new ContractId<Network>(""),
+                    contract.Domain
+                ]
             },
             [
                 new Container(contract.Container.Name)
                 {
-                    DependsOn = [contract]
+                    Labels = new Dictionary<string, Argument<string>>
+                    {
+                        ["traefik.enable"] = "true",
+                        [$"traefik.http.routers.{traefikRouterName}.rule"] =
+                            new(plan => $"Host(`{plan.GetContract(contract.Domain).Value}`)"),
+                        [$"traefik.http.services.{traefikRouterName}.loadbalancer.server.port"] =
+                            contract.Port.ToString(),
+                        [$"traefik.http.routers.{traefikRouterName}.tls"] =
+                            new(plan =>
+                                GetCertificateResolver(plan.GetContract(contract.Domain)) == null
+                                    ? "false"
+                                    : "true"
+                            ),
+                        [$"traefik.http.routers.{traefikRouterName}.tls.certresolver"] =
+                            new(plan =>
+                                GetCertificateResolver(plan.GetContract(contract.Domain))
+                            )
+                    },
+                    DependsOn = [contract, contract.Domain]
                 }
             ]
         );
@@ -46,41 +73,12 @@ public class TraefikHttpEndpointHandler(Application application)
 
     public override HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
     {
-        var domainContract = plan.GetContract(contract.Domain);
-        Debug.Assert(domainContract.Installed);
-        var domain = domainContract.Value;
-        var subdomain = domain.Split('.')[0];
-
         var container = plan.GetContract(contract.Container);
         var network = plan.GetContract(container.Network);
         Debug.Assert(network.Installed);
 
         _container.AttachNetwork(network.NetworkName);
-
-        var certResolver = GetCertificateResolver(domainContract);
-
-        var labels = new Dictionary<string, string>
-        {
-            ["traefik.enable"] = "true",
-            [$"traefik.http.routers.{subdomain}.rule"] = $"Host(`{domain}`)",
-            [$"traefik.http.services.{subdomain}.loadbalancer.server.port"] = contract.Port.ToString()
-        };
-
-        if (certResolver != null)
-        {
-            labels[$"traefik.http.routers.{subdomain}.tls"] = "true";
-            labels[$"traefik.http.routers.{subdomain}.tls.certresolver"] = certResolver;
-        }
-
-        plan.ReplaceContract(
-            container.Merge(
-                new Container(
-                    Name: container.Name,
-                    Labels: labels
-                )
-            )
-        );
-
+        
         return contract with
         {
             NetworkName = network.NetworkName,

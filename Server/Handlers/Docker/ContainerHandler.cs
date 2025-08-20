@@ -21,16 +21,17 @@ public class ContainerHandler(Application application, DockerService dockerServi
                     prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
                     c => c.ContainerName
                 ),
-                Labels = new Dictionary<string, string>(contract.Labels)
+                Labels = new Dictionary<string, Argument<string>>(contract.Labels)
                 {
                     ["com.docker.compose.project"] = prefix,
                     ["com.docker.compose.service"] = contract.Name
                 },
                 Handler = this,
-                DependsOn = [
+                DependsOn =
+                [
                     contract.Network,
                     ..contract.Mounts.Values.Select(mount => mount.Volume)
-                ] 
+                ]
             },
             [
                 new Network(contract.Network.Name)
@@ -38,9 +39,10 @@ public class ContainerHandler(Application application, DockerService dockerServi
                     HandlerApplication = Application?.Name,
                 },
                 ..contract.Mounts.Values.Select(mount => new Volume(mount.Volume.Name)
-                {
-                    HandlerApplication = Application?.Name,
-                }),
+                    {
+                        HandlerApplication = Application?.Name,
+                    }
+                ),
             ]
         );
     }
@@ -65,7 +67,11 @@ public class ContainerHandler(Application application, DockerService dockerServi
                 Mounts = new List<Mount>(),
                 PortBindings = new Dictionary<string, IList<PortBinding>>()
             },
-            Labels = new Dictionary<string, string>(contract.Labels),
+            Labels = new Dictionary<string, string>(
+                contract.Labels
+                    .Where(kv => kv.Value.Value != null)
+                    .Select(kv => new KeyValuePair<string, string>(kv.Key, kv.Value.Value!))
+            ),
             Name = contract.ContainerName,
             NetworkingConfig = new NetworkingConfig
             {
@@ -99,13 +105,13 @@ public class ContainerHandler(Application application, DockerService dockerServi
         {
             var volume = plan.GetContract(mount.Volume);
             Debug.Assert(volume.Installed);
-            
+
             var dockerMount = new Mount
             {
                 Target = path,
                 ReadOnly = mount.ReadOnly
             };
-            
+
             if (volume.VolumeName != null)
             {
                 dockerMount.Source = volume.VolumeName;
@@ -123,7 +129,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
 
             dockerParameters.HostConfig.Mounts.Add(dockerMount);
         }
-        
+
         // exposes ports
         var endpoints = plan.Contracts.OfType<PortEndpoint>().Where(ep => ep.Container == contract);
         foreach (var endpoint in endpoints)
@@ -136,7 +142,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
                     {
                         HostPort = endpoint.ExternalPort.ToString()
                     }
-                };            
+                };
         }
 
         var result = dockerService.StartContainer(dockerParameters).Result;

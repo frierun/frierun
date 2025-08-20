@@ -12,6 +12,7 @@ public record HttpEndpoint(
     Argument<bool?>? ResultSsl = null,
     Argument<string>? ResultHost = null,
     Argument<int>? ResultPort = null,
+    string? TraefikRouterName = null, // for Traefik endpoints
     string? NetworkName = null, // for Traefik endpoints
     string? CloudflareZoneId = null // for Cloudflare endpoints
 ) : Contract(Name ?? $"{Port}{(Container != null ? $" at {Container.Name}" : "")}")
