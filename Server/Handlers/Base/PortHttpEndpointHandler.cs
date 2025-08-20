@@ -15,14 +15,13 @@ public class PortHttpEndpointHandler : Handler<HttpEndpoint>
                 ResultHost = new Argument<string>(plan => plan.GetContract(portEndpointId).ExternalIp),
                 ResultPort = new Argument<int>(plan => plan.GetContract(portEndpointId).ExternalPort),
                 Handler = this,
-                DependsOn = contract.DependsOn.Append(portEndpoint),
+                DependsOn = [
+                    portEndpointId,
+                    contract.Container
+                ],
             },
             [
-                portEndpoint,
-                new Container(contract.Container.Name)
-                {
-                    DependsOn = [contract]
-                }
+                portEndpoint
             ]
         );
     }

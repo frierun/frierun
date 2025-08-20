@@ -9,7 +9,7 @@ public class PortEndpointHandlerTests : BaseTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void Install_ContainerWithPortEndpoint_InstallEndpointFirst(bool reverseOrder)
+    public void Install_ContainerWithPortEndpoint_InstallContainerFirst(bool reverseOrder)
     {
         InstallPackage("docker");
         var container = Factory<Container>().Generate();
@@ -32,7 +32,7 @@ public class PortEndpointHandlerTests : BaseTests
         var containerIndex = installedContainers.FindIndex(r => r is Container);
         Assert.NotEqual(-1, endpointIndex);
         Assert.NotEqual(-1, containerIndex);
-        Assert.True(endpointIndex < containerIndex);
+        Assert.True(containerIndex < endpointIndex);
     }
 
     [Fact]

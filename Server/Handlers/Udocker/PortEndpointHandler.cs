@@ -50,12 +50,12 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
             {
                 ExternalIp = _connection.Host,
                 Handler = this,
+                DependsOn = [contract.Container]
             },
             [
                 new Container(contract.Container.Name)
                 {
                     HandlerApplication = Application?.Name,
-                    DependsOn = [contract]
                 }
             ]
         );

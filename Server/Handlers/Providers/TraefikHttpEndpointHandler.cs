@@ -20,16 +20,15 @@ public class TraefikHttpEndpointHandler(Application application)
 
     public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
     {
-        var traefikRouterName = contract.TraefikRouterName
-                                ?? FindUniqueName(
-                                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
-                                    c => c.TraefikRouterName
-                                );
+        var routerName = contract.TraefikRouterName ?? FindUniqueName(
+            prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+            c => c.TraefikRouterName
+        );
 
         yield return new ContractInitializeResult(
             contract with
             {
-                TraefikRouterName = traefikRouterName,
+                TraefikRouterName = routerName,
                 ResultSsl = new Argument<bool?>(plan =>
                     GetCertificateResolver(plan.GetContract(contract.Domain)) != null
                 ),
@@ -40,7 +39,7 @@ public class TraefikHttpEndpointHandler(Application application)
                 Handler = this,
                 DependsOn =
                 [
-                    new ContractId<Network>(""),
+                    contract.Container,
                     contract.Domain
                 ]
             },
@@ -50,22 +49,20 @@ public class TraefikHttpEndpointHandler(Application application)
                     Labels = new Dictionary<string, Argument<string>>
                     {
                         ["traefik.enable"] = "true",
-                        [$"traefik.http.routers.{traefikRouterName}.rule"] =
-                            new(plan => $"Host(`{plan.GetContract(contract.Domain).Value}`)"),
-                        [$"traefik.http.services.{traefikRouterName}.loadbalancer.server.port"] =
-                            contract.Port.ToString(),
-                        [$"traefik.http.routers.{traefikRouterName}.tls"] =
-                            new(plan =>
-                                GetCertificateResolver(plan.GetContract(contract.Domain)) == null
-                                    ? "false"
-                                    : "true"
-                            ),
-                        [$"traefik.http.routers.{traefikRouterName}.tls.certresolver"] =
-                            new(plan =>
-                                GetCertificateResolver(plan.GetContract(contract.Domain))
-                            )
+                        [$"traefik.http.routers.{routerName}.rule"] = new(plan =>
+                            $"Host(`{plan.GetContract(contract.Domain).Value}`)"
+                        ),
+                        [$"traefik.http.services.{routerName}.loadbalancer.server.port"] = contract.Port.ToString(),
+                        [$"traefik.http.routers.{routerName}.tls"] = new(plan =>
+                            GetCertificateResolver(plan.GetContract(contract.Domain)) == null
+                                ? "false"
+                                : "true"
+                        ),
+                        [$"traefik.http.routers.{routerName}.tls.certresolver"] = new(plan =>
+                            GetCertificateResolver(plan.GetContract(contract.Domain))
+                        )
                     },
-                    DependsOn = [contract, contract.Domain]
+                    DependsOn = [contract.Domain]
                 }
             ]
         );
@@ -78,7 +75,7 @@ public class TraefikHttpEndpointHandler(Application application)
         Debug.Assert(network.Installed);
 
         _container.AttachNetwork(network.NetworkName);
-        
+
         return contract with
         {
             NetworkName = network.NetworkName,

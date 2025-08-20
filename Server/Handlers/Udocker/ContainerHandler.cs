@@ -81,8 +81,6 @@ public class ContainerHandler(Application application)
         var endpoints = plan.Contracts.OfType<PortEndpoint>().Where(ep => ep.Container == contract);
         foreach (var endpoint in endpoints)
         {
-            Debug.Assert(endpoint.Installed);
-
             command.Add($"--publish={endpoint.ExternalPort}:{endpoint.Port}");
         }
 

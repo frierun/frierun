@@ -15,7 +15,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void Install_ContainerWithHttpEndpoint_InstallsTraefikFirst(bool reverseOrder)
+    public void Install_ContainerWithHttpEndpoint_InstallsContainerFirst(bool reverseOrder)
     {
         InstallPackage("static-zone");
         InstallPackage("traefik");
@@ -40,7 +40,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
         var containerIndex = installedContracts.FindIndex(r => r is Container);
         Assert.NotEqual(-1, endpointIndex);
         Assert.NotEqual(-1, containerIndex);
-        Assert.True(endpointIndex < containerIndex);
+        Assert.True(containerIndex < endpointIndex);
     }
 
     [Fact]
