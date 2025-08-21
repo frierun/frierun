@@ -14,7 +14,7 @@ public class ContainerHandlerTests : BaseTests
     }
 
     [Fact]
-    public void Initialize_ContractWithMountDockerSocket_ReturnsEmpty()
+    public void Initialize_ContractWithMountDockerSocket_RefusesToInstall()
     {
         var container = Factory<Container>().Generate() with { MountDockerSocket = true };
         var handler = Handler<ContainerHandler>(_udocker);
@@ -25,6 +25,75 @@ public class ContainerHandlerTests : BaseTests
     }
 
     [Fact]
+    public void GetCommands_Container_ResolvesAllContainerArguments()
+    {
+        var parameter = Factory<Parameter>().Generate();
+        var container = Factory<Container>().Generate("udocker") with
+        {
+            ImageName = new Argument<string>($"{{{{Parameter:{parameter.Name}:Value}}}}"),
+            Env = new Dictionary<string, Argument<string>>
+            {
+                ["Test"] = new($"{{{{Parameter:{parameter.Name}:Value}}}}")
+            }
+        };
+        var handler = Handler<ContainerHandler>(_udocker);
+        var result = handler.Initialize(container, "").Single();
+        var daemon = result.AdditionalContracts.OfType<Daemon>().Single();
+        container = (Container)container.Merge(result.Contract);
+        var plan = new ExecutionPlan(
+            new Dictionary<ContractId, Contract>
+            {
+                [container] = container,
+                [parameter] = parameter,
+            },
+            []
+        );
+        
+        Assert.False(container.ImageName.Resolved);
+        Assert.False(container.Env.Values.Single().Resolved);
+        
+        daemon.Command.Resolve(plan);
+        
+        Assert.True(container.ImageName.Resolved);
+        Assert.True(container.Env.Values.Single().Resolved);
+    }
+    
+    [Fact]
+    public void GetPreCommands_Container_ResolvesAllContainerArguments()
+    {
+        var parameter = Factory<Parameter>().Generate();
+        var container = Factory<Container>().Generate("udocker") with
+        {
+            ImageName = new Argument<string>($"{{{{Parameter:{parameter.Name}:Value}}}}"),
+            Env = new Dictionary<string, Argument<string>>
+            {
+                ["Test"] = new($"{{{{Parameter:{parameter.Name}:Value}}}}")
+            }
+        };
+        var handler = Handler<ContainerHandler>(_udocker);
+        var result = handler.Initialize(container, "").Single();
+        var daemon = result.AdditionalContracts.OfType<Daemon>().Single();
+        container = (Container)container.Merge(result.Contract);
+        var plan = new ExecutionPlan(
+            new Dictionary<ContractId, Contract>
+            {
+                [container] = container,
+                [parameter] = parameter,
+            },
+            []
+        );
+        
+        Assert.False(container.ImageName.Resolved);
+        Assert.False(container.Env.Values.Single().Resolved);
+        
+        daemon.PreCommands.Resolve(plan);
+        
+        Assert.True(container.ImageName.Resolved);
+        Assert.True(container.Env.Values.Single().Resolved);
+    }
+    
+
+    [Fact]
     public void Install_Container_CreatesDaemon()
     {
         var container = Factory<Container>().Generate("udocker");
@@ -33,13 +102,22 @@ public class ContainerHandlerTests : BaseTests
         var application = InstallPackage(package);
 
         var daemon = application.Contracts.OfType<Daemon>().Single();
-        Assert.Contains("udocker", daemon.Command);
-        Assert.Contains(container.ContainerName, daemon.Command);
+        Assert.NotNull(daemon.Command.Value);
+        Assert.Contains("udocker", daemon.Command.Value);
+        Assert.Contains(container.ContainerName, daemon.Command.Value);
 
+        Assert.NotNull(daemon.PreCommands.Value);
         var preCommand =
-            daemon.PreCommands.Single(command => command.Contains("udocker") && command.Contains("create"));
+            daemon.PreCommands.Value
+                .Single(command =>
+                    {
+                        var enumerable = command.ToList();
+                        return enumerable.Contains("udocker") && enumerable.Contains("create");
+                    }
+                )
+                .ToList();
         Assert.Contains($"--name={container.ContainerName}", preCommand);
-        Assert.Contains(container.ImageName?.Value, preCommand);
+        Assert.Contains(container.ImageName.Value, preCommand);
     }
 
     [Fact]
@@ -55,9 +133,11 @@ public class ContainerHandlerTests : BaseTests
 
         var volume = application.Contracts.OfType<Volume>().Single();
         var daemon = application.Contracts.OfType<Daemon>().Single();
-        Assert.Contains($"--volume={volume.LocalPath}:/test", daemon.Command);
+        Assert.NotNull(daemon.Command.Value);
+        Assert.Contains($"--volume={volume.LocalPath}:/test", daemon.Command.Value);
 
-        var preCommand = daemon.PreCommands.Single(command => command.Contains("mkdir"));
+        Assert.NotNull(daemon.PreCommands.Value);
+        var preCommand = daemon.PreCommands.Value.Single(command => command.Contains("mkdir"));
         Assert.Contains(volume.LocalPath, preCommand);
     }
 
@@ -78,7 +158,8 @@ public class ContainerHandlerTests : BaseTests
 
         var portEndpoint = application.Contracts.OfType<PortEndpoint>().Single();
         var daemon = application.Contracts.OfType<Daemon>().Single();
-        Assert.Contains($"--publish={portEndpoint.ExternalPort}:80", daemon.Command);
+        Assert.NotNull(daemon.Command.Value);
+        Assert.Contains($"--publish={portEndpoint.ExternalPort}:80", daemon.Command.Value);
     }
 
     [Fact]
@@ -99,7 +180,8 @@ public class ContainerHandlerTests : BaseTests
         var application = InstallPackage(package);
 
         var daemon = application.Contracts.OfType<Daemon>().Single();
-        Assert.Contains($"--env={name}={value}", daemon.Command);
+        Assert.NotNull(daemon.Command.Value);
+        Assert.Contains($"--env={name}={value}", daemon.Command.Value);
     }
 
     [Fact]
@@ -123,7 +205,47 @@ public class ContainerHandlerTests : BaseTests
         var application = InstallPackage(package);
 
         var daemon = application.Contracts.OfType<Daemon>().Single();
-        Assert.Contains($"--env={name}={value}", daemon.Command);
+        Assert.NotNull(daemon.Command.Value);
+        Assert.Contains($"--env={name}={value}", daemon.Command.Value);
+    }
+
+    [Fact]
+    public void Install_ContainerWithChanges_AppliesChanges()
+    {
+        var name = Resolve<Faker>().Lorem.Word();
+        var value = Resolve<Faker>().Lorem.Word();
+        var container = Factory<Container>().Generate("udocker");
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts =
+            [
+                container,
+                new Selector(
+                    "test", new List<SelectorOption>
+                    {
+                        new(
+                            "one",
+                            new List<Contract>
+                            {
+                                new Container(container.Name) with
+                                {
+                                    Env = new Dictionary<string, Argument<string>>
+                                    {
+                                        { name, value }
+                                    }
+                                }
+                            }
+                        )
+                    }
+                )
+            ]
+        };
+
+        var application = InstallPackage(package);
+
+        var daemon = application.Contracts.OfType<Daemon>().Single();
+        Assert.NotNull(daemon.Command.Value);
+        Assert.Contains($"--env={name}={value}", daemon.Command.Value);
     }
 
     [Fact]

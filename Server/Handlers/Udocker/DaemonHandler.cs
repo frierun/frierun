@@ -35,12 +35,21 @@ public class DaemonHandler(Application application)
 
         var runContent = new StringBuilder();
         runContent.Append("#!/data/data/com.termux/files/usr/bin/sh\n\n");
-        foreach (var commandPre in contract.PreCommands)
+        if (contract.PreCommands.Value != null)
         {
-            runContent.Append($"{string.Join(' ', commandPre.Select(SshConnection.EscapeArgument))} 2>&1\n");
+            foreach (var commandPre in contract.PreCommands.Value)
+            {
+                runContent.Append($"{string.Join(' ', commandPre.Select(SshConnection.EscapeArgument))} 2>&1\n");
+            }
         }
-        runContent.Append($"exec {string.Join(' ', contract.Command.Select(SshConnection.EscapeArgument))} 2>&1\n");
-        
+
+        if (contract.Command.Value != null)
+        {
+            runContent.Append(
+                $"exec {string.Join(' ', contract.Command.Value.Select(SshConnection.EscapeArgument))} 2>&1\n"
+            );
+        }
+
         sftpClient.WriteAllText(DaemonsPath + "/" + contract.DaemonName + "/run", runContent.ToString());
         sftpClient.ChangePermissions(DaemonsPath + "/" + contract.DaemonName + "/run", 0755);
 
@@ -61,7 +70,7 @@ public class DaemonHandler(Application application)
 
         using var sshClient = _connection.CreateSshClient();
         sshClient.RunCommand("sv-disable " + SshConnection.EscapeArgument(contract.DaemonName)).Dispose();
-        sshClient.RunCommand("rm -rf " + SshConnection.EscapeArgument(DaemonsPath + "/" + contract.DaemonName)).Dispose();
+        sshClient.RunCommand("rm -rf " + SshConnection.EscapeArgument(DaemonsPath + "/" + contract.DaemonName))
+            .Dispose();
     }
-
 }

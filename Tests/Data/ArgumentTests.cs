@@ -49,6 +49,60 @@ public class ArgumentTests : BaseTests
 
         Assert.Throws<MergeException>(() => arg1.Merge(arg2));
     }
+    
+    [Fact]
+    public void Merge_SameFuncResolvers_ReturnsResolver()
+    {
+        var value = Resolve<Faker>().Lorem.Word();
+        Func<ExecutionPlan, string> resolver = _ => value;
+        var arg1 = new Argument<string>(resolver);
+        var arg2 = new Argument<string>(resolver);
+
+        var result = arg1.Merge(arg2);
+
+        Assert.Null(result.Value);
+        Assert.Equal(arg1.Resolver, result.Resolver);
+    }
+    
+    [Fact]
+    public void Merge_SameClassResolvers_ReturnsResolver()
+    {
+        var value = Resolve<Faker>().Lorem.Word();
+        Func<ExecutionPlan, string> lambda = _ => value;
+        var arg1 = new Argument<string>(new ArgumentResolver<string>(lambda));
+        var arg2 = new Argument<string>(new ArgumentResolver<string>(lambda));
+
+        var result = arg1.Merge(arg2);
+
+        Assert.Null(result.Value);
+        Assert.Equal(arg1.Resolver, result.Resolver);
+    }
+    
+    [Fact]
+    public void Merge_SameClassWithParameterResolvers_ReturnsResolver()
+    {
+        var value = Resolve<Faker>().Lorem.Word();
+        var param = Resolve<Faker>().Lorem.Word();
+        Func<string, ExecutionPlan, string> lambda = (p, _) => "{p} {value}";
+        var arg1 = new Argument<string>(new ArgumentResolver<string, string>(param, lambda));
+        var arg2 = new Argument<string>(new ArgumentResolver<string, string>(param, lambda));
+
+        var result = arg1.Merge(arg2);
+
+        Assert.Null(result.Value);
+        Assert.Equal(arg1.Resolver, result.Resolver);
+    }
+
+    [Fact]
+    public void Merge_DifferentResolvers_ThrowsException()
+    {
+        var value = Resolve<Faker>().Lorem.Word();
+        var arg1 = new Argument<string>((Func<ExecutionPlan, string>)(_ => value));
+        var arg2 = new Argument<string>((Func<ExecutionPlan, string>)(_ => value));
+
+        Assert.Throws<MergeException>(() => arg1.Merge(arg2));
+    }
+    
 
     [Fact]
     public void Merge_WithRequiredContracts_CopiesContracts()
