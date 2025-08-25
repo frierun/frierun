@@ -13,7 +13,7 @@ public class Discover(ILogger<Discover> logger, HandlerRegistry handlerRegistry,
         {
             foreach (var contract in handler.Discover())
             {
-                logger.LogInformation("Found contract: {type}", contract.Id.Type);
+                logger.LogInformation("Found contract: {type}", contract.Id.TypeName);
                 state.UnmanagedContracts.Add(contract);
             }
         }

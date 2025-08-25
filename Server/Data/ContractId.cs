@@ -1,24 +1,25 @@
-﻿using System.Text.Json.Serialization;
-
+﻿
 namespace Frierun.Server.Data;
 
-public record ContractId<TContract>(
-    string Name
-) : ContractId(typeof(TContract), Name)
-    where TContract : Contract
+public class ContractId<TContract>(
+    string name
+) : ContractId(typeof(TContract).Name, name)
+    where TContract : Contract;
+
+public class ContractId(
+    string typeName,
+    string name
+) : IEquatable<ContractId>
 {
+    public string TypeName { get; } = typeName;
+    public string Name { get; } = name;
+
     public override string ToString()
     {
-        return $"{Type.Name}:{Name}";
+        return $"{TypeName}:{Name}";
     }
-}
 
-public abstract record ContractId(
-    [property: JsonIgnore] Type Type,
-    string Name
-)
-{
-    public virtual bool Equals(ContractId? other)
+    public bool Equals(ContractId? other)
     {
         if (other is null)
         {
@@ -30,19 +31,44 @@ public abstract record ContractId(
             return true;
         }
 
-        return Type == other.Type && Name == other.Name;
+        return TypeName == other.TypeName && Name == other.Name;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, obj))
+        {
+            return true;
+        }
+
+        if (obj is not ContractId contractId)
+        {
+            return false;
+        }
+
+        return Equals(contractId);
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Type, Name);
+        unchecked
+        {
+            return (TypeName.GetHashCode() * 397) ^ Name.GetHashCode();
+        }
     }
     
-    public static ContractId Create(Type type, string name)
+    public static bool operator ==(ContractId? left, ContractId? right)
     {
-        return (ContractId)Activator.CreateInstance(
-            typeof(ContractId<>).MakeGenericType(type),
-            name
-        )!;
+        return Equals(left, right);
+    }
+
+    public static bool operator !=(ContractId? left, ContractId? right)
+    {
+        return !(left == right);
     }
 }

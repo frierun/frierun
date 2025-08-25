@@ -4,7 +4,7 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server;
 
-public class ContractIdConverter(ContractRegistry contractRegistry) : JsonConverter<ContractId>
+public class ContractIdConverter : JsonConverter<ContractId>
 {
     public override ContractId? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -15,8 +15,7 @@ public class ContractIdConverter(ContractRegistry contractRegistry) : JsonConver
         }
         
         var parts = value.Split(':', 2);
-        var type = ContractRegistry.GetContractType(parts[0]);
-        return ContractId.Create(type, parts.Length == 2 ?  parts[1] : "");
+        return new ContractId(parts[0], parts.Length == 2 ?  parts[1] : "");
     }
 
     public override void Write(Utf8JsonWriter writer, ContractId value, JsonSerializerOptions options)

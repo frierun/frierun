@@ -45,7 +45,10 @@ public class ContractIdOfTConverter : JsonConverterFactory
                 name = parts[0];
             }
         
-            return (ContractId<TContract>)ContractId.Create(typeof(TContract), name);
+            return (ContractId<TContract>)Activator.CreateInstance(
+                typeof(ContractId<TContract>),
+                name
+            )!;
         }
 
         public override void Write(Utf8JsonWriter writer, ContractId<TContract> value, JsonSerializerOptions options)

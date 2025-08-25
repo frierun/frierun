@@ -31,11 +31,7 @@ public class TemplateResolver : IArgumentResolver<string>
                         throw new Exception($"Invalid insertion format: {insertion}");
                     }
 
-                    var contractTypeName = match.Groups[1].Value;
-                    var contractType = ContractRegistry.GetContractType(contractTypeName);
-                    var contractName = match.Groups[2].Value;
-
-                    return ContractId.Create(contractType, contractName);
+                    return new ContractId(match.Groups[1].Value, match.Groups[2].Value);
                 }
             )
             .ToList();
@@ -71,19 +67,18 @@ public class TemplateResolver : IArgumentResolver<string>
             throw new Exception($"Invalid insertion format: {insertion}");
         }
 
-        var contractTypeName = match.Groups[1].Value;
+        var typeName = match.Groups[1].Value;
         var contractName = match.Groups[2].Value;
         var propertyName = match.Groups[3].Value;
 
-        var contractType = ContractRegistry.GetContractType(contractTypeName);
-        var contractId = ContractId.Create(contractType, contractName);
+        var contractId = new ContractId(typeName, contractName);
 
         var contract = plan.GetContract(contractId);
 
         var propertyInfo = contract.GetType().GetProperty(propertyName);
         if (propertyInfo == null)
         {
-            throw new Exception($"Property not found: {propertyName} in {contractType}");
+            throw new Exception($"Property not found: {propertyName} in {contractId}");
         }
 
         if (propertyInfo.PropertyType.IsAssignableTo(typeof(IArgument)))

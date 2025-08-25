@@ -24,7 +24,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
         List<Contract> contracts =
         [
             container,
-            Factory<HttpEndpoint>().Generate() with { Container = (ContractId<Container>)container.Id }
+            Factory<HttpEndpoint>().Generate() with { Container = new ContractId<Container>(container.Name) }
         ];
         if (reverseOrder)
         {
@@ -174,7 +174,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
             Arg.Any<CancellationToken>()
         );
     }
-    
+
     [Fact]
     public void Install_HttpsEndpoint_AddsContainerLabel()
     {
@@ -202,5 +202,5 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
             ),
             Arg.Any<CancellationToken>()
         );
-    }    
+    }
 }

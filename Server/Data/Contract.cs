@@ -39,7 +39,7 @@ public abstract record Contract<THandler>(
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
 public abstract record Contract(string Name)
 {
-    [JsonIgnore] public ContractId Id => ContractId.Create(GetType(), Name);
+    [JsonIgnore] public ContractId Id => new ContractId(GetType().Name, Name);
 
     [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = [];
 

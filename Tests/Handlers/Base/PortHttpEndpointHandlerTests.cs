@@ -9,7 +9,10 @@ public class PortHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         var container = Factory<Container>().Generate();
-        var httpEndpoint = Factory<HttpEndpoint>().Generate() with { Container = (ContractId<Container>)container.Id };
+        var httpEndpoint = Factory<HttpEndpoint>().Generate() with
+        {
+            Container = new ContractId<Container>(container.Name)
+        };
         List<Contract> contracts =
         [
             container,
@@ -24,7 +27,7 @@ public class PortHttpEndpointHandlerTests : BaseTests
         Assert.Equal(httpEndpoint.Port, resultHttpEndpoint.ResultPort.Value);
         Assert.NotNull(resultHttpEndpoint.ResultHost.Value);
     }
-    
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -35,12 +38,13 @@ public class PortHttpEndpointHandlerTests : BaseTests
         List<Contract> contracts =
         [
             container,
-            Factory<HttpEndpoint>().Generate() with { Container = (ContractId<Container>)container.Id }
+            Factory<HttpEndpoint>().Generate() with { Container = new ContractId<Container>(container.Name) }
         ];
         if (reverseOrder)
         {
             contracts.Reverse();
         }
+
         var package = Factory<Package>().Generate() with { Contracts = contracts };
 
         var application = InstallPackage(package);

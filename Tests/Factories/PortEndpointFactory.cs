@@ -10,6 +10,6 @@ public sealed class PortEndpointFactory : Faker<PortEndpoint>
         CustomInstantiator(f => new PortEndpoint(default, 0));
         RuleFor(p => p.Protocol, f => f.Random.Enum<Protocol>());
         RuleFor(p => p.Port, f => f.Internet.Port());
-        RuleFor(p => p.Container, _ => containerFactory.Generate().Id);
+        RuleFor(p => p.Container, _ => new ContractId<Container>(containerFactory.Generate().Name));
     }
 }

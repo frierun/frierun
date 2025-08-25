@@ -1,5 +1,4 @@
 ﻿using Frierun.Server.Data;
-using File = Frierun.Server.Data.File;
 
 namespace Frierun.Server;
 
@@ -18,7 +17,7 @@ public class ContractRegistry
 
     public Contract CreateContract(ContractId contractId)
     {
-        return CreateContract(contractId.Type.Name, contractId.Name);
+        return CreateContract(contractId.TypeName, contractId.Name);
     }
     
     public static Contract CreateContract(string typeName, string name)

@@ -53,6 +53,15 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
     }
     
     /// <summary>
+    /// Get contract by id.
+    /// </summary>
+    public T GetContract<T>(ContractId contractId)
+        where T : Contract
+    {
+        return (T)GetContract(contractId);
+    }
+    
+    /// <summary>
     /// Installs all contracts in the execution plan.
     /// </summary>
     public Application Install()
