@@ -55,7 +55,7 @@ public class ExecutionServiceTests : BaseTests
         var contract = new Contract1();
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         handler
-            .Initialize(Arg.Any<Contract1>(), Arg.Any<string>())
+            .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
             .Returns([]);
 
         Assert.Throws<HandlerNotFoundException>(() => Service.Create(package));
@@ -70,7 +70,7 @@ public class ExecutionServiceTests : BaseTests
         var unknownContract = new Contract2();
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         handler
-            .Initialize(Arg.Any<Contract1>(), Arg.Any<string>())
+            .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
             .Returns([new ContractInitializeResult(contract with { Handler = handler }, [unknownContract])]);
 
         Assert.Throws<HandlerNotFoundException>(() => Service.Create(package));
@@ -84,7 +84,7 @@ public class ExecutionServiceTests : BaseTests
         var contract = new Contract1();
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         handler
-            .Initialize(Arg.Any<Contract1>(), Arg.Any<string>())
+            .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
             .Returns([new ContractInitializeResult(contract with { Handler = handler })]);
 
         var plan = Service.Create(package);
@@ -94,7 +94,7 @@ public class ExecutionServiceTests : BaseTests
         Assert.NotNull(plan.GetContract(package));
         Assert.NotNull(plan.GetContract(contract));
         // ReSharper disable once IteratorMethodResultIsIgnored
-        handler.Received(1).Initialize(Arg.Any<Contract1>(), Arg.Any<string>());
+        handler.Received(1).Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>());
     }
 
     [Fact]
@@ -105,7 +105,7 @@ public class ExecutionServiceTests : BaseTests
         var contract = new Contract1();
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         handler
-            .Initialize(Arg.Any<Contract1>(), Arg.Any<string>())
+            .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
             .Returns([new ContractInitializeResult(contract with { Handler = handler }, [contract])]);
 
         Assert.Throws<Exception>(() => Service.Create(package));
@@ -121,7 +121,7 @@ public class ExecutionServiceTests : BaseTests
         var knownContract = new Contract1("second");
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         handler
-            .Initialize(Arg.Any<Contract1>(), Arg.Any<string>())
+            .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
             .Returns(info =>
                 [
                     new ContractInitializeResult(info.Arg<Contract1>() with { Handler = handler }, [unknownContract]),
@@ -152,14 +152,14 @@ public class ExecutionServiceTests : BaseTests
         var knownContract = new Contract1("second");
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         handler
-            .Initialize(Arg.Any<Contract1>(), Arg.Any<string>())
+            .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
             .Returns(info =>
                 [
                     new ContractInitializeResult(info.Arg<Contract1>() with { Handler = handler }, [unknownContract]),
                 ]
             );
         handler2
-            .Initialize(Arg.Any<Contract1>(), Arg.Any<string>())
+            .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
             .Returns(info =>
                 [
                     new ContractInitializeResult(

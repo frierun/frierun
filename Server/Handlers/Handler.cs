@@ -14,7 +14,7 @@ public class Handler<TContract>(Application? application = null) : IHandler
         return [];
     }
 
-    public virtual IEnumerable<ContractInitializeResult> Initialize(TContract contract, string prefix)
+    public virtual IEnumerable<ContractInitializeResult> Initialize(TContract contract, ApplicationContext context)
     {
         yield return new ContractInitializeResult(
             contract with
@@ -41,9 +41,9 @@ public class Handler<TContract>(Application? application = null) : IHandler
     }
 
     [DebuggerStepThrough]
-    IEnumerable<ContractInitializeResult> IHandler.Initialize(Contract contract, string prefix)
+    IEnumerable<ContractInitializeResult> IHandler.Initialize(Contract contract, ApplicationContext context)
     {
-        return Initialize((TContract)contract, prefix);
+        return Initialize((TContract)contract, context);
     }
 
     [DebuggerStepThrough]

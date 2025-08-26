@@ -181,7 +181,7 @@ public abstract class BaseTests
         {
             throw stateManager.Exception;
         }
-        throw new Exception($"Failed to install package {package.Name}");
+        throw new Exception($"Failed to install package {package}");
     }
 
     /// <summary>

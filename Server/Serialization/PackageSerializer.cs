@@ -8,7 +8,7 @@ using File = System.IO.File;
 
 namespace Frierun.Server;
 
-public class PackageSerializer(ILogger<PackageSerializer> logger, ContractRegistry contractRegistry)
+public class PackageSerializer(ILogger<PackageSerializer> logger)
 {
     private readonly JsonSerializerOptions _serializerOptions = new()
     {

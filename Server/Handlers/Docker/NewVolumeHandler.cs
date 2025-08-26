@@ -6,7 +6,7 @@ namespace Frierun.Server.Handlers.Docker;
 public class NewVolumeHandler(Application application, DockerService dockerService)
     : Handler<Volume>(application)
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(Volume contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Volume contract, ApplicationContext context)
     {
         if (contract.LocalPath != null)
         {
@@ -25,7 +25,7 @@ public class NewVolumeHandler(Application application, DockerService dockerServi
             {
                 Handler = this,
                 VolumeName = contract.VolumeName ?? FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     volume => volume.VolumeName
                 )
             }

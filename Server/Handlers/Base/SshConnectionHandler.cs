@@ -6,7 +6,7 @@ namespace Frierun.Server.Handlers.Base;
 
 public class SshConnectionHandler : Handler<SshConnection>, ISshConnectionHandler
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(SshConnection contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(SshConnection contract, ApplicationContext context)
     {
         yield return new ContractInitializeResult(
             contract with

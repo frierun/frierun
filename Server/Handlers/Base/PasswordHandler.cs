@@ -5,7 +5,7 @@ namespace Frierun.Server.Handlers.Base;
 
 public class PasswordHandler : Handler<Password>
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(Password contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Password contract, ApplicationContext context)
     {
         if (contract.Value != null)
         {

@@ -14,7 +14,7 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
 
     public override IEnumerable<ContractInitializeResult> Initialize(
         Postgresql contract,
-        string prefix
+        ApplicationContext context
     )
     {
         if (contract.Admin)
@@ -46,11 +46,11 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
             {
                 Handler = this,
                 Database = contract.Database ?? FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     c => c.Database
                 ),
                 Username = contract.Username ?? FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     c => c.Username,
                     "",
                     ["postgres"]

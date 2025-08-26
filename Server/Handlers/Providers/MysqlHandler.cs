@@ -12,7 +12,7 @@ public class MysqlHandler(Application application)
     private readonly string _rootPassword = application.Contracts.OfType<Password>().Single().Value ??
                                             throw new Exception("Root password not found");
 
-    public override IEnumerable<ContractInitializeResult> Initialize(Mysql contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Mysql contract, ApplicationContext context)
     {
         if (contract.Admin)
         {
@@ -43,13 +43,13 @@ public class MysqlHandler(Application application)
             {
                 Handler = this,
                 Database = contract.Database ?? FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     c => c.Database,
                     "",
                     ["mysql"]
                 ),
                 Username = contract.Username ?? FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     c => c.Username,
                     "",
                     ["root"]

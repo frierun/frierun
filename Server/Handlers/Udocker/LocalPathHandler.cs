@@ -8,7 +8,7 @@ public class LocalPathHandler(Application application) : Handler<Volume>(applica
     private const string HomePath = "/data/data/com.termux/files/home";
 
     
-    public override IEnumerable<ContractInitializeResult> Initialize(Volume contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Volume contract, ApplicationContext context)
     {
         if (contract.VolumeName != null)
         {
@@ -17,7 +17,7 @@ public class LocalPathHandler(Application application) : Handler<Volume>(applica
         
         yield return new ContractInitializeResult(contract with
         {
-            LocalPath = contract.LocalPath ?? $"{HomePath}/frierun/{prefix}/{contract.Name}",
+            LocalPath = contract.LocalPath ?? $"{HomePath}/frierun/{context.Prefix}/{context.Name}",
             Handler = this
         });
     }

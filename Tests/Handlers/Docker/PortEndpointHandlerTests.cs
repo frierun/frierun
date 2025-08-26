@@ -16,7 +16,7 @@ public class PortEndpointHandlerTests : BaseTests
         List<Contract> contracts =
         [
             container,
-            Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Name) }
+            Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Id) }
         ];
         if (reverseOrder)
         {
@@ -43,7 +43,7 @@ public class PortEndpointHandlerTests : BaseTests
         List<Contract> contracts =
         [
             container,
-            Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Name) }
+            Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Id) }
         ];
         var package = Factory<Package>().Generate() with { Contracts = contracts };
 

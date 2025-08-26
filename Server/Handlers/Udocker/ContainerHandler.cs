@@ -8,7 +8,7 @@ public class ContainerHandler(Application application)
 {
     private readonly SshConnection _connection = application.Contracts.OfType<SshConnection>().Single();
 
-    public override IEnumerable<ContractInitializeResult> Initialize(Container contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Container contract, ApplicationContext context)
     {
         if (contract.MountDockerSocket)
         {
@@ -20,19 +20,19 @@ public class ContainerHandler(Application application)
             contract with
             {
                 ContainerName = contract.ContainerName ?? FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     c => c.ContainerName
                 ),
                 Handler = this,
                 DependsOn =
                 [
                     contract.Network,
-                    new ContractId<Daemon>(contract.Name),
+                    new ContractId<Daemon>(context.Name),
                     ..contract.Mounts.Values.Select(mount => mount.Volume)
                 ]
             },
             [
-                new Daemon(contract.Name)
+                new Daemon(context.Name)
                 {
                     HandlerApplication = Application?.Name,
                     Command = new Argument<IEnumerable<string>>(
@@ -51,11 +51,11 @@ public class ContainerHandler(Application application)
                 },
                 new Network(contract.Network.Name)
                 {
-                    HandlerApplication = Application?.Name,
+                    HandlerApplication = Application?.Name
                 },
                 ..contract.Mounts.Values.Select(mount => new Volume(mount.Volume.Name)
                     {
-                        HandlerApplication = Application?.Name,
+                        HandlerApplication = Application?.Name
                     }
                 )
             ]

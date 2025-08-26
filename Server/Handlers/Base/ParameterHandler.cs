@@ -4,7 +4,7 @@ namespace Frierun.Server.Handlers.Base;
 
 public class ParameterHandler : Handler<Parameter>
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(Parameter contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Parameter contract, ApplicationContext context)
     {
         yield return new ContractInitializeResult(
             contract with

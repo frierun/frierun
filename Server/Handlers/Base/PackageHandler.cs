@@ -4,7 +4,7 @@ namespace Frierun.Server.Handlers.Base;
 
 public class PackageHandler : Handler<Package>
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(Package package, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Package package, ApplicationContext context)
     {
         var applicationUrl = package.ApplicationUrl;
 
@@ -31,7 +31,7 @@ public class PackageHandler : Handler<Package>
         yield return new ContractInitializeResult(
             package with
             {
-                Prefix = prefix,
+                Prefix = context.Prefix,
                 ApplicationUrl = applicationUrl,
                 Handler = this
             },

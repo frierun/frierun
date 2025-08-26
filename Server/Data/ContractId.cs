@@ -1,10 +1,20 @@
 ﻿
+using System.Diagnostics;
+
 namespace Frierun.Server.Data;
 
-public class ContractId<TContract>(
-    string name
-) : ContractId(typeof(TContract).Name, name)
-    where TContract : Contract;
+public class ContractId<TContract> : ContractId
+    where TContract : Contract
+{
+    public ContractId(string name) : base(typeof(TContract).Name, name)
+    {
+    }
+
+    public ContractId(ContractId contractId) : base(typeof(TContract).Name, contractId.Name)
+    {
+        Debug.Assert(contractId.TypeName == typeof(TContract).Name);
+    }
+}
 
 public class ContractId(
     string typeName,

@@ -7,14 +7,14 @@ namespace Frierun.Server.Handlers.Docker;
 public class NetworkHandler(Application application, DockerService dockerService)
     : Handler<Network>(application)
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(Network contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Network contract, ApplicationContext context)
     {
         yield return new ContractInitializeResult(
             contract with
             {
                 Handler = this,
                 NetworkName = contract.NetworkName ?? FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     c => c.NetworkName
                 )
             }

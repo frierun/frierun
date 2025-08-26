@@ -6,7 +6,7 @@ namespace Frierun.Server.Handlers.Udocker;
 
 public class NetworkHandler(Application application) : Handler<Network>(application)
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(Network contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Network contract, ApplicationContext context)
     {
         if (contract.NetworkName != null && contract.NetworkName != "udocker")
         {

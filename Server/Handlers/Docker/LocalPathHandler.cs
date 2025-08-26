@@ -5,7 +5,7 @@ namespace Frierun.Server.Handlers.Docker;
 
 public class LocalPathHandler(Application application) : Handler<Volume>(application)
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(Volume contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Volume contract, ApplicationContext context)
     {
         if (contract.VolumeName != null)
         {
@@ -14,7 +14,7 @@ public class LocalPathHandler(Application application) : Handler<Volume>(applica
         
         yield return new ContractInitializeResult(contract with
         {
-            LocalPath = contract.LocalPath ?? $"/data/{prefix}/{contract.Name}",
+            LocalPath = contract.LocalPath ?? $"/data/{context.Prefix}/{context.Name}",
             Handler = this
         });
     }

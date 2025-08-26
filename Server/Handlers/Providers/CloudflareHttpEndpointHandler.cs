@@ -10,7 +10,7 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
     private readonly Container _container = application.Contracts.OfType<Container>().Single();
     private readonly CloudflareTunnel _tunnel = application.Contracts.OfType<CloudflareTunnel>().Single();
 
-    public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, ApplicationContext context)
     {
         var zones = client.GetZones();
         (string id, string name) zone;
@@ -30,7 +30,7 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
             {
                 ResultHost = new Argument<string>(
                     FindUniqueName(
-                        prefix,
+                        context.Prefix,
                         c => c.ResultHost,
                         $".{zone.name}"
                     )

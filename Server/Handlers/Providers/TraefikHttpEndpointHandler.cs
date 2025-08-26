@@ -18,10 +18,10 @@ public class TraefikHttpEndpointHandler(Application application)
         .FirstOrDefault(endpoint => endpoint.Name == "WebSecure")
         ?.ExternalPort ?? 0;
 
-    public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, ApplicationContext context)
     {
         var routerName = contract.TraefikRouterName ?? FindUniqueName(
-            prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+            context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
             c => c.TraefikRouterName
         );
 

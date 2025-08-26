@@ -1,5 +1,6 @@
 ﻿using Bogus;
 using Frierun.Server.Data;
+using Frierun.Server.Handlers;
 using Frierun.Server.Handlers.Udocker;
 
 namespace Frierun.Tests.Handlers.Udocker;
@@ -19,7 +20,7 @@ public class ContainerHandlerTests : BaseTests
         var container = Factory<Container>().Generate() with { MountDockerSocket = true };
         var handler = Handler<ContainerHandler>(_udocker);
 
-        var result = handler.Initialize(container, "");
+        var result = handler.Initialize(container, new ApplicationContext("", ""));
 
         Assert.Empty(result);
     }
@@ -37,7 +38,7 @@ public class ContainerHandlerTests : BaseTests
             }
         };
         var handler = Handler<ContainerHandler>(_udocker);
-        var result = handler.Initialize(container, "").Single();
+        var result = handler.Initialize(container, new ApplicationContext("", "")).Single();
         var daemon = result.AdditionalContracts.OfType<Daemon>().Single();
         container = (Container)container.Merge(result.Contract);
         var plan = new ExecutionPlan(
@@ -71,7 +72,7 @@ public class ContainerHandlerTests : BaseTests
             }
         };
         var handler = Handler<ContainerHandler>(_udocker);
-        var result = handler.Initialize(container, "").Single();
+        var result = handler.Initialize(container, new ApplicationContext("", "")).Single();
         var daemon = result.AdditionalContracts.OfType<Daemon>().Single();
         container = (Container)container.Merge(result.Contract);
         var plan = new ExecutionPlan(
@@ -150,7 +151,7 @@ public class ContainerHandlerTests : BaseTests
             Contracts =
             [
                 container,
-                new PortEndpoint(Protocol.Tcp, 80, Container: new ContractId<Container>(container.Name))
+                new PortEndpoint(Protocol.Tcp, 80, Container: new ContractId<Container>(container.Id))
             ]
         };
 
@@ -299,7 +300,7 @@ public class ContainerHandlerTests : BaseTests
         var udocker1 = InstallPackage("termux-udocker");
         var udocker2 = InstallPackage("termux-udocker");
         var container = Factory<Container>().Generate("udocker");
-        var port = Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Name) };
+        var port = Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Id) };
 
         var application1 = InstallPackage(
             Factory<Package>().Generate() with

@@ -111,14 +111,15 @@ public class ExecutionService(
     /// </summary>
     private IEnumerable<ContractInitializeResult> DiscoverContract(Contract contract, string? prefix = null)
     {
+        var context = new ApplicationContext(contract.Name, prefix ?? "");
         if (contract.Handler != null)
         {
-            return contract.Handler.Initialize(contract, prefix ?? "");
+            return contract.Handler.Initialize(contract, context);
         }
         
         return handlerRegistry
             .GetHandlers(contract.GetType())
             .Where(handler => contract.HandlerApplication == null || handler.Application?.Name == contract.HandlerApplication)
-            .SelectMany(handler => handler.Initialize(contract, prefix ?? ""));
+            .SelectMany(handler => handler.Initialize(contract, context));
     }
 }

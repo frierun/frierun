@@ -4,7 +4,7 @@ namespace Frierun.Server.Handlers.Base;
 
 public class OptionalHandler : Handler<Optional>
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(Optional contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Optional contract, ApplicationContext context)
     {
         if (contract.Value is null or true)
         {

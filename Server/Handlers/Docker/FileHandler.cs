@@ -7,7 +7,7 @@ namespace Frierun.Server.Handlers.Docker;
 
 public class FileHandler(Application application, DockerService dockerService) : Handler<File>(application)
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(File contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(File contract, ApplicationContext context)
     {
         yield return new ContractInitializeResult(
             contract with
@@ -42,7 +42,7 @@ public class FileHandler(Application application, DockerService dockerService) :
         }
         else
         {
-            throw new Exception($"Unknown volume type for volume {volume.Name}");
+            throw new Exception($"Unknown volume type for volume {volume}");
         }
 
         var containerId = dockerService.StartContainer(

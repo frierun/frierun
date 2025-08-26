@@ -24,7 +24,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
         List<Contract> contracts =
         [
             container,
-            Factory<HttpEndpoint>().Generate() with { Container = new ContractId<Container>(container.Name) }
+            Factory<HttpEndpoint>().Generate() with { Container = new ContractId<Container>(container.Id) }
         ];
         if (reverseOrder)
         {

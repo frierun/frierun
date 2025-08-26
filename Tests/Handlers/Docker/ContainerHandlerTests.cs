@@ -139,7 +139,7 @@ public class ContainerHandlerTests : BaseTests
         var docker1 = InstallPackage("docker");
         var docker2 = InstallPackage("docker");
         var container = Factory<Container>().Generate();
-        var port = Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Name) };
+        var port = Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Id) };
 
         var application1 = InstallPackage(
             Factory<Package>().Generate() with

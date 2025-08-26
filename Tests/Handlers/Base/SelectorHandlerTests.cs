@@ -1,4 +1,5 @@
 ﻿using Frierun.Server.Data;
+using Frierun.Server.Handlers;
 using Frierun.Server.Handlers.Base;
 
 namespace Frierun.Tests.Handlers.Base;
@@ -16,7 +17,7 @@ public class SelectorHandlerTests : BaseTests
         );
         var handler = Handler<SelectorHandler>();
 
-        var result = handler.Initialize(selector, "prefix").ToList();
+        var result = handler.Initialize(selector, new ApplicationContext("", "prefix")).ToList();
 
         // Assert
         Assert.Single(result);
@@ -37,7 +38,7 @@ public class SelectorHandlerTests : BaseTests
         );
         var handler = Handler<SelectorHandler>();
 
-        var result = handler.Initialize(selector, "prefix").ToList();
+        var result = handler.Initialize(selector, new ApplicationContext("", "prefix")).ToList();
 
         Assert.Equal(2, result.Count);
         var resolvedContract1 = (Selector)result[0].Contract;

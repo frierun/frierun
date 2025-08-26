@@ -6,7 +6,7 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
 {
     private readonly SshConnection _connection = application.Contracts.OfType<SshConnection>().Single();
     
-    public override IEnumerable<ContractInitializeResult> Initialize(PortEndpoint contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(PortEndpoint contract, ApplicationContext context)
     {
         if (contract.Port == 0)
         {

@@ -5,14 +5,14 @@ namespace Frierun.Server.Handlers.Base;
 
 public class CloudflareTunnelHandler : Handler<CloudflareTunnel>
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(CloudflareTunnel contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(CloudflareTunnel contract, ApplicationContext context)
     {
         yield return new ContractInitializeResult(
             contract with
             {
                 Handler = this,
                 TunnelName = contract.TunnelName ?? FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     tunnel => tunnel.TunnelName
                 ),
                 DependsOn = [contract.CloudflareApiConnection],

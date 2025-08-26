@@ -16,7 +16,7 @@ public class StaticDomainHandler(Application application)
         .First(parameter => parameter.Name == "Internal")
         .Value == "Yes";
 
-    public override IEnumerable<ContractInitializeResult> Initialize(Domain contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Domain contract, ApplicationContext context)
     {
         if (contract.IsInternal != null && contract.IsInternal != _isInternal)
         {
@@ -45,7 +45,7 @@ public class StaticDomainHandler(Application application)
             {
                 Handler = this,
                 Value = FindUniqueName(
-                    prefix,
+                    context.Prefix,
                     c => c.Value,
                     $".{_domainName}"
                 ),

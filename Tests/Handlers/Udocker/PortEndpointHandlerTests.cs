@@ -13,7 +13,7 @@ public class PortEndpointHandlerTests : BaseTests
         var portEndpoint = Factory<PortEndpoint>().Generate() with
         {
             Port = 80,
-            Container = new ContractId<Container>(container.Name)
+            Container = new ContractId<Container>(container.Id)
         };
         var package = Factory<Package>().Generate() with { Contracts = [portEndpoint, container] };
 
@@ -33,7 +33,7 @@ public class PortEndpointHandlerTests : BaseTests
         {
             Port = 80,
             ExternalPort = 80,
-            Container = new ContractId<Container>(container.Name)
+            Container = new ContractId<Container>(container.Id)
         };
         var package = Factory<Package>().Generate() with { Contracts = [portEndpoint, container] };
 

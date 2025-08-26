@@ -4,7 +4,7 @@ namespace Frierun.Server.Handlers.Base;
 
 public class PortHttpEndpointHandler : Handler<HttpEndpoint>
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, ApplicationContext context)
     {
         var portEndpoint = CreatePortEndpoint(contract);
         var portEndpointId = portEndpoint.Id;

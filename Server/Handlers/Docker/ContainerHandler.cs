@@ -12,19 +12,19 @@ public class ContainerHandler(Application application, DockerService dockerServi
     private readonly DockerApiConnection _dockerApiConnection =
         application.Contracts.OfType<DockerApiConnection>().Single();
 
-    public override IEnumerable<ContractInitializeResult> Initialize(Container contract, string prefix)
+    public override IEnumerable<ContractInitializeResult> Initialize(Container contract, ApplicationContext context)
     {
         yield return new ContractInitializeResult(
             contract with
             {
                 ContainerName = contract.ContainerName ?? FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     c => c.ContainerName
                 ),
                 Labels = new Dictionary<string, Argument<string>>(contract.Labels)
                 {
-                    ["com.docker.compose.project"] = prefix,
-                    ["com.docker.compose.service"] = contract.Name
+                    ["com.docker.compose.project"] = context.Prefix,
+                    ["com.docker.compose.service"] = context.Name
                 },
                 Handler = this,
                 DependsOn =

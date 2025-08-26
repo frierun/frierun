@@ -1,4 +1,5 @@
 ﻿using Frierun.Server.Data;
+using Frierun.Server.Handlers;
 using Frierun.Server.Handlers.Base;
 
 namespace Frierun.Tests.Handlers.Base;
@@ -12,7 +13,7 @@ public class OptionalHandlerTests : BaseTests
         var contract = new Optional("", [container]);
         var handler = Handler<OptionalHandler>();
 
-        var result = handler.Initialize(contract, "prefix").ToList();
+        var result = handler.Initialize(contract, new ApplicationContext("", "prefix")).ToList();
 
         Assert.Equal(2, result.Count);
         Assert.Equal(true, ((Optional)result[0].Contract).Value);
@@ -30,7 +31,7 @@ public class OptionalHandlerTests : BaseTests
         var contract = new Optional("", [container]) { Value = true };
         var handler = Handler<OptionalHandler>();
 
-        var result = handler.Initialize(contract, "prefix").ToList();
+        var result = handler.Initialize(contract, new ApplicationContext("", "prefix")).ToList();
 
         Assert.Single(result);
         Assert.Equal(true, ((Optional)result[0].Contract).Value);
@@ -45,7 +46,7 @@ public class OptionalHandlerTests : BaseTests
         var contract = new Optional("", [container]) { Value = false };
         var handler = Handler<OptionalHandler>();
 
-        var result = handler.Initialize(contract, "prefix").ToList();
+        var result = handler.Initialize(contract, new ApplicationContext("", "prefix")).ToList();
 
         Assert.Single(result);
         Assert.Equal(false, ((Optional)result[0].Contract).Value);
