@@ -58,16 +58,20 @@ public class DiscoveryGraphTests : BaseTests
     }
 
     [Fact]
-    public void Next_ContractReinitializationRecursion_ThrowsException()
+    public void Next_ContractInfiniteRecursion_ThrowsException()
     {
         var rootContract = Factory<Package>().Generate() with { Handler = Handler<PackageHandler>() };
         var graph = new DiscoveryGraph();
 
-        Assert.True(graph.Apply(new ContractInitializeResult(rootContract, [rootContract])));
-        graph.Next();
-        Assert.True(graph.Apply(new ContractInitializeResult(rootContract, [rootContract])));
-
-        Assert.Throws<Exception>(() => graph.Next());
+        Assert.Throws<Exception>(() =>
+            {
+                for (int i = 0; i < 10000; i++)
+                {
+                    Assert.True(graph.Apply(new ContractInitializeResult(rootContract, [rootContract])));
+                    graph.Next();
+                }
+            }
+        );
     }
 
     [Fact]

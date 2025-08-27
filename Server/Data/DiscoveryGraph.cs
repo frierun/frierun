@@ -1,20 +1,19 @@
 ﻿using System.Diagnostics;
-using System.Text.RegularExpressions;
 using Frierun.Server.Handlers;
 
 namespace Frierun.Server.Data;
 
 public class DiscoveryGraph
 {
-    private readonly HashSet<ContractId> _toReinitialize = [];
+    
+    private readonly HashSet<ContractId> _toInitialize = [];
     private readonly HashSet<ContractId> _emptyContracts = [];
-    private readonly Dictionary<ContractId, Contract> _uninitializedContracts = new();
 
     /// <summary>
     /// Prevents infinite recursion during reinitialization
     /// </summary>
-    private readonly HashSet<ContractId> _reinitializeRecursion = [];
-
+    private int _count;
+    private const int MaxContracts = 1000;
 
     public Dictionary<ContractId, Contract> Contracts { get; } = new();
 
@@ -25,10 +24,9 @@ public class DiscoveryGraph
     public DiscoveryGraph(DiscoveryGraph graph)
     {
         Contracts = new Dictionary<ContractId, Contract>(graph.Contracts);
-        _toReinitialize = [..graph._toReinitialize];
+        _toInitialize = [..graph._toInitialize];
         _emptyContracts = [..graph._emptyContracts];
-        _uninitializedContracts = new Dictionary<ContractId, Contract>(graph._uninitializedContracts);
-        _reinitializeRecursion = [..graph._reinitializeRecursion];
+        _count = graph._count;
     }
 
     /// <summary>
@@ -37,11 +35,12 @@ public class DiscoveryGraph
     public (ContractId?, Contract?) Next()
     {
         // reinitializing freshly updated contracts
-        while (_toReinitialize.Count > 0)
+        while (_toInitialize.Count > 0)
         {
-            var contractId = _toReinitialize.First();
-            _toReinitialize.Remove(contractId);
-            if (!_reinitializeRecursion.Add(contractId))
+            var contractId = _toInitialize.First();
+            _toInitialize.Remove(contractId);
+            _count++;
+            if (_count > MaxContracts)
             {
                 throw new Exception("Infinite recursion found during contract reinitialization");
             }
@@ -49,19 +48,8 @@ public class DiscoveryGraph
             return (contractId, Contracts[contractId]);
         }
 
-        _reinitializeRecursion.Clear();
-
-        // initialize contracts which were defined but not initialized yet
-        while (_uninitializedContracts.Count > 0)
-        {
-            var (contractId, contract) = _uninitializedContracts.First();
-            _uninitializedContracts.Remove(contractId);
-            Debug.Assert(!Contracts.ContainsKey(contractId));
-
-            Contracts[contractId] = contract;
-            return (contractId, contract);
-        }
-
+        _count = 0;
+        
         // initialize empty contracts
         while (_emptyContracts.Count > 0)
         {
@@ -109,18 +97,12 @@ public class DiscoveryGraph
                 {
                     var contract = initializedContract.Merge(additionalContract);
                     Contracts[contract] = contract;
-                    _toReinitialize.Add(contract);
-                    continue;
-                }
-
-                if (_uninitializedContracts.TryGetValue(additionalContract, out var uninitializedContract))
-                {
-                    _uninitializedContracts[additionalContract] = uninitializedContract.Merge(additionalContract);
                 }
                 else
                 {
-                    _uninitializedContracts[additionalContract] = additionalContract;
+                    Contracts[additionalContract] = additionalContract;
                 }
+                _toInitialize.Add(additionalContract);
             }
         }
         catch (MergeException)
