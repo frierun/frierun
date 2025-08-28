@@ -31,7 +31,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
             contracts.Reverse();
         }
 
-        var package = Factory<Package>().Generate() with { Contracts = contracts };
+        var package = Factory<Package>().Generate() with { Contracts = [..contracts] };
 
         var application = InstallPackage(package);
 
@@ -111,7 +111,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
             [new Selector("Internal", Value: "No")]
         );
         InstallPackage("traefik");
-        var package = Factory<Package>().Generate() with { Contracts = Factory<HttpEndpoint>().Generate(2) };
+        var package = Factory<Package>().Generate() with { Contracts = [..Factory<HttpEndpoint>().Generate(2)] };
 
         var application = InstallPackage(package);
 
@@ -138,7 +138,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
             [new Selector("Internal", Value: "No")]
         );
         InstallPackage("traefik");
-        var package = Factory<Package>().Generate() with { Contracts = Factory<HttpEndpoint>().Generate(2) };
+        var package = Factory<Package>().Generate() with { Contracts = [..Factory<HttpEndpoint>().Generate(2)] };
         var application = InstallPackage(package);
 
         Resolve<UninstallService>().Handle(application);

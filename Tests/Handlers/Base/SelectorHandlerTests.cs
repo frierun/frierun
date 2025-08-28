@@ -61,7 +61,7 @@ public class SelectorHandlerTests : BaseTests
                 new SelectorOption("option1", [contract]),
             ]
         );
-        var package = Factory<Package>().Generate() with { Contracts = new List<Contract> { selector } };
+        var package = Factory<Package>().Generate() with { Contracts = [ selector ] };
 
         var application = InstallPackage(package);
 

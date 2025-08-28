@@ -20,6 +20,7 @@ public class StateSerializer(
         {
             new ContractIdConverter(),
             new ContractIdOfTConverter(),
+            new ContractListConverter(),
             new ArgumentOfTConverter(),
             new LazyHandlerConverter(lazyHandlerRegistry),
             new PackageConverter(packageRegistry)

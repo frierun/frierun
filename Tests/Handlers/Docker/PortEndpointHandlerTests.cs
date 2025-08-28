@@ -23,7 +23,7 @@ public class PortEndpointHandlerTests : BaseTests
             contracts.Reverse();
         }
 
-        var package = Factory<Package>().Generate() with { Contracts = contracts };
+        var package = Factory<Package>().Generate() with { Contracts = [..contracts] };
 
         var application = InstallPackage(package);
 
@@ -40,12 +40,14 @@ public class PortEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         var container = Factory<Container>().Generate();
-        List<Contract> contracts =
-        [
-            container,
-            Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Id) }
-        ];
-        var package = Factory<Package>().Generate() with { Contracts = contracts };
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts =
+            [
+                container,
+                Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Id) }
+            ]
+        };
 
         var application = InstallPackage(package);
 

@@ -12,12 +12,12 @@ public record Package(
     string? ShortDescription = null,
     string? FullDescription = null,
     IReadOnlyList<string>? Tags = null,
-    IEnumerable<Contract>? Contracts = null,
+    ContractList? Contracts = null,
     Application? Result = null
 ) : Contract(Name)
 {
     public IReadOnlyList<string> Tags { get; init; } = Tags ?? [];
-    public IEnumerable<Contract> Contracts { get; init; } = Contracts ?? [];
+    public ContractList Contracts { get; init; } = Contracts ?? [];
     public Argument<string> ApplicationUrl { get; init; } = ApplicationUrl ?? new Argument<string>();
     public Argument<string> ApplicationDescription { get; init; } = ApplicationDescription ?? new Argument<string>();
 
@@ -36,11 +36,14 @@ public record Package(
             Prefix = OnlyOne(Prefix, contract.Prefix),
             ApplicationUrl = ApplicationUrl.Merge(contract.ApplicationUrl),
             ApplicationDescription = ApplicationDescription.Merge(contract.ApplicationDescription),
-            Contracts = Contracts.Concat(contract.Contracts)
-                .GroupBy(c => c.Id)
-                .Select(group =>
-                    group.Aggregate((a, b) => a.Merge(b))
-                )
+            Contracts = new ContractList(
+                Contracts
+                    .Concat<KeyValuePair<ContractId, Contract>>(contract.Contracts)
+                    .GroupBy(c => c.Key)
+                    .Select(group =>
+                        group.Aggregate((a, b) => new KeyValuePair<ContractId, Contract>(a.Key, a.Value.Merge(b.Value)))
+                    )
+            )
         };
     }
 }

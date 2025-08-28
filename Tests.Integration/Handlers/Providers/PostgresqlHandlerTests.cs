@@ -20,7 +20,7 @@ public class PostgresqlHandlerTests : TestWithDocker
         var package = dbPackage with
         {
             Name = "db-client",
-            Contracts = dbPackage.Contracts.Append(new Postgresql())
+            Contracts = [..dbPackage.Contracts.Values.Append(new Postgresql())]
         };
         var application = InstallPackage(package);
 
@@ -66,7 +66,7 @@ public class PostgresqlHandlerTests : TestWithDocker
         var package = dbPackage with
         {
             Name = "db-client",
-            Contracts = dbPackage.Contracts.Append(new Postgresql(Admin: true))
+            Contracts = [..dbPackage.Contracts.Values.Append(new Postgresql(Admin: true))]
         };
         var application = InstallPackage(package);
 

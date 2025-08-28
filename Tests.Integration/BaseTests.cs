@@ -4,12 +4,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
+
 namespace Tests.Integration;
 
 public abstract class BaseTests : IDisposable
 {
     private readonly IHost _host;
-    
+
     protected BaseTests()
     {
         _host = Program.CreateHost();
@@ -27,7 +28,7 @@ public abstract class BaseTests : IDisposable
         _host.Dispose();
         GC.SuppressFinalize(this);
     }
-    
+
     /// <summary>
     /// Resolve an object from the IHost.
     /// </summary>
@@ -35,7 +36,7 @@ public abstract class BaseTests : IDisposable
         where T : notnull
     {
         return _host.Services.GetRequiredService<T>();
-    }    
+    }
 
     /// <summary>
     /// Installs package by name and returns application
@@ -48,7 +49,7 @@ public abstract class BaseTests : IDisposable
 
         if (overrides != null)
         {
-            var overridePackage = new Package(name) { Contracts = overrides };
+            var overridePackage = new Package(name) { Contracts = [..overrides] };
             package = (Package)package.Merge(overridePackage);
         }
 

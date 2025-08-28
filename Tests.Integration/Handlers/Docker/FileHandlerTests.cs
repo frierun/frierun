@@ -16,7 +16,7 @@ public class FileHandlerTests : TestWithDocker
             ),
             contract
         };
-        
+
         if (parameter != null)
         {
             contracts.Add(parameter);
@@ -24,7 +24,7 @@ public class FileHandlerTests : TestWithDocker
 
         var package = new Package(
             Name: "test-package",
-            Contracts: contracts
+            Contracts: [..contracts]
         );
 
         var application = InstallPackage(package);

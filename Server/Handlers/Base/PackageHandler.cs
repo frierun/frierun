@@ -11,7 +11,7 @@ public class PackageHandler : Handler<Package>
         // auto-detect application URL
         if (applicationUrl.Empty)
         {
-            var httpEndpoint = package.Contracts.OfType<HttpEndpoint>().FirstOrDefault();
+            var httpEndpoint = package.Contracts.Values.OfType<HttpEndpoint>().FirstOrDefault();
             if (httpEndpoint != null)
             {
                 applicationUrl = $"{{{{{httpEndpoint.Id}:Url}}}}";
@@ -21,7 +21,7 @@ public class PackageHandler : Handler<Package>
         // use the first endpoint if not found any other
         if (applicationUrl.Empty)
         {
-            var endpoint = package.Contracts.OfType<PortEndpoint>().FirstOrDefault();
+            var endpoint = package.Contracts.Values.OfType<PortEndpoint>().FirstOrDefault();
             if (endpoint != null)
             {
                 applicationUrl = $"{{{{{endpoint.Id}:Url}}}}";
@@ -35,7 +35,7 @@ public class PackageHandler : Handler<Package>
                 ApplicationUrl = applicationUrl,
                 Handler = this
             },
-            package.Contracts
+            package.Contracts.Values
         );
     }
 

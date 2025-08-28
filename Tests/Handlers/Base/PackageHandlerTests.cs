@@ -15,14 +15,14 @@ public class PackageHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new List<Contract>
-            {
+            Contracts =
+            [
                 new HttpEndpoint(Port: 80),
                 new PortEndpoint(
                     Protocol.Tcp,
                     2222
                 )
-            }
+            ]
         };
         Assert.NotNull(package.ApplicationUrl.Value);
 
@@ -37,14 +37,14 @@ public class PackageHandlerTests : BaseTests
         var package = Factory<Package>().Generate() with
         {
             ApplicationUrl = new Argument<string>(),
-            Contracts = new List<Contract>
-            {
+            Contracts =
+            [
                 new HttpEndpoint(Port: 80),
                 new PortEndpoint(
                     Protocol.Tcp,
                     2222
                 )
-            }
+            ]
         };
 
         var application = InstallPackage(package);
@@ -58,13 +58,13 @@ public class PackageHandlerTests : BaseTests
         var package = Factory<Package>().Generate() with
         {
             ApplicationUrl = new Argument<string>(),
-            Contracts = new List<Contract>
-            {
+            Contracts =
+            [
                 new PortEndpoint(
                     Protocol.Tcp,
                     2222
                 )
-            }
+            ]
         };
 
         var application = InstallPackage(package);
@@ -79,17 +79,14 @@ public class PackageHandlerTests : BaseTests
         var package = Factory<Package>().Generate() with
         {
             ApplicationUrl = new Argument<string>("{{Parameter:Test:Value}}"),
-            Contracts = new List<Contract>
-            {
-                new Parameter("Test", Value: value)
-            }
+            Contracts = [new Parameter("Test", Value: value)]
         };
 
         var application = InstallPackage(package);
 
         Assert.Equal(value, application.Url);
     }
-    
+
     [Fact]
     public void Install_ApplicationDescriptionWithTemplate_ResolvesTemplate()
     {
@@ -97,14 +94,11 @@ public class PackageHandlerTests : BaseTests
         var package = Factory<Package>().Generate() with
         {
             ApplicationDescription = new Argument<string>("{{Parameter:Test:Value}}"),
-            Contracts = new List<Contract>
-            {
-                new Parameter("Test", Value: value)
-            }
+            Contracts = [new Parameter("Test", Value: value)]
         };
 
         var application = InstallPackage(package);
 
         Assert.Equal(value, application.Description);
-    }    
+    }
 }

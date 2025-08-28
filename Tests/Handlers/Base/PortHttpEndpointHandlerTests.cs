@@ -13,12 +13,7 @@ public class PortHttpEndpointHandlerTests : BaseTests
         {
             Container = new ContractId<Container>(container.Name)
         };
-        List<Contract> contracts =
-        [
-            container,
-            httpEndpoint
-        ];
-        var package = Factory<Package>().Generate() with { Contracts = contracts };
+        var package = Factory<Package>().Generate() with { Contracts = [container, httpEndpoint] };
 
         var application = InstallPackage(package);
 
@@ -45,7 +40,7 @@ public class PortHttpEndpointHandlerTests : BaseTests
             contracts.Reverse();
         }
 
-        var package = Factory<Package>().Generate() with { Contracts = contracts };
+        var package = Factory<Package>().Generate() with { Contracts = [..contracts] };
 
         var application = InstallPackage(package);
 

@@ -155,7 +155,7 @@ public abstract class BaseTests
 
         if (overrides != null)
         {
-            var overridePackage = new Package(name) { Contracts = overrides };
+            var overridePackage = new Package(name) { Contracts = [..overrides] };
             package = (Package)package.Merge(overridePackage);
         }
 

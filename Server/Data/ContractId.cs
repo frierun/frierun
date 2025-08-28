@@ -6,7 +6,7 @@ namespace Frierun.Server.Data;
 public class ContractId<TContract> : ContractId
     where TContract : Contract
 {
-    public ContractId(string name) : base(typeof(TContract).Name, name)
+    public ContractId(string? name = null) : base(typeof(TContract).Name, name ?? "")
     {
     }
 
