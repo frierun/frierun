@@ -62,7 +62,7 @@ public record Container(
             MountDockerSocket = MountDockerSocket || contract.MountDockerSocket,
             Network = OnlyOne(Network, contract.Network),
             Command = Command.Merge(contract.Command),
-            NetworkAliases = NetworkAliases.Concat(contract.NetworkAliases),
+            NetworkAliases = NetworkAliases.Concat(contract.NetworkAliases).Distinct(),
             Env = MergeDictionaries(Env, contract.Env),
             Labels = MergeDictionaries(Labels, contract.Labels),
             Mounts = MergeDictionaries(Mounts, contract.Mounts)

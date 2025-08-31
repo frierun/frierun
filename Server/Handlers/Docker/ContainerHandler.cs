@@ -80,7 +80,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
                     {
                         network.NetworkName, new EndpointSettings
                         {
-                            Aliases = [..contract.NetworkAliases.Distinct()]
+                            Aliases = [..contract.NetworkAliases]
                         }
                     }
                 }
