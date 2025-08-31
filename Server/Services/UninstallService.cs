@@ -24,21 +24,27 @@ public class UninstallService(
                     throw new Exception($"Cannot uninstall {application.Name} because it is required by {other.Name}");
                 }
             }
-            
-            foreach (var contract in application.Contracts.Reverse())
-            {
-                Debug.Assert(contract is not Package);
-                
-                contract.Uninstall();
-            }
+
+            UninstallContracts(application);
 
             state.RemoveApplication(application);
-            
+
             stateSerializer.Save(state);
         }
         finally
         {
             stateManager.FinishTask();
+        }
+    }
+
+    private void UninstallContracts(Application application)
+    {
+        var contracts = application.Contracts.ToList();
+        while (contracts.Count > 0)
+        {
+            var contract = contracts.First(contract => !contracts.Any(depend => depend.DependsOn.Contains(contract.Id)));
+            contract.Uninstall();
+            contracts.Remove(contract);
         }
     }
 }
