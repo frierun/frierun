@@ -10,7 +10,7 @@ public sealed class ApplicationFactory : Faker<Application>
         RuleFor(p => p.Package, _ => packageFactory.Generate());
         RuleFor(p => p.Url, f => f.Internet.Url());
         RuleFor(p => p.Description, f => f.Lorem.Sentence());
-        RuleFor(p => p.Contracts, _ => Array.Empty<Contract>());
-        RuleFor(p => p.RequiredApplications, _ => Array.Empty<string>());
+        RuleFor(p => p.Contracts, _ => []);
+        RuleFor(p => p.RequiredApplications, _ => []);
     }
 }

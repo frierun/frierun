@@ -22,7 +22,7 @@ public class MysqlHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var database = application.Contracts.OfType<Mysql>().Single();
+        var database = application.GetContracts<Mysql>().Single();
         Assert.True(database.Installed);
         Assert.Equal(package.Name, database.Username);
         Assert.Equal(package.Name, database.Database);
@@ -48,7 +48,7 @@ public class MysqlHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.Equal(2, application.Contracts.OfType<Mysql>().Count());
+        Assert.Equal(2, application.GetContracts<Mysql>().Count());
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
             application.Name,
             Arg.Any<NetworkConnectParameters>()
@@ -87,7 +87,7 @@ public class MysqlHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var database = application.Contracts.OfType<Mysql>().Single();
+        var database = application.GetContracts<Mysql>().Single();
         Assert.NotEqual(package.Name, database.Username);
     }
     
@@ -104,7 +104,7 @@ public class MysqlHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var database = application.Contracts.OfType<Mysql>().Single();
+        var database = application.GetContracts<Mysql>().Single();
         Assert.NotEqual(package.Name, database.Database);
     }    
 }

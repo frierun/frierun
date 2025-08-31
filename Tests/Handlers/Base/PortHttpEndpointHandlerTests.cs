@@ -17,7 +17,7 @@ public class PortHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var resultHttpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
+        var resultHttpEndpoint = application.GetContract(new ContractId<HttpEndpoint>(httpEndpoint.Id));
         Assert.False(resultHttpEndpoint.ResultSsl.Value);
         Assert.Equal(httpEndpoint.Port, resultHttpEndpoint.ResultPort.Value);
         Assert.NotNull(resultHttpEndpoint.ResultHost.Value);

@@ -13,7 +13,7 @@ public class ParameterHandlerTests : BaseTests
         
         var application = InstallPackage(package);
         
-        var installedParameter = application.Contracts.OfType<Parameter>().Single();
+        var installedParameter = application.GetContract(new ContractId<Parameter>(parameter.Id));
         Assert.Equal(parameter.DefaultValue, installedParameter.Value.Value);
     }
 }

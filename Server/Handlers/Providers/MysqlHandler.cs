@@ -7,9 +7,8 @@ namespace Frierun.Server.Handlers;
 public class MysqlHandler(Application application)
     : Handler<Mysql>(application)
 {
-    private readonly Container _container = application.Contracts.OfType<Container>().Single();
-
-    private readonly string _rootPassword = application.Contracts.OfType<Password>().Single().Value ??
+    private readonly Container _container = application.GetContract(new ContractId<Container>());
+    private readonly string _rootPassword = application.GetContract(new ContractId<Password>()).Value ??
                                             throw new Exception("Root password not found");
 
     public override IEnumerable<ContractList> Initialize(Mysql contract, ApplicationContext context)

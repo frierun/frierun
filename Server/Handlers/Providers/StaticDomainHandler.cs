@@ -5,15 +5,13 @@ namespace Frierun.Server.Handlers;
 public class StaticDomainHandler(Application application)
     : Handler<Domain>(application)
 {
-    private readonly string _domainName = application.Contracts
-        .OfType<Parameter>()
-        .First(parameter => parameter.Name == "Domain")
+    private readonly string _domainName = application
+        .GetContract(new ContractId<Parameter>("Domain"))
         .Value
         .Value ?? "";
 
-    private readonly bool _isInternal = application.Contracts
-        .OfType<Selector>()
-        .First(parameter => parameter.Name == "Internal")
+    private readonly bool _isInternal = application
+        .GetContract(new ContractId<Selector>("Internal"))
         .Value == "Yes";
 
     public override IEnumerable<ContractList> Initialize(Domain contract, ApplicationContext context)

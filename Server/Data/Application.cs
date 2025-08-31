@@ -26,4 +26,13 @@ public class Application
     {
         return (T)GetContract((ContractId)contractId);
     }
+    
+    /// <summary>
+    /// Gets all contracts of the specified type
+    /// </summary>
+    public IEnumerable<T> GetContracts<T>()
+        where T : Contract
+    {
+        return Contracts.OfType<T>();
+    }
 }

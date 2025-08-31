@@ -13,13 +13,13 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         var tunnelApplication = InstallPackage("cloudflare-tunnel");
-        var tunnel = tunnelApplication.Contracts.OfType<CloudflareTunnel>().Single();
+        var tunnel = tunnelApplication.GetContracts<CloudflareTunnel>().Single();
         Assert.NotNull(tunnel.TunnelId);
         Assert.NotNull(tunnel.AccountId);
 
         var application = InstallPackage("frierun");
 
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
+        var httpEndpoint = application.GetContracts<HttpEndpoint>().Single();
         Assert.NotNull(httpEndpoint.CloudflareZoneId);
         Assert.NotNull(httpEndpoint.NetworkName);
 
@@ -46,13 +46,13 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         var tunnelApplication = InstallPackage("cloudflare-tunnel");
-        var tunnel = tunnelApplication.Contracts.OfType<CloudflareTunnel>().Single();
+        var tunnel = tunnelApplication.GetContracts<CloudflareTunnel>().Single();
         Assert.NotNull(tunnel.TunnelId);
         Assert.NotNull(tunnel.AccountId);
 
         var application = InstallPackage("frierun");
 
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
+        var httpEndpoint = application.GetContracts<HttpEndpoint>().Single();
         Assert.NotNull(httpEndpoint.CloudflareZoneId);
         Assert.NotNull(httpEndpoint.NetworkName);
 
@@ -83,7 +83,7 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
+        var httpEndpoint = application.GetContracts<HttpEndpoint>().Single();
         Assert.Equal("zoneId2", httpEndpoint.CloudflareZoneId);
     }
 
@@ -106,7 +106,7 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
+        var httpEndpoint = application.GetContracts<HttpEndpoint>().Single();
         Assert.Equal("zoneId2", httpEndpoint.CloudflareZoneId);
     }
 
@@ -170,8 +170,8 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
             }
         );
 
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
-        var container = application.Contracts.OfType<Container>().Single();
+        var httpEndpoint = application.GetContracts<HttpEndpoint>().Single();
+        var container = application.GetContracts<Container>().Single();
         var host = $"http://{container.ContainerName}:{httpEndpoint.Port}";
         CloudflareClient.UpdateTunnelConfiguration(
             Arg.Any<string>(), Arg.Any<string>(), Arg.Is<JsonObject>(config =>
@@ -214,8 +214,8 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
             }
         );
 
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
-        var container = application.Contracts.OfType<Container>().Single();
+        var httpEndpoint = application.GetContracts<HttpEndpoint>().Single();
+        var container = application.GetContracts<Container>().Single();
         var host = $"http://{container.ContainerName}:{httpEndpoint.Port}";
         CloudflareClient.UpdateTunnelConfiguration(
             Arg.Any<string>(), Arg.Any<string>(), Arg.Is<JsonObject>(config =>
@@ -258,7 +258,7 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
                 ]
             }
         );
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
+        var httpEndpoint = application.GetContracts<HttpEndpoint>().Single();
         Assert.Equal("zoneId1", httpEndpoint.CloudflareZoneId);
 
         CloudflareClient.Received(1).DeleteDnsRecord("zoneId1", "recordId1");
@@ -273,7 +273,7 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
         InstallPackage("docker");
         InstallPackage("cloudflare-tunnel");
         var application = InstallPackage("frierun");
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
+        var httpEndpoint = application.GetContracts<HttpEndpoint>().Single();
         Assert.NotNull(httpEndpoint.CloudflareZoneId);
         CloudflareClient.GetDnsRecords(httpEndpoint.CloudflareZoneId).Returns(
             new List<JsonObject>
@@ -303,7 +303,7 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
                 Contracts = [new HttpEndpoint()]
             }
         );
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
+        var httpEndpoint = application.GetContracts<HttpEndpoint>().Single();
         CloudflareClient.GetTunnelConfiguration(Arg.Any<string>(), Arg.Any<string>())
             .ReturnsForAnyArgs(
                 new JsonObject

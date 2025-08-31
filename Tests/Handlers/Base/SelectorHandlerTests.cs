@@ -67,7 +67,7 @@ public class SelectorHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var installedSelector = application.Contracts.OfType<Parameter>().Single();
+        var installedSelector = application.GetContract(new ContractId<Parameter>(contract.Id));
         Assert.True(installedSelector.Installed);
         Assert.Equal(contract.Value, installedSelector.Value);
     }

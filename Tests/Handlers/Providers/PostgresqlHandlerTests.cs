@@ -28,7 +28,7 @@ public class PostgresqlHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var database = application.Contracts.OfType<Postgresql>().Single();
+        var database = application.GetContracts<Postgresql>().Single();
         Assert.True(database.Installed);
         Assert.Equal(package.Name, database.Username);
         Assert.Equal(package.Name, database.Database);
@@ -55,7 +55,7 @@ public class PostgresqlHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.Equal(2, application.Contracts.OfType<Postgresql>().Count());
+        Assert.Equal(2, application.GetContracts<Postgresql>().Count());
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
             application.Name, 
             Arg.Any<NetworkConnectParameters>()
@@ -94,7 +94,7 @@ public class PostgresqlHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var database = application.Contracts.OfType<Postgresql>().Single();
+        var database = application.GetContracts<Postgresql>().Single();
         Assert.NotEqual(package.Name, database.Username);
     }    
 }

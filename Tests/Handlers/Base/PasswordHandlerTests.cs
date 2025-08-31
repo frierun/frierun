@@ -14,7 +14,7 @@ public class PasswordHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var password = application.Contracts.OfType<Password>().Single();
+        var password = application.GetContract(new ContractId<Password>());
         Assert.True(password.Installed);
         Assert.NotNull(password.Value);
     }
@@ -30,7 +30,7 @@ public class PasswordHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var password = application.Contracts.OfType<Password>().Single();
+        var password = application.GetContract(new ContractId<Password>());
         Assert.True(password.Installed);
         Assert.Equal(application.Description, $"GeneratedPassword: {password.Value}");
     }

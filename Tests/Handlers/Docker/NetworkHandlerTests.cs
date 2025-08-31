@@ -15,7 +15,7 @@ public class NetworkHandlerTests : BaseTests
         var container = Factory<Container>().Generate("udocker") with { Handler = Handler<ContainerHandler>(udocker) };
         var package = Factory<Package>().Generate() with { Contracts = [container] };
         var application = InstallPackage(package);
-        var network = application.Contracts.OfType<Network>().Single();
+        var network = application.GetContracts<Network>().Single();
         Assert.True(network.Installed);
 
         var result = Handler<NetworkHandler>(docker)

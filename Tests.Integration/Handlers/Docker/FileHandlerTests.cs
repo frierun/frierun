@@ -29,10 +29,10 @@ public class FileHandlerTests : TestWithDocker
 
         var application = InstallPackage(package);
 
-        var volume = application.Contracts.OfType<Volume>().Single();
+        var volume = application.GetContract(new ContractId<Volume>());
         Assert.True(volume.Installed);
         Assert.NotNull(volume.VolumeName);
-        var container = application.Contracts.OfType<Container>().Single();
+        var container = application.GetContract(new ContractId<Container>());
         Assert.True(container.Installed);
 
         await checkContainer(container.ContainerName);

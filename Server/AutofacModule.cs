@@ -43,9 +43,7 @@ public class AutofacModule : Module
                     builder.Register<IDockerClient>(
                             static context => context
                                 .Resolve<Application>()
-                                .Contracts
-                                .OfType<DockerApiConnection>()
-                                .Single()
+                                .GetContract(new ContractId<DockerApiConnection>())
                                 .CreateClient()
                         )
                         .SingleInstance();
@@ -76,9 +74,7 @@ public class AutofacModule : Module
                     builder.Register<ICloudflareClient>(
                             static context => context
                                 .Resolve<Application>()
-                                .Contracts
-                                .OfType<CloudflareApiConnection>()
-                                .Single()
+                                .GetContract(new ContractId<CloudflareApiConnection>())
                                 .CreateClient()
                         )
                         .SingleInstance();

@@ -17,7 +17,7 @@ public class DaemonHandlerTests : BaseTests
         
         var application = InstallPackage(package);
 
-        var daemon = application.Contracts.OfType<Daemon>().Single();
+        var daemon = application.GetContracts<Daemon>().Single();
         Assert.True(daemon.Installed);
         var directory = "/data/data/com.termux/files/usr/var/service/" + daemon.DaemonName;
         SftpClient.Received(1).CreateDirectory(directory);
@@ -30,7 +30,7 @@ public class DaemonHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with { Contracts = [Factory<Daemon>().Generate()] };
         var application = InstallPackage(package);
-        var daemon = application.Contracts.OfType<Daemon>().Single();
+        var daemon = application.GetContracts<Daemon>().Single();
         var directory = "/data/data/com.termux/files/usr/var/service/" + daemon.DaemonName;
         Assert.True(daemon.Installed);
         

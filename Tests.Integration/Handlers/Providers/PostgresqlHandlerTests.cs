@@ -24,9 +24,9 @@ public class PostgresqlHandlerTests : TestWithDocker
         };
         var application = InstallPackage(package);
 
-        var container = application.Contracts.OfType<Container>().Single();
+        var container = application.GetContract(new ContractId<Container>());
         Assert.True(container.Installed);
-        var database = application.Contracts.OfType<Postgresql>().Single();
+        var database = application.GetContract(new ContractId<Postgresql>());
         Assert.True(database.Installed);
         Assert.Equal("db-client", database.Username);
         Assert.Equal("db-client", database.Database);
@@ -70,9 +70,9 @@ public class PostgresqlHandlerTests : TestWithDocker
         };
         var application = InstallPackage(package);
 
-        var container = application.Contracts.OfType<Container>().Single();
+        var container = application.GetContract(new ContractId<Container>());
         Assert.True(container.Installed);
-        var database = application.Contracts.OfType<Postgresql>().Single();
+        var database = application.GetContract(new ContractId<Postgresql>());
         Assert.True(database.Installed);
         Assert.Equal("postgres", database.Username);
         Assert.Null(database.Database);

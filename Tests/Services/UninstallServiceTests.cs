@@ -45,7 +45,7 @@ public class UninstallServiceTests : BaseTests
         var traefik = InstallPackage("traefik");
         var application = InstallPackage("frierun");
         
-        Assert.Single(application.Contracts.OfType<HttpEndpoint>());
+        Assert.Single(application.GetContracts<HttpEndpoint>());
         
         Assert.Throws<Exception>(() => Resolve<UninstallService>().Handle(traefik));
     }

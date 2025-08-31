@@ -10,7 +10,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
     : Handler<Container>(application), IContainerHandler
 {
     private readonly DockerApiConnection _dockerApiConnection =
-        application.Contracts.OfType<DockerApiConnection>().Single();
+        application.GetContract(new ContractId<DockerApiConnection>());
 
     public override IEnumerable<ContractList> Initialize(Container contract, ApplicationContext context)
     {
@@ -80,7 +80,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
                     {
                         network.NetworkName, new EndpointSettings
                         {
-                            Aliases = [..contract.NetworkAliases?.Distinct() ?? []]
+                            Aliases = [..contract.NetworkAliases.Distinct()]
                         }
                     }
                 }

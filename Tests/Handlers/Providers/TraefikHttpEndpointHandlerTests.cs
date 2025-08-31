@@ -52,7 +52,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var endpointContract = application.Contracts.OfType<HttpEndpoint>().Single();
+        var endpointContract = application.GetContracts<HttpEndpoint>().Single();
         Assert.True(endpointContract.Installed);
         Assert.Equal(80, endpointContract.Url.Port);
         Assert.Equal("http", endpointContract.Url.Scheme);
@@ -71,7 +71,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var endpointContract = application.Contracts.OfType<HttpEndpoint>().Single();
+        var endpointContract = application.GetContracts<HttpEndpoint>().Single();
         Assert.True(endpointContract.Installed);
         Assert.Equal(443, endpointContract.Url.Port);
         Assert.Equal("https", endpointContract.Url.Scheme);
@@ -96,7 +96,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var endpointContract = application.Contracts.OfType<HttpEndpoint>().Single();
+        var endpointContract = application.GetContracts<HttpEndpoint>().Single();
         Assert.True(endpointContract.Installed);
         Assert.Equal(81, endpointContract.Url.Port);
         Assert.Equal("http", endpointContract.Url.Scheme);
@@ -115,7 +115,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var installedContracts = application.Contracts.OfType<HttpEndpoint>().ToList();
+        var installedContracts = application.GetContracts<HttpEndpoint>().ToList();
         Assert.Equal(2, installedContracts.Count);
         for (var i = 0; i < 2; i++)
         {
@@ -158,7 +158,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var contract = application.Contracts.OfType<HttpEndpoint>().Single();
+        var contract = application.GetContracts<HttpEndpoint>().Single();
         var router = contract.TraefikRouterName;
         var host = $"Host(`{contract.ResultHost.Value}`)";
         Assert.NotNull(router);
@@ -187,7 +187,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var contract = application.Contracts.OfType<HttpEndpoint>().Single();
+        var contract = application.GetContracts<HttpEndpoint>().Single();
         var router = contract.TraefikRouterName;
         var host = $"Host(`{contract.ResultHost.Value}`)";
         Assert.NotNull(router);

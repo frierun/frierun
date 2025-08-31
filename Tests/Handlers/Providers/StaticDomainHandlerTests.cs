@@ -12,7 +12,7 @@ public class StaticDomainHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var domain = application.Contracts.OfType<Domain>().Single();
+        var domain = application.GetContracts<Domain>().Single();
         Assert.True(domain.Installed);
         Assert.True(domain.IsInternal);
     }
@@ -28,7 +28,7 @@ public class StaticDomainHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var domain = application.Contracts.OfType<Domain>().Single();
+        var domain = application.GetContracts<Domain>().Single();
         Assert.True(domain.Installed);
         Assert.False(domain.IsInternal);
     }

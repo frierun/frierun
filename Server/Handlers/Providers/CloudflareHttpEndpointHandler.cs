@@ -7,8 +7,8 @@ namespace Frierun.Server.Handlers;
 public class CloudflareHttpEndpointHandler(Application application, ICloudflareClient client)
     : Handler<HttpEndpoint>(application)
 {
-    private readonly Container _container = application.Contracts.OfType<Container>().Single();
-    private readonly CloudflareTunnel _tunnel = application.Contracts.OfType<CloudflareTunnel>().Single();
+    private readonly Container _container = application.GetContract(new ContractId<Container>());
+    private readonly CloudflareTunnel _tunnel = application.GetContract(new ContractId<CloudflareTunnel>());
 
     public override IEnumerable<ContractList> Initialize(HttpEndpoint contract, ApplicationContext context)
     {
