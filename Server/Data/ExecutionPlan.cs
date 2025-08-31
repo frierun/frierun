@@ -106,7 +106,7 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
             Package = application.Package,
             Description = application.Description,
             Url = application.Url,
-            Contracts = installedContracts,
+            Contracts = [..installedContracts],
             RequiredApplications = _requiredApplications.Select(app => app.Name).ToList()
         };
     }

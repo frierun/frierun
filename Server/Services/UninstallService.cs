@@ -39,7 +39,7 @@ public class UninstallService(
 
     private void UninstallContracts(Application application)
     {
-        var contracts = application.Contracts.ToList();
+        var contracts = application.Contracts.Values.ToList();
         while (contracts.Count > 0)
         {
             var contract = contracts.First(contract => !contracts.Any(depend => depend.DependsOn.Contains(contract.Id)));

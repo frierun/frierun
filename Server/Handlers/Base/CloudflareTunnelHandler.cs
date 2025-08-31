@@ -109,7 +109,7 @@ public class CloudflareTunnelHandler : Handler<CloudflareTunnel>
     public override void Uninstall(CloudflareTunnel contract)
     {
         Debug.Assert(contract.Installed);
-        var application = State.Applications.Single(application => application.Contracts.Contains(contract));
+        var application = State.Applications.Single(application => application.Contracts.Values.Contains(contract));
         var cloudflareApiConnection = application.GetContract(contract.CloudflareApiConnection);
 
         var client = cloudflareApiConnection.CreateClient();

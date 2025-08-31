@@ -7,7 +7,7 @@ public class Application
     public Package? Package { get; init; }
     public string? Url { get; init; }
     public string? Description { get; init; }
-    public IReadOnlyList<Contract> Contracts { get; init; } = [];
+    public ContractList Contracts { get; init; } = [];
     public IReadOnlyList<string> RequiredApplications { get; init; } = [];
     
     /// <summary>
@@ -15,7 +15,7 @@ public class Application
     /// </summary>
     public Contract GetContract(ContractId contractId)
     {
-        return Contracts.Single(contract => contract.Id == contractId);
+        return Contracts[contractId];
     }
 
     /// <summary>
@@ -33,6 +33,6 @@ public class Application
     public IEnumerable<T> GetContracts<T>()
         where T : Contract
     {
-        return Contracts.OfType<T>();
+        return Contracts.Values.OfType<T>();
     }
 }

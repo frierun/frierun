@@ -21,7 +21,7 @@ public class State
     /// </summary>
     [JsonIgnore]
     public IEnumerable<Contract> Contracts => _applications
-        .SelectMany(application => application.Contracts)
+        .SelectMany(application => application.Contracts.Values)
         .Concat(UnmanagedContracts);
     
     /// <summary>
