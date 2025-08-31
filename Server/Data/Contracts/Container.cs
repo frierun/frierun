@@ -14,6 +14,7 @@ public record Container(
     bool MountDockerSocket = false,
     ContractId<Network>? Network = null,
     Argument<IEnumerable<string>>? Command = null,
+    IEnumerable<string>? NetworkAliases = null,
     IReadOnlyDictionary<string, Argument<string>>? Env = null,
     IReadOnlyDictionary<string, Argument<string>>? Labels = null,
     IReadOnlyDictionary<string, ContainerMount>? Mounts = null
@@ -23,6 +24,7 @@ public record Container(
     public override bool Installed { get; init; }
     
     public Argument<IEnumerable<string>> Command { get; init; } = Command ?? new Argument<IEnumerable<string>>();
+    public IEnumerable<string> NetworkAliases { get; init; } = NetworkAliases ?? [];
     public IReadOnlyDictionary<string, Argument<string>> Env { get; init; } = Env ?? new Dictionary<string, Argument<string>>();
     public IReadOnlyDictionary<string, Argument<string>> Labels { get; init; } = Labels ?? new Dictionary<string, Argument<string>>();
     public IReadOnlyDictionary<string, ContainerMount> Mounts { get; init; } = Mounts ?? new Dictionary<string, ContainerMount>();
@@ -60,6 +62,7 @@ public record Container(
             MountDockerSocket = MountDockerSocket || contract.MountDockerSocket,
             Network = OnlyOne(Network, contract.Network),
             Command = Command.Merge(contract.Command),
+            NetworkAliases = NetworkAliases.Concat(contract.NetworkAliases),
             Env = MergeDictionaries(Env, contract.Env),
             Labels = MergeDictionaries(Labels, contract.Labels),
             Mounts = MergeDictionaries(Mounts, contract.Mounts)

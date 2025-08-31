@@ -27,6 +27,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
                     ["com.docker.compose.project"] = context.Prefix,
                     ["com.docker.compose.service"] = context.Name
                 },
+                NetworkAliases = context.Name == "" ? [] : [context.Name],
                 Handler = this,
                 DependsOn =
                 [
@@ -79,7 +80,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
                     {
                         network.NetworkName, new EndpointSettings
                         {
-                            Aliases = contract.Name == "" ? Array.Empty<string>() : new List<string> { contract.Name }
+                            Aliases = [..contract.NetworkAliases?.Distinct() ?? []]
                         }
                     }
                 }
