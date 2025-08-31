@@ -4,13 +4,13 @@ namespace Frierun.Server.Handlers.Docker;
 
 public class PortEndpointHandler(Application application) : Handler<PortEndpoint>(application)
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(PortEndpoint contract, ApplicationContext context)
+    public override IEnumerable<ContractList> Initialize(PortEndpoint contract, ApplicationContext context)
     {
         if (contract.Port == 0)
         {
             yield break;
         }
-        
+
         if (contract.ExternalPort != 0)
         {
             if (State.Contracts.OfType<PortEndpoint>()
@@ -24,7 +24,7 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
             var port = contract.Port;
 
             while (State.Contracts.OfType<PortEndpoint>()
-                       .Any(endpoint => endpoint.Port == port && endpoint.Protocol == contract.Protocol)
+                   .Any(endpoint => endpoint.Port == port && endpoint.Protocol == contract.Protocol)
                   )
             {
                 port += 1000;
@@ -36,8 +36,9 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
 
             contract = contract with { ExternalPort = port };
         }
-        
-        yield return new ContractInitializeResult(
+
+        yield return
+        [
             contract with
             {
                 // TODO: fill the correct ip of the host
@@ -45,12 +46,10 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
                 Handler = this,
                 DependsOn = [contract.Container]
             },
-            [
-                new Container(contract.Container.Name)
-                {
-                    HandlerApplication = Application?.Name,
-                }
-            ]
-        );
+            new Container(contract.Container.Name)
+            {
+                HandlerApplication = Application?.Name,
+            }
+        ];
     }
 }

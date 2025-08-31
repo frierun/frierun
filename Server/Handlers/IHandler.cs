@@ -14,7 +14,7 @@ public interface IHandler
     /// <summary>
     /// Returns all possible ways to initialize a contract
     /// </summary>
-    public IEnumerable<ContractInitializeResult> Initialize(Contract contract, ApplicationContext context);
+    public IEnumerable<ContractList> Initialize(Contract contract, ApplicationContext context);
 
     /// <summary>
     /// Installs the contract

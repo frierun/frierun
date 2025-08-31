@@ -5,9 +5,10 @@ namespace Frierun.Server.Handlers.Base;
 
 public class CloudflareTunnelHandler : Handler<CloudflareTunnel>
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(CloudflareTunnel contract, ApplicationContext context)
+    public override IEnumerable<ContractList> Initialize(CloudflareTunnel contract, ApplicationContext context)
     {
-        yield return new ContractInitializeResult(
+        yield return
+        [
             contract with
             {
                 Handler = this,
@@ -17,25 +18,23 @@ public class CloudflareTunnelHandler : Handler<CloudflareTunnel>
                 ),
                 DependsOn = [contract.CloudflareApiConnection],
             },
-            [
-                new Container(
-                    Name: contract.Container.Name,
-                    ImageName: "cloudflare/cloudflared:latest"
-                )
-                {
-                    Command = new Argument<IEnumerable<string>>(plan =>
-                        [
-                            "tunnel",
-                            "--no-autoupdate",
-                            "run",
-                            "--token",
-                            ((CloudflareTunnel)plan.GetContract(contract)).Token ?? ""
-                        ]
-                    ),
-                    DependsOn = [contract]
-                }
-            ]
-        );
+            new Container(
+                Name: contract.Container.Name,
+                ImageName: "cloudflare/cloudflared:latest"
+            )
+            {
+                Command = new Argument<IEnumerable<string>>(plan =>
+                    [
+                        "tunnel",
+                        "--no-autoupdate",
+                        "run",
+                        "--token",
+                        ((CloudflareTunnel)plan.GetContract(contract)).Token ?? ""
+                    ]
+                ),
+                DependsOn = [contract]
+            }
+        ];
     }
 
     public override CloudflareTunnel Install(CloudflareTunnel contract, ExecutionPlan plan)

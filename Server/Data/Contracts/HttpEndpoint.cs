@@ -44,6 +44,7 @@ public record HttpEndpoint(
             ResultSsl = ResultSsl.Merge(contract.ResultSsl),
             ResultHost = ResultHost.Merge(contract.ResultHost),
             ResultPort = ResultPort.Merge(contract.ResultPort),
+            TraefikRouterName = OnlyOne(TraefikRouterName, contract.TraefikRouterName),
             NetworkName = OnlyOne(NetworkName, contract.NetworkName),
             CloudflareZoneId = OnlyOne(CloudflareZoneId, contract.CloudflareZoneId)
         };

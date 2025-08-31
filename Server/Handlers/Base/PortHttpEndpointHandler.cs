@@ -4,26 +4,26 @@ namespace Frierun.Server.Handlers.Base;
 
 public class PortHttpEndpointHandler : Handler<HttpEndpoint>
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, ApplicationContext context)
+    public override IEnumerable<ContractList> Initialize(HttpEndpoint contract, ApplicationContext context)
     {
         var portEndpoint = CreatePortEndpoint(contract);
         var portEndpointId = portEndpoint.Id;
-        yield return new ContractInitializeResult(
+        yield return
+        [
             contract with
             {
                 ResultSsl = false,
                 ResultHost = new Argument<string>(plan => plan.GetContract<PortEndpoint>(portEndpointId).ExternalIp),
                 ResultPort = new Argument<int>(plan => plan.GetContract<PortEndpoint>(portEndpointId).ExternalPort),
                 Handler = this,
-                DependsOn = [
+                DependsOn =
+                [
                     portEndpointId,
                     contract.Container
                 ],
             },
-            [
-                portEndpoint
-            ]
-        );
+            portEndpoint
+        ];
     }
 
     private static PortEndpoint CreatePortEndpoint(HttpEndpoint contract)

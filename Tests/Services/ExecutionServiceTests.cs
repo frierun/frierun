@@ -71,7 +71,7 @@ public class ExecutionServiceTests : BaseTests
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         handler
             .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
-            .Returns([new ContractInitializeResult(contract with { Handler = handler }, [unknownContract])]);
+            .Returns([[contract with { Handler = handler }, unknownContract]]);
 
         Assert.Throws<HandlerNotFoundException>(() => Service.Create(package));
     }
@@ -85,7 +85,7 @@ public class ExecutionServiceTests : BaseTests
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         handler
             .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
-            .Returns([new ContractInitializeResult(contract with { Handler = handler })]);
+            .Returns([[contract with { Handler = handler }]]);
 
         var plan = Service.Create(package);
 
@@ -102,11 +102,12 @@ public class ExecutionServiceTests : BaseTests
     {
         var handler = Mock<Handler<Contract1>, IHandler>([null]);
 
-        var contract = new Contract1();
-        var package = Factory<Package>().Generate() with { Contracts = [contract] };
+        var contract1 = new Contract1("contract1") { Handler = handler };
+        var contract2 = new Contract1("contract2") { Handler = handler };
+        var package = Factory<Package>().Generate() with { Contracts = [contract1] };
         handler
             .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
-            .Returns([new ContractInitializeResult(contract with { Handler = handler }, [contract])]);
+            .Returns([[contract1, contract2]]);
 
         Assert.Throws<Exception>(() => Service.Create(package));
     }
@@ -121,14 +122,24 @@ public class ExecutionServiceTests : BaseTests
         var knownContract = new Contract1("second");
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         handler
-            .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
+            .Initialize(contract, Arg.Any<ApplicationContext>())
             .Returns(info =>
                 [
-                    new ContractInitializeResult(info.Arg<Contract1>() with { Handler = handler }, [unknownContract]),
-                    new ContractInitializeResult(
+                    [info.Arg<Contract1>() with { Handler = handler }, unknownContract],
+                    [
                         info.Arg<Contract1>() with { Handler = handler },
-                        info.Arg<Contract1>() == contract ? [knownContract] : []
-                    )
+                        knownContract
+                    ]
+                ]
+            );
+        handler
+            .Initialize(Arg.Is<Contract1>(arg => arg != contract), Arg.Any<ApplicationContext>())
+            .Returns(info =>
+                [
+                    [info.Arg<Contract1>() with { Handler = handler }, unknownContract],
+                    [
+                        info.Arg<Contract1>() with { Handler = handler },
+                    ]
                 ]
             );
 
@@ -153,21 +164,15 @@ public class ExecutionServiceTests : BaseTests
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         handler
             .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
-            .Returns(info =>
-                [
-                    new ContractInitializeResult(info.Arg<Contract1>() with { Handler = handler }, [unknownContract]),
-                ]
-            );
+            .Returns(info => [[info.Arg<Contract1>() with { Handler = handler }, unknownContract]]);
+
         handler2
-            .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
-            .Returns(info =>
-                [
-                    new ContractInitializeResult(
-                        info.Arg<Contract1>() with { Handler = handler2 },
-                        info.Arg<Contract1>() == contract ? [knownContract] : []
-                    )
-                ]
-            );
+            .Initialize(contract, Arg.Any<ApplicationContext>())
+            .Returns(info => [[info.Arg<Contract1>() with { Handler = handler2 }, knownContract]]);
+
+        handler2
+            .Initialize(Arg.Is<Contract1>(arg => arg != contract), Arg.Any<ApplicationContext>())
+            .Returns(info => [[info.Arg<Contract1>() with { Handler = handler2 }]]);
 
         var plan = Service.Create(package);
 
@@ -213,7 +218,8 @@ public class ExecutionServiceTests : BaseTests
                             [
                                 container with
                                 {
-                                    Env = new Dictionary<string, Argument<string>> { { "key", "{{Parameter:Test:Value}}" } }
+                                    Env = new Dictionary<string, Argument<string>>
+                                        { { "key", "{{Parameter:Test:Value}}" } }
                                 }
                             ]
                         )

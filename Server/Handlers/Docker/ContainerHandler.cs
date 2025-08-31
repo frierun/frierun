@@ -12,9 +12,10 @@ public class ContainerHandler(Application application, DockerService dockerServi
     private readonly DockerApiConnection _dockerApiConnection =
         application.Contracts.OfType<DockerApiConnection>().Single();
 
-    public override IEnumerable<ContractInitializeResult> Initialize(Container contract, ApplicationContext context)
+    public override IEnumerable<ContractList> Initialize(Container contract, ApplicationContext context)
     {
-        yield return new ContractInitializeResult(
+        yield return
+        [
             contract with
             {
                 ContainerName = contract.ContainerName ?? FindUniqueName(
@@ -33,18 +34,16 @@ public class ContainerHandler(Application application, DockerService dockerServi
                     ..contract.Mounts.Values.Select(mount => mount.Volume)
                 ]
             },
-            [
-                new Network(contract.Network.Name)
+            new Network(contract.Network.Name)
+            {
+                HandlerApplication = Application?.Name,
+            },
+            ..contract.Mounts.Values.Select(mount => new Volume(mount.Volume.Name)
                 {
                     HandlerApplication = Application?.Name,
-                },
-                ..contract.Mounts.Values.Select(mount => new Volume(mount.Volume.Name)
-                    {
-                        HandlerApplication = Application?.Name,
-                    }
-                ),
-            ]
-        );
+                }
+            )
+        ];
     }
 
     public override Container Install(Container contract, ExecutionPlan plan)

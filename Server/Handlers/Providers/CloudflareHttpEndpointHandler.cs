@@ -10,7 +10,7 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
     private readonly Container _container = application.Contracts.OfType<Container>().Single();
     private readonly CloudflareTunnel _tunnel = application.Contracts.OfType<CloudflareTunnel>().Single();
 
-    public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, ApplicationContext context)
+    public override IEnumerable<ContractList> Initialize(HttpEndpoint contract, ApplicationContext context)
     {
         var zones = client.GetZones();
         (string id, string name) zone;
@@ -51,7 +51,8 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
             }
         }
 
-        yield return new ContractInitializeResult(
+        yield return
+        [
             contract with
             {
                 Handler = this,
@@ -60,7 +61,7 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
                 CloudflareZoneId = zone.id,
                 DependsOn = [contract.Container],
             }
-        );
+        ];
     }
 
     public override HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)

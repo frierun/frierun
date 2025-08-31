@@ -39,8 +39,8 @@ public class ContainerHandlerTests : BaseTests
         };
         var handler = Handler<ContainerHandler>(_udocker);
         var result = handler.Initialize(container, new ApplicationContext("", "")).Single();
-        var daemon = result.AdditionalContracts.OfType<Daemon>().Single();
-        container = (Container)container.Merge(result.Contract);
+        var daemon = result.Values.OfType<Daemon>().Single();
+        container = (Container)container.Merge(result[container.Id]);
         var plan = new ExecutionPlan(
             new Dictionary<ContractId, Contract>
             {
@@ -73,8 +73,8 @@ public class ContainerHandlerTests : BaseTests
         };
         var handler = Handler<ContainerHandler>(_udocker);
         var result = handler.Initialize(container, new ApplicationContext("", "")).Single();
-        var daemon = result.AdditionalContracts.OfType<Daemon>().Single();
-        container = (Container)container.Merge(result.Contract);
+        var daemon = result.Values.OfType<Daemon>().Single();
+        container = (Container)container.Merge(result[container.Id]);
         var plan = new ExecutionPlan(
             new Dictionary<ContractId, Contract>
             {

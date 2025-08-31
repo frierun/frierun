@@ -11,9 +11,10 @@ public class DaemonHandler(Application application)
     private const string DaemonsPath = PrefixPath + "/var/service";
     private readonly SshConnection _connection = application.Contracts.OfType<SshConnection>().Single();
 
-    public override IEnumerable<ContractInitializeResult> Initialize(Daemon contract, ApplicationContext context)
+    public override IEnumerable<ContractList> Initialize(Daemon contract, ApplicationContext context)
     {
-        yield return new ContractInitializeResult(
+        yield return
+        [
             contract with
             {
                 DaemonName = contract.DaemonName ?? FindUniqueName(
@@ -22,7 +23,7 @@ public class DaemonHandler(Application application)
                 ),
                 Handler = this
             }
-        );
+        ];
     }
 
     public override Daemon Install(Daemon contract, ExecutionPlan plan)

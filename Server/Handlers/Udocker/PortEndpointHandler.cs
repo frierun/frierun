@@ -5,14 +5,14 @@ namespace Frierun.Server.Handlers.Udocker;
 public class PortEndpointHandler(Application application) : Handler<PortEndpoint>(application)
 {
     private readonly SshConnection _connection = application.Contracts.OfType<SshConnection>().Single();
-    
-    public override IEnumerable<ContractInitializeResult> Initialize(PortEndpoint contract, ApplicationContext context)
+
+    public override IEnumerable<ContractList> Initialize(PortEndpoint contract, ApplicationContext context)
     {
         if (contract.Port == 0)
         {
             yield break;
         }
-        
+
         if (contract.ExternalPort is > 0 and < 1024)
         {
             yield break;
@@ -45,19 +45,18 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
             contract = contract with { ExternalPort = port };
         }
 
-        yield return new ContractInitializeResult(
+        yield return
+        [
             contract with
             {
                 ExternalIp = _connection.Host,
                 Handler = this,
                 DependsOn = [contract.Container]
             },
-            [
-                new Container(contract.Container.Name)
-                {
-                    HandlerApplication = Application?.Name,
-                }
-            ]
-        );
+            new Container(contract.Container.Name)
+            {
+                HandlerApplication = Application?.Name,
+            }
+        ];
     }
 }

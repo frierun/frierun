@@ -8,7 +8,7 @@ public class ContainerHandler(Application application)
 {
     private readonly SshConnection _connection = application.Contracts.OfType<SshConnection>().Single();
 
-    public override IEnumerable<ContractInitializeResult> Initialize(Container contract, ApplicationContext context)
+    public override IEnumerable<ContractList> Initialize(Container contract, ApplicationContext context)
     {
         if (contract.MountDockerSocket)
         {
@@ -16,7 +16,8 @@ public class ContainerHandler(Application application)
         }
 
         var contractId = contract.Id;
-        yield return new ContractInitializeResult(
+        yield return
+        [
             contract with
             {
                 ContainerName = contract.ContainerName ?? FindUniqueName(
@@ -31,35 +32,33 @@ public class ContainerHandler(Application application)
                     ..contract.Mounts.Values.Select(mount => mount.Volume)
                 ]
             },
-            [
-                new Daemon(context.Name)
-                {
-                    HandlerApplication = Application?.Name,
-                    Command = new Argument<IEnumerable<string>>(
-                        new ArgumentResolver<ContractId, IEnumerable<string>>(
-                            contractId,
-                            GetCommands
-                        )
-                    ),
-                    PreCommands = new Argument<IEnumerable<IEnumerable<string>>>(
-                        new ArgumentResolver<ContractId, IEnumerable<IEnumerable<string>>>(
-                            contractId,
-                            GetPreCommands
-                        )
-                    ),
-                    DependsOn = [..contract.Mounts.Values.Select(mount => mount.Volume)]
-                },
-                new Network(contract.Network.Name)
+            new Daemon(context.Name)
+            {
+                HandlerApplication = Application?.Name,
+                Command = new Argument<IEnumerable<string>>(
+                    new ArgumentResolver<ContractId, IEnumerable<string>>(
+                        contractId,
+                        GetCommands
+                    )
+                ),
+                PreCommands = new Argument<IEnumerable<IEnumerable<string>>>(
+                    new ArgumentResolver<ContractId, IEnumerable<IEnumerable<string>>>(
+                        contractId,
+                        GetPreCommands
+                    )
+                ),
+                DependsOn = [..contract.Mounts.Values.Select(mount => mount.Volume)]
+            },
+            new Network(contract.Network.Name)
+            {
+                HandlerApplication = Application?.Name
+            },
+            ..contract.Mounts.Values.Select(mount => new Volume(mount.Volume.Name)
                 {
                     HandlerApplication = Application?.Name
-                },
-                ..contract.Mounts.Values.Select(mount => new Volume(mount.Volume.Name)
-                    {
-                        HandlerApplication = Application?.Name
-                    }
-                )
-            ]
-        );
+                }
+            )
+        ];
     }
 
     /// <summary>

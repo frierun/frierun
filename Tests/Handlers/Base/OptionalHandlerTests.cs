@@ -16,12 +16,13 @@ public class OptionalHandlerTests : BaseTests
         var result = handler.Initialize(contract, new ApplicationContext("", "prefix")).ToList();
 
         Assert.Equal(2, result.Count);
-        Assert.Equal(true, ((Optional)result[0].Contract).Value);
-        Assert.Single(result[0].AdditionalContracts);
-        Assert.Equal(container, result[0].AdditionalContracts.First());
 
-        Assert.Equal(false, ((Optional)result[1].Contract).Value);
-        Assert.Empty(result[1].AdditionalContracts);
+        Assert.Equal(true, ((Optional)result[0][contract.Id]).Value);
+        Assert.Equal(2, result[0].Count);
+        Assert.Equal(container, result[0][container.Id]);
+
+        Assert.Equal(false, ((Optional)result[1][contract.Id]).Value);
+        Assert.Single(result[1]);
     }
 
     [Fact]
@@ -34,9 +35,9 @@ public class OptionalHandlerTests : BaseTests
         var result = handler.Initialize(contract, new ApplicationContext("", "prefix")).ToList();
 
         Assert.Single(result);
-        Assert.Equal(true, ((Optional)result[0].Contract).Value);
-        Assert.Single(result[0].AdditionalContracts);
-        Assert.Equal(container, result[0].AdditionalContracts.First());
+        Assert.Equal(true, ((Optional)result[0][contract.Id]).Value);
+        Assert.Equal(2, result[0].Count);
+        Assert.Equal(container, result[0][container.Id]);
     }
     
     [Fact]
@@ -49,7 +50,7 @@ public class OptionalHandlerTests : BaseTests
         var result = handler.Initialize(contract, new ApplicationContext("", "prefix")).ToList();
 
         Assert.Single(result);
-        Assert.Equal(false, ((Optional)result[0].Contract).Value);
-        Assert.Empty(result[0].AdditionalContracts);
+        Assert.Equal(false, ((Optional)result[0][contract.Id]).Value);
+        Assert.Single(result[0]);        
     }    
 }

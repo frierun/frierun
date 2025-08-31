@@ -1,11 +1,7 @@
-﻿using System.Diagnostics;
-using Frierun.Server.Handlers;
-
-namespace Frierun.Server.Data;
+﻿namespace Frierun.Server.Data;
 
 public class DiscoveryGraph
 {
-    
     private readonly HashSet<ContractId> _toInitialize = [];
     private readonly HashSet<ContractId> _emptyContracts = [];
 
@@ -13,6 +9,7 @@ public class DiscoveryGraph
     /// Prevents infinite recursion during reinitialization
     /// </summary>
     private int _count;
+
     private const int MaxContracts = 1000;
 
     public Dictionary<ContractId, Contract> Contracts { get; } = new();
@@ -49,7 +46,7 @@ public class DiscoveryGraph
         }
 
         _count = 0;
-        
+
         // initialize empty contracts
         while (_emptyContracts.Count > 0)
         {
@@ -70,39 +67,25 @@ public class DiscoveryGraph
     /// Applies contract initialization result.
     /// </summary>
     /// <returns>True if the result is not conflicting with the graph</returns>
-    public bool Apply(ContractInitializeResult result)
+    public bool Apply(ContractId initializedContractId, ContractList result)
     {
-        Debug.Assert(result.Contract.Handler != null, "Initialized contract must have a handler");
-
         try
         {
-            var contract = result.Contract;
-            if (Contracts.TryGetValue(contract, out var initializedContract))
+            foreach (var contract in result.Values)
             {
-                contract = contract.Merge(initializedContract);
-            }
-
-            Contracts[contract] = contract;
-        }
-        catch (MergeException)
-        {
-            return false;
-        }
-
-        try
-        {
-            foreach (var additionalContract in result.AdditionalContracts)
-            {
-                if (Contracts.TryGetValue(additionalContract, out var initializedContract))
+                if (Contracts.TryGetValue(contract, out var oldContract))
                 {
-                    var contract = initializedContract.Merge(additionalContract);
-                    Contracts[contract] = contract;
+                    Contracts[contract] = oldContract.Merge(contract);
                 }
                 else
                 {
-                    Contracts[additionalContract] = additionalContract;
+                    Contracts[contract] = contract;
                 }
-                _toInitialize.Add(additionalContract);
+
+                if (contract.Id != initializedContractId)
+                {
+                    _toInitialize.Add(contract);
+                }
             }
         }
         catch (MergeException)
@@ -110,15 +93,16 @@ public class DiscoveryGraph
             return false;
         }
 
-        foreach (var contractId in result.Contract.DependsOn)
+        var initializedContract = result[initializedContractId];
+        foreach (var contractId in initializedContract.DependsOn)
         {
             if (!Contracts.ContainsKey(contractId))
             {
                 _emptyContracts.Add(contractId);
             }
         }
-        
-        foreach (var argument in result.Contract.GetArguments())
+
+        foreach (var argument in initializedContract.GetArguments())
         {
             foreach (var contractId in argument.RequiredContracts)
             {

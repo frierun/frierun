@@ -14,14 +14,15 @@ public class Handler<TContract>(Application? application = null) : IHandler
         return [];
     }
 
-    public virtual IEnumerable<ContractInitializeResult> Initialize(TContract contract, ApplicationContext context)
+    public virtual IEnumerable<ContractList> Initialize(TContract contract, ApplicationContext context)
     {
-        yield return new ContractInitializeResult(
+        yield return
+        [
             contract with
             {
                 Handler = this
             }
-        );
+        ];
     }
 
     public virtual TContract Install(TContract contract, ExecutionPlan plan)
@@ -41,9 +42,13 @@ public class Handler<TContract>(Application? application = null) : IHandler
     }
 
     [DebuggerStepThrough]
-    IEnumerable<ContractInitializeResult> IHandler.Initialize(Contract contract, ApplicationContext context)
+    IEnumerable<ContractList> IHandler.Initialize(Contract contract, ApplicationContext context)
     {
-        return Initialize((TContract)contract, context);
+        foreach (var result in Initialize((TContract)contract, context))
+        {
+            Debug.Assert(result[contract.Id].Handler == this, "Initialized contract must have this handler");
+            yield return result;
+        }
     }
 
     [DebuggerStepThrough]

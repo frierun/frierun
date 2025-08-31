@@ -7,9 +7,10 @@ namespace Frierun.Server.Handlers.Docker;
 public class NetworkHandler(Application application, DockerService dockerService)
     : Handler<Network>(application)
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(Network contract, ApplicationContext context)
+    public override IEnumerable<ContractList> Initialize(Network contract, ApplicationContext context)
     {
-        yield return new ContractInitializeResult(
+        yield return
+        [
             contract with
             {
                 Handler = this,
@@ -18,7 +19,7 @@ public class NetworkHandler(Application application, DockerService dockerService
                     c => c.NetworkName
                 )
             }
-        );
+        ];
     }
 
     public override Network Install(Network contract, ExecutionPlan plan)

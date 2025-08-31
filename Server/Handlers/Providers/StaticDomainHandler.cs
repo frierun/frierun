@@ -16,7 +16,7 @@ public class StaticDomainHandler(Application application)
         .First(parameter => parameter.Name == "Internal")
         .Value == "Yes";
 
-    public override IEnumerable<ContractInitializeResult> Initialize(Domain contract, ApplicationContext context)
+    public override IEnumerable<ContractList> Initialize(Domain contract, ApplicationContext context)
     {
         if (contract.IsInternal != null && contract.IsInternal != _isInternal)
         {
@@ -34,13 +34,14 @@ public class StaticDomainHandler(Application application)
 
             if (!IsDomainExist(contract.Value))
             {
-                yield return new ContractInitializeResult(contract with { Handler = this, IsInternal = _isInternal });
+                yield return [contract with { Handler = this, IsInternal = _isInternal }];
             }
 
             yield break;
         }
-        
-        yield return new ContractInitializeResult(
+
+        yield return
+        [
             contract with
             {
                 Handler = this,
@@ -51,7 +52,7 @@ public class StaticDomainHandler(Application application)
                 ),
                 IsInternal = _isInternal
             }
-        );
+        ];
     }
 
     /// <summary>

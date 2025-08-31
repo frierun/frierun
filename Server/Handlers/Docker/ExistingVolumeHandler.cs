@@ -6,7 +6,7 @@ namespace Frierun.Server.Handlers.Docker;
 public class ExistingVolumeHandler(Application application, DockerService dockerService)
     : Handler<Volume>(application)
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(Volume contract, ApplicationContext context)
+    public override IEnumerable<ContractList> Initialize(Volume contract, ApplicationContext context)
     {
         if (contract.LocalPath != null)
         {
@@ -16,7 +16,7 @@ public class ExistingVolumeHandler(Application application, DockerService docker
         var volumeName = contract.VolumeName ?? State.Contracts
             .OfType<Volume>()
             .FirstOrDefault(volume => volume.VolumeName != null)?.VolumeName;
-        
+
         if (volumeName == null)
         {
             yield break;
@@ -27,13 +27,14 @@ public class ExistingVolumeHandler(Application application, DockerService docker
             yield break;
         }
 
-        yield return new ContractInitializeResult(
+        yield return
+        [
             contract with
             {
                 Handler = this,
                 VolumeName = volumeName
             }
-        );
+        ];
     }
 
     public override Volume Install(Volume contract, ExecutionPlan plan)

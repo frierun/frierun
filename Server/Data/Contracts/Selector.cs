@@ -3,7 +3,7 @@ using static Frierun.Server.Data.Merger;
 
 namespace Frierun.Server.Data;
 
-public record SelectorOption(string Name, IReadOnlyList<Contract> Contracts);
+public record SelectorOption(string Name, IReadOnlyList<Contract>? Contracts);
 
 public record Selector(
     string Name,

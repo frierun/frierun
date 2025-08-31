@@ -18,12 +18,13 @@ public class NetworkHandlerTests : BaseTests
         var network = application.Contracts.OfType<Network>().Single();
         Assert.True(network.Installed);
 
-        var result = Handler<NetworkHandler>(docker).Initialize(
-            new Network(""), 
-            new ApplicationContext("", network.NetworkName)
-        );
+        var result = Handler<NetworkHandler>(docker)
+            .Initialize(
+                new Network(""),
+                new ApplicationContext("", network.NetworkName)
+            );
 
-        var dockerNetwork = (Network)result.Single().Contract;
+        var dockerNetwork = (Network)result.Single()[network.Id];
         Assert.Equal(network.NetworkName, dockerNetwork.NetworkName);
     }
 }

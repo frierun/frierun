@@ -7,15 +7,16 @@ namespace Frierun.Server.Handlers.Docker;
 
 public class FileHandler(Application application, DockerService dockerService) : Handler<File>(application)
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(File contract, ApplicationContext context)
+    public override IEnumerable<ContractList> Initialize(File contract, ApplicationContext context)
     {
-        yield return new ContractInitializeResult(
+        yield return
+        [
             contract with
             {
                 Handler = this,
                 DependsOn = contract.DependsOn.Append(contract.Volume)
             }
-        );
+        ];
     }
 
     public override File Install(File contract, ExecutionPlan plan)

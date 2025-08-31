@@ -12,10 +12,7 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
     private readonly string _rootPassword = application.Contracts.OfType<Password>().Single().Value ??
                                             throw new Exception("Root password not found");
 
-    public override IEnumerable<ContractInitializeResult> Initialize(
-        Postgresql contract,
-        ApplicationContext context
-    )
+    public override IEnumerable<ContractList> Initialize(Postgresql contract, ApplicationContext context)
     {
         if (contract.Admin)
         {
@@ -29,7 +26,7 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
                 yield break;
             }
 
-            yield return new ContractInitializeResult(
+            yield return [
                 contract with
                 {
                     Handler = this,
@@ -38,10 +35,10 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
                     Host = _container.ContainerName,
                     DependsOn = contract.DependsOn.Append(contract.Network)
                 }
-            );
+            ];
         }
 
-        yield return new ContractInitializeResult(
+        yield return [
             contract with
             {
                 Handler = this,
@@ -62,7 +59,7 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
                 Host = _container.ContainerName,
                 DependsOn = contract.DependsOn.Append(contract.Network)
             }
-        );
+        ];
     }
 
     public override Postgresql Install(Postgresql contract, ExecutionPlan plan)
@@ -73,7 +70,7 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
 
         var network = plan.GetContract(contract.Network);
         Debug.Assert(network.Installed);
-        
+
         if (contract.NetworkName != null && contract.NetworkName != network.NetworkName)
         {
             throw new Exception("NetworkName cannot be set");

@@ -29,6 +29,7 @@ public record Postgresql(
             Username = OnlyOne(Username, contract.Username),
             Password = OnlyOne(Password, contract.Password),
             Host = OnlyOne(Host, contract.Host),
+            Database = OnlyOne(Database, contract.Database),
             NetworkName = OnlyOne(NetworkName, contract.NetworkName),
             Admin = Admin || contract.Admin
         };

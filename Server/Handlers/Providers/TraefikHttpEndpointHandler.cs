@@ -18,14 +18,15 @@ public class TraefikHttpEndpointHandler(Application application)
         .FirstOrDefault(endpoint => endpoint.Name == "WebSecure")
         ?.ExternalPort ?? 0;
 
-    public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, ApplicationContext context)
+    public override IEnumerable<ContractList> Initialize(HttpEndpoint contract, ApplicationContext context)
     {
         var routerName = contract.TraefikRouterName ?? FindUniqueName(
             context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
             c => c.TraefikRouterName
         );
 
-        yield return new ContractInitializeResult(
+        yield return
+        [
             contract with
             {
                 TraefikRouterName = routerName,
@@ -43,29 +44,27 @@ public class TraefikHttpEndpointHandler(Application application)
                     contract.Domain
                 ]
             },
-            [
-                new Container(contract.Container.Name)
+            new Container(contract.Container.Name)
+            {
+                Labels = new Dictionary<string, Argument<string>>
                 {
-                    Labels = new Dictionary<string, Argument<string>>
-                    {
-                        ["traefik.enable"] = "true",
-                        [$"traefik.http.routers.{routerName}.rule"] = new(plan =>
-                            $"Host(`{plan.GetContract(contract.Domain).Value}`)"
-                        ),
-                        [$"traefik.http.services.{routerName}.loadbalancer.server.port"] = contract.Port.ToString(),
-                        [$"traefik.http.routers.{routerName}.tls"] = new(plan =>
-                            GetCertificateResolver(plan.GetContract(contract.Domain)) == null
-                                ? "false"
-                                : "true"
-                        ),
-                        [$"traefik.http.routers.{routerName}.tls.certresolver"] = new(plan =>
-                            GetCertificateResolver(plan.GetContract(contract.Domain))
-                        )
-                    },
-                    DependsOn = [contract.Domain]
-                }
-            ]
-        );
+                    ["traefik.enable"] = "true",
+                    [$"traefik.http.routers.{routerName}.rule"] = new(plan =>
+                        $"Host(`{plan.GetContract(contract.Domain).Value}`)"
+                    ),
+                    [$"traefik.http.services.{routerName}.loadbalancer.server.port"] = contract.Port.ToString(),
+                    [$"traefik.http.routers.{routerName}.tls"] = new(plan =>
+                        GetCertificateResolver(plan.GetContract(contract.Domain)) == null
+                            ? "false"
+                            : "true"
+                    ),
+                    [$"traefik.http.routers.{routerName}.tls.certresolver"] = new(plan =>
+                        GetCertificateResolver(plan.GetContract(contract.Domain))
+                    )
+                },
+                DependsOn = [contract.Domain]
+            }
+        ];
     }
 
     public override HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)

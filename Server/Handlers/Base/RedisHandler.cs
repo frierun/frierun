@@ -4,7 +4,7 @@ namespace Frierun.Server.Handlers.Base;
 
 public class RedisHandler : Handler<Redis>
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(Redis contract, ApplicationContext context)
+    public override IEnumerable<ContractList> Initialize(Redis contract, ApplicationContext context)
     {
         var name = "redis" + (string.IsNullOrEmpty(context.Name) ? "" : $"-{context.Name}");
         var container = contract.Container ?? new ContractId<Container>(name);
@@ -16,22 +16,21 @@ public class RedisHandler : Handler<Redis>
             contract = contract with { Host = new Argument<string>(plan => plan.GetContract(container).ContainerName) };
         }
 
-        yield return new ContractInitializeResult(
+        yield return
+        [
             contract with
             {
                 Handler = this,
                 DependsOn = [container],
                 Container = container,
             },
-            [
-                new Container(
-                    Name: container.Name,
-                    ImageName: "redis:7",
-                    Network: contract.Network,
-                    ContainerName: contract.Host,
-                    Mounts: new Dictionary<string, ContainerMount> { { "/data", new ContainerMount(Volume: volume) } }
-                )
-            ]
-        );
+            new Container(
+                Name: container.Name,
+                ImageName: "redis:7",
+                Network: contract.Network,
+                ContainerName: contract.Host,
+                Mounts: new Dictionary<string, ContainerMount> { { "/data", new ContainerMount(Volume: volume) } }
+            )
+        ];
     }
 }
