@@ -5,14 +5,14 @@ namespace Frierun.Server.Data;
 
 public record Optional(
     string Name,
-    IReadOnlyList<Contract>? Contracts = null,
+    ContractList? Contracts = null,
     bool? Value = null
 ) : Contract(Name ?? "")
 {
     [MemberNotNullWhen(true, nameof(Value))]
     public override bool Installed { get; init; }
     
-    public IReadOnlyList<Contract> Contracts { get; init; } = Contracts ?? [];
+    public ContractList Contracts { get; init; } = Contracts ?? [];
     
     public override Contract Merge(Contract other)
     {

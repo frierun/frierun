@@ -49,16 +49,16 @@ public class ContainerHandlerTests : BaseTests
             },
             []
         );
-        
+
         Assert.False(container.ImageName.Resolved);
         Assert.False(container.Env.Values.Single().Resolved);
-        
+
         daemon.Command.Resolve(plan);
-        
+
         Assert.True(container.ImageName.Resolved);
         Assert.True(container.Env.Values.Single().Resolved);
     }
-    
+
     [Fact]
     public void GetPreCommands_Container_ResolvesAllContainerArguments()
     {
@@ -83,16 +83,16 @@ public class ContainerHandlerTests : BaseTests
             },
             []
         );
-        
+
         Assert.False(container.ImageName.Resolved);
         Assert.False(container.Env.Values.Single().Resolved);
-        
+
         daemon.PreCommands.Resolve(plan);
-        
+
         Assert.True(container.ImageName.Resolved);
         Assert.True(container.Env.Values.Single().Resolved);
     }
-    
+
 
     [Fact]
     public void Install_Container_CreatesDaemon()
@@ -226,16 +226,15 @@ public class ContainerHandlerTests : BaseTests
                     {
                         new(
                             "one",
-                            new List<Contract>
-                            {
-                                new Container(container.Name) with
+                            [
+                                new Container(container.Name)
                                 {
                                     Env = new Dictionary<string, Argument<string>>
                                     {
                                         { name, value }
                                     }
                                 }
-                            }
+                            ]
                         )
                     }
                 )
