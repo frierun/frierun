@@ -6,33 +6,24 @@ namespace Frierun.Tests.Handlers.Docker;
 
 public class PortEndpointHandlerTests : BaseTests
 {
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void Install_ContainerWithPortEndpoint_InstallContainerFirst(bool reverseOrder)
+    [Fact]
+    public void Install_ContainerWithPortEndpoint_DependsOnContainer()
     {
         InstallPackage("docker");
         var container = Factory<Container>().Generate();
-        List<Contract> contracts =
-        [
-            container,
-            Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Id) }
-        ];
-        if (reverseOrder)
+        var package = Factory<Package>().Generate() with
         {
-            contracts.Reverse();
-        }
-
-        var package = Factory<Package>().Generate() with { Contracts = [..contracts] };
+            Contracts =
+            [
+                container,
+                Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Id) }
+            ]
+        };
 
         var application = InstallPackage(package);
 
-        var installedContainers = application.Contracts.ToList();
-        var endpointIndex = installedContainers.FindIndex(r => r is PortEndpoint);
-        var containerIndex = installedContainers.FindIndex(r => r is Container);
-        Assert.NotEqual(-1, endpointIndex);
-        Assert.NotEqual(-1, containerIndex);
-        Assert.True(containerIndex < endpointIndex);
+        var portEndpoint = application.GetContracts<PortEndpoint>().Single();
+        Assert.Contains(container.Id, portEndpoint.DependsOn);
     }
 
     [Fact]

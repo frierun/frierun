@@ -23,32 +23,25 @@ public class PortHttpEndpointHandlerTests : BaseTests
         Assert.NotNull(resultHttpEndpoint.ResultHost.Value);
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void Install_ContainerWithHttpEndpoint_InstallContainerFirst(bool reverseOrder)
+    [Fact]
+    public void Install_ContainerWithHttpEndpoint_DependsOnPortEndpoint()
     {
         InstallPackage("docker");
         var container = Factory<Container>().Generate();
-        List<Contract> contracts =
-        [
-            container,
-            Factory<HttpEndpoint>().Generate() with { Container = new ContractId<Container>(container.Id) }
-        ];
-        if (reverseOrder)
-        {
-            contracts.Reverse();
-        }
 
-        var package = Factory<Package>().Generate() with { Contracts = [..contracts] };
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts =
+            [
+                container,
+                Factory<HttpEndpoint>().Generate() with { Container = new ContractId<Container>(container.Id) }
+            ]
+        };
 
         var application = InstallPackage(package);
 
-        var installedContracts = application.Contracts.ToList();
-        var endpointIndex = installedContracts.FindIndex(r => r is PortEndpoint);
-        var containerIndex = installedContracts.FindIndex(r => r is Container);
-        Assert.NotEqual(-1, endpointIndex);
-        Assert.NotEqual(-1, containerIndex);
-        Assert.True(containerIndex < endpointIndex);
+        var httpEndpoint = application.GetContracts<HttpEndpoint>().Single();
+        var portEndpoint = application.GetContracts<PortEndpoint>().Single();
+        Assert.Contains(portEndpoint.Id, httpEndpoint.DependsOn);
     }
 }
