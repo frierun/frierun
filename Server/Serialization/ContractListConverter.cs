@@ -15,7 +15,7 @@ public class ContractListConverter : JsonConverter<ContractList>
             return null;
         }
 
-        return [..list];
+        return new ContractList(list);
     }
 
     public override void Write(Utf8JsonWriter writer, ContractList value, JsonSerializerOptions options)

@@ -14,9 +14,16 @@ public class ContainerHandler(Application application, DockerService dockerServi
 
     public override IEnumerable<ContractList> Initialize(Container contract, ApplicationContext context)
     {
-        yield return
-        [
-            contract with
+        yield return new ContractList(
+            contract.Mounts.Values
+                .Select(mount => new Volume(mount.Volume.Name)
+                    {
+                        HandlerApplication = Application?.Name,
+                    }
+                )
+        )
+        {
+            [context] = contract with
             {
                 ContainerName = contract.ContainerName ?? FindUniqueName(
                     context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
@@ -35,16 +42,11 @@ public class ContainerHandler(Application application, DockerService dockerServi
                     ..contract.Mounts.Values.Select(mount => mount.Volume)
                 ]
             },
-            new Network(contract.Network.Name)
+            [contract.Network] = new Network(contract.Network.Name)
             {
                 HandlerApplication = Application?.Name,
-            },
-            ..contract.Mounts.Values.Select(mount => new Volume(mount.Volume.Name)
-                {
-                    HandlerApplication = Application?.Name,
-                }
-            )
-        ];
+            }
+        };
     }
 
     public override Container Install(Container contract, ExecutionPlan plan)

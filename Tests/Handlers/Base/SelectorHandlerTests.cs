@@ -21,7 +21,7 @@ public class SelectorHandlerTests : BaseTests
         );
         var handler = Handler<SelectorHandler>();
 
-        var result = handler.Initialize(selector, new ApplicationContext("", "prefix")).ToList();
+        var result = handler.Initialize(selector, new ApplicationContext(selector.Id.Name, "prefix")).ToList();
 
         Assert.Single(result);
         Assert.Equal("option2", ((Selector)result[0][selector.Id]).Value);
@@ -42,13 +42,13 @@ public class SelectorHandlerTests : BaseTests
         );
         var handler = Handler<SelectorHandler>();
 
-        var result = handler.Initialize(selector, new ApplicationContext("", "prefix")).ToList();
+        var result = handler.Initialize(selector, new ApplicationContext(selector.Id.Name, "prefix")).ToList();
 
         Assert.Equal(2, result.Count);
         Assert.Equal("option1", ((Selector)result[0][selector.Id]).Value);
         Assert.Equal(2, result[0].Count);
         Assert.Equal(container1, result[0][container1.Id]);
-        
+
         Assert.Equal("option2", ((Selector)result[1][selector.Id]).Value);
         Assert.Equal(2, result[1].Count);
         Assert.Equal(container2, result[1][container2.Id]);

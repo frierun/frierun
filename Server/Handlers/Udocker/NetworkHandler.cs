@@ -13,14 +13,14 @@ public class NetworkHandler(Application application) : Handler<Network>(applicat
             yield break;
         }
 
-        yield return
-        [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
                 NetworkName = "udocker"
             }
-        ];
+        };
     }
 
     public override Network Install(Network contract, ExecutionPlan plan)

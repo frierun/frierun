@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using Frierun.Server.Handlers;
 
 namespace Frierun.Server.Data;
 
@@ -28,14 +29,18 @@ public class ContractList : IReadOnlyDictionary<ContractId, Contract>, IEnumerab
             new Dictionary<ContractId, Contract>(
                 contracts.Select(c => new KeyValuePair<ContractId, Contract>(c.Id, c))
             );
-        ;
+    }
+
+    public ContractList(ContractList contracts)
+    {
+        _contracts = new Dictionary<ContractId, Contract>(contracts);
     }
 
     public void Add(Contract contract)
     {
         _contracts.Add(contract.Id, contract);
     }
-
+    
     public IEnumerator<Contract> GetEnumerator()
     {
         return _contracts.Values.GetEnumerator();
@@ -63,8 +68,21 @@ public class ContractList : IReadOnlyDictionary<ContractId, Contract>, IEnumerab
         return _contracts.TryGetValue(key, out value);
     }
 
-    public Contract this[ContractId key] => _contracts[key];
-    //public Contract this[string type, string name] => _contracts[new ContractId(type, name)];
+    public Contract this[ContractId key]
+    {
+        get => _contracts[key];
+        init => _contracts[key] = value;
+    }
+    
+    public Contract this[ApplicationContext context]
+    {
+        init => _contracts[new ContractId(value.GetType().Name, context.Name)] = value;
+    }
+
+    public Contract this[string name]
+    {
+        init => _contracts[new ContractId(value.GetType().Name, name)] = value;
+    }
 
     public IEnumerable<ContractId> Keys => _contracts.Keys;
 

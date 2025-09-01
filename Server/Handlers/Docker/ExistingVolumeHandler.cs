@@ -27,14 +27,14 @@ public class ExistingVolumeHandler(Application application, DockerService docker
             yield break;
         }
 
-        yield return
-        [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
                 VolumeName = volumeName
             }
-        ];
+        };
     }
 
     public override Volume Install(Volume contract, ExecutionPlan plan)

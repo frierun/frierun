@@ -51,9 +51,9 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
             }
         }
 
-        yield return
-        [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
                 ResultSsl = true,
@@ -61,7 +61,7 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
                 CloudflareZoneId = zone.id,
                 DependsOn = [contract.Container],
             }
-        ];
+        };
     }
 
     public override HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)

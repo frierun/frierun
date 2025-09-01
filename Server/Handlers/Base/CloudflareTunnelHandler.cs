@@ -7,9 +7,9 @@ public class CloudflareTunnelHandler : Handler<CloudflareTunnel>
 {
     public override IEnumerable<ContractList> Initialize(CloudflareTunnel contract, ApplicationContext context)
     {
-        yield return
-        [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
                 TunnelName = contract.TunnelName ?? FindUniqueName(
@@ -18,11 +18,10 @@ public class CloudflareTunnelHandler : Handler<CloudflareTunnel>
                 ),
                 DependsOn = [contract.CloudflareApiConnection],
             },
-            new Container(
-                Name: contract.Container.Name,
-                ImageName: "cloudflare/cloudflared:latest"
-            )
+            [contract.Container] = new Container
             {
+                Name = contract.Container.Name,
+                ImageName = "cloudflare/cloudflared:latest",
                 Command = new Argument<IEnumerable<string>>(plan =>
                     [
                         "tunnel",
@@ -34,7 +33,7 @@ public class CloudflareTunnelHandler : Handler<CloudflareTunnel>
                 ),
                 DependsOn = [contract]
             }
-        ];
+        };
     }
 
     public override CloudflareTunnel Install(CloudflareTunnel contract, ExecutionPlan plan)

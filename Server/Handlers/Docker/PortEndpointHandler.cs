@@ -37,19 +37,19 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
             contract = contract with { ExternalPort = port };
         }
 
-        yield return
-        [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 // TODO: fill the correct ip of the host
                 ExternalIp = "127.0.0.1",
                 Handler = this,
                 DependsOn = [contract.Container]
             },
-            new Container(contract.Container.Name)
+            [contract.Container] = new Container(contract.Container.Name)
             {
                 HandlerApplication = Application?.Name,
             }
-        ];
+        };
     }
 }

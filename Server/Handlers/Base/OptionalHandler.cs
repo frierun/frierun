@@ -8,27 +8,26 @@ public class OptionalHandler : Handler<Optional>
     {
         if (contract.Value is null or true)
         {
-            yield return
-            [
-                contract with
+            yield return new ContractList(contract.Contracts)
+            {
+                [context] = contract with
                 {
                     Handler = this,
                     Value = true
                 },
-                ..contract.Contracts
-            ];
+            };
         }
 
         if (contract.Value is null or false)
         {
-            yield return
-            [
-                contract with
+            yield return new ContractList
+            {
+                [context] = contract with
                 {
                     Handler = this,
                     Value = false
                 }
-            ];
+            };
         }
     }
 }

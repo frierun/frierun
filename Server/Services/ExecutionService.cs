@@ -10,7 +10,7 @@ public class ExecutionService(
 )
 {
     private record StackItem(DiscoveryGraph Graph, ContractId ContractId, Queue<ContractList> Queue);
-    
+
     /// <summary>
     /// Creates an execution plan for the given package.
     /// </summary>
@@ -41,6 +41,7 @@ public class ExecutionService(
                 {
                     throw new HandlerNotFoundException(nextContract);
                 }
+
                 currentGraph = item.Graph;
 
                 if (currentGraph.Apply(item.ContractId, branch))
@@ -48,6 +49,7 @@ public class ExecutionService(
                     break;
                 }
             }
+
             (nextId, nextContract) = currentGraph.Next();
         }
 
@@ -55,7 +57,7 @@ public class ExecutionService(
             .SelectMany(item => item.Queue)
             .Select(result => result.Values.Single(contract => contract.Handler != null))
             .ToList();
-        
+
         return new ExecutionPlan(currentGraph.Contracts, alternatives);
     }
 
@@ -82,7 +84,7 @@ public class ExecutionService(
 
         return (item, branch);
     }
-    
+
     /// <summary>
     /// Gets the application name from the package.
     /// </summary>
@@ -114,15 +116,21 @@ public class ExecutionService(
     /// </summary>
     private IEnumerable<ContractList> DiscoverContract(Contract contract, string? prefix = null)
     {
-        var context = new ApplicationContext(contract.Name, prefix ?? "");
+        var context = new ApplicationContext(
+            contract.Name, 
+            prefix ?? ""
+        );
+        
         if (contract.Handler != null)
         {
             return contract.Handler.Initialize(contract, context);
         }
-        
+
         return handlerRegistry
             .GetHandlers(contract.GetType())
-            .Where(handler => contract.HandlerApplication == null || handler.Application?.Name == contract.HandlerApplication)
+            .Where(handler =>
+                contract.HandlerApplication == null || handler.Application?.Name == contract.HandlerApplication
+            )
             .SelectMany(handler => handler.Initialize(contract, context));
     }
 }

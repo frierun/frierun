@@ -32,15 +32,18 @@ public class StaticDomainHandler(Application application)
 
             if (!IsDomainExist(contract.Value))
             {
-                yield return [contract with { Handler = this, IsInternal = _isInternal }];
+                yield return new ContractList
+                {
+                    [context] = contract with { Handler = this, IsInternal = _isInternal }
+                };
             }
 
             yield break;
         }
 
-        yield return
-        [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
                 Value = FindUniqueName(
@@ -50,7 +53,7 @@ public class StaticDomainHandler(Application application)
                 ),
                 IsInternal = _isInternal
             }
-        ];
+        };
     }
 
     /// <summary>

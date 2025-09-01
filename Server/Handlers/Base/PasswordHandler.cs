@@ -7,23 +7,16 @@ public class PasswordHandler : Handler<Password>
 {
     public override IEnumerable<ContractList> Initialize(Password contract, ApplicationContext context)
     {
-        if (contract.Value != null)
+        yield return new ContractList
         {
-            yield return [contract with { Handler = this }];
-        }
-        else
-        {
-            yield return
-            [
-                contract with
-                {
-                    Handler = this,
-                    Value = RandomNumberGenerator.GetString(
-                        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
-                        16
-                    )
-                }
-            ];
-        }
+            [context] = contract with
+            {
+                Handler = this,
+                Value = contract.Value ?? RandomNumberGenerator.GetString(
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+                    16
+                )
+            }
+        };
     }
 }

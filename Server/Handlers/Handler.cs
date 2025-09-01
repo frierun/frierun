@@ -16,13 +16,13 @@ public class Handler<TContract>(Application? application = null) : IHandler
 
     public virtual IEnumerable<ContractList> Initialize(TContract contract, ApplicationContext context)
     {
-        yield return
-        [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this
             }
-        ];
+        };
     }
 
     public virtual TContract Install(TContract contract, ExecutionPlan plan)

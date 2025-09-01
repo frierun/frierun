@@ -8,6 +8,7 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
     : Handler<Postgresql>(application)
 {
     private readonly Container _container = application.GetContract(new ContractId<Container>());
+
     private readonly string _rootPassword = application.GetContract(new ContractId<Password>()).Value ??
                                             throw new Exception("Root password not found");
 
@@ -25,8 +26,9 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
                 yield break;
             }
 
-            yield return [
-                contract with
+            yield return new ContractList
+            {
+                [context] = contract with
                 {
                     Handler = this,
                     Username = "postgres",
@@ -34,11 +36,12 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
                     Host = _container.ContainerName,
                     DependsOn = contract.DependsOn.Append(contract.Network)
                 }
-            ];
+            };
         }
 
-        yield return [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
                 Database = contract.Database ?? FindUniqueName(
@@ -58,7 +61,7 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
                 Host = _container.ContainerName,
                 DependsOn = contract.DependsOn.Append(contract.Network)
             }
-        ];
+        };
     }
 
     public override Postgresql Install(Postgresql contract, ExecutionPlan plan)

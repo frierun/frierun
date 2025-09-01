@@ -23,9 +23,9 @@ public class TraefikHttpEndpointHandler(Application application)
             c => c.TraefikRouterName
         );
 
-        yield return
-        [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 TraefikRouterName = routerName,
                 ResultSsl = new Argument<bool?>(plan =>
@@ -42,7 +42,7 @@ public class TraefikHttpEndpointHandler(Application application)
                     contract.Domain
                 ]
             },
-            new Container(contract.Container.Name)
+            [contract.Container] = new Container(contract.Container.Name)
             {
                 Labels = new Dictionary<string, Argument<string>>
                 {
@@ -62,7 +62,7 @@ public class TraefikHttpEndpointHandler(Application application)
                 },
                 DependsOn = [contract.Domain]
             }
-        ];
+        };
     }
 
     public override HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)

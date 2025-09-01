@@ -16,9 +16,15 @@ public class ContainerHandler(Application application)
         }
 
         var contractId = contract.Id;
-        yield return
-        [
-            contract with
+        yield return new ContractList(
+            contract.Mounts.Values.Select(mount => new Volume(mount.Volume.Name)
+                {
+                    HandlerApplication = Application?.Name
+                }
+            )
+        )
+        {
+            [context] = contract with
             {
                 ContainerName = contract.ContainerName ?? FindUniqueName(
                     context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
@@ -32,7 +38,7 @@ public class ContainerHandler(Application application)
                     ..contract.Mounts.Values.Select(mount => mount.Volume)
                 ]
             },
-            new Daemon(context.Name)
+            [context.Name] = new Daemon(context.Name)
             {
                 HandlerApplication = Application?.Name,
                 Command = new Argument<IEnumerable<string>>(
@@ -49,16 +55,11 @@ public class ContainerHandler(Application application)
                 ),
                 DependsOn = [..contract.Mounts.Values.Select(mount => mount.Volume)]
             },
-            new Network(contract.Network.Name)
+            [contract.Network] = new Network(contract.Network.Name)
             {
                 HandlerApplication = Application?.Name
-            },
-            ..contract.Mounts.Values.Select(mount => new Volume(mount.Volume.Name)
-                {
-                    HandlerApplication = Application?.Name
-                }
-            )
-        ];
+            }
+        };
     }
 
     /// <summary>

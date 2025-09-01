@@ -45,18 +45,18 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
             contract = contract with { ExternalPort = port };
         }
 
-        yield return
-        [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 ExternalIp = _connection.Host,
                 Handler = this,
                 DependsOn = [contract.Container]
             },
-            new Container(contract.Container.Name)
+            [contract.Container] = new Container(contract.Container.Name)
             {
                 HandlerApplication = Application?.Name,
             }
-        ];
+        };
     }
 }

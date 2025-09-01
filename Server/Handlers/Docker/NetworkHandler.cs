@@ -9,9 +9,9 @@ public class NetworkHandler(Application application, DockerService dockerService
 {
     public override IEnumerable<ContractList> Initialize(Network contract, ApplicationContext context)
     {
-        yield return
-        [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
                 NetworkName = contract.NetworkName ?? FindUniqueName(
@@ -19,7 +19,7 @@ public class NetworkHandler(Application application, DockerService dockerService
                     c => c.NetworkName
                 )
             }
-        ];
+        };
     }
 
     public override Network Install(Network contract, ExecutionPlan plan)

@@ -13,9 +13,9 @@ public class DaemonHandler(Application application)
 
     public override IEnumerable<ContractList> Initialize(Daemon contract, ApplicationContext context)
     {
-        yield return
-        [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 DaemonName = contract.DaemonName ?? FindUniqueName(
                     context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
@@ -23,7 +23,7 @@ public class DaemonHandler(Application application)
                 ),
                 Handler = this
             }
-        ];
+        };
     }
 
     public override Daemon Install(Daemon contract, ExecutionPlan plan)

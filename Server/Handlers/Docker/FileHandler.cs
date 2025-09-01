@@ -9,14 +9,14 @@ public class FileHandler(Application application, DockerService dockerService) :
 {
     public override IEnumerable<ContractList> Initialize(File contract, ApplicationContext context)
     {
-        yield return
-        [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
                 DependsOn = contract.DependsOn.Append(contract.Volume)
             }
-        ];
+        };
     }
 
     public override File Install(File contract, ExecutionPlan plan)

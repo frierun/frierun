@@ -6,30 +6,24 @@ public class PortHttpEndpointHandler : Handler<HttpEndpoint>
 {
     public override IEnumerable<ContractList> Initialize(HttpEndpoint contract, ApplicationContext context)
     {
-        var portEndpoint = CreatePortEndpoint(contract);
+        var portEndpoint = new PortEndpoint(Protocol.Tcp, contract.Port, Container: contract.Container);
         var portEndpointId = portEndpoint.Id;
-        yield return
-        [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 ResultSsl = false,
-                ResultHost = new Argument<string>(plan => plan.GetContract<PortEndpoint>(portEndpointId).ExternalIp),
+                ResultHost =
+                new Argument<string>(plan => plan.GetContract<PortEndpoint>(portEndpointId).ExternalIp),
                 ResultPort = new Argument<int>(plan => plan.GetContract<PortEndpoint>(portEndpointId).ExternalPort),
                 Handler = this,
                 DependsOn =
                 [
                     portEndpointId,
                     contract.Container
-                ],
+                ]
             },
-            portEndpoint
-        ];
-    }
-
-    private static PortEndpoint CreatePortEndpoint(HttpEndpoint contract)
-    {
-        return new PortEndpoint(
-            Protocol.Tcp, contract.Port, Container: contract.Container
-        );
+            [portEndpointId] = portEndpoint
+        };
     }
 }

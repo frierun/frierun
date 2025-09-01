@@ -34,11 +34,11 @@ public class ContainerHandlerTests : BaseTests
             ImageName = new Argument<string>($"{{{{Parameter:{parameter.Name}:Value}}}}"),
             Env = new Dictionary<string, Argument<string>>
             {
-                ["Test"] = new($"{{{{Parameter:{parameter.Name}:Value}}}}")
+                ["Test"] = $"{{{{Parameter:{parameter.Name}:Value}}}}"
             }
         };
         var handler = Handler<ContainerHandler>(_udocker);
-        var result = handler.Initialize(container, new ApplicationContext("", "")).Single();
+        var result = handler.Initialize(container, new ApplicationContext(container.Id.Name, "")).Single();
         var daemon = result.Values.OfType<Daemon>().Single();
         container = (Container)container.Merge(result[container.Id]);
         var plan = new ExecutionPlan(
@@ -72,7 +72,7 @@ public class ContainerHandlerTests : BaseTests
             }
         };
         var handler = Handler<ContainerHandler>(_udocker);
-        var result = handler.Initialize(container, new ApplicationContext("", "")).Single();
+        var result = handler.Initialize(container, new ApplicationContext(container.Id.Name, "")).Single();
         var daemon = result.Values.OfType<Daemon>().Single();
         container = (Container)container.Merge(result[container.Id]);
         var plan = new ExecutionPlan(

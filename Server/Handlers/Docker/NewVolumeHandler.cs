@@ -20,9 +20,9 @@ public class NewVolumeHandler(Application application, DockerService dockerServi
             yield break;
         }
 
-        yield return
-        [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
                 VolumeName = contract.VolumeName ?? FindUniqueName(
@@ -30,7 +30,7 @@ public class NewVolumeHandler(Application application, DockerService dockerServi
                     volume => volume.VolumeName
                 )
             }
-        ];
+        };
     }
 
     public override Volume Install(Volume contract, ExecutionPlan plan)

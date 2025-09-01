@@ -8,9 +8,9 @@ public class SshConnectionHandler : Handler<SshConnection>, ISshConnectionHandle
 {
     public override IEnumerable<ContractList> Initialize(SshConnection contract, ApplicationContext context)
     {
-        yield return
-        [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
                 Host = contract.Host ?? "",
@@ -18,7 +18,7 @@ public class SshConnectionHandler : Handler<SshConnection>, ISshConnectionHandle
                 Username = contract.Username ?? "",
                 Password = contract.Password ?? ""
             }
-        ];
+        };
     }
 
     public override SshConnection Install(SshConnection contract, ExecutionPlan plan)

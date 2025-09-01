@@ -15,14 +15,14 @@ public class LocalPathHandler(Application application) : Handler<Volume>(applica
             yield break;
         }
 
-        yield return
-        [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 LocalPath = contract.LocalPath ?? $"{HomePath}/frierun/{context.Prefix}/{context.Name}",
                 Handler = this
             }
-        ];
+        };
     }
 
     public override Volume Install(Volume contract, ExecutionPlan plan)

@@ -8,6 +8,7 @@ public class MysqlHandler(Application application)
     : Handler<Mysql>(application)
 {
     private readonly Container _container = application.GetContract(new ContractId<Container>());
+
     private readonly string _rootPassword = application.GetContract(new ContractId<Password>()).Value ??
                                             throw new Exception("Root password not found");
 
@@ -25,9 +26,9 @@ public class MysqlHandler(Application application)
                 yield break;
             }
 
-            yield return
-            [
-                contract with
+            yield return new ContractList
+            {
+                [context] = contract with
                 {
                     Handler = this,
                     Username = "root",
@@ -35,12 +36,12 @@ public class MysqlHandler(Application application)
                     Host = _container.ContainerName,
                     DependsOn = contract.DependsOn.Append(contract.Network)
                 }
-            ];
+            };
         }
 
-        yield return
-        [
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
                 Database = contract.Database ?? FindUniqueName(
@@ -62,7 +63,7 @@ public class MysqlHandler(Application application)
                 Host = _container.ContainerName,
                 DependsOn = contract.DependsOn.Append(contract.Network)
             }
-        ];
+        };
     }
 
     public override Mysql Install(Mysql contract, ExecutionPlan plan)

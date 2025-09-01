@@ -28,15 +28,15 @@ public class PackageHandler : Handler<Package>
             }
         }
 
-        yield return [
-            package with
+        yield return new ContractList(package.Contracts)
+        {
+            [context] = package with
             {
                 Prefix = context.Prefix,
                 ApplicationUrl = applicationUrl,
                 Handler = this
-            },
-            ..package.Contracts
-        ];
+            }
+        };
     }
 
     public override Package Install(Package package, ExecutionPlan plan)
