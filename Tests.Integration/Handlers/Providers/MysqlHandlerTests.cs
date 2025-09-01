@@ -22,7 +22,7 @@ public class MysqlHandlerTests : TestWithDocker
         var package = dbPackage with
         {
             Name = "db-client",
-            Contracts = [..dbPackage.Contracts.Values.Append(new Mysql())]
+            Contracts = new ContractList(dbPackage.Contracts) { [""] = new Mysql() }
         };
         var application = InstallPackage(package);
 
@@ -74,7 +74,7 @@ public class MysqlHandlerTests : TestWithDocker
         var package = dbPackage with
         {
             Name = "db-client",
-            Contracts = [..dbPackage.Contracts.Values.Append(new Mysql(Admin: true))]
+            Contracts = new ContractList(dbPackage.Contracts) { [""] = new Mysql(Admin: true) }
         };
         var application = InstallPackage(package);
 

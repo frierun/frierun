@@ -9,16 +9,16 @@ public class RedisHandlerTests : TestWithDocker
     {
         var package = new Package(
             Name: "redis-client",
-            Contracts:
-            [
-                new Redis(),
-                new Container(
+            Contracts: new ContractList
+            {
+                [""] = new Redis(),
+                ["redis-client"] = new Container(
                     Name: "redis-client"
                 )
                 {
                     ImageName = "redis:7"
                 }
-            ]
+            }
         );
         var application = InstallPackage(package);
 

@@ -24,7 +24,7 @@ public class FileHandlerTests : TestWithDocker
 
         var package = new Package(
             Name: "test-package",
-            Contracts: [..contracts]
+            Contracts: new ContractList(contracts)
         );
 
         var application = InstallPackage(package);
@@ -145,19 +145,19 @@ public class FileHandlerTests : TestWithDocker
         var filePath = Path.Combine(directory.FullName, fileName);
         var package = new Package(
             Name: "test-package",
-            Contracts:
-            [
-                new Container(
+            Contracts: new ContractList
+            {
+                [""] = new Container(
                     ImageName: "alpine:latest",
                     Command: new Argument<IEnumerable<string>>(["tail", "-f", "/dev/null"]),
                     Mounts: new Dictionary<string, ContainerMount> { { "/mnt", new ContainerMount() } }
                 ),
-                new Volume(Name: "", LocalPath: directory.FullName),
-                new File(
+                [""] = new Volume(Name: "", LocalPath: directory.FullName),
+                [""] = new File(
                     Path: fileName,
                     Text: "test-text"
                 )
-            ]
+            }
         );
 
         var application = InstallPackage(package);

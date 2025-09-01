@@ -41,7 +41,7 @@ public abstract class BaseTests : IDisposable
     /// <summary>
     /// Installs package by name and returns application
     /// </summary>
-    protected Application InstallPackage(string name, IEnumerable<Contract>? overrides = null)
+    protected Application InstallPackage(string name, ContractList? overrides = null)
     {
         Resolve<PackageRegistry>().Load();
         var package = Resolve<PackageRegistry>().Find(name)
@@ -49,7 +49,7 @@ public abstract class BaseTests : IDisposable
 
         if (overrides != null)
         {
-            var overridePackage = new Package(name) { Contracts = [..overrides] };
+            var overridePackage = new Package(name) { Contracts = new ContractList(overrides) };
             package = (Package)package.Merge(overridePackage);
         }
 
