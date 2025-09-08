@@ -13,8 +13,11 @@ public class DaemonHandlerTests : BaseTests
     [Fact]
     public void Install_Contract_CreatesFilesAndDirectories()
     {
-        var package = Factory<Package>().Generate() with { Contracts = [Factory<Daemon>().Generate()] };
-        
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts = new ContractList { Contract<Daemon>().Generate() }
+        };
+
         var application = InstallPackage(package);
 
         var daemon = application.GetContracts<Daemon>().Single();
@@ -22,21 +25,28 @@ public class DaemonHandlerTests : BaseTests
         var directory = "/data/data/com.termux/files/usr/var/service/" + daemon.DaemonName;
         SftpClient.Received(1).CreateDirectory(directory);
         SftpClient.Received(1).WriteAllText(directory + "/run", Arg.Any<string>());
-        SshClient.Received(1).RunCommand(Arg.Is<string>(arg => arg.StartsWith("sv-enable") && arg.Contains(daemon.DaemonName)));
+        SshClient.Received(1).RunCommand(
+            Arg.Is<string>(arg => arg.StartsWith("sv-enable") && arg.Contains(daemon.DaemonName))
+        );
     }
 
     [Fact]
     public void Uninstall_Contract_StopsDaemon()
     {
-        var package = Factory<Package>().Generate() with { Contracts = [Factory<Daemon>().Generate()] };
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts = new ContractList { Contract<Daemon>().Generate() }
+        };
         var application = InstallPackage(package);
         var daemon = application.GetContracts<Daemon>().Single();
         var directory = "/data/data/com.termux/files/usr/var/service/" + daemon.DaemonName;
         Assert.True(daemon.Installed);
-        
+
         UninstallApplication(application);
-        
-        SshClient.Received(1).RunCommand(Arg.Is<string>(arg => arg.StartsWith("sv-disable") && arg.Contains(daemon.DaemonName)));
+
+        SshClient.Received(1).RunCommand(
+            Arg.Is<string>(arg => arg.StartsWith("sv-disable") && arg.Contains(daemon.DaemonName))
+        );
         SshClient.Received(1).RunCommand(Arg.Is<string>(arg => arg.StartsWith("rm -rf") && arg.Contains(directory)));
     }
 }

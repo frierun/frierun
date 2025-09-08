@@ -8,16 +8,17 @@ public class PortHttpEndpointHandlerTests : BaseTests
     public void Install_ContainerWithHttpEndpoint_CreatesEndpoint()
     {
         InstallPackage("docker");
-        var container = Factory<Container>().Generate();
-        var httpEndpoint = Factory<HttpEndpoint>().Generate() with
+        var (containerId, container) = Contract<Container>().GenerateEntry();
+        var (httpEndpointId, httpEndpoint) = Contract<HttpEndpoint>().GenerateEntry();
+        httpEndpoint = httpEndpoint with { Container = containerId };
+        var package = Factory<Package>().Generate() with
         {
-            Container = new ContractId<Container>(container.Name)
+            Contracts = new ContractList { [containerId] = container, [httpEndpointId] = httpEndpoint }
         };
-        var package = Factory<Package>().Generate() with { Contracts = [container, httpEndpoint] };
 
         var application = InstallPackage(package);
 
-        var resultHttpEndpoint = application.GetContract(new ContractId<HttpEndpoint>(httpEndpoint.Id));
+        var resultHttpEndpoint = application.GetContract(httpEndpointId);
         Assert.False(resultHttpEndpoint.ResultSsl.Value);
         Assert.Equal(httpEndpoint.Port, resultHttpEndpoint.ResultPort.Value);
         Assert.NotNull(resultHttpEndpoint.ResultHost.Value);
@@ -27,21 +28,20 @@ public class PortHttpEndpointHandlerTests : BaseTests
     public void Install_ContainerWithHttpEndpoint_DependsOnPortEndpoint()
     {
         InstallPackage("docker");
-        var container = Factory<Container>().Generate();
+        var (containerId, container) = Contract<Container>().GenerateEntry();
+        var (httpEndpointId, httpEndpoint) = Contract<HttpEndpoint>().GenerateEntry();
+        httpEndpoint = httpEndpoint with { Container = containerId };
 
         var package = Factory<Package>().Generate() with
         {
-            Contracts =
-            [
-                container,
-                Factory<HttpEndpoint>().Generate() with { Container = new ContractId<Container>(container.Id) }
-            ]
+            Contracts = new ContractList { [containerId] = container, [httpEndpointId] = httpEndpoint }
         };
 
         var application = InstallPackage(package);
 
-        var httpEndpoint = application.GetContracts<HttpEndpoint>().Single();
-        var portEndpoint = application.GetContracts<PortEndpoint>().Single();
-        Assert.Contains(portEndpoint.Id, httpEndpoint.DependsOn);
+        Assert.Contains(
+            application.GetContracts<PortEndpoint>().Single().Id,
+            application.GetContracts<HttpEndpoint>().Single().DependsOn
+        );
     }
 }

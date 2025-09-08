@@ -3,7 +3,7 @@ using Frierun.Server.Data;
 
 namespace Frierun.Tests.Factories;
 
-public sealed class PortEndpointFactory : Faker<PortEndpoint>
+public sealed class PortEndpointFactory : ContractFaker<PortEndpoint>
 {
     public PortEndpointFactory(Faker<Container> containerFactory)
     {

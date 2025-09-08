@@ -1,16 +1,12 @@
-﻿using Bogus;
-using Frierun.Server.Data;
+﻿using Frierun.Server.Data;
 
 namespace Frierun.Tests.Factories;
 
-public sealed class ContainerFactory : Faker<Container>
+public sealed class ContainerFactory : ContractFaker<Container>
 {
-    private readonly HashSet<string?> _uniqueNames = [];
-    
     public ContainerFactory()
     {
         CustomInstantiator(_ => new Container(""));
-        this.UniqueRuleFor(p => p.Name, f => f.Lorem.Word(), _uniqueNames);
         RuleFor(p => p.ContainerName, f => f.Lorem.Word());
         RuleFor(p => p.ImageName, f => new Argument<string>(f.Internet.Url()));
         RuleFor(p => p.MountDockerSocket, f => f.Random.Bool());

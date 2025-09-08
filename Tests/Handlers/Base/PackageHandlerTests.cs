@@ -15,14 +15,11 @@ public class PackageHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts =
-            [
-                new HttpEndpoint(Port: 80),
-                new PortEndpoint(
-                    Protocol.Tcp,
-                    2222
-                )
-            ]
+            Contracts = new ContractList
+            {
+                ["http"] = new HttpEndpoint(Port: 80),
+                ["tcp"] = new PortEndpoint(Protocol.Tcp, 2222)
+            }
         };
         Assert.NotNull(package.ApplicationUrl.Value);
 
@@ -37,14 +34,11 @@ public class PackageHandlerTests : BaseTests
         var package = Factory<Package>().Generate() with
         {
             ApplicationUrl = new Argument<string>(),
-            Contracts =
-            [
-                new HttpEndpoint(Port: 80),
-                new PortEndpoint(
-                    Protocol.Tcp,
-                    2222
-                )
-            ]
+            Contracts = new ContractList
+            {
+                ["http"] = new HttpEndpoint(Port: 80),
+                ["tcp"] = new PortEndpoint(Protocol.Tcp, 2222)
+            }
         };
 
         var application = InstallPackage(package);
@@ -58,13 +52,10 @@ public class PackageHandlerTests : BaseTests
         var package = Factory<Package>().Generate() with
         {
             ApplicationUrl = new Argument<string>(),
-            Contracts =
-            [
-                new PortEndpoint(
-                    Protocol.Tcp,
-                    2222
-                )
-            ]
+            Contracts = new ContractList
+            {
+                ["tcp"] = new PortEndpoint(Protocol.Tcp, 2222)
+            }
         };
 
         var application = InstallPackage(package);
@@ -75,11 +66,12 @@ public class PackageHandlerTests : BaseTests
     [Fact]
     public void Install_ApplicationUrlWithTemplate_ResolvesTemplate()
     {
+        var (parameterId, parameter) = Contract<Parameter>().GenerateEntry();
         var value = Resolve<Faker>().Lorem.Word();
         var package = Factory<Package>().Generate() with
         {
-            ApplicationUrl = new Argument<string>("{{Parameter:Test:Value}}"),
-            Contracts = [new Parameter("Test", Value: value)]
+            ApplicationUrl = new Argument<string>($"{{{{Parameter:{parameterId.Name}:Value}}}}"),
+            Contracts = new ContractList { [parameterId] = parameter with { Value = value } }
         };
 
         var application = InstallPackage(package);
@@ -90,11 +82,12 @@ public class PackageHandlerTests : BaseTests
     [Fact]
     public void Install_ApplicationDescriptionWithTemplate_ResolvesTemplate()
     {
+        var (parameterId, parameter) = Contract<Parameter>().GenerateEntry();
         var value = Resolve<Faker>().Lorem.Word();
         var package = Factory<Package>().Generate() with
         {
-            ApplicationDescription = new Argument<string>("{{Parameter:Test:Value}}"),
-            Contracts = [new Parameter("Test", Value: value)]
+            ApplicationDescription = new Argument<string>($"{{{{Parameter:{parameterId.Name}:Value}}}}"),
+            Contracts = new ContractList { [parameterId] = parameter with { Value = value } }
         };
 
         var application = InstallPackage(package);

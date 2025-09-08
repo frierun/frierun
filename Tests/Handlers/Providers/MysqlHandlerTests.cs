@@ -18,14 +18,17 @@ public class MysqlHandlerTests : BaseTests
     [Fact]
     public void Install_PackageWithContract_CreatesDatabase()
     {
-        var package = Factory<Package>().Generate() with { Contracts = [new Mysql()] };
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts = new ContractList { Contract<Mysql>().Generate() }
+        };
 
         var application = InstallPackage(package);
 
         var database = application.GetContracts<Mysql>().Single();
         Assert.True(database.Installed);
-        Assert.Equal(package.Name, database.Username);
-        Assert.Equal(package.Name, database.Database);
+        Assert.StartsWith(package.Name, database.Username);
+        Assert.StartsWith(package.Name, database.Database);
         Assert.Contains(_providerApplication.Name, application.RequiredApplications);
         Assert.Equal(application.Name, database.NetworkName);
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
@@ -39,11 +42,11 @@ public class MysqlHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts =
-            [
-                new Mysql("first"),
-                new Mysql("second"),
-            ]
+            Contracts = new ContractList
+            {
+                Contract<Mysql>().Generate(),
+                Contract<Mysql>().Generate()
+            }
         };
 
         var application = InstallPackage(package);
@@ -60,11 +63,11 @@ public class MysqlHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts =
-            [
-                new Mysql("first"),
-                new Mysql("second"),
-            ]
+            Contracts = new ContractList
+            {
+                Contract<Mysql>().Generate(),
+                Contract<Mysql>().Generate()
+            }
         };
         var application = InstallPackage(package);
 
@@ -82,7 +85,7 @@ public class MysqlHandlerTests : BaseTests
         var package = Factory<Package>().Generate() with
         {
             Prefix = "root",
-            Contracts = [new Mysql()]
+            Contracts = new ContractList { Contract<Mysql>().Generate() }
         };
 
         var application = InstallPackage(package);
@@ -90,7 +93,7 @@ public class MysqlHandlerTests : BaseTests
         var database = application.GetContracts<Mysql>().Single();
         Assert.NotEqual(package.Name, database.Username);
     }
-    
+
     [Fact]
     public void Initialize_PrefixIsMysql_DatabaseIsNotMysql()
     {
@@ -99,12 +102,12 @@ public class MysqlHandlerTests : BaseTests
         var package = Factory<Package>().Generate() with
         {
             Prefix = "mysql",
-            Contracts = [new Mysql()]
+            Contracts = new ContractList { Contract<Mysql>().Generate() }
         };
 
         var application = InstallPackage(package);
 
         var database = application.GetContracts<Mysql>().Single();
         Assert.NotEqual(package.Name, database.Database);
-    }    
+    }
 }

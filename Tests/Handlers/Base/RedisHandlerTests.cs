@@ -8,7 +8,7 @@ public class RedisHandlerTests : BaseTests
     public void Install_PackageWithContract_CreatesDatabase()
     {
         InstallPackage("docker");
-        var package = Factory<Package>().Generate() with { Contracts = [new Redis()] };
+        var package = Factory<Package>().Generate() with { Contracts = new ContractList { [""] = new Redis() } };
 
         var application = InstallPackage(package);
 

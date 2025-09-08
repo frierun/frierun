@@ -1,6 +1,7 @@
 ﻿using Frierun.Server;
 using Frierun.Server.Data;
 using Frierun.Server.Handlers;
+using Frierun.Tests.Factories;
 using NSubstitute;
 using Substitute = NSubstitute.Substitute;
 
@@ -41,8 +42,8 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_WithoutHandler_ThrowsException()
     {
-        var contract = Substitute.For<Contract>("");
-        var package = Factory<Package>().Generate() with { Contracts = [contract] };
+        var contract = new ContractEntry<Contract>("", Substitute.For<Contract>(""));
+        var package = Factory<Package>().Generate() with { Contracts = new ContractList { contract } };
 
         Assert.Throws<HandlerNotFoundException>(() => Service.Create(package));
     }
@@ -52,8 +53,8 @@ public class ExecutionServiceTests : BaseTests
     {
         var handler = Mock<Handler<Contract1>, IHandler>([null]);
 
-        var contract = new Contract1();
-        var package = Factory<Package>().Generate() with { Contracts = [contract] };
+        var contract = new ContractEntry<Contract1>("", new Contract1());
+        var package = Factory<Package>().Generate() with { Contracts = new ContractList { contract } };
         handler
             .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
             .Returns([]);
@@ -66,12 +67,12 @@ public class ExecutionServiceTests : BaseTests
     {
         var handler = Mock<Handler<Contract1>, IHandler>([null]);
 
-        var contract = new Contract1();
-        var unknownContract = new Contract2();
-        var package = Factory<Package>().Generate() with { Contracts = [contract] };
+        var contract = new ContractEntry<Contract1>("", new Contract1());
+        var unknownContract = new ContractEntry<Contract2>("", new Contract2());
+        var package = Factory<Package>().Generate() with { Contracts = new ContractList { contract } };
         handler
             .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
-            .Returns([[contract with { Handler = handler }, unknownContract]]);
+            .Returns([new ContractList { contract.With(c => c with { Handler = handler }), unknownContract }]);
 
         Assert.Throws<HandlerNotFoundException>(() => Service.Create(package));
     }
@@ -81,18 +82,18 @@ public class ExecutionServiceTests : BaseTests
     {
         var handler = Mock<Handler<Contract1>, IHandler>([null]);
 
-        var contract = new Contract1();
-        var package = Factory<Package>().Generate() with { Contracts = [contract] };
+        var contract = new ContractEntry<Contract1>("", new Contract1());
+        var package = Factory<Package>().Generate() with { Contracts = new ContractList { contract } };
         handler
             .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
-            .Returns([[contract with { Handler = handler }]]);
+            .Returns([new ContractList { contract.With(c => c with { Handler = handler }) }]);
 
         var plan = Service.Create(package);
 
         Assert.NotNull(plan);
         Assert.Equal(2, plan.Contracts.Count());
         Assert.NotNull(plan.GetContract(package));
-        Assert.NotNull(plan.GetContract(contract));
+        Assert.NotNull(plan.GetContract(contract.Id));
         // ReSharper disable once IteratorMethodResultIsIgnored
         handler.Received(1).Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>());
     }
@@ -102,12 +103,12 @@ public class ExecutionServiceTests : BaseTests
     {
         var handler = Mock<Handler<Contract1>, IHandler>([null]);
 
-        var contract1 = new Contract1("contract1") { Handler = handler };
-        var contract2 = new Contract1("contract2") { Handler = handler };
-        var package = Factory<Package>().Generate() with { Contracts = [contract1] };
+        var contract1 = new ContractEntry<Contract1>("contract1", new Contract1("contract1") { Handler = handler });
+        var contract2 = new ContractEntry<Contract1>("contract2", new Contract1("contract2") { Handler = handler });
+        var package = Factory<Package>().Generate() with { Contracts = new ContractList { contract1 } };
         handler
             .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
-            .Returns([[contract1, contract2]]);
+            .Returns([new ContractList { contract1, contract2 }]);
 
         Assert.Throws<Exception>(() => Service.Create(package));
     }
@@ -117,29 +118,39 @@ public class ExecutionServiceTests : BaseTests
     {
         var handler = Mock<Handler<Contract1>, IHandler>([null]);
 
-        var contract = new Contract1();
-        var unknownContract = new Contract2();
-        var knownContract = new Contract1("second");
-        var package = Factory<Package>().Generate() with { Contracts = [contract] };
+        var contract = new ContractEntry<Contract1>("", new Contract1());
+        var unknownContract = new ContractEntry<Contract2>("", new Contract2());
+        var knownContract = new ContractEntry<Contract1>("second", new Contract1("second"));
+        var package = Factory<Package>().Generate() with { Contracts = new ContractList { contract } };
         handler
-            .Initialize(contract, Arg.Any<ApplicationContext>())
+            .Initialize(contract.Contract, Arg.Any<ApplicationContext>())
             .Returns(info =>
                 [
-                    [info.Arg<Contract1>() with { Handler = handler }, unknownContract],
-                    [
-                        info.Arg<Contract1>() with { Handler = handler },
-                        knownContract
-                    ]
+                    new ContractList
+                    {
+                        [info.Arg<ApplicationContext>().Name] = info.Arg<Contract1>() with { Handler = handler },
+                        [unknownContract.Id] = unknownContract.Contract
+                    },
+                    new ContractList
+                    {
+                        [info.Arg<ApplicationContext>().Name] = info.Arg<Contract1>() with { Handler = handler },
+                        [knownContract.Id] = knownContract.Contract
+                    }
                 ]
             );
         handler
-            .Initialize(Arg.Is<Contract1>(arg => arg != contract), Arg.Any<ApplicationContext>())
+            .Initialize(Arg.Is<Contract1>(arg => arg != contract.Contract), Arg.Any<ApplicationContext>())
             .Returns(info =>
                 [
-                    [info.Arg<Contract1>() with { Handler = handler }, unknownContract],
-                    [
-                        info.Arg<Contract1>() with { Handler = handler },
-                    ]
+                    new ContractList
+                    {
+                        [info.Arg<ApplicationContext>().Name] = info.Arg<Contract1>() with { Handler = handler },
+                        [unknownContract.Id] = unknownContract.Contract
+                    },
+                    new ContractList
+                    {
+                        [info.Arg<ApplicationContext>().Name] = info.Arg<Contract1>() with { Handler = handler }
+                    }
                 ]
             );
 
@@ -148,8 +159,8 @@ public class ExecutionServiceTests : BaseTests
         Assert.NotNull(plan);
         Assert.Equal(3, plan.Contracts.Count());
         Assert.NotNull(plan.GetContract(package));
-        Assert.NotNull(plan.GetContract(contract));
-        Assert.NotNull(plan.GetContract(knownContract));
+        Assert.NotNull(plan.GetContract(contract.Id));
+        Assert.NotNull(plan.GetContract(knownContract.Id));
     }
 
     [Fact]
@@ -158,40 +169,64 @@ public class ExecutionServiceTests : BaseTests
         var handler = Mock<Handler<Contract1>, IHandler>([null]);
         var handler2 = Mock<Handler<Contract1>, IHandler>([null]);
 
-        var contract = new Contract1();
-        var unknownContract = new Contract2();
-        var knownContract = new Contract1("second");
-        var package = Factory<Package>().Generate() with { Contracts = [contract] };
+        var contract = new ContractEntry<Contract1>("", new Contract1());
+        var unknownContract = new ContractEntry<Contract2>("", new Contract2());
+        var knownContract = new ContractEntry<Contract1>("second", new Contract1("second"));
+        var package = Factory<Package>().Generate() with { Contracts = new ContractList { contract } };
         handler
             .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
-            .Returns(info => [[info.Arg<Contract1>() with { Handler = handler }, unknownContract]]);
+            .Returns(info =>
+                [
+                    new ContractList
+                    {
+                        [info.Arg<ApplicationContext>().Name] = info.Arg<Contract1>() with { Handler = handler },
+                        [unknownContract.Id] = unknownContract.Contract
+                    },
+                ]
+            );
 
         handler2
-            .Initialize(contract, Arg.Any<ApplicationContext>())
-            .Returns(info => [[info.Arg<Contract1>() with { Handler = handler2 }, knownContract]]);
+            .Initialize(contract.Contract, Arg.Any<ApplicationContext>())
+            .Returns(info =>
+                [
+                    new ContractList
+                    {
+                        [info.Arg<ApplicationContext>().Name] = info.Arg<Contract1>() with { Handler = handler2 },
+                        [knownContract.Id] = knownContract.Contract
+                    }
+                ]
+            );
 
         handler2
-            .Initialize(Arg.Is<Contract1>(arg => arg != contract), Arg.Any<ApplicationContext>())
-            .Returns(info => [[info.Arg<Contract1>() with { Handler = handler2 }]]);
+            .Initialize(Arg.Is<Contract1>(arg => arg != contract.Contract), Arg.Any<ApplicationContext>())
+            .Returns(info =>
+                [
+                    new ContractList
+                    {
+                        [info.Arg<ApplicationContext>().Name] = info.Arg<Contract1>() with { Handler = handler2 }
+                    }
+                ]
+            );
 
         var plan = Service.Create(package);
 
         Assert.NotNull(plan);
         Assert.Equal(3, plan.Contracts.Count());
         Assert.NotNull(plan.GetContract(package));
-        Assert.NotNull(plan.GetContract(contract));
-        Assert.NotNull(plan.GetContract(knownContract));
+        Assert.NotNull(plan.GetContract(contract.Contract));
+        Assert.NotNull(plan.GetContract(knownContract.Contract));
     }
 
     [Fact]
     public void Create_ContractWithSubstitute_CreatesDependentContract()
     {
         InstallPackage("docker");
-        var container = Factory<Container>().Generate() with
-        {
-            Env = new Dictionary<string, Argument<string>> { { "key", "{{Parameter:Test:Value}}" } }
-        };
-        var package = Factory<Package>().Generate() with { Contracts = [container] };
+        var container = Contract<Container>().Generate().With(c => c with
+            {
+                Env = new Dictionary<string, Argument<string>> { { "key", "{{Parameter:Test:Value}}" } }
+            }
+        );
+        var package = Factory<Package>().Generate() with { Contracts = new ContractList { container } };
 
         var plan = Service.Create(package);
 
@@ -203,29 +238,29 @@ public class ExecutionServiceTests : BaseTests
     public void Create_ContractAddsSubstituteLater_CreatesDependentContract()
     {
         InstallPackage("docker");
-        var container = Factory<Container>().Generate();
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts =
-            [
-                container,
-                new Selector("")
-                {
-                    Options =
-                    [
-                        new SelectorOption(
-                            "one",
-                            [
-                                container with
+        var container = Contract<Container>().Generate();
+        var selector = Contract<Selector>().Generate().With(s => s with
+            {
+                Options =
+                [
+                    new SelectorOption(
+                        "one",
+                        new ContractList
+                        {
+                            container.With(c => c with
                                 {
                                     Env = new Dictionary<string, Argument<string>>
                                         { { "key", "{{Parameter:Test:Value}}" } }
                                 }
-                            ]
-                        )
-                    ]
-                }
-            ]
+                            )
+                        }
+                    )
+                ]
+            }
+        );
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts = new ContractList { container, selector }
         };
 
         var plan = Service.Create(package);
@@ -239,8 +274,8 @@ public class ExecutionServiceTests : BaseTests
     {
         InstallPackage("docker");
         InstallPackage("docker");
-        var container = Factory<Container>().Generate();
-        var package = Factory<Package>().Generate() with { Contracts = [container] };
+        var container = Contract<Container>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = new ContractList { container } };
 
         var plan = Service.Create(package);
 
@@ -252,18 +287,18 @@ public class ExecutionServiceTests : BaseTests
     {
         var docker1 = InstallPackage("docker");
         var docker2 = InstallPackage("docker");
-        var container = Factory<Container>().Generate();
+        var container = Contract<Container>().Generate();
 
         var plan1 = Service.Create(
             Factory<Package>().Generate() with
             {
-                Contracts = [container with { HandlerApplication = docker1.Name }]
+                Contracts = new ContractList { container.With(c => c with { HandlerApplication = docker1.Name }) }
             }
         );
         var plan2 = Service.Create(
             Factory<Package>().Generate() with
             {
-                Contracts = [container with { HandlerApplication = docker2.Name }]
+                Contracts = new ContractList { container.With(c => c with { HandlerApplication = docker2.Name }) }
             }
         );
 

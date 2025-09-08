@@ -9,13 +9,14 @@ public class PortEndpointHandlerTests : BaseTests
     public void Install_PrivilegedPort_CreatesUnprivilegedPort()
     {
         InstallPackage("termux-udocker");
-        var container = Factory<Container>().Generate("udocker");
-        var portEndpoint = Factory<PortEndpoint>().Generate() with
-        {
-            Port = 80,
-            Container = new ContractId<Container>(container.Id)
-        };
-        var package = Factory<Package>().Generate() with { Contracts = [portEndpoint, container] };
+        var container = Contract<Container>().Generate("udocker");
+        var portEndpoint = Contract<PortEndpoint>().Generate().With(c => c with
+            {
+                Port = 80,
+                Container = container.Id
+            }
+        );
+        var package = Factory<Package>().Generate() with { Contracts = new ContractList { portEndpoint, container } };
 
         var application = InstallPackage(package);
 
@@ -28,14 +29,15 @@ public class PortEndpointHandlerTests : BaseTests
     public void Install_PrivilegedPortPinned_FailedToCreate()
     {
         InstallPackage("termux-udocker");
-        var container = Factory<Container>().Generate("udocker");
-        var portEndpoint = Factory<PortEndpoint>().Generate() with
-        {
-            Port = 80,
-            ExternalPort = 80,
-            Container = new ContractId<Container>(container.Id)
-        };
-        var package = Factory<Package>().Generate() with { Contracts = [portEndpoint, container] };
+        var container = Contract<Container>().Generate("udocker");
+        var portEndpoint = Contract<PortEndpoint>().Generate().With(c => c with
+            {
+                Port = 80,
+                ExternalPort = 80,
+                Container = container.Id
+            }
+        );
+        var package = Factory<Package>().Generate() with { Contracts = new ContractList { portEndpoint, container } };
 
         Assert.Throws<HandlerNotFoundException>(() => InstallPackage(package));
     }

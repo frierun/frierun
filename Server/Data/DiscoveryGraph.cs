@@ -29,7 +29,7 @@ public class DiscoveryGraph
     /// <summary>
     /// Returns next contract to initialize.
     /// </summary>
-    public (ContractId?, Contract?) Next()
+    public (ContractId? Id, Contract? Contract) Next()
     {
         // reinitializing freshly updated contracts
         while (_toInitialize.Count > 0)

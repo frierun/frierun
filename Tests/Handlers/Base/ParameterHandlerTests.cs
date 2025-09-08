@@ -7,13 +7,14 @@ public class ParameterHandlerTests : BaseTests
     [Fact]
     public void Install_WithDefaultValue_SetsDefaultValue()
     {
-        var parameter = Factory<Parameter>().Generate() with { Value = new Argument<string>()};
+        var (parameterId, parameter) = Contract<Parameter>().GenerateEntry();
+        parameter = parameter with { Value = new Argument<string>() };
+        var package = Factory<Package>().Generate() with { Contracts = new ContractList { [parameterId] = parameter } };
         Assert.NotNull(parameter.DefaultValue);
-        var package = Factory<Package>().Generate() with { Contracts = [parameter] };
-        
+
         var application = InstallPackage(package);
-        
-        var installedParameter = application.GetContract(new ContractId<Parameter>(parameter.Id));
+
+        var installedParameter = application.GetContract(new ContractId<Parameter>(parameterId));
         Assert.Equal(parameter.DefaultValue, installedParameter.Value.Value);
     }
 }

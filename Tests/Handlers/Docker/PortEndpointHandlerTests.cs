@@ -10,46 +10,47 @@ public class PortEndpointHandlerTests : BaseTests
     public void Install_ContainerWithPortEndpoint_DependsOnContainer()
     {
         InstallPackage("docker");
-        var container = Factory<Container>().Generate();
+        var (containerId, container) = Contract<Container>().GenerateEntry();
+        var (portId, port) = Contract<PortEndpoint>().GenerateEntry();
         var package = Factory<Package>().Generate() with
         {
-            Contracts =
-            [
-                container,
-                Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Id) }
-            ]
+            Contracts = new ContractList
+            {
+                [containerId] = container,
+                [portId] = port with { Container = containerId }
+            }
         };
 
         var application = InstallPackage(package);
 
-        var portEndpoint = application.GetContracts<PortEndpoint>().Single();
-        Assert.Contains(container.Id, portEndpoint.DependsOn);
+        Assert.Contains(containerId, application.GetContracts<PortEndpoint>().Single().DependsOn);
     }
 
     [Fact]
     public void Install_ContainerWithPortEndpoint_PassesPortToContainer()
     {
         InstallPackage("docker");
-        var container = Factory<Container>().Generate();
+        var (containerId, container) = Contract<Container>().GenerateEntry();
+        var (portId, port) = Contract<PortEndpoint>().GenerateEntry();
         var package = Factory<Package>().Generate() with
         {
-            Contracts =
-            [
-                container,
-                Factory<PortEndpoint>().Generate() with { Container = new ContractId<Container>(container.Id) }
-            ]
+            Contracts = new ContractList
+            {
+                [containerId] = container,
+                [portId] = port with { Container = containerId }
+            }
         };
 
         var application = InstallPackage(package);
 
-        var endpoint = application.GetContracts<PortEndpoint>().Single();
-        Assert.True(endpoint.Installed);
+        var installedPort = application.GetContract(portId);
+        Assert.True(installedPort.Installed);
 
         DockerClient.Containers.Received(1).CreateContainerAsync(
             Arg.Is<CreateContainerParameters>(p =>
                 p.HostConfig
-                    .PortBindings[$"{endpoint.Port}/{endpoint.Protocol.ToString().ToLower()}"][0]
-                    .HostPort == endpoint.Port.ToString()
+                    .PortBindings[$"{installedPort.Port}/{installedPort.Protocol.ToString().ToLower()}"][0]
+                    .HostPort == installedPort.Port.ToString()
             ),
             Arg.Any<CancellationToken>()
         );

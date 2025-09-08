@@ -8,7 +8,7 @@ namespace Frierun.Tests.Handlers;
 public class PostgresqlHandlerTests : BaseTests
 {
     private readonly Application _providerApplication;
-    
+
     public PostgresqlHandlerTests()
     {
         InstallPackage("docker");
@@ -20,61 +20,57 @@ public class PostgresqlHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts =
-            [
-                new Postgresql(),
-            ]
+            Contracts = new ContractList { Contract<Postgresql>().Generate() }
         };
 
         var application = InstallPackage(package);
 
         var database = application.GetContracts<Postgresql>().Single();
         Assert.True(database.Installed);
-        Assert.Equal(package.Name, database.Username);
-        Assert.Equal(package.Name, database.Database);
+        Assert.StartsWith(package.Name, database.Username);
+        Assert.StartsWith(package.Name, database.Database);
         Assert.Contains(_providerApplication.Name, application.RequiredApplications);
         Assert.Equal(application.Name, database.NetworkName);
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
-            database.NetworkName, 
+            database.NetworkName,
             Arg.Any<NetworkConnectParameters>()
         );
-        
-    }    
-    
+    }
+
     [Fact]
     public void Install_PackageWithTwoContracts_OnlyOneNetworkAttached()
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts =
-            [
-                new Postgresql("first"),
-                new Postgresql("second"),
-            ]
+            Contracts = new ContractList
+            {
+                Contract<Postgresql>().Generate(),
+                Contract<Postgresql>().Generate()
+            }
         };
 
         var application = InstallPackage(package);
 
         Assert.Equal(2, application.GetContracts<Postgresql>().Count());
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
-            application.Name, 
+            application.Name,
             Arg.Any<NetworkConnectParameters>()
         );
     }
-    
+
     [Fact]
     public void Uninstall_PackageWithTwoContracts_OnlyOneNetworkDetached()
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts =
-            [
-                new Postgresql("first"),
-                new Postgresql("second"),
-            ]
+            Contracts = new ContractList
+            {
+                Contract<Postgresql>().Generate(),
+                Contract<Postgresql>().Generate()
+            }
         };
         var application = InstallPackage(package);
-        
+
         Resolve<UninstallService>().Handle(application);
 
         DockerClient.Networks.Received(1).DisconnectNetworkAsync(
@@ -82,19 +78,19 @@ public class PostgresqlHandlerTests : BaseTests
             Arg.Any<NetworkDisconnectParameters>()
         );
     }
-    
+
     [Fact]
     public void Initialize_PrefixIsPostgres_UserIsNotPostgres()
     {
         var package = Factory<Package>().Generate() with
         {
             Prefix = "postgres",
-            Contracts = [new Postgresql()]
+            Contracts = new ContractList { Contract<Postgresql>().Generate() }
         };
 
         var application = InstallPackage(package);
 
         var database = application.GetContracts<Postgresql>().Single();
         Assert.NotEqual(package.Name, database.Username);
-    }    
+    }
 }

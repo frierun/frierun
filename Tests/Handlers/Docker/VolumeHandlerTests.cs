@@ -15,15 +15,15 @@ public class VolumeHandlerTests : BaseTests
     [Fact]
     public void Install_TwoApplicationsWithSameVolume_AddsVolumeOnce()
     {
-        var volume = Factory<Volume>().Generate();
+        var (volumeId, volume) = Contract<Volume>().GenerateEntry();
         volume = volume with { VolumeName = volume.Name };
         var package1 = Factory<Package>().Generate() with
         {
-            Contracts = [volume]
+            Contracts = new ContractList { [volumeId] = volume }
         };
         var package2 = Factory<Package>().Generate() with
         {
-            Contracts = [volume]
+            Contracts = new ContractList { [volumeId] = volume }
         };
 
         var application1 = InstallPackage(package1);
@@ -40,15 +40,15 @@ public class VolumeHandlerTests : BaseTests
     public void Uninstall_TwoApplicationsWithSameVolume_RemovesVolumeOnce()
     {
         var uninstallService = Resolve<UninstallService>();
-        var volume = Factory<Volume>().Generate();
+        var (volumeId, volume) = Contract<Volume>().GenerateEntry();
         volume = volume with { VolumeName = volume.Name };
         var package1 = Factory<Package>().Generate() with
         {
-            Contracts = [volume]
+            Contracts = new ContractList { [volumeId] = volume }
         };
         var package2 = Factory<Package>().Generate() with
         {
-            Contracts = [volume]
+            Contracts = new ContractList { [volumeId] = volume }
         };
 
         var application1 = InstallPackage(package1);

@@ -3,14 +3,11 @@ using Frierun.Server.Data;
 
 namespace Frierun.Tests.Factories;
 
-public sealed class DaemonFactory : Faker<Daemon>
+public sealed class DaemonFactory : ContractFaker<Daemon>
 {
-    private readonly HashSet<string?> _uniqueNames = [];
-
     public DaemonFactory()
     {
         CustomInstantiator(_ => new Daemon(""));
-        this.UniqueRuleFor(p => p.Name, f => f.Lorem.Word(), _uniqueNames);
         RuleFor(p => p.Command, f => new Argument<IEnumerable<string>>(new List<string>(f.Lorem.Words())));
         RuleFor(
             p => p.PreCommands,

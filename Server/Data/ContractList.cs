@@ -35,10 +35,10 @@ public class ContractList : IReadOnlyDictionary<ContractId, Contract>, IEnumerab
     {
         _contracts = new Dictionary<ContractId, Contract>(contracts);
     }
-
-    public void Add(Contract contract)
+    
+    public void Add(KeyValuePair<ContractId, Contract> pair)
     {
-        _contracts.Add(contract.Id, contract);
+        _contracts.Add(pair.Key, pair.Value);
     }
     
     public IEnumerator<Contract> GetEnumerator()

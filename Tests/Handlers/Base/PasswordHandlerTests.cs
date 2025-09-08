@@ -7,31 +7,33 @@ public class PasswordHandlerTests : BaseTests
     [Fact]
     public void Install_Password_CreatesRandomString()
     {
+        var (passwordId, password) = Contract<Password>().GenerateEntry();
         var package = Factory<Package>().Generate() with
         {
-            Contracts = [new Password()]
+            Contracts = new ContractList { [passwordId] = password }
         };
 
         var application = InstallPackage(package);
 
-        var password = application.GetContract(new ContractId<Password>());
-        Assert.True(password.Installed);
-        Assert.NotNull(password.Value);
+        var installedPassword = application.GetContract(passwordId);
+        Assert.True(installedPassword.Installed);
+        Assert.NotNull(installedPassword.Value);
     }
 
     [Fact]
     public void Install_Password_CanBeInserted()
     {
+        var (passwordId, password) = Contract<Password>().GenerateEntry();
         var package = Factory<Package>().Generate() with
         {
-            ApplicationDescription = "GeneratedPassword: {{Password::Value}}",
-            Contracts = [new Password()]
+            ApplicationDescription = $"GeneratedPassword: {{{{Password:{passwordId.Name}:Value}}}}",
+            Contracts = new ContractList { [passwordId] = password }
         };
 
         var application = InstallPackage(package);
 
-        var password = application.GetContract(new ContractId<Password>());
-        Assert.True(password.Installed);
-        Assert.Equal(application.Description, $"GeneratedPassword: {password.Value}");
+        var installedPassword = application.GetContract(passwordId);
+        Assert.True(installedPassword.Installed);
+        Assert.Equal(application.Description, $"GeneratedPassword: {installedPassword.Value}");
     }
 }

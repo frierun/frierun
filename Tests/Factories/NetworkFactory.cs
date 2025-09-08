@@ -3,14 +3,11 @@ using Network = Frierun.Server.Data.Network;
 
 namespace Frierun.Tests.Factories;
 
-public sealed class NetworkFactory: Faker<Network>
+public sealed class NetworkFactory: ContractFaker<Network>
 {
-    private readonly HashSet<string?> _uniqueNames = [];
-    
     public NetworkFactory()
     {
         CustomInstantiator(_ => new Network(""));
-        this.UniqueRuleFor(p => p.Name, f => f.Lorem.Word(), _uniqueNames);
         RuleFor(p => p.NetworkName, f => f.Lorem.Word());
 
         RuleSet(

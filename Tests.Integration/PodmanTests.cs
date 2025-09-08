@@ -13,7 +13,7 @@ public class PodmanTests : BaseTests
         const string socketPath = "/run/podman/podman.sock";
         var application = InstallPackage(
             "docker",
-            [new DockerApiConnection(Path: socketUri)]
+            new ContractList { [""] = new DockerApiConnection(Path: socketUri) }
         );
 
         var dockerApiConnection = application.GetContract(new ContractId<DockerApiConnection>());
