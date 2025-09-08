@@ -67,7 +67,7 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
     public Application Install()
     {
         var graph = BuildGraph();
-        var installedContracts = new List<Contract>();
+        var installedContracts = new Dictionary<ContractId, Contract>();
         graph.RunDfs(
             contractId =>
             {
@@ -84,7 +84,7 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
 
                 if (installedContract is not Package)
                 {
-                    installedContracts.Add(installedContract);
+                    installedContracts[contractId] = installedContract;
                 }
 
                 contracts[contractId] = installedContract;

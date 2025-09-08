@@ -15,7 +15,7 @@ public class ContractListConverter : JsonConverter<ContractList>
             return null;
         }
 
-        return new ContractList(list);
+        return new ContractList(list.Select(contract => new KeyValuePair<ContractId, Contract>(contract.Id, contract)));
     }
 
     public override void Write(Utf8JsonWriter writer, ContractList value, JsonSerializerOptions options)

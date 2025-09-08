@@ -15,12 +15,13 @@ public class ContainerHandler(Application application, DockerService dockerServi
     public override IEnumerable<ContractList> Initialize(Container contract, ApplicationContext context)
     {
         yield return new ContractList(
-            contract.Mounts.Values
-                .Select(mount => new Volume(mount.Volume.Name)
+            contract.Mounts.Values.Select(mount => new KeyValuePair<ContractId, Contract>(
+                    mount.Volume, new Volume(mount.Volume.Name)
                     {
                         HandlerApplication = Application?.Name,
                     }
                 )
+            )
         )
         {
             [context] = contract with

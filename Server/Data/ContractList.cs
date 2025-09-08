@@ -30,14 +30,6 @@ public class ContractList : IReadOnlyDictionary<ContractId, Contract>
         _contracts = new Dictionary<ContractId, Contract>(contracts);
     }
     
-    public ContractList(IEnumerable<Contract> contracts)
-    {
-        _contracts =
-            new Dictionary<ContractId, Contract>(
-                contracts.Select(c => new KeyValuePair<ContractId, Contract>(c.Id, c))
-            );
-    }
-
     public ContractList(ContractList contracts)
     {
         _contracts = new Dictionary<ContractId, Contract>(contracts);

@@ -7,19 +7,25 @@ public class FileHandlerTests : TestWithDocker
 {
     private async Task InstallAndCheck(File contract, Func<string, Task> checkContainer, Parameter? parameter = null)
     {
-        var contracts = new List<Contract>
+        var contracts = new Dictionary<ContractId, Contract>
         {
-            new Container(
-                ImageName: "alpine:latest",
-                Command: new Argument<IEnumerable<string>>(["tail", "-f", "/dev/null"]),
-                Mounts: new Dictionary<string, ContainerMount> { { "/mnt", new ContainerMount() } }
-            ),
-            contract
+            {
+                new ContractId<Container>(),
+                new Container(
+                    ImageName: "alpine:latest",
+                    Command: new Argument<IEnumerable<string>>(["tail", "-f", "/dev/null"]),
+                    Mounts: new Dictionary<string, ContainerMount> { { "/mnt", new ContainerMount() } }
+                )
+            },
+            {
+                new ContractId<File>(),
+                contract
+            }
         };
 
         if (parameter != null)
         {
-            contracts.Add(parameter);
+            contracts[new ContractId<Parameter>()] = parameter;
         }
 
         var package = new Package(

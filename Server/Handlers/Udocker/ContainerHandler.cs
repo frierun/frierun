@@ -17,10 +17,12 @@ public class ContainerHandler(Application application)
 
         var contractId = contract.Id;
         yield return new ContractList(
-            contract.Mounts.Values.Select(mount => new Volume(mount.Volume.Name)
-                {
-                    HandlerApplication = Application?.Name
-                }
+            contract.Mounts.Values.Select(mount => new KeyValuePair<ContractId, Contract>(
+                    mount.Volume, new Volume(mount.Volume.Name)
+                    {
+                        HandlerApplication = Application?.Name,
+                    }
+                )
             )
         )
         {
