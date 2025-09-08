@@ -20,7 +20,7 @@ public class PostgresqlHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList { Contract<Postgresql>().Generate() }
+            Contracts = [Contract<Postgresql>().Generate()]
         };
 
         var application = InstallPackage(package);
@@ -42,11 +42,11 @@ public class PostgresqlHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList
-            {
+            Contracts =
+            [
                 Contract<Postgresql>().Generate(),
                 Contract<Postgresql>().Generate()
-            }
+            ]
         };
 
         var application = InstallPackage(package);
@@ -63,11 +63,11 @@ public class PostgresqlHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList
-            {
+            Contracts =
+            [
                 Contract<Postgresql>().Generate(),
                 Contract<Postgresql>().Generate()
-            }
+            ]
         };
         var application = InstallPackage(package);
 
@@ -85,7 +85,7 @@ public class PostgresqlHandlerTests : BaseTests
         var package = Factory<Package>().Generate() with
         {
             Prefix = "postgres",
-            Contracts = new ContractList { Contract<Postgresql>().Generate() }
+            Contracts = [Contract<Postgresql>().Generate()]
         };
 
         var application = InstallPackage(package);

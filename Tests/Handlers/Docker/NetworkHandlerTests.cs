@@ -14,11 +14,11 @@ public class NetworkHandlerTests : BaseTests
         var udocker = InstallPackage("termux-udocker");
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList
-            {
+            Contracts =
+            [
                 Contract<Container>().Generate("udocker")
                     .With(c => c with { Handler = Handler<ContainerHandler>(udocker) })
-            }
+            ]
         };
         var application = InstallPackage(package);
         var network = application.GetContracts<Network>().Single();

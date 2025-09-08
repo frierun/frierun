@@ -15,7 +15,7 @@ public class DaemonHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList { Contract<Daemon>().Generate() }
+            Contracts = [Contract<Daemon>().Generate()]
         };
 
         var application = InstallPackage(package);
@@ -35,7 +35,7 @@ public class DaemonHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList { Contract<Daemon>().Generate() }
+            Contracts = [Contract<Daemon>().Generate()]
         };
         var application = InstallPackage(package);
         var daemon = application.GetContracts<Daemon>().Single();

@@ -10,7 +10,7 @@ public class StaticDomainHandlerTests : BaseTests
         InstallPackage("static-zone");
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList { Contract<Domain>().Generate() }
+            Contracts = [Contract<Domain>().Generate()]
         };
 
         var application = InstallPackage(package);
@@ -29,7 +29,7 @@ public class StaticDomainHandlerTests : BaseTests
         );
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList { Contract<Domain>().Generate() }
+            Contracts = [Contract<Domain>().Generate()]
         };
 
         var application = InstallPackage(package);

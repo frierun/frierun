@@ -1,12 +1,19 @@
 ﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using Frierun.Server.Handlers;
 
 namespace Frierun.Server.Data;
 
-public class ContractList : IReadOnlyDictionary<ContractId, Contract>, IEnumerable<Contract>
+[CollectionBuilder(typeof(ContractList), "Create")]
+public class ContractList : IReadOnlyDictionary<ContractId, Contract>
 {
     private readonly Dictionary<ContractId, Contract> _contracts;
+
+    public static ContractList Create(ReadOnlySpan<KeyValuePair<ContractId, Contract>> contracts)
+    {
+        return new ContractList(contracts.ToArray());
+    }
 
     public ContractList()
     {
@@ -22,7 +29,7 @@ public class ContractList : IReadOnlyDictionary<ContractId, Contract>, IEnumerab
     {
         _contracts = new Dictionary<ContractId, Contract>(contracts);
     }
-
+    
     public ContractList(IEnumerable<Contract> contracts)
     {
         _contracts =
@@ -36,22 +43,12 @@ public class ContractList : IReadOnlyDictionary<ContractId, Contract>, IEnumerab
         _contracts = new Dictionary<ContractId, Contract>(contracts);
     }
     
-    public void Add(KeyValuePair<ContractId, Contract> pair)
-    {
-        _contracts.Add(pair.Key, pair.Value);
-    }
-    
-    public IEnumerator<Contract> GetEnumerator()
-    {
-        return _contracts.Values.GetEnumerator();
-    }
-
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
     }
 
-    IEnumerator<KeyValuePair<ContractId, Contract>> IEnumerable<KeyValuePair<ContractId, Contract>>.GetEnumerator()
+    public IEnumerator<KeyValuePair<ContractId, Contract>> GetEnumerator()
     {
         return _contracts.GetEnumerator();
     }

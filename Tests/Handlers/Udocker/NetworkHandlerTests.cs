@@ -15,11 +15,11 @@ public class NetworkHandlerTests : BaseTests
     {
         var package1 = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList { Contract<Container>().Generate("udocker") }
+            Contracts = [Contract<Container>().Generate("udocker")]
         };
         var package2 = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList { Contract<Container>().Generate("udocker") }
+            Contracts = [Contract<Container>().Generate("udocker")]
         };
 
         var application1 = InstallPackage(package1);
@@ -35,7 +35,7 @@ public class NetworkHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList { Contract<Network>().Generate().With(c => c with { NetworkName = "test" }) }
+            Contracts = [Contract<Network>().Generate().With(c => c with { NetworkName = "test" })]
         };
 
         Assert.Throws<HandlerNotFoundException>(() => InstallPackage(package));

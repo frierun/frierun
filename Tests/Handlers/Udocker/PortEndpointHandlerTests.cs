@@ -16,7 +16,7 @@ public class PortEndpointHandlerTests : BaseTests
                 Container = container.Id
             }
         );
-        var package = Factory<Package>().Generate() with { Contracts = new ContractList { portEndpoint, container } };
+        var package = Factory<Package>().Generate() with { Contracts = [portEndpoint, container] };
 
         var application = InstallPackage(package);
 
@@ -37,7 +37,7 @@ public class PortEndpointHandlerTests : BaseTests
                 Container = container.Id
             }
         );
-        var package = Factory<Package>().Generate() with { Contracts = new ContractList { portEndpoint, container } };
+        var package = Factory<Package>().Generate() with { Contracts = [portEndpoint, container] };
 
         Assert.Throws<HandlerNotFoundException>(() => InstallPackage(package));
     }

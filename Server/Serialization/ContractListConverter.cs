@@ -21,6 +21,6 @@ public class ContractListConverter : JsonConverter<ContractList>
     public override void Write(Utf8JsonWriter writer, ContractList value, JsonSerializerOptions options)
     {
         var converter = (JsonConverter<IEnumerable<Contract>>)options.GetConverter(typeof(IEnumerable<Contract>));
-        converter.Write(writer, value, options);
+        converter.Write(writer, value.Values, options);
     }
 }

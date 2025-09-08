@@ -23,11 +23,10 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
         var package = Factory<Package>().Generate() with
         {
             Contracts =
-            new ContractList
-            {
+            [
                 container,
                 Contract<HttpEndpoint>().Generate().With(c => c with { Container = container.Id })
-            }
+            ]
         };
 
         var application = InstallPackage(package);
@@ -41,10 +40,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("static-zone");
         InstallPackage("traefik");
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { Contract<HttpEndpoint>().Generate() }
-        };
+        var package = Factory<Package>().Generate() with { Contracts = [Contract<HttpEndpoint>().Generate()] };
 
         var application = InstallPackage(package);
 
@@ -63,10 +59,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
             new ContractList { ["Internal"] = new Selector("Internal", Value: "No") }
         );
         InstallPackage("traefik");
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { Contract<HttpEndpoint>().Generate() }
-        };
+        var package = Factory<Package>().Generate() with { Contracts = [Contract<HttpEndpoint>().Generate()] };
 
         var application = InstallPackage(package);
 
@@ -95,10 +88,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
                 ["WebSecure"] = new PortEndpoint(Protocol.Tcp, 443, Name: "WebSecure", ExternalPort: 444),
             }
         );
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { Contract<HttpEndpoint>().Generate() }
-        };
+        var package = Factory<Package>().Generate() with { Contracts = [Contract<HttpEndpoint>().Generate()] };
 
         var application = InstallPackage(package);
 
@@ -119,11 +109,11 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
         InstallPackage("traefik");
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList
-            {
+            Contracts =
+            [
                 Contract<HttpEndpoint>().Generate(),
                 Contract<HttpEndpoint>().Generate()
-            }
+            ]
         };
 
         var application = InstallPackage(package);
@@ -153,11 +143,11 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
         InstallPackage("traefik");
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList
-            {
+            Contracts =
+            [
                 Contract<HttpEndpoint>().Generate(),
                 Contract<HttpEndpoint>().Generate()
-            }
+            ]
         };
         var application = InstallPackage(package);
 
@@ -174,10 +164,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("static-zone");
         InstallPackage("traefik");
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { Contract<HttpEndpoint>().Generate() }
-        };
+        var package = Factory<Package>().Generate() with { Contracts = [Contract<HttpEndpoint>().Generate()] };
 
         var application = InstallPackage(package);
 
@@ -206,10 +193,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
             new ContractList { ["Internal"] = new Selector("Internal", Value: "No") }
         );
         InstallPackage("traefik");
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { Contract<HttpEndpoint>().Generate() }
-        };
+        var package = Factory<Package>().Generate() with { Contracts = [Contract<HttpEndpoint>().Generate()] };
 
         var application = InstallPackage(package);
 

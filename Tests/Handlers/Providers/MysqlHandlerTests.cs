@@ -20,7 +20,7 @@ public class MysqlHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList { Contract<Mysql>().Generate() }
+            Contracts = [Contract<Mysql>().Generate()]
         };
 
         var application = InstallPackage(package);
@@ -42,11 +42,11 @@ public class MysqlHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList
-            {
+            Contracts =
+            [
                 Contract<Mysql>().Generate(),
                 Contract<Mysql>().Generate()
-            }
+            ]
         };
 
         var application = InstallPackage(package);
@@ -63,11 +63,11 @@ public class MysqlHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList
-            {
+            Contracts =
+            [
                 Contract<Mysql>().Generate(),
                 Contract<Mysql>().Generate()
-            }
+            ]
         };
         var application = InstallPackage(package);
 
@@ -85,7 +85,7 @@ public class MysqlHandlerTests : BaseTests
         var package = Factory<Package>().Generate() with
         {
             Prefix = "root",
-            Contracts = new ContractList { Contract<Mysql>().Generate() }
+            Contracts = [Contract<Mysql>().Generate()]
         };
 
         var application = InstallPackage(package);
@@ -102,7 +102,7 @@ public class MysqlHandlerTests : BaseTests
         var package = Factory<Package>().Generate() with
         {
             Prefix = "mysql",
-            Contracts = new ContractList { Contract<Mysql>().Generate() }
+            Contracts = [Contract<Mysql>().Generate()]
         };
 
         var application = InstallPackage(package);
