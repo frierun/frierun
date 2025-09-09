@@ -36,9 +36,20 @@ public class Serve(ILifetimeScope root) : BaseCommand("serve", "Start webserver"
                 options.MapType(typeof(ContractId), () => new OpenApiSchema { Type = "string" });
 
                 options.MapType<Argument<bool?>>(() => new OpenApiSchema { Type = "boolean", Nullable = true });
-                options.MapType<Argument<string>>(() => new OpenApiSchema { Type = "string", Nullable = true });
                 options.MapType<Argument<int>>(() => new OpenApiSchema { Type = "integer", Format = "int32" });
+                options.MapType<Argument<string>>(() => new OpenApiSchema { Type = "string", Nullable = true });
+                options.MapType<Argument<IEnumerable<string>>>(() => new OpenApiSchema
+                    { Type = "array", Items = new OpenApiSchema { Type = "string" }, Nullable = true }
+                );
+                options.MapType<Argument<IEnumerable<IEnumerable<string>>>>(() => new OpenApiSchema
+                    {
+                        Type = "array",
+                        Items = new OpenApiSchema { Type = "array", Items = new OpenApiSchema { Type = "string" } },
+                        Nullable = true
+                    }
+                );
 
+                options.SchemaFilter<ArgumentOfTSchemaFilter>();
                 options.SchemaFilter<LazyHandlerSchemaFilter>();
                 options.SchemaFilter<InstalledNotRequiredSchemaFilter>();
             }
