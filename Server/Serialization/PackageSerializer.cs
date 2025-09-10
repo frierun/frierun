@@ -53,15 +53,24 @@ public class PackageSerializer(ILogger<PackageSerializer> logger)
             {
                 continue;
             }
-            
-            using Stream stream = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var package = Load(stream);
-            if (package is null)
-            {
-                logger.LogWarning("Failed to deserialize package from {FileName}", fileName);
-                continue;
-            }
 
+            using Stream stream = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            Package? package;
+            try
+            {
+                package = Load(stream);
+                if (package is null)
+                {
+                    logger.LogWarning("Failed to deserialize package {FileName}", fileName);
+                    continue;
+                }
+
+            }
+            catch (JsonException e)
+            {
+                logger.LogError(e, "Failed to deserialize package {FileName}", fileName);
+                throw new Exception($"Failed to deserialize package {fileName}", e); 
+            }
             yield return package;
         }
     }
@@ -74,11 +83,11 @@ public class PackageSerializer(ILogger<PackageSerializer> logger)
         var deserializer = new DeserializerBuilder()
             .WithTypeResolver(new StaticTypeResolver())
             .Build();
-        
+
         using StreamReader reader = new(stream);
-        
+
         var obj = deserializer.Deserialize(reader);
-        
+
         var json = JsonSerializer.SerializeToDocument(obj);
         return json.Deserialize<Package>(_serializerOptions);
     }

@@ -4,10 +4,12 @@ shortDescription: "Expenses and savings tracking"
 fullDescription: "Actual Budget is a super fast and privacy-focused app for managing your finances. At its heart is the well proven and much loved Envelope Budgeting methodology."
 tags: [ "finance" ]
 contracts:
-  - type: "Container"
+  Container:
+    type: "Container"
     imageName: "ghcr.io/actualbudget/actual:latest"
     mounts:
       /data: "data"
   
-  - type: "HttpEndpoint"
+  HttpEndpoint:
+    type: "HttpEndpoint"
     port: 5006

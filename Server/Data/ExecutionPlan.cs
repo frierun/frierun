@@ -6,7 +6,7 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
 {
     private readonly HashSet<Application> _requiredApplications = [];
 
-    public IEnumerable<Contract> Contracts => contracts.Values;
+    public ContractList Contracts => new(contracts);
     
     /// <summary>
     /// List of all contracts that are alternatives to the main execution plan.
