@@ -6,12 +6,12 @@ fullDescription: "Your personal media on any device.
   Your personal Emby Server automatically converts and streams your media on-the-fly to play on any device."
 tags: [ "storage" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "emby/embyserver:latest"
     mounts:
       /mnt/media: "media"
       /config: "config"
     
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 8096
     

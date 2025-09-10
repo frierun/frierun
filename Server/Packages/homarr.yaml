@@ -6,18 +6,18 @@ fullDescription: "A sleek, modern dashboard that puts all of your apps and servi
   Seamlessly integrates with the apps you've added, providing you with valuable information."
 tags: [ "dashboard" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "ghcr.io/homarr-labs/homarr:latest"
     mounts:
       /app/data/configs: "configs"
       /app/public/icons: "icons"
       /data: "data"
     
-  - type: "Optional"
+  Optional:Docker socket:
     name: "Docker socket"
     contracts:
-      - type: "Container"
+      Container:
         mountDockerSocket: true
         
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 7575

@@ -5,7 +5,7 @@ shortDescription: "Minimalist feed reader"
 fullDescription: "Miniflux is a minimalist software. The purpose of this application is to read feeds. Nothing else."
 tags: [ "internet" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "ghcr.io/miniflux/miniflux:latest"
     env:
       DATABASE_URL: "postgres://{{Postgresql::Username}}:{{Postgresql::Password}}@{{Postgresql::Host}}/{{Postgresql::Database}}?sslmode=disable"
@@ -15,6 +15,5 @@ contracts:
       ADMIN_PASSWORD: "{{Password::Value}}"
     dependsOn: ["Postgresql"]
       
-  - type: "HttpEndpoint"
-    name: "frontend"
+  HttpEndpoint:
     port: 8080

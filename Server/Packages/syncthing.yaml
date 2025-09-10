@@ -7,7 +7,7 @@ fullDescription: "Syncthing is a continuous file synchronization program.
   and how it’s transmitted over the internet."
 tags: [ "storage" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "lscr.io/linuxserver/syncthing:latest"
     env:
       PUID: "1000"
@@ -18,22 +18,22 @@ contracts:
       /config: "config"
     dependsOn: [ "File:data" ]      
       
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 8384
     
-  - type: "PortEndpoint"
+  PortEndpoint:22000/tcp:
     port: 22000
     protocol: "tcp"
     
-  - type: "PortEndpoint"
+  PortEndpoint:22000/udp:
     port: 22000
     protocol: "udp"
     
-  - type: "PortEndpoint"
+  PortEndpoint:21027/udp:
     port: 21027
     protocol: "udp"
     
-  - type: "File"
+  File:data:
     name: "data"
     volume: "data"
     path: ""

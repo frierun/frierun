@@ -6,7 +6,7 @@ fullDescription: "MariaDB Server is one of the most popular open source relation
   It’s made by the original developers of MySQL and guaranteed to stay open source."
 tags: [ "storage", "provider" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "mariadb:10"
     env:
       MARIADB_ROOT_PASSWORD: "{{Password::Value}}"

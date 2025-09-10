@@ -4,7 +4,7 @@ shortDescription: "Request management for Plex"
 fullDescription: "Overseerr is a request management and media discovery tool built to work with your existing Plex ecosystem."
 tags: [ "network" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "lscr.io/linuxserver/overseerr:latest"
     env:
       PUID: "1000"
@@ -13,5 +13,5 @@ contracts:
     mounts:
       /config: "config"
       
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 5055

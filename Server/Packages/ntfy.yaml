@@ -5,9 +5,9 @@ fullDescription: "ntfy lets you send push notifications to your phone or desktop
   using simple HTTP PUT or POST requests. I use it to notify myself when scripts fail, or long-running commands complete."
 tags: [ "network" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "binwiederhier/ntfy:latest"
     command: [ "serve" ]
     
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 80

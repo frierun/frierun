@@ -4,10 +4,10 @@ shortDescription: "Password manager"
 fullDescription: "Vaultwarden gives you power to create and manage unique passwords, so you can strengthen privacy and boost productivity online from any device or location."
 tags: [ "security" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "ghcr.io/dani-garcia/vaultwarden:latest"
     mounts:
       /data: "data"
     
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 80

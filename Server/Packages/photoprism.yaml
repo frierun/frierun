@@ -7,7 +7,7 @@ fullDescription: "PhotoPrism® is an AI-Powered Photos App for the Decentralized
   You can run it at home, on a private server, or in the cloud."
 tags: [ "storage" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "photoprism/photoprism:latest"
     env:
       PHOTOPRISM_UPLOAD_NSFW: "true"
@@ -16,5 +16,5 @@ contracts:
       /photoprism/originals: "originals"
       /photoprism/storage: "storage"
       
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 2342

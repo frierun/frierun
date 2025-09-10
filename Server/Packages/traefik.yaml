@@ -6,7 +6,7 @@ fullDescription: "Traefik is an open-source Application Proxy that makes publish
   and routes them securely."
 tags: [ "network", "provider" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "traefik:v3.1"
     command:
       - "--api.insecure=true"
@@ -17,12 +17,12 @@ contracts:
       - "--certificatesresolvers.tlschallenge.acme.tlschallenge=true"
     mountDockerSocket: true
     
-  - type: "PortEndpoint"
+  PortEndpoint:Web:
     name: "Web"
     port: 80
     protocol: "tcp"
     
-  - type: "PortEndpoint"
+  PortEndpoint:WebSecure:
     name: "WebSecure"
     port: 443
     protocol: "tcp"

@@ -4,6 +4,5 @@ shortDescription: "Cloudflare Zero Trust Tunnel"
 fullDescription: "Allows exposing local application to the internet via Cloudflare Zero Trust Tunnel."
 tags: [ "provider" ]
 contracts:
-  - type: "CloudflareApiConnection"
-    
-  - type: "CloudflareTunnel"
+  CloudflareApiConnection:
+  CloudflareTunnel:

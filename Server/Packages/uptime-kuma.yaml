@@ -4,10 +4,10 @@ shortDescription: "Uptime monitoring"
 fullDescription: "Monitoring uptime for HTTP(s) / TCP / HTTP(s) Keyword / HTTP(s) Json Query / Ping / DNS Record / Push / Steam Game Server / Docker Containers"
 tags: [ "dashboard", "network" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "louislam/uptime-kuma:1"
     mounts:
       /app/data: "data"
     
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 3001

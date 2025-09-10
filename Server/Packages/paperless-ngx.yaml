@@ -6,7 +6,7 @@ fullDescription: "Paperless-ngx is a community-supported open-source document ma
 tags: [ "storage" ]
 applicationDescription: "Login: admin\nPassword: {{Password::Value}}"
 contracts:
-  - type: "Container"
+  Container:webserver:
     name: "webserver"
     imageName: "ghcr.io/paperless-ngx/paperless-ngx:latest"
     env:
@@ -20,7 +20,7 @@ contracts:
       /usr/src/paperless/media: "media"
     dependsOn: ["Redis"]
  
-  - type: "Selector"
+  Selector:Database:
     name: "Database"
     options:
       - name: "PostgreSQL"
@@ -36,6 +36,6 @@ contracts:
 
       - name: "SQLite"
               
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     container: "webserver"
     port: 8000

@@ -6,7 +6,7 @@ fullDescription: "Sonarr is a PVR for Usenet and BitTorrent users.
   It can also be configured to automatically upgrade the quality of files already downloaded when a better quality format becomes available."
 tags: [ "network" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "lscr.io/linuxserver/sonarr:latest"
     env:
       PUID: "1000"
@@ -17,10 +17,10 @@ contracts:
       /data: "data"
     dependsOn: [ "File:data" ]      
       
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 8989
         
-  - type: "File"
+  File:data:
     name: "data"
     volume: "data"
     path: ""

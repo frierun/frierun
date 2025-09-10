@@ -4,16 +4,16 @@ shortDescription: "Container management"
 fullDescription: "Portainer is your all-in-one platform engineering solution for managing containerized environments."
 tags: [ "dev" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "portainer/portainer-ce:latest"
     mounts:
       /data: "data"
       
-  - type: "Optional"
+  Optional:Docker socket:
     name: "Docker socket"
     contracts:
-      - type: "Container"
+      Container:
         mountDockerSocket: true      
     
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 9000

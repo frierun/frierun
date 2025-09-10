@@ -5,7 +5,7 @@ shortDescription: "Account management system"
 fullDescription: "Provides users/employees with one login for all internal applications and services, simplifying access and improving security."
 tags: [ "network", "security" ]
 contracts:
-  - type: "Container"
+  Container:server:
     name: "server"
     imageName: "ghcr.io/goauthentik/server:latest"
     command: [ "server" ]
@@ -20,7 +20,7 @@ contracts:
     mounts:
       /media: "media"
       
-  - type: "Container"
+  Container:worker:
     name: "worker"
     imageName: "ghcr.io/goauthentik/server:latest"
     command: [ "worker" ]
@@ -36,7 +36,7 @@ contracts:
       /certs: "certs"
     mountDockerSocket: true
     
-  - type: "HttpEndpoint"
+  HttpEndpoint:frontend:
     name: "frontend"
     container: "server"
     port: 9000

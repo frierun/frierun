@@ -7,7 +7,7 @@ fullDescription: "Gitea is a painless self-hosted all-in-one software developmen
   making it an ideal choice for both small teams and large organizations."
 tags: [ "dev" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "docker.gitea.com/gitea:1"
     env:
       USER_UID: "1000"
@@ -15,12 +15,12 @@ contracts:
     mounts:
       /data: "data"
  
-  - type: "Selector"
+  Selector:Database:
     name: "Database"
     options:
       - name: "MySQL"
         contracts:
-          - type: "Container"
+          Container:
             env:
               GITEA__database__DB_TYPE: "mysql"
               GITEA__database__HOST: "{{Mysql::Host}}"
@@ -31,7 +31,7 @@ contracts:
               
       - name: "PostgreSQL"
         contracts:
-          - type: "Container"
+          Container:
             env:
               GITEA__database__DB_TYPE: "postgres"
               GITEA__database__HOST: "{{Postgresql::Host}}"
@@ -42,10 +42,10 @@ contracts:
               
       - name: "SQLite"
               
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 3000
     
-  - type: "PortEndpoint"
+  PortEndpoint:Ssh:
     port: 22
     externalPort: 2222
     protocol: "tcp"

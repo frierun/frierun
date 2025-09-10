@@ -5,7 +5,7 @@ fullDescription: "Easily back up, organize, and manage your photos on your own s
   Immich helps you browse, search and organize your photos and videos with ease, without sacrificing your privacy."
 tags: [ "storage" ]
 contracts:
-  - type: "Container"
+  Container:server:
     name: "server"
     imageName: "ghcr.io/immich-app/immich-server:release"
     env:
@@ -17,17 +17,17 @@ contracts:
     mounts:
       /usr/src/app/upload: "upload"
     
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     container: "server"
     port: 2283
         
-  - type: "Container"
+  Container:machine-learning:
     name: "machine-learning"
     imageName: "ghcr.io/immich-app/immich-machine-learning:release"
     mounts:
       /cache: "model-cache"
     
-  - type: "Container"
+  Container:database:
     name: "database"
     imageName: "docker.io/tensorchord/pgvecto-rs:pg14-v0.2.0@sha256:90724186f0a3517cf6914295b5ab410db9ce23190a2d9d0b9dd6463e3fa298f0"
     command:

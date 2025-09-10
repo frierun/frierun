@@ -5,12 +5,12 @@ fullDescription: "Navidrome can be used as a standalone server, that allows you 
   It can also work as a lightweight Subsonic-API compatible server, that can be used with any Subsonic compatible client."
 tags: [ "storage" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "deluan/navidrome:latest"
     mounts:
       /data: "data"
       /music: "music"
     
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 4533
     
