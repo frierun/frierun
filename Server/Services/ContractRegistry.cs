@@ -24,7 +24,10 @@ public class ContractRegistry
     {
         return typeName switch
         {
+            nameof(CloudflareApiConnection) => new CloudflareApiConnection(name),
+            nameof(CloudflareTunnel) => new CloudflareTunnel(name),
             nameof(Container) => new Container(name),
+            nameof(DockerApiConnection) => new DockerApiConnection(name),
             nameof(Domain) => new Domain(name),
             nameof(HttpEndpoint) => new HttpEndpoint(name),
             nameof(Mysql) => new Mysql(name),
@@ -34,6 +37,7 @@ public class ContractRegistry
             nameof(Password) => new Password(name),
             nameof(Postgresql) => new Postgresql(name),
             nameof(Redis) => new Redis(name),
+            nameof(SshConnection) => new SshConnection(name),
             nameof(Volume) => new Volume(name),
             _ => throw new Exception("Can't create contract type: " + typeName)
         };

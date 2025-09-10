@@ -4,7 +4,7 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server;
 
-public class ContractListConverter : JsonConverter<ContractList>
+public class ContractListConverter(ContractRegistry contractRegistry) : JsonConverter<ContractList>
 {
     private delegate Contract? ReadDelegate(
         ref Utf8JsonReader reader,
@@ -62,10 +62,10 @@ public class ContractListConverter : JsonConverter<ContractList>
 
             var contractId = contractIdConverter.ReadAsPropertyName(ref reader, typeof(ContractId), options);
             reader.Read();
-            
+
             var contractType = ContractRegistry.GetContractType(contractId.TypeName);
             var contract = GetDelegateForType(contractType, options)(ref reader, contractType, options);
-            dictionary[contractId] = contract ?? throw new JsonException();
+            dictionary[contractId] = contract ?? contractRegistry.CreateContract(contractId);
         }
 
         return new ContractList(dictionary);

@@ -7,6 +7,7 @@ namespace Frierun.Server;
 public class StateSerializer(
     string path,
     PackageRegistry packageRegistry,
+    ContractRegistry contractRegistry,
     Lazy<HandlerRegistry> lazyHandlerRegistry
 )
 {
@@ -20,7 +21,7 @@ public class StateSerializer(
         {
             new ContractIdConverter(),
             new ContractIdOfTConverter(),
-            new ContractListConverter(),
+            new ContractListConverter(contractRegistry),
             new ArgumentOfTConverter(),
             new LazyHandlerConverter(lazyHandlerRegistry),
             new PackageConverter(packageRegistry)

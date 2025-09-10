@@ -4,7 +4,8 @@ using Microsoft.Extensions.Options;
 namespace Frierun.Server;
 
 public class ConfigureJsonOptions(
-    Lazy<HandlerRegistry> lazyHandlerRegistry
+    Lazy<HandlerRegistry> lazyHandlerRegistry,
+    ContractRegistry contractRegistry
 )
     : IConfigureOptions<JsonOptions>
 {
@@ -13,7 +14,7 @@ public class ConfigureJsonOptions(
         options.JsonSerializerOptions.Converters.Add(new ArgumentOfTConverter());
         options.JsonSerializerOptions.Converters.Add(new ContractIdConverter());
         options.JsonSerializerOptions.Converters.Add(new ContractIdOfTConverter());
-        options.JsonSerializerOptions.Converters.Add(new ContractListConverter());
+        options.JsonSerializerOptions.Converters.Add(new ContractListConverter(contractRegistry));
         options.JsonSerializerOptions.Converters.Add(new LazyHandlerConverter(lazyHandlerRegistry));
     }
 }
