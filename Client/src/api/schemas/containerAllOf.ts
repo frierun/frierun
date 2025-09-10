@@ -15,10 +15,13 @@ export type ContainerAllOf = {
   networkName?: string | null;
   mountDockerSocket: boolean;
   installed?: boolean;
-  command: string[];
+  /** @nullable */
+  command: string[] | null;
+  networkAliases: string[];
   env: ContainerAllOfEnv;
   labels: ContainerAllOfLabels;
   mounts: ContainerAllOfMounts;
   network: string;
-  imageName: string;
+  /** @nullable */
+  imageName: string | null;
 };

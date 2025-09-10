@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { Package } from "./package";
-import type { ApplicationContractsItem } from "./applicationContractsItem";
+import type { ApplicationContracts } from "./applicationContracts";
 
 export interface Application {
   name: string;
@@ -14,6 +14,6 @@ export interface Application {
   url?: string | null;
   /** @nullable */
   description?: string | null;
-  contracts: ApplicationContractsItem[];
+  contracts: ApplicationContracts;
   requiredApplications: string[];
 }

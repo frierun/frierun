@@ -1,7 +1,7 @@
 ﻿import InstallForm from "../components/InstallForm.tsx";
 import {usePostPackagesIdPlan} from "@/api/endpoints/packages.ts";
 import {useCallback, useEffect, useState} from "react";
-import {Package} from "@/api/schemas";
+import {type ExecutionPlanContracts, Package} from "@/api/schemas";
 import {Contract} from "@/components/contracts/ContractForm.tsx";
 
 type Props = {
@@ -13,6 +13,8 @@ type Plan = {
     contracts: Contract[];
     alternatives: Contract[];
 }
+
+export type ContractList = ExecutionPlanContracts;
 
 export default function PackageInstall({name}: Props) {
     const [error, setError] = useState<string | null>(null);
@@ -27,7 +29,9 @@ export default function PackageInstall({name}: Props) {
                 type: 'Package',
                 name,
                 tags: [],
-                contracts: overrides,
+                contracts: Object.fromEntries(overrides.map(contract => [`${contract.type}:${contract.name}`, contract])),
+                applicationUrl: null,
+                applicationDescription: null
             }
         })
 
@@ -41,7 +45,9 @@ export default function PackageInstall({name}: Props) {
             return;
         }
 
-        const packageContract = result.data.contracts.find(contract => contract.type === 'Package');
+        const contracts = Object.entries(result.data.contracts)
+            .map(pair => pair[1]);
+        const packageContract = contracts.find(contract => contract.type === 'Package');
         if (!packageContract) {
             setError("Package has no contract");
             return;
@@ -49,7 +55,7 @@ export default function PackageInstall({name}: Props) {
 
         setPlan({
             packageContract,
-            contracts: result.data.contracts,
+            contracts,
             alternatives: result.data.alternatives
         });
     }, [mutateAsync, name]);
@@ -74,7 +80,7 @@ export default function PackageInstall({name}: Props) {
                             className="z-50 bg-gray opacity-50 absolute top-20 left-0 right-0 bottom-0 flex justify-center font-bold">
                             Please wait...
                         </div>
-                    }                    
+                    }
                     <InstallForm
                         packageContract={plan.packageContract}
                         contracts={plan.contracts}

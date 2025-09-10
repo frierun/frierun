@@ -12,5 +12,6 @@ export type FileAllOf = {
   /** @nullable */
   group?: number | null;
   volume: string;
-  text: string;
+  /** @nullable */
+  text: string | null;
 };

@@ -4,9 +4,10 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { SelectorOptionContractsItem } from "./selectorOptionContractsItem";
+import type { SelectorOptionContracts } from "./selectorOptionContracts";
 
 export interface SelectorOption {
   name: string;
-  contracts: SelectorOptionContractsItem[];
+  /** @nullable */
+  contracts?: SelectorOptionContracts;
 }

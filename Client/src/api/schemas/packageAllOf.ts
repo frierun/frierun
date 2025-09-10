@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { Application } from "./application";
-import type { PackageAllOfContractsItem } from "./packageAllOfContractsItem";
+import type { PackageAllOfContracts } from "./packageAllOfContracts";
 
 export type PackageAllOf = {
   /** @nullable */
@@ -20,7 +20,9 @@ export type PackageAllOf = {
   fullDescription?: string | null;
   result?: Application;
   tags: string[];
-  contracts: PackageAllOfContractsItem[];
-  applicationUrl?: string | null;
-  applicationDescription?: string | null;
+  contracts: PackageAllOfContracts;
+  /** @nullable */
+  applicationUrl: string | null;
+  /** @nullable */
+  applicationDescription: string | null;
 };

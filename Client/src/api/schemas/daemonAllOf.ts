@@ -9,6 +9,8 @@ export type DaemonAllOf = {
   /** @nullable */
   daemonName?: string | null;
   installed?: boolean;
-  command: string[];
-  preCommands: string[][];
+  /** @nullable */
+  command: string[] | null;
+  /** @nullable */
+  preCommands: string[][] | null;
 };

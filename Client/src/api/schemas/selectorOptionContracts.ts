@@ -25,24 +25,29 @@ import type { Selector } from "./selector";
 import type { SshConnection } from "./sshConnection";
 import type { Volume } from "./volume";
 
-export type ExecutionPlanContractsItem =
-  | CloudflareApiConnection
-  | CloudflareTunnel
-  | Container
-  | Daemon
-  | DockerApiConnection
-  | Domain
-  | File
-  | HttpEndpoint
-  | Mysql
-  | Network
-  | Optional
-  | Package
-  | Parameter
-  | Password
-  | PortEndpoint
-  | Postgresql
-  | Redis
-  | Selector
-  | SshConnection
-  | Volume;
+/**
+ * @nullable
+ */
+export type SelectorOptionContracts = {
+  [key: string]:
+    | CloudflareApiConnection
+    | CloudflareTunnel
+    | Container
+    | Daemon
+    | DockerApiConnection
+    | Domain
+    | File
+    | HttpEndpoint
+    | Mysql
+    | Network
+    | Optional
+    | Package
+    | Parameter
+    | Password
+    | PortEndpoint
+    | Postgresql
+    | Redis
+    | Selector
+    | SshConnection
+    | Volume;
+} | null;

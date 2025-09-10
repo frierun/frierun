@@ -4,11 +4,11 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { OptionalAllOfContractsItem } from "./optionalAllOfContractsItem";
+import type { OptionalAllOfContracts } from "./optionalAllOfContracts";
 
 export type OptionalAllOf = {
   /** @nullable */
   value?: boolean | null;
   installed?: boolean;
-  contracts: OptionalAllOfContractsItem[];
+  contracts: OptionalAllOfContracts;
 };

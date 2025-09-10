@@ -9,7 +9,7 @@ import {Contract} from "@/components/contracts/ContractForm.tsx";
 
 type Props = {
     packageContract: Package;
-    overrides: Contract[] ;
+    overrides: Contract[];
     prefix: string;
     setError: (error: string | null) => void;
 }
@@ -28,7 +28,7 @@ export default function useInstall({packageContract, overrides, prefix, setError
             data: {
                 ...packageContract,
                 prefix,
-                contracts: Object.entries(overrides).flatMap(([, value]) => value),
+                contracts: Object.fromEntries(overrides.map(contract => [`${contract.type}:${contract.name}`, contract])),
             }
         });
 

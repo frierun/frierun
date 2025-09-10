@@ -9,5 +9,6 @@ export type ParameterAllOf = {
   /** @nullable */
   defaultValue?: string | null;
   installed?: boolean;
-  value: string;
+  /** @nullable */
+  value: string | null;
 };

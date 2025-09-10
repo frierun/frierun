@@ -4,10 +4,10 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import type { ExecutionPlanContractsItem } from "./executionPlanContractsItem";
+import type { ExecutionPlanContracts } from "./executionPlanContracts";
 import type { ExecutionPlanAlternativesItem } from "./executionPlanAlternativesItem";
 
 export interface ExecutionPlan {
-  contracts: ExecutionPlanContractsItem[];
+  contracts: ExecutionPlanContracts;
   alternatives: ExecutionPlanAlternativesItem[];
 }

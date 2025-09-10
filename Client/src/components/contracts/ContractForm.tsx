@@ -1,5 +1,4 @@
-﻿import {ExecutionPlanContractsItem} from "@/api/schemas";
-import React, {useEffect, useState} from "react";
+﻿import React, {useEffect, useState} from "react";
 import HttpEndpointForm from "@/components/contracts/HttpEndpointForm.tsx";
 import DomainForm from "@/components/contracts/DomainForm.tsx";
 import VolumeForm from "@/components/contracts/VolumeForm.tsx";
@@ -11,8 +10,9 @@ import ParameterForm from "@/components/contracts/ParameterForm.tsx";
 import PortEndpointForm from "@/components/contracts/PortEndpointForm.tsx";
 import DockerApiConnectionForm from "@/components/contracts/DockerApiConnectionForm.tsx";
 import CloudflareApiConnectionForm from "@/components/contracts/CloudflareApiConnectionForm.tsx";
+import {ContractList} from "@/components/PackageInstall.tsx";
 
-export type Contract = ExecutionPlanContractsItem;
+export type Contract = ContractList[keyof ContractList];
 
 export type ContractProps<TContract extends Contract> = {
     contract: TContract;
