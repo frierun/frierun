@@ -25,7 +25,7 @@ contracts:
     options:
       - name: "PostgreSQL"
         contracts:
-          - type: "Container"
+          Container:
             env:
               PAPERLESS_DBENGINE: "postgresql"
               PAPERLESS_DBHOST: "{{Postgresql::Host}}"

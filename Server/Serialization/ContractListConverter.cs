@@ -13,7 +13,7 @@ public class ContractListConverter(ContractRegistry contractRegistry) : JsonConv
     );
 
     /// <summary>
-    /// Create delegate for reading a contract of a given type.
+    /// Create a delegate for reading a contract of a given type.
     /// </summary>
     private ReadDelegate GetDelegateForType(Type contractType, JsonSerializerOptions options)
     {
@@ -26,21 +26,6 @@ public class ContractListConverter(ContractRegistry contractRegistry) : JsonConv
 
     public override ContractList? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (reader.TokenType == JsonTokenType.StartArray)
-        {
-            var listConverter = (JsonConverter<IEnumerable<Contract>>)
-                options.GetConverter(typeof(IEnumerable<Contract>));
-            var list = listConverter.Read(ref reader, typeof(IEnumerable<Contract>), options);
-            if (list is null)
-            {
-                return null;
-            }
-
-            return new ContractList(
-                list.Select(contract => new KeyValuePair<ContractId, Contract>(contract.Id, contract))
-            );
-        }
-
         if (reader.TokenType != JsonTokenType.StartObject)
         {
             throw new JsonException();
