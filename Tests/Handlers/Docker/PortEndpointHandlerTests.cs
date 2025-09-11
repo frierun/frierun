@@ -10,40 +10,32 @@ public class PortEndpointHandlerTests : BaseTests
     public void Install_ContainerWithPortEndpoint_DependsOnContainer()
     {
         InstallPackage("docker");
-        var (containerId, container) = Contract<Container>().GenerateEntry();
-        var (portId, port) = Contract<PortEndpoint>().GenerateEntry();
+        var container = Contract<Container>().Generate();
+        var port = Contract<PortEndpoint>().Set(p => p.Container, container.Id).Generate();
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList
-            {
-                [containerId] = container,
-                [portId] = port with { Container = containerId }
-            }
+            Contracts = [container, port]
         };
 
         var application = InstallPackage(package);
 
-        Assert.Contains(containerId, application.GetContracts<PortEndpoint>().Single().DependsOn);
+        Assert.Contains(container.Id, application.GetContracts<PortEndpoint>().Single().DependsOn);
     }
 
     [Fact]
     public void Install_ContainerWithPortEndpoint_PassesPortToContainer()
     {
         InstallPackage("docker");
-        var (containerId, container) = Contract<Container>().GenerateEntry();
-        var (portId, port) = Contract<PortEndpoint>().GenerateEntry();
+        var container = Contract<Container>().Generate();
+        var port = Contract<PortEndpoint>().Set(p => p.Container, container.Id).Generate();
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList
-            {
-                [containerId] = container,
-                [portId] = port with { Container = containerId }
-            }
+            Contracts = [container, port]
         };
 
         var application = InstallPackage(package);
 
-        var installedPort = application.GetContract(portId);
+        var installedPort = application.GetContract(port.Id);
         Assert.True(installedPort.Installed);
 
         DockerClient.Containers.Received(1).CreateContainerAsync(

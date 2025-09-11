@@ -19,22 +19,4 @@ public sealed class ContainerFactory : ContractFaker<Container>
             "udocker", set => { set.RuleFor(p => p.MountDockerSocket, false); }
         );
     }
-
-    /// <summary>
-    /// Always insert default ruleset 
-    /// </summary>
-    protected override string[] ParseDirtyRulesSets(string dirtyRules)
-    {
-        var result = base.ParseDirtyRulesSets(dirtyRules);
-        if (result[0] != "default")
-        {
-            return
-            [
-                "default",
-                ..result
-            ];
-        }
-
-        return result;
-    }
 }

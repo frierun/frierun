@@ -9,39 +9,29 @@ public class DiscoveryGraphTests : BaseTests
     [Fact]
     public void Next_QueueAndEmptyContracts_QueueHasPriority()
     {
-        var (rootId, rootContract) = Contract<Parameter>().GenerateEntry();
-        var (emptyId, _) = Contract<Parameter>().GenerateEntry();
-        var (queuedId, queuedContract) = Contract<Parameter>().GenerateEntry();
+        var empty = Contract<Parameter>().Generate();
+        var root = Contract<Parameter>()
+            .SetHandler<ParameterHandler>()
+            .Set(p => p.DependsOn, [empty.Id])
+            .Generate();
+        var queued = Contract<Parameter>().Generate();
         var graph = new DiscoveryGraph();
 
-        var result = graph.Apply(
-            rootId,
-            new ContractList
-            {
-                [rootId] = rootContract with { DependsOn = [emptyId], Handler = Handler<ParameterHandler>() },
-                [queuedId] = queuedContract
-            }
-        );
+        var result = graph.Apply(root.Id, [root, queued]);
 
         Assert.True(result);
-        Assert.Equal((queuedId, queuedContract), graph.Next());
-        Assert.Equal((emptyId, null), graph.Next());
+        Assert.Equal((queued.Id, queued.Contract), graph.Next());
+        Assert.Equal((empty.Id, null), graph.Next());
         Assert.Equal((null, null), graph.Next());
     }
 
     [Fact]
     public void Next_SameEmptyContract_ReturnsNull()
     {
-        var (rootId, rootContract) = Contract<Parameter>().GenerateEntry();
+        var root = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
         var graph = new DiscoveryGraph();
 
-        var result = graph.Apply(
-            rootId,
-            new ContractList
-            {
-                [rootId] = rootContract with { DependsOn = [rootContract], Handler = Handler<PackageHandler>() }
-            }
-        );
+        var result = graph.Apply(root.Id, [root]);
 
         Assert.True(result);
         Assert.Equal((null, null), graph.Next());
@@ -50,57 +40,42 @@ public class DiscoveryGraphTests : BaseTests
     [Fact]
     public void Next_ContractReinitialization_ReturnsContract()
     {
-        var (rootId, rootContract) = Contract<Parameter>().GenerateEntry();
-        var (childId, childContract) = Contract<Parameter>().GenerateEntry();
+        var root = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
+        var child = Contract<Parameter>().Generate();
         var graph = new DiscoveryGraph();
 
-        var result = graph.Apply(
-            rootId,
-            new ContractList
-            {
-                [rootId] = rootContract with { Handler = Handler<PackageHandler>() },
-                [childId] = childContract
-            }
-        );
+        var result = graph.Apply(root.Id, [root, child]);
         Assert.True(result);
         var (contractId, contract) = graph.Next();
-        Assert.Equal(childId, contractId);
+        Assert.Equal(child.Id, contractId);
         Assert.NotNull(contract);
 
         result = graph.Apply(
-            childId,
-            new ContractList
-            {
-                [childId] = childContract with { Handler = Handler<PackageHandler>() },
-                [rootId] = rootContract
-            }
+            child.Id,
+            [
+                child.With(c => c with { Handler = Handler<ParameterHandler>() }),
+                root
+            ]
         );
 
         Assert.True(result);
         (contractId, contract) = graph.Next();
-        Assert.Equal(rootId, contractId);
+        Assert.Equal(root.Id, contractId);
         Assert.NotNull(contract);
     }
 
     [Fact]
     public void Next_ContractInfiniteRecursion_ThrowsException()
     {
-        var (rootId, rootContract) = Contract<Parameter>().GenerateEntry();
-        var (childId, childContract) = Contract<Parameter>().GenerateEntry();
+        var root = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
+        var child = Contract<Parameter>().Generate();
         var graph = new DiscoveryGraph();
 
         Assert.Throws<Exception>(() =>
             {
                 for (int i = 0; i < 10000; i++)
                 {
-                    var result = graph.Apply(
-                        rootId,
-                        new ContractList
-                        {
-                            [rootId] = rootContract with { Handler = Handler<PackageHandler>() },
-                            [childId] = childContract
-                        }
-                    );
+                    var result = graph.Apply(root.Id, [root, child]);
                     Assert.True(result);
                     graph.Next();
                 }
@@ -111,64 +86,63 @@ public class DiscoveryGraphTests : BaseTests
     [Fact]
     public void Apply_UninitializedContract_MergeContract()
     {
-        var (rootId, rootContract) = Contract<Parameter>().GenerateEntry();
-        var (childId, childContract) = Contract<Parameter>().GenerateEntry();
+        var root = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
+        var child = Contract<Parameter>().Generate();
 
         var graph = new DiscoveryGraph();
         graph.Apply(
-            rootId,
-            new ContractList
-            {
-                [rootId] = rootContract with { Handler = Handler<ParameterHandler>() },
-                [childId] = childContract with { Value = new Argument<string>() }
-            }
+            root.Id,
+            [
+                root,
+                child.With(c => c with { Value = new Argument<string>() })
+            ]
         );
         var (nextContractId, nextContract) = graph.Next();
-        Assert.Equal(childId, nextContractId);
+        Assert.Equal(child.Id, nextContractId);
         Assert.NotNull(nextContract);
         Assert.Null(((Parameter)nextContract).Value.Value);
 
 
         var result = graph.Apply(
-            childId,
-            new ContractList
-            {
-                [childId] = childContract with { DefaultValue = null, Handler = Handler<ParameterHandler>() }
-            }
+            child.Id,
+            [
+                child.With(c => c with { DefaultValue = null, Handler = Handler<ParameterHandler>() })
+            ]
         );
         Assert.True(result);
 
-        var resultContract = (Parameter)graph.Contracts[childId];
-        Assert.Equal(childContract.Value, resultContract.Value);
-        Assert.Equal(childContract.DefaultValue, resultContract.DefaultValue);
+        var resultContract = (Parameter)graph.Contracts[child.Id];
+        Assert.Equal(child.Contract.Value, resultContract.Value);
+        Assert.Equal(child.Contract.DefaultValue, resultContract.DefaultValue);
     }
 
 
     [Fact]
-    public void Apply_ExistingContract_MergeContract()
+    public void Apply_SameContract_MergeContract()
     {
-        var (id, contract) = Contract<Parameter>().GenerateEntry();
-        contract = contract with { Handler = Handler<ParameterHandler>() };
+        var contract = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
         var graph = new DiscoveryGraph();
 
-        Assert.True(graph.Apply(id, new ContractList { [id] = contract with { DefaultValue = null } }));
-        Assert.True(graph.Apply(id, new ContractList { [id] = contract with { Value = new Argument<string>() } }));
+        Assert.True(graph.Apply(contract.Id, [contract.With(c => c with { DefaultValue = null })]));
+        Assert.True(graph.Apply(contract.Id, [contract.With(c => c with { Value = new Argument<string>() })]));
 
-        var resultContract = (Parameter)graph.Contracts[id];
-        Assert.Equal(contract.Value, resultContract.Value);
-        Assert.Equal(contract.DefaultValue, resultContract.DefaultValue);
+        var resultContract = (Parameter)graph.Contracts[contract.Id];
+        Assert.Equal(contract.Contract.Value, resultContract.Value);
+        Assert.Equal(contract.Contract.DefaultValue, resultContract.DefaultValue);
     }
 
     [Fact]
-    public void Apply_ExistingConflictingContract_ReturnsFalse()
+    public void Apply_SameConflictingContract_ReturnsFalse()
     {
-        var (id, contract) = Contract<Parameter>().GenerateEntry();
-        contract = contract with { Handler = Handler<ParameterHandler>() };
+        var contract = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
         var graph = new DiscoveryGraph();
 
-        Assert.True(graph.Apply(id, new ContractList { [id] = contract }));
+        Assert.True(graph.Apply(contract.Id, [contract]));
         Assert.False(
-            graph.Apply(id, new ContractList { [id] = contract with { Value = contract.Value + "conflict" } })
+            graph.Apply(
+                contract.Id,
+                [contract.With(c => c with { Value = contract.Contract.Value + "conflict" })]
+            )
         );
     }
 
@@ -176,33 +150,29 @@ public class DiscoveryGraphTests : BaseTests
     [Fact]
     public void Apply_UpdatedContract_ContractIsReinitialized()
     {
-        var (rootId, rootContract) = Contract<Parameter>().GenerateEntry();
-        var (childId, childContract) = Contract<Parameter>().GenerateEntry();
+        var root = Contract<Parameter>()
+            .Set(p => p.Value, new Argument<string>())
+            .SetHandler<ParameterHandler>()
+            .Generate();
+        var child = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
         var value = Resolve<Faker>().Lorem.Word();
         var graph = new DiscoveryGraph();
 
-        var result = graph.Apply(
-            rootId,
-            new ContractList
-            {
-                [rootId] = rootContract with { Value = new Argument<string>(), Handler = Handler<ParameterHandler>() }
-            }
-        );
+        var result = graph.Apply(root.Id, [root]);
         Assert.True(result);
         Assert.Null(graph.Next().Id);
 
         result = graph.Apply(
-            childId,
-            new ContractList
-            {
-                [childId] = childContract with { Handler = Handler<ParameterHandler>() },
-                [rootId] = rootContract with { Value = value }
-            }
+            child.Id,
+            [
+                child,
+                root.With(c => c with { Value = value })
+            ]
         );
         Assert.True(result);
 
         var (contractId, contract) = graph.Next();
-        Assert.Equal(rootId, contractId);
+        Assert.Equal(root.Id, contractId);
         Assert.NotNull(contract);
         Assert.Equal(value, ((Parameter)contract).Value);
     }
@@ -210,21 +180,18 @@ public class DiscoveryGraphTests : BaseTests
     [Fact]
     public void Apply_ConflictingContracts_ReturnsFalse()
     {
-        var (rootId, rootContract) = Contract<Parameter>().GenerateEntry();
-        var (childId, childContract) = Contract<Parameter>().GenerateEntry();
+        var root = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
+        var child = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
         var graph = new DiscoveryGraph();
 
-        graph.Apply(
-            rootId, new ContractList { [rootId] = rootContract with { Handler = Handler<ParameterHandler>() } }
-        );
+        graph.Apply(root.Id, [root]);
 
         var result = graph.Apply(
-            childId,
-            new ContractList
-            {
-                [childId] = childContract with { Handler = Handler<ParameterHandler>() },
-                [rootId] = rootContract with { Value = rootContract.Value + "_conflict" }
-            }
+            child.Id,
+            [
+                child,
+                root.With(c => c with { Value = root.Contract.Value + "_conflict" })
+            ]
         );
 
         Assert.False(result);

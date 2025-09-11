@@ -66,12 +66,12 @@ public class PackageHandlerTests : BaseTests
     [Fact]
     public void Install_ApplicationUrlWithTemplate_ResolvesTemplate()
     {
-        var (parameterId, parameter) = Contract<Parameter>().GenerateEntry();
         var value = Resolve<Faker>().Lorem.Word();
+        var parameter = Contract<Parameter>().Set(p => p.Value, value).Generate();
         var package = Factory<Package>().Generate() with
         {
-            ApplicationUrl = new Argument<string>($"{{{{Parameter:{parameterId.Name}:Value}}}}"),
-            Contracts = new ContractList { [parameterId] = parameter with { Value = value } }
+            ApplicationUrl = new Argument<string>($"{{{{{parameter.Id}:Value}}}}"),
+            Contracts = [parameter]
         };
 
         var application = InstallPackage(package);
@@ -82,12 +82,12 @@ public class PackageHandlerTests : BaseTests
     [Fact]
     public void Install_ApplicationDescriptionWithTemplate_ResolvesTemplate()
     {
-        var (parameterId, parameter) = Contract<Parameter>().GenerateEntry();
         var value = Resolve<Faker>().Lorem.Word();
+        var parameter = Contract<Parameter>().Set(p => p.Value, value).Generate();
         var package = Factory<Package>().Generate() with
         {
-            ApplicationDescription = new Argument<string>($"{{{{Parameter:{parameterId.Name}:Value}}}}"),
-            Contracts = new ContractList { [parameterId] = parameter with { Value = value } }
+            ApplicationDescription = new Argument<string>($"{{{{{parameter.Id}:Value}}}}"),
+            Contracts = [parameter]
         };
 
         var application = InstallPackage(package);

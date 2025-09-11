@@ -27,11 +27,11 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
             .UpdateTunnelConfiguration(tunnel.AccountId, tunnel.TunnelId, Arg.Any<JsonObject>());
 
         CloudflareClient.Received(1).CreateDnsRecord(
-            httpEndpoint.CloudflareZoneId, Arg.Is<JsonObject>(arg => arg["type"]!.GetValue<string>() == "CNAME" &&
-                                                                     arg["name"]!.GetValue<string>() ==
-                                                                     httpEndpoint.ResultHost &&
-                                                                     arg["content"]!.GetValue<string>() ==
-                                                                     $"{tunnel.TunnelId}.cfargotunnel.com"
+            httpEndpoint.CloudflareZoneId,
+            Arg.Is<JsonObject>(arg =>
+                arg["type"]!.GetValue<string>() == "CNAME"
+                && arg["name"]!.GetValue<string>() == httpEndpoint.ResultHost
+                && arg["content"]!.GetValue<string>() == $"{tunnel.TunnelId}.cfargotunnel.com"
             )
         );
 
@@ -69,16 +69,12 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         InstallPackage("cloudflare-tunnel");
-        var (httpId, http) = Contract<HttpEndpoint>().GenerateEntry();
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { [httpId] = http with { ResultHost = "subdomain.domain2.zone2" } }
-        };
+        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.ResultHost, "subdomain.domain2.zone2").Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
 
         var application = InstallPackage(package);
 
-        var httpEndpoint = application.GetContracts<HttpEndpoint>().Single();
-        Assert.Equal("zoneId2", httpEndpoint.CloudflareZoneId);
+        Assert.Equal("zoneId2", application.GetContracts<HttpEndpoint>().Single().CloudflareZoneId);
     }
 
     [Fact]
@@ -86,16 +82,12 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         InstallPackage("cloudflare-tunnel");
-        var (httpId, http) = Contract<HttpEndpoint>().GenerateEntry();
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { [httpId] = http with { ResultHost = "domain2.zone2" } }
-        };
+        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.ResultHost, "domain2.zone2").Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
 
         var application = InstallPackage(package);
 
-        var httpEndpoint = application.GetContracts<HttpEndpoint>().Single();
-        Assert.Equal("zoneId2", httpEndpoint.CloudflareZoneId);
+        Assert.Equal("zoneId2", application.GetContracts<HttpEndpoint>().Single().CloudflareZoneId);
     }
 
     [Fact]
@@ -104,11 +96,8 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
         InstallPackage("docker");
         InstallPackage("cloudflare-tunnel");
         CloudflareClient.GetZones().Returns([]);
-        var (httpId, http) = Contract<HttpEndpoint>().GenerateEntry();
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { [httpId] = http }
-        };
+        var httpEndpoint = Contract<HttpEndpoint>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
 
         var exception = Assert.Throws<HandlerException>(() => InstallPackage(package));
 
@@ -120,18 +109,12 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         InstallPackage("cloudflare-tunnel");
-        var (httpId, http) = Contract<HttpEndpoint>().GenerateEntry();
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { [httpId] = http with { ResultHost = "subdomain.unknown.zone" } }
-        };
+        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.ResultHost, "subdomain.unknown.zone").Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
 
         var exception = Assert.Throws<HandlerException>(() => InstallPackage(package));
 
-        Assert.Equal(
-            "No DNS zone found for subdomain.unknown.zone in Cloudflare.",
-            exception.Message
-        );
+        Assert.Equal("No DNS zone found for subdomain.unknown.zone in Cloudflare.", exception.Message);
     }
 
     [Fact]
@@ -141,8 +124,7 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
         InstallPackage("cloudflare-tunnel");
         CloudflareClient.GetTunnelConfiguration(Arg.Any<string>(), Arg.Any<string>())
             .ReturnsForAnyArgs(new JsonObject());
-        var (httpId, http) = Contract<HttpEndpoint>().GenerateEntry();
-        var package = Factory<Package>().Generate() with { Contracts = new ContractList { [httpId] = http } };
+        var package = Factory<Package>().Generate() with { Contracts = [Contract<HttpEndpoint>().Generate()] };
 
         var application = InstallPackage(package);
 
@@ -182,8 +164,7 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
                     }
                 }
             );
-        var (httpId, http) = Contract<HttpEndpoint>().GenerateEntry();
-        var package = Factory<Package>().Generate() with { Contracts = new ContractList { [httpId] = http } };
+        var package = Factory<Package>().Generate() with { Contracts = [Contract<HttpEndpoint>().Generate()] };
 
         var application = InstallPackage(package);
 
@@ -218,16 +199,12 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
                 new() { ["id"] = "recordId5" }
             }
         );
-        var (httpId, http) = Contract<HttpEndpoint>().GenerateEntry();
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { [httpId] = http with { ResultHost = "test.domain1.zone1" } }
-        };
+        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.ResultHost, "test.domain1.zone1").Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
 
         var application = InstallPackage(package);
-        
-        var httpEndpoint = application.GetContracts<HttpEndpoint>().Single();
-        Assert.Equal("zoneId1", httpEndpoint.CloudflareZoneId);
+
+        Assert.Equal("zoneId1", application.GetContracts<HttpEndpoint>().Single().CloudflareZoneId);
 
         CloudflareClient.Received(1).DeleteDnsRecord("zoneId1", "recordId1");
         CloudflareClient.Received(1).DeleteDnsRecord("zoneId1", "recordId2");
@@ -265,9 +242,8 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         InstallPackage("cloudflare-tunnel");
-        var (httpId, http) = Contract<HttpEndpoint>().GenerateEntry();
-        var package = Factory<Package>().Generate() with { Contracts = new ContractList { [httpId] = http } };
-        var application = InstallPackage(package );
+        var package = Factory<Package>().Generate() with { Contracts = [Contract<HttpEndpoint>().Generate()] };
+        var application = InstallPackage(package);
         var httpEndpoint = application.GetContracts<HttpEndpoint>().Single();
         CloudflareClient.GetTunnelConfiguration(Arg.Any<string>(), Arg.Any<string>())
             .ReturnsForAnyArgs(

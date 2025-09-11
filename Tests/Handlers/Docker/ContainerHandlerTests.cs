@@ -13,11 +13,8 @@ public class ContainerHandlerTests : BaseTests
     public void Install_Container_CreatesNetwork()
     {
         InstallPackage("docker");
-        var (containerId, container) = Contract<Container>().GenerateEntry();
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { [containerId] = container }
-        };
+        var container = Contract<Container>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [container] };
 
         var application = InstallPackage(package);
 
@@ -28,12 +25,8 @@ public class ContainerHandlerTests : BaseTests
     public void Install_RequireDocker_MountsSocket()
     {
         InstallPackage("docker");
-        var (containerId, container) = Contract<Container>().GenerateEntry();
-        container = container with { MountDockerSocket = true };
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { [containerId] = container }
-        };
+        var container = Contract<Container>().Set(p => p.MountDockerSocket, true).Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [container] };
 
         InstallPackage(package);
 
@@ -53,12 +46,8 @@ public class ContainerHandlerTests : BaseTests
         const string path = "/run/podman/podman.sock";
         Handler<FakeDockerApiConnectionHandler>().SocketRootPath = path;
         InstallPackage("docker");
-        var (containerId, container) = Contract<Container>().GenerateEntry();
-        container = container with { MountDockerSocket = true };
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { [containerId] = container }
-        };
+        var container = Contract<Container>().Set(p => p.MountDockerSocket, true).Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [container] };
 
         InstallPackage(package);
 
@@ -76,15 +65,10 @@ public class ContainerHandlerTests : BaseTests
     public void Install_ContainerWithMount_CreatesVolume()
     {
         InstallPackage("docker");
-        var (containerId, container) = Contract<Container>().GenerateEntry();
-        container = container with
-        {
-            Mounts = new Dictionary<string, ContainerMount> { { "/mnt", new ContainerMount() } }
-        };
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { [containerId] = container }
-        };
+        var container = Contract<Container>()
+            .Set(p => p.Mounts, new Dictionary<string, ContainerMount> { { "/mnt", new ContainerMount() } })
+            .Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [container] };
 
         var application = InstallPackage(package);
 
@@ -96,18 +80,18 @@ public class ContainerHandlerTests : BaseTests
     {
         var docker1 = InstallPackage("docker");
         var docker2 = InstallPackage("docker");
-        var (containerId, container) = Contract<Container>().GenerateEntry();
+        var container = Contract<Container>().Generate();
 
         var application1 = InstallPackage(
             Factory<Package>().Generate() with
             {
-                Contracts = new ContractList { [containerId] = container with { HandlerApplication = docker1.Name } }
+                Contracts = [container.With(c => c with { HandlerApplication = docker1.Name })]
             }
         );
         var application2 = InstallPackage(
             Factory<Package>().Generate() with
             {
-                Contracts = new ContractList { [containerId] = container with { HandlerApplication = docker2.Name } }
+                Contracts = [container.With(c => c with { HandlerApplication = docker2.Name })]
             }
         );
 
@@ -123,22 +107,20 @@ public class ContainerHandlerTests : BaseTests
     {
         var docker1 = InstallPackage("docker");
         var docker2 = InstallPackage("docker");
-        var (containerId, container) = Contract<Container>().GenerateEntry();
-        container = container with
-        {
-            Mounts = new Dictionary<string, ContainerMount> { { "/mnt", new ContainerMount() } }
-        };
+        var container = Contract<Container>()
+            .Set(p => p.Mounts, new Dictionary<string, ContainerMount> { { "/mnt", new ContainerMount() } })
+            .Generate();
 
         var application1 = InstallPackage(
             Factory<Package>().Generate() with
             {
-                Contracts = new ContractList { [containerId] = container with { HandlerApplication = docker1.Name } }
+                Contracts = [container.With(c => c with { HandlerApplication = docker1.Name })]
             }
         );
         var application2 = InstallPackage(
             Factory<Package>().Generate() with
             {
-                Contracts = new ContractList { [containerId] = container with { HandlerApplication = docker2.Name } }
+                Contracts = [container.With(c => c with { HandlerApplication = docker2.Name })]
             }
         );
 
@@ -154,27 +136,19 @@ public class ContainerHandlerTests : BaseTests
     {
         var docker1 = InstallPackage("docker");
         var docker2 = InstallPackage("docker");
-        var (containerId, container) = Contract<Container>().GenerateEntry();
-        var (portId, port) = Contract<PortEndpoint>().GenerateEntry();
+        var container = Contract<Container>().Generate();
+        var portEndpoint = Contract<PortEndpoint>().Set(p => p.Container, container.Id).Generate();
 
         var application1 = InstallPackage(
             Factory<Package>().Generate() with
             {
-                Contracts = new ContractList
-                {
-                    [portId] = port with { Container = containerId },
-                    [containerId] = container with { HandlerApplication = docker1.Name }
-                }
+                Contracts = [portEndpoint, container.With(c => c with { HandlerApplication = docker1.Name })]
             }
         );
         var application2 = InstallPackage(
             Factory<Package>().Generate() with
             {
-                Contracts = new ContractList
-                {
-                    [portId] = port with { Container = containerId },
-                    [containerId] = container with { HandlerApplication = docker2.Name }
-                }
+                Contracts = [portEndpoint, container.With(c => c with { HandlerApplication = docker2.Name })]
             }
         );
 
@@ -191,14 +165,13 @@ public class ContainerHandlerTests : BaseTests
         var name = Resolve<Faker>().Lorem.Word();
         var value = Resolve<Faker>().Lorem.Word();
         InstallPackage("docker");
-        var (containerId, container) = Contract<Container>().GenerateEntry();
+        var container = Contract<Container>()
+            .Set(p => p.Env, new Dictionary<string, Argument<string>> { [name] = value })
+            .Generate();
 
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList
-            {
-                [containerId] = container with { Env = new Dictionary<string, Argument<string>> { [name] = value } }
-            }
+            Contracts = [container]
         };
 
         InstallPackage(package);
@@ -217,21 +190,13 @@ public class ContainerHandlerTests : BaseTests
         var name = Resolve<Faker>().Lorem.Word();
         var value = Resolve<Faker>().Lorem.Word();
         InstallPackage("docker");
-        var (parameterId, parameter) = Contract<Parameter>().GenerateEntry();
-        var (containerId, container) = Contract<Container>().GenerateEntry();
+        var parameter = Contract<Parameter>().Set(p => p.Value, value).Generate();
+        var container = Contract<Container>()
+            .Set(p => p.Env, new Dictionary<string, Argument<string>> { [name] = new($"{{{{{parameter.Id}:Value}}}}") })
+            .Generate();
         var package = Factory<Package>().Generate() with
         {
-            Contracts = new ContractList
-            {
-                [containerId] = container with
-                {
-                    Env = new Dictionary<string, Argument<string>>
-                    {
-                        [name] = "{{Parameter:" + parameterId.Name + ":Value}}"
-                    }
-                },
-                [parameterId] = parameter with { Value = value }
-            }
+            Contracts = [parameter, container]
         };
 
         InstallPackage(package);

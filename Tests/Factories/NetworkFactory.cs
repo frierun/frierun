@@ -13,7 +13,7 @@ public sealed class NetworkFactory: ContractFaker<Network>
         RuleSet(
             "udocker", set =>
             {
-                RuleFor(p => p.NetworkName, "udocker");
+                Set(p => p.NetworkName, "udocker");
             }
         );
     }

@@ -1,4 +1,5 @@
-﻿using Docker.DotNet.Models;
+﻿using Bogus;
+using Docker.DotNet.Models;
 using Frierun.Server;
 using Frierun.Server.Data;
 using NSubstitute;
@@ -15,16 +16,10 @@ public class VolumeHandlerTests : BaseTests
     [Fact]
     public void Install_TwoApplicationsWithSameVolume_AddsVolumeOnce()
     {
-        var (volumeId, volume) = Contract<Volume>().GenerateEntry();
-        volume = volume with { VolumeName = volume.Name };
-        var package1 = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { [volumeId] = volume }
-        };
-        var package2 = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { [volumeId] = volume }
-        };
+        var volumeName = Resolve<Faker>().Lorem.Word();
+        var volume = Contract<Volume>().Set(v => v.VolumeName, volumeName).Generate();
+        var package1 = Factory<Package>().Generate() with { Contracts = [volume] };
+        var package2 = Factory<Package>().Generate() with { Contracts = [volume] };
 
         var application1 = InstallPackage(package1);
         var application2 = InstallPackage(package2);
@@ -33,29 +28,23 @@ public class VolumeHandlerTests : BaseTests
         var volume2 = application2.GetContracts<Volume>().Single();
         Assert.NotSame(volume1, volume2);
 
-        DockerClient.Volumes.Received(1).CreateAsync(Arg.Any<VolumesCreateParameters>());
+        DockerClient.Volumes.Received(1).CreateAsync(Arg.Is<VolumesCreateParameters>(arg => arg.Name == volumeName));
     }
 
     [Fact]
     public void Uninstall_TwoApplicationsWithSameVolume_RemovesVolumeOnce()
     {
         var uninstallService = Resolve<UninstallService>();
-        var (volumeId, volume) = Contract<Volume>().GenerateEntry();
-        volume = volume with { VolumeName = volume.Name };
-        var package1 = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { [volumeId] = volume }
-        };
-        var package2 = Factory<Package>().Generate() with
-        {
-            Contracts = new ContractList { [volumeId] = volume }
-        };
+        var volumeName = Resolve<Faker>().Lorem.Word();
+        var volume = Contract<Volume>().Set(v => v.VolumeName, volumeName).Generate();
+        var package1 = Factory<Package>().Generate() with { Contracts = [volume] };
+        var package2 = Factory<Package>().Generate() with { Contracts = [volume] };
 
         var application1 = InstallPackage(package1);
         var application2 = InstallPackage(package2);
         uninstallService.Handle(application1);
         uninstallService.Handle(application2);
 
-        DockerClient.Volumes.Received(1).RemoveAsync(volume.Name, Arg.Any<bool>());
+        DockerClient.Volumes.Received(1).RemoveAsync(volumeName, Arg.Any<bool>());
     }
 }
