@@ -19,9 +19,9 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
     private DirectedAcyclicGraph<ContractId> BuildGraph()
     {
         var graph = new DirectedAcyclicGraph<ContractId>();
-        foreach (var contract in contracts.Values)
+        foreach (var contractId in contracts.Keys)
         {
-            graph.AddVertex(contract.Id);
+            graph.AddVertex(contractId);
         }
 
         foreach (var contract in contracts.Values)
@@ -79,8 +79,6 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
                 }
                 
                 var installedContract = contract.Install(this);
-
-                Debug.Assert(installedContract.Id == contractId);
 
                 if (installedContract is not Package)
                 {

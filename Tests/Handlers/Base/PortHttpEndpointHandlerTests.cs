@@ -40,7 +40,7 @@ public class PortHttpEndpointHandlerTests : BaseTests
         var application = InstallPackage(package);
 
         Assert.Contains(
-            application.GetContracts<PortEndpoint>().Single().Id,
+            new ContractId<PortEndpoint>(httpEndpointId.Name),
             application.GetContracts<HttpEndpoint>().Single().DependsOn
         );
     }

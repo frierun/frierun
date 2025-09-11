@@ -15,7 +15,7 @@ public class ContainerHandler(Application application)
             yield break;
         }
 
-        var contractId = contract.Id;
+        var contractId = new ContractId<Container>(context.Name);
         yield return new ContractList(
             contract.Mounts.Values.Select(mount => new KeyValuePair<ContractId, Contract>(
                     mount.Volume, new Volume(mount.Volume.Name)
@@ -44,13 +44,13 @@ public class ContainerHandler(Application application)
             {
                 HandlerApplication = Application?.Name,
                 Command = new Argument<IEnumerable<string>>(
-                    new ArgumentResolver<ContractId, IEnumerable<string>>(
+                    new ArgumentResolver<ContractId<Container>, IEnumerable<string>>(
                         contractId,
                         GetCommands
                     )
                 ),
                 PreCommands = new Argument<IEnumerable<IEnumerable<string>>>(
-                    new ArgumentResolver<ContractId, IEnumerable<IEnumerable<string>>>(
+                    new ArgumentResolver<ContractId<Container>, IEnumerable<IEnumerable<string>>>(
                         contractId,
                         GetPreCommands
                     )
@@ -67,9 +67,9 @@ public class ContainerHandler(Application application)
     /// <summary>
     /// Gets udocker commands for the daemon
     /// </summary>
-    private static IEnumerable<string> GetCommands(ContractId contractId, ExecutionPlan plan)
+    private static IEnumerable<string> GetCommands(ContractId<Container> contractId, ExecutionPlan plan)
     {
-        var contract = (Container)plan.GetContract(contractId);
+        var contract = plan.GetContract(contractId);
         foreach (var argument in contract.GetArguments())
         {
             argument.Resolve(plan);
@@ -112,9 +112,9 @@ public class ContainerHandler(Application application)
     /// <summary>
     /// Gets preparation commands to run udocker via daemon
     /// </summary>
-    private static IEnumerable<IEnumerable<string>> GetPreCommands(ContractId contractId, ExecutionPlan plan)
+    private static IEnumerable<IEnumerable<string>> GetPreCommands(ContractId<Container> contractId, ExecutionPlan plan)
     {
-        var contract = (Container)plan.GetContract(contractId);
+        var contract = plan.GetContract(contractId);
         foreach (var argument in contract.GetArguments())
         {
             argument.Resolve(plan);

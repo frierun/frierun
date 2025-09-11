@@ -44,11 +44,7 @@ public class Handler<TContract>(Application? application = null) : IHandler
     [DebuggerStepThrough]
     IEnumerable<ContractList> IHandler.Initialize(Contract contract, ApplicationContext context)
     {
-        foreach (var result in Initialize((TContract)contract, context))
-        {
-            Debug.Assert(result[contract.Id].Handler == this, "Initialized contract must have this handler");
-            yield return result;
-        }
+        return Initialize((TContract)contract, context);
     }
 
     [DebuggerStepThrough]

@@ -71,7 +71,7 @@ public class DiscoveryGraph
     {
         try
         {
-            foreach (var contract in result.Values)
+            foreach (var (contractId, contract) in result)
             {
                 if (Contracts.TryGetValue(contract, out var oldContract))
                 {
@@ -82,7 +82,7 @@ public class DiscoveryGraph
                     Contracts[contract] = contract;
                 }
 
-                if (contract.Id != initializedContractId)
+                if (contractId != initializedContractId)
                 {
                     _toInitialize.Add(contract);
                 }

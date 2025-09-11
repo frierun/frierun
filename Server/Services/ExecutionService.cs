@@ -39,7 +39,7 @@ public class ExecutionService(
                 var (item, branch) = PopNextBranch(branchesStack);
                 if (branch == null || item == null)
                 {
-                    throw new HandlerNotFoundException(nextContract);
+                    throw new HandlerNotFoundException(nextId, nextContract);
                 }
 
                 currentGraph = item.Graph;

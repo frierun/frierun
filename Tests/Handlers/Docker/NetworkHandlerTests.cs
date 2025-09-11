@@ -30,7 +30,7 @@ public class NetworkHandlerTests : BaseTests
                 new ApplicationContext("", network.NetworkName)
             );
 
-        var dockerNetwork = (Network)result.Single()[network.Id];
+        var dockerNetwork = result.Single().Values.OfType<Network>().Single();
         Assert.Equal(network.NetworkName, dockerNetwork.NetworkName);
     }
 }

@@ -2,9 +2,9 @@
 
 namespace Frierun.Server.Handlers;
 
-public class HandlerNotFoundException(Contract contract)
+public class HandlerNotFoundException(ContractId contractId, Contract contract)
     : HandlerException(
-        $"No handler found for contract {contract.Id}.",
+        $"No handler found for contract {contractId}.",
         "Install the missing dependencies first.",
         contract
     );
