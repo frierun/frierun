@@ -4,7 +4,10 @@ namespace Frierun.Server;
 
 public class ContractRegistry
 {
-    public static Type GetContractType(string contractTypeName)
+    /// <summary>
+    /// Gets a contract type by name.
+    /// </summary>
+    public Type GetContractType(string contractTypeName)
     {
         var contractType = Type.GetType($"Frierun.Server.Data.{contractTypeName}");
         if (contractType == null)
@@ -15,12 +18,18 @@ public class ContractRegistry
         return contractType;
     }
 
+    /// <summary>
+    /// Creates an empty contract by id
+    /// </summary>
     public Contract CreateContract(ContractId contractId)
     {
         return CreateContract(contractId.TypeName, contractId.Name);
     }
     
-    public static Contract CreateContract(string typeName, string name)
+    /// <summary>
+    /// Creates an empty contract by type name and name.
+    /// </summary>
+    public Contract CreateContract(string typeName, string name)
     {
         return typeName switch
         {

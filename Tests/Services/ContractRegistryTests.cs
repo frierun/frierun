@@ -13,7 +13,7 @@ public class ContractRegistryTests : BaseTests
     {
         var contractRegistry = Resolve<ContractRegistry>();
 
-        var resultingType = ContractRegistry.GetContractType(type.Name);
+        var resultingType = contractRegistry.GetContractType(type.Name);
 
         Assert.Same(type, resultingType);
     }
@@ -23,7 +23,7 @@ public class ContractRegistryTests : BaseTests
     {
         var contractRegistry = Resolve<ContractRegistry>();
 
-        Assert.Throws<Exception>(() => ContractRegistry.GetContractType("NonExistingType"));
+        Assert.Throws<Exception>(() => contractRegistry.GetContractType("NonExistingType"));
     }
     
     [Theory]
@@ -43,7 +43,7 @@ public class ContractRegistryTests : BaseTests
         var faker = Resolve<Faker>();
         var name = faker.Lorem.Word();
 
-        var contract = ContractRegistry.CreateContract(type.Name, name);
+        var contract = contractRegistry.CreateContract(type.Name, name);
 
         Assert.IsType(type, contract);
         Assert.Equal(name, contract.Name);
@@ -57,6 +57,6 @@ public class ContractRegistryTests : BaseTests
         var faker = Resolve<Faker>();
         var name = faker.Lorem.Word();
 
-        Assert.Throws<Exception>(() => ContractRegistry.CreateContract(invalidType, name));
+        Assert.Throws<Exception>(() => contractRegistry.CreateContract(invalidType, name));
     }
 }
