@@ -11,7 +11,6 @@ public class ContractIdConverterTests : BaseTests
     [Fact]
     public void Read_ContainerWithName_ReturnsContractId()
     {
-        var contractRegistry = Resolve<ContractRegistry>();
         var converter = new ContractIdConverter();
         var name = Resolve<Faker>().Lorem.Word();
         var reader = new Utf8JsonReader(
@@ -34,7 +33,6 @@ public class ContractIdConverterTests : BaseTests
     [Fact]
     public void Read_ContainerWithoutName_ReturnsContractId()
     {
-        var contractRegistry = Resolve<ContractRegistry>();
         var converter = new ContractIdConverter();
         var reader = new Utf8JsonReader(
             """
