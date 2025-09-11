@@ -35,7 +35,7 @@ public class NetworkHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts = [Contract<Network>().Generate().With(c => c with { NetworkName = "test" })]
+            Contracts = [Contract<Network>().Set(p => p.NetworkName, "test").Generate()]
         };
 
         Assert.Throws<HandlerNotFoundException>(() => InstallPackage(package));

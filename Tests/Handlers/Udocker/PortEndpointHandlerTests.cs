@@ -10,12 +10,10 @@ public class PortEndpointHandlerTests : BaseTests
     {
         InstallPackage("termux-udocker");
         var container = Contract<Container>().Generate("udocker");
-        var portEndpoint = Contract<PortEndpoint>().Generate().With(c => c with
-            {
-                Port = 80,
-                Container = container.Id
-            }
-        );
+        var portEndpoint = Contract<PortEndpoint>()
+            .Set(p => p.Port, 80)
+            .Set(p => p.Container, container.Id)
+            .Generate();
         var package = Factory<Package>().Generate() with { Contracts = [portEndpoint, container] };
 
         var application = InstallPackage(package);
@@ -30,13 +28,11 @@ public class PortEndpointHandlerTests : BaseTests
     {
         InstallPackage("termux-udocker");
         var container = Contract<Container>().Generate("udocker");
-        var portEndpoint = Contract<PortEndpoint>().Generate().With(c => c with
-            {
-                Port = 80,
-                ExternalPort = 80,
-                Container = container.Id
-            }
-        );
+        var portEndpoint = Contract<PortEndpoint>()
+            .Set(p => p.Port, 80)
+            .Set(p => p.ExternalPort, 80)
+            .Set(p => p.Container, container.Id)
+            .Generate();
         var package = Factory<Package>().Generate() with { Contracts = [portEndpoint, container] };
 
         Assert.Throws<HandlerNotFoundException>(() => InstallPackage(package));

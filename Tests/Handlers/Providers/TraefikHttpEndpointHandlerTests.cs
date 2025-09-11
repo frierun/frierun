@@ -22,11 +22,7 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
 
         var package = Factory<Package>().Generate() with
         {
-            Contracts =
-            [
-                container,
-                Contract<HttpEndpoint>().Generate().With(c => c with { Container = container.Id })
-            ]
+            Contracts = [container, Contract<HttpEndpoint>().Set(p => p.Container, container.Id).Generate()]
         };
 
         var application = InstallPackage(package);

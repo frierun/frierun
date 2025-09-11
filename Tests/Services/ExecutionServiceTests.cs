@@ -221,11 +221,9 @@ public class ExecutionServiceTests : BaseTests
     public void Create_ContractWithSubstitute_CreatesDependentContract()
     {
         InstallPackage("docker");
-        var container = Contract<Container>().Generate().With(c => c with
-            {
-                Env = new Dictionary<string, Argument<string>> { { "key", "{{Parameter:Test:Value}}" } }
-            }
-        );
+        var container = Contract<Container>()
+            .Set(p => p.Env, new Dictionary<string, Argument<string>> { { "key", "{{Parameter:Test:Value}}" } })
+            .Generate();
         var package = Factory<Package>().Generate() with { Contracts = [container] };
 
         var plan = Service.Create(package);
@@ -239,9 +237,9 @@ public class ExecutionServiceTests : BaseTests
     {
         InstallPackage("docker");
         var container = Contract<Container>().Generate();
-        var selector = Contract<Selector>().Generate().With(s => s with
-            {
-                Options =
+        var selector = Contract<Selector>()
+            .Set(
+                p => p.Options,
                 [
                     new SelectorOption(
                         "one",
@@ -255,8 +253,8 @@ public class ExecutionServiceTests : BaseTests
                         ]
                     )
                 ]
-            }
-        );
+            )
+            .Generate();
         var package = Factory<Package>().Generate() with { Contracts = [container, selector] };
 
         var plan = Service.Create(package);

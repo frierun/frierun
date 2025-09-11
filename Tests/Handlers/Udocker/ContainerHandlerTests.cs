@@ -29,15 +29,10 @@ public class ContainerHandlerTests : BaseTests
     public void GetCommands_Container_ResolvesAllContainerArguments()
     {
         var parameter = Contract<Parameter>().Generate();
-        var container = Contract<Container>().Generate("udocker").With(c => c with
-            {
-                ImageName = new Argument<string>($"{{{{Parameter:{parameter.Id.Name}:Value}}}}"),
-                Env = new Dictionary<string, Argument<string>>
-                {
-                    ["Test"] = $"{{{{Parameter:{parameter.Id.Name}:Value}}}}"
-                }
-            }
-        );
+        var container = Contract<Container>()
+            .Set(p => p.ImageName, $"{{{{{parameter.Id}:Value}}}}")
+            .Set(p => p.Env, new Dictionary<string, Argument<string>> { ["Test"] = $"{{{{{parameter.Id}:Value}}}}" })
+            .Generate("udocker");
         var handler = Handler<ContainerHandler>(_udocker);
         var result = handler.Initialize(container.Contract, new ApplicationContext(container.Id.Name, "")).Single();
         var daemon = result.Values.OfType<Daemon>().Single();
@@ -64,15 +59,10 @@ public class ContainerHandlerTests : BaseTests
     public void GetPreCommands_Container_ResolvesAllContainerArguments()
     {
         var parameter = Contract<Parameter>().Generate();
-        var container = Contract<Container>().Generate("udocker").With(c => c with
-            {
-                ImageName = new Argument<string>($"{{{{Parameter:{parameter.Id.Name}:Value}}}}"),
-                Env = new Dictionary<string, Argument<string>>
-                {
-                    ["Test"] = new($"{{{{Parameter:{parameter.Id.Name}:Value}}}}")
-                }
-            }
-        );
+        var container = Contract<Container>()
+            .Set(p => p.ImageName, $"{{{{{parameter.Id}:Value}}}}")
+            .Set(p => p.Env, new Dictionary<string, Argument<string>> { ["Test"] = $"{{{{{parameter.Id}:Value}}}}" })
+            .Generate("udocker");
         var handler = Handler<ContainerHandler>(_udocker);
         var result = handler.Initialize(container.Contract, new ApplicationContext(container.Id.Name, "")).Single();
         var daemon = result.Values.OfType<Daemon>().Single();
@@ -127,12 +117,8 @@ public class ContainerHandlerTests : BaseTests
     public void Install_ContainerWithVolume_CreatesPath()
     {
         var container = Contract<Container>()
-            .Generate("udocker")
-            .With(c => c with
-                {
-                    Mounts = new Dictionary<string, ContainerMount> { { "/test", new ContainerMount() } }
-                }
-            );
+            .Set(p => p.Mounts, new Dictionary<string, ContainerMount> { { "/test", new ContainerMount() } })
+            .Generate("udocker");
         var package = Factory<Package>().Generate() with { Contracts = [container] };
 
         var application = InstallPackage(package);
@@ -156,9 +142,10 @@ public class ContainerHandlerTests : BaseTests
             Contracts =
             [
                 container,
-                Contract<PortEndpoint>().Generate().With(c =>
-                    c with { Protocol = Protocol.Tcp, Container = container.Id }
-                )
+                Contract<PortEndpoint>()
+                    .Set(p => p.Protocol, Protocol.Tcp)
+                    .Set(p => p.Container, container.Id)
+                    .Generate()
             ]
         };
 
@@ -175,14 +162,9 @@ public class ContainerHandlerTests : BaseTests
     {
         var name = Resolve<Faker>().Lorem.Word();
         var value = Resolve<Faker>().Lorem.Word();
-        var container = Contract<Container>().Generate("udocker").With(c => c with
-            {
-                Env = new Dictionary<string, Argument<string>>
-                {
-                    { name, value }
-                }
-            }
-        );
+        var container = Contract<Container>()
+            .Set(p => p.Env, new Dictionary<string, Argument<string>> { [name] = value })
+            .Generate("udocker");
         var package = Factory<Package>().Generate() with { Contracts = [container] };
 
         var application = InstallPackage(package);
@@ -198,13 +180,10 @@ public class ContainerHandlerTests : BaseTests
         var name = Resolve<Faker>().Lorem.Word();
         var value = Resolve<Faker>().Lorem.Word();
 
-        var parameter = Contract<Parameter>().Generate().With(c => c with { Value = value });
-        var container = Contract<Container>().Generate("udocker").With(c => c with
-            {
-                Env = new Dictionary<string, Argument<string>>
-                    { { name, $"{{{{Parameter:{parameter.Id.Name}:Value}}}}" } }
-            }
-        );
+        var parameter = Contract<Parameter>().Set(p => p.Value, value).Generate();
+        var container = Contract<Container>()
+            .Set(p => p.Env, new Dictionary<string, Argument<string>> { [name] = $"{{{{{parameter.Id}:Value}}}}" })
+            .Generate("udocker");
         var package = Factory<Package>().Generate() with
         {
             Contracts = [container, parameter]
@@ -223,26 +202,21 @@ public class ContainerHandlerTests : BaseTests
         var name = Resolve<Faker>().Lorem.Word();
         var value = Resolve<Faker>().Lorem.Word();
         var container = Contract<Container>().Generate("udocker");
-        var selector = Contract<Selector>().Generate().With(s => s with
-            {
-                Options =
+        var selector = Contract<Selector>()
+            .Set(
+                p => p.Options,
                 [
                     new SelectorOption(
                         "one",
                         [
-                            container.With(c => c with
-                                {
-                                    Env = new Dictionary<string, Argument<string>>
-                                    {
-                                        { name, value }
-                                    }
-                                }
+                            container.With(c =>
+                                c with { Env = new Dictionary<string, Argument<string>> { { name, value } } }
                             )
                         ]
                     )
                 ]
-            }
-        );
+            )
+            .Generate();
         var package = Factory<Package>().Generate() with
         {
             Contracts = [container, selector]
@@ -287,11 +261,9 @@ public class ContainerHandlerTests : BaseTests
     {
         var udocker1 = InstallPackage("termux-udocker");
         var udocker2 = InstallPackage("termux-udocker");
-        var container = Contract<Container>().Generate("udocker").With(c => c with
-            {
-                Mounts = new Dictionary<string, ContainerMount> { { "/mnt", new ContainerMount() } }
-            }
-        );
+        var container = Contract<Container>()
+            .Set(p => p.Mounts, new Dictionary<string, ContainerMount> { { "/mnt", new ContainerMount() } })
+            .Generate("udocker");
 
         var application1 = InstallPackage(
             Factory<Package>().Generate() with
@@ -319,7 +291,7 @@ public class ContainerHandlerTests : BaseTests
         var udocker1 = InstallPackage("termux-udocker");
         var udocker2 = InstallPackage("termux-udocker");
         var container = Contract<Container>().Generate("udocker");
-        var port = Contract<PortEndpoint>().Generate().With(c => c with { Container = container.Id });
+        var port = Contract<PortEndpoint>().Set(p => p.Container, container.Id).Generate();
 
         var application1 = InstallPackage(
             Factory<Package>().Generate() with
