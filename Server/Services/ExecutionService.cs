@@ -18,7 +18,7 @@ public class ExecutionService(
     public ExecutionPlan Create(Package package)
     {
         var branchesStack = new Stack<StackItem>();
-        DiscoveryGraph? currentGraph = new DiscoveryGraph();
+        var currentGraph = new DiscoveryGraph();
         var applicationName = GetApplicationName(package);
 
         ContractId? nextId = package.Id;
@@ -54,8 +54,10 @@ public class ExecutionService(
         }
 
         var alternatives = branchesStack
-            .SelectMany(item => item.Queue)
-            .Select(result => result.Values.Single(contract => contract.Handler != null))
+            .SelectMany(item => item.Queue.Select(contracts =>
+                    new ExecutionPlan.Alternative(item.ContractId, contracts[item.ContractId])
+                )
+            )
             .ToList();
 
         return new ExecutionPlan(currentGraph.Contracts, alternatives);
@@ -117,10 +119,10 @@ public class ExecutionService(
     private IEnumerable<ContractList> DiscoverContract(Contract contract, string? prefix = null)
     {
         var context = new ApplicationContext(
-            contract.Name, 
+            contract.Name,
             prefix ?? ""
         );
-        
+
         if (contract.Handler != null)
         {
             return contract.Handler.Initialize(contract, context);

@@ -5,6 +5,8 @@
  * OpenAPI spec version: 1.0
  */
 
+export * from "./alternative";
+export * from "./alternativeContract";
 export * from "./application";
 export * from "./applicationContracts";
 export * from "./applicationResponse";
@@ -32,7 +34,6 @@ export * from "./domain";
 export * from "./domainAllOf";
 export * from "./domainType";
 export * from "./executionPlan";
-export * from "./executionPlanAlternativesItem";
 export * from "./executionPlanContracts";
 export * from "./file";
 export * from "./fileAllOf";

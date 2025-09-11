@@ -2,16 +2,18 @@
 
 namespace Frierun.Server.Data;
 
-public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerable<Contract> alternatives) : IExecutionPlan
+public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerable<ExecutionPlan.Alternative> alternatives) : IExecutionPlan
 {
     private readonly HashSet<Application> _requiredApplications = [];
+    
+    public record Alternative(ContractId contractId, Contract contract);
 
     public ContractList Contracts => new(contracts);
     
     /// <summary>
     /// List of all contracts that are alternatives to the main execution plan.
     /// </summary>
-    public IEnumerable<Contract> Alternatives => alternatives;
+    public IEnumerable<Alternative> Alternatives => alternatives;
 
     /// <summary>
     /// Builds the graph of contracts.

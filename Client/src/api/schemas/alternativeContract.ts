@@ -25,7 +25,7 @@ import type { Selector } from "./selector";
 import type { SshConnection } from "./sshConnection";
 import type { Volume } from "./volume";
 
-export type ExecutionPlanAlternativesItem =
+export type AlternativeContract =
   | CloudflareApiConnection
   | CloudflareTunnel
   | Container

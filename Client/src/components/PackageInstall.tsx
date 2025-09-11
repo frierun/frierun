@@ -56,7 +56,7 @@ export default function PackageInstall({name}: Props) {
         setPlan({
             packageContract,
             contracts,
-            alternatives: result.data.alternatives
+            alternatives: result.data.alternatives.map(pair => pair.contract as Contract)
         });
     }, [mutateAsync, name]);
 

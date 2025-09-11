@@ -273,7 +273,7 @@ public class ExecutionServiceTests : BaseTests
 
         var plan = Service.Create(package);
 
-        Assert.Single(plan.Alternatives, contract => contract.Id == container.Id);
+        Assert.Single(plan.Alternatives, alternative => alternative.contractId == container.Id);
     }
 
     [Fact]
@@ -296,7 +296,7 @@ public class ExecutionServiceTests : BaseTests
             }
         );
 
-        Assert.DoesNotContain(plan1.Alternatives, contract => contract.Id == container.Id);
-        Assert.DoesNotContain(plan2.Alternatives, contract => contract.Id == container.Id);
+        Assert.DoesNotContain(plan1.Alternatives, alternative => alternative.contractId == container.Id);
+        Assert.DoesNotContain(plan2.Alternatives, alternative => alternative.contractId == container.Id);
     }
 }
