@@ -2,21 +2,22 @@
 import Button from "@/components/Button.tsx";
 import Debug from "@/components/Debug";
 import {Package} from "@/api/schemas";
-import ContractForm, {Contract} from "@/components/contracts/ContractForm.tsx";
+import ContractForm from "@/components/contracts/ContractForm.tsx";
 import useInstall from "@/hooks/useInstall.tsx";
+import {Alternative, Contract, ContractList} from "@/types.ts";
 
 type Props = {
     packageContract: Package;
-    contracts: Contract[];
-    alternatives: Contract[];
+    contracts: ContractList;
+    alternatives: Alternative[];
     name: string;
     setError: (error: string | null) => void;
-    refetch: (overrides: Contract[]) => void;
+    refetch: (overrides: ContractList) => void;
 }
 
 export default function InstallForm({packageContract, contracts, alternatives, name, setError, refetch}: Props) {
     const [prefix, setPrefix] = useState(packageContract.prefix ?? '');
-    const [overrides, setOverrides] = useState<Contract[]>([]);
+    const [overrides, setOverrides] = useState<ContractList>({});
 
     const {install, isPending: isInstallPending} = useInstall({
         packageContract,
@@ -25,14 +26,12 @@ export default function InstallForm({packageContract, contracts, alternatives, n
         setError
     })
 
-    const updateContract = useCallback((contract: Contract, isRefetch?: boolean) => {
+    const updateContract = useCallback((contractId: string, contract: Contract|null, isRefetch?: boolean) => {
         setOverrides(overrides => {
-            const newOverrides = [
-                ...overrides.filter(c => c.type !== contract.type || c.name !== contract.name),
-            ]
+            const newOverrides = Object.fromEntries(Object.entries(overrides).filter(entry => entry[0] != contractId));
 
-            if (contracts.find(c => c.type === contract.type && c.name === contract.name) !== contract) {
-                newOverrides.push(contract);
+            if (contracts[contractId] !== contract && contract !== null) {
+                newOverrides[contractId] = contract;
             }
 
             if (isRefetch) {
@@ -79,10 +78,10 @@ export default function InstallForm({packageContract, contracts, alternatives, n
                             setPrefix(e.target.value);
                         }}/>
                     </div>
-                    {contracts.map(contract => (
+                    {Object.entries(contracts).map(entry => (
                         <ContractForm
-                            key={`${contract.type}:${contract.name}`}
-                            contract={contract}
+                            key={entry[0]}
+                            contractId={entry[0]}
                             alternatives={alternatives}
                             updateContract={updateContract}
                             allContracts={contracts}

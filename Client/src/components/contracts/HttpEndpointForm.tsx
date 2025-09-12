@@ -18,10 +18,10 @@ function VariantName(contract: HttpEndpoint): string {
 
 export default function HttpEndpointForm
 ({
+     contractId,
      contract,
      variants,
-     updateContract,
-     allContracts
+     updateContract
  }: ContractProps<HttpEndpoint>) {
     const [host, setHost] = useState<string>(contract.resultHost ?? '');
 
@@ -31,6 +31,7 @@ export default function HttpEndpointForm
 
     return (
         <BaseForm
+            contractId={contractId}
             contract={contract}
             variants={variants}
             updateContract={updateContract}
@@ -39,16 +40,10 @@ export default function HttpEndpointForm
             updateVariant={() => {
                 // reset other related contracts
                 if (contract.handler?.typeName === 'TraefikHttpEndpointHandler') {
-                    const domainContract = allContracts.find(c => c.type === 'Domain' && c.name === contract.domain);
-                    if (domainContract) {
-                        updateContract(domainContract);
-                    }
+                    updateContract(`Domain:${contract.domain}`, null);
                 }
                 if (contract.handler?.typeName === 'PortHttpEndpointHandler') {
-                    const portContract = allContracts.find(c => c.type === 'PortEndpoint' && c.port === contract.port && c.protocol === 'Tcp');
-                    if (portContract) {
-                        updateContract(portContract);
-                    }
+                    updateContract(contractId.replace('HttpEndpoint', 'PortEndpoint'), null);
                 }
             }}
         >
@@ -59,7 +54,7 @@ export default function HttpEndpointForm
                         value={host}
                         onChange={e => {
                             setHost(e.target.value);
-                            updateContract({
+                            updateContract(contractId, {
                                 ...contract,
                                 resultHost: e.target.value
                             });

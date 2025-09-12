@@ -1,8 +1,8 @@
 import {useState} from "react";
-import {Contract} from "@/components/contracts/ContractForm.tsx";
+import {ContractList} from "@/types.ts";
 
 type Props = {
-    contracts: Contract[];
+    contracts: ContractList;
 }
 
 export default function Debug({contracts}: Props) {
@@ -14,10 +14,10 @@ export default function Debug({contracts}: Props) {
         }}>Debug info {!visible ? '↓' : '↑'}</a>
         {visible && (
             <div className={"card mt-2"}>
-                {contracts.map(contract => (
-                    <div key={`${contract.type}:${contract.name}`}>
-                        <p>{contract.type}</p>
-                        <pre>{JSON.stringify(contract, null, 2)}</pre>
+                {Object.entries(contracts).map(pair => (
+                    <div key={pair[0]}>
+                        <p>{pair[0]}</p>
+                        <pre>{JSON.stringify(pair[1], null, 2)}</pre>
                     </div>
                 ))}
             </div>

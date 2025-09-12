@@ -3,7 +3,7 @@ import {PortEndpoint} from "@/api/schemas";
 import {ContractProps} from "@/components/contracts/ContractForm.tsx";
 import BaseForm from "@/components/contracts/BaseForm.tsx";
 
-export default function PortEndpointForm({contract, updateContract}: ContractProps<PortEndpoint>) {
+export default function PortEndpointForm({contractId, contract, updateContract}: ContractProps<PortEndpoint>) {
     const [port, setPort] = useState(contract.externalPort);
 
     useEffect(() => {
@@ -20,7 +20,7 @@ export default function PortEndpointForm({contract, updateContract}: ContractPro
         }
 
         setPort(intPort);
-        updateContract({
+        updateContract(contractId, {
             ...contract,
             externalPort: intPort
         });
@@ -28,6 +28,7 @@ export default function PortEndpointForm({contract, updateContract}: ContractPro
 
     return (
         <BaseForm
+            contractId={contractId}
             contract={contract}
             updateContract={updateContract}
             contractName={contract => `from ${contract.port.toString()}/${contract.protocol}` + (contract.container && ` in container ${contract.container}`)}

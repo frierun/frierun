@@ -5,11 +5,11 @@ import {usePostPackagesIdInstall} from "@/api/endpoints/packages.ts";
 import {Package} from "@/api/schemas";
 import {useQueryClient} from "@tanstack/react-query";
 import {useNavigate} from "react-router-dom";
-import {Contract} from "@/components/contracts/ContractForm.tsx";
+import {ContractList} from "@/types.ts";
 
 type Props = {
     packageContract: Package;
-    overrides: Contract[];
+    overrides: ContractList;
     prefix: string;
     setError: (error: string | null) => void;
 }
@@ -28,7 +28,7 @@ export default function useInstall({packageContract, overrides, prefix, setError
             data: {
                 ...packageContract,
                 prefix,
-                contracts: Object.fromEntries(overrides.map(contract => [`${contract.type}:${contract.name}`, contract])),
+                contracts: overrides,
             }
         });
 

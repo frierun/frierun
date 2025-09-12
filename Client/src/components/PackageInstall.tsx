@@ -1,8 +1,8 @@
 ﻿import InstallForm from "../components/InstallForm.tsx";
 import {usePostPackagesIdPlan} from "@/api/endpoints/packages.ts";
 import {useCallback, useEffect, useState} from "react";
-import {type ExecutionPlanContracts, Package} from "@/api/schemas";
-import {Contract} from "@/components/contracts/ContractForm.tsx";
+import {Package} from "@/api/schemas";
+import {Alternative, ContractList} from "@/types.ts";
 
 type Props = {
     name: string;
@@ -10,18 +10,16 @@ type Props = {
 
 type Plan = {
     packageContract: Package;
-    contracts: Contract[];
-    alternatives: Contract[];
+    contracts: ContractList;
+    alternatives: Alternative[];
 }
-
-export type ContractList = ExecutionPlanContracts;
 
 export default function PackageInstall({name}: Props) {
     const [error, setError] = useState<string | null>(null);
     const [plan, setPlan] = useState<Plan | null>(null);
     const {isPending, isIdle, mutateAsync} = usePostPackagesIdPlan();
 
-    const refetch = useCallback(async (overrides: Contract[]) => {
+    const refetch = useCallback(async (overrides: ContractList) => {
         setError(null);
         const result = await mutateAsync({
             id: name,
@@ -29,7 +27,7 @@ export default function PackageInstall({name}: Props) {
                 type: 'Package',
                 name,
                 tags: [],
-                contracts: Object.fromEntries(overrides.map(contract => [`${contract.type}:${contract.name}`, contract])),
+                contracts: overrides,
                 applicationUrl: null,
                 applicationDescription: null
             }
@@ -45,8 +43,7 @@ export default function PackageInstall({name}: Props) {
             return;
         }
 
-        const contracts = Object.entries(result.data.contracts)
-            .map(pair => pair[1]);
+        const contracts = Object.entries(result.data.contracts).map(entry => entry[1]);
         const packageContract = contracts.find(contract => contract.type === 'Package');
         if (!packageContract) {
             setError("Package has no contract");
@@ -55,13 +52,13 @@ export default function PackageInstall({name}: Props) {
 
         setPlan({
             packageContract,
-            contracts,
-            alternatives: result.data.alternatives.map(pair => pair.contract as Contract)
+            contracts: result.data.contracts,
+            alternatives: result.data.alternatives
         });
     }, [mutateAsync, name]);
 
     useEffect(() => {
-        void refetch([]);
+        void refetch({});
     }, [refetch]);
 
     if (plan == null && (isIdle || isPending)) {

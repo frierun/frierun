@@ -3,16 +3,17 @@ import {useEffect, useState} from "react";
 import {Domain} from "@/api/schemas";
 import BaseForm from "@/components/contracts/BaseForm.tsx";
 
-export default function DomainForm({contract, variants, updateContract}: ContractProps<Domain>) {
+export default function DomainForm({contractId, contract, variants, updateContract}: ContractProps<Domain>) {
     const [subdomain, setSubdomain] = useState<string>('');
     const domainName = contract.value?.split('.').slice(1).join('.') ?? '';
 
     useEffect(() => {
         setSubdomain(contract.value?.split('.')[0] ?? '');
     }, [contract]);
-    
+
     return (
         <BaseForm
+            contractId={contractId}
             contract={contract}
             variants={variants}
             updateContract={updateContract}
@@ -23,12 +24,12 @@ export default function DomainForm({contract, variants, updateContract}: Contrac
                 </label>
                 <input
                     value={subdomain} onChange={e => {
-                        setSubdomain(e.target.value);
-                        updateContract({
-                            ...contract,
-                            value: `${e.target.value}.${domainName}`
-                        });
-                    }}
+                    setSubdomain(e.target.value);
+                    updateContract(contractId, {
+                        ...contract,
+                        value: `${e.target.value}.${domainName}`
+                    });
+                }}
                 />
                 <span className="ml-2">.{domainName}</span>
             </div>

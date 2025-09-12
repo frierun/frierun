@@ -3,7 +3,13 @@ import {DockerApiConnection} from "@/api/schemas";
 import {ContractProps} from "@/components/contracts/ContractForm.tsx";
 import BaseForm from "@/components/contracts/BaseForm.tsx";
 
-export default function DockerApiConnectionForm({contract, updateContract}: ContractProps<DockerApiConnection>) {
+export default function DockerApiConnectionForm(
+    {
+        contractId,
+        contract,
+        updateContract
+    }: ContractProps<DockerApiConnection>
+) {
     const [path, setPath] = useState('');
 
     useEffect(() => {
@@ -11,7 +17,7 @@ export default function DockerApiConnectionForm({contract, updateContract}: Cont
     }, [contract]);
 
     return (
-        <BaseForm contract={contract} updateContract={updateContract}>
+        <BaseForm contractId={contractId} contract={contract} updateContract={updateContract}>
             <div className={"my-1.5"}>
                 <label className={"inline-block w-48"}>
                     Socket path:
@@ -21,10 +27,12 @@ export default function DockerApiConnectionForm({contract, updateContract}: Cont
                     value={path}
                     onChange={e => {
                         setPath(e.target.value);
-                        updateContract({
-                            ...contract,
-                            path: e.target.value,
-                        })
+                        updateContract(contractId,
+                            {
+                                ...contract,
+                                path: e.target.value,
+                            }
+                        );
                     }}
                 />
             </div>
