@@ -10,15 +10,11 @@ public class VolumeTests : BaseTests
     {
         var dependency = new ContractId<Container>("test");
         var dependency2 = new ContractId<Container>("test2");
-        var volume = Factory<Volume>().Generate()
-            with
-            {
-                DependsOn = [dependency],
-            };
+        var volume = Factory<Volume>().Generate() with { DependsOn = [dependency] };
 
-        var result = volume.Merge(Factory<Volume>().Generate() with { Name = volume.Name });
+        var result = volume.Merge(volume with { DependsOn = [dependency2] });
 
-        Assert.Equal([dependency], result.DependsOn);
+        Assert.Equal([dependency, dependency2], result.DependsOn);
     }
 
 

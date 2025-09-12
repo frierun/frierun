@@ -28,7 +28,7 @@ public class ExecutionService(
         {
             nextContract ??= contractRegistry.CreateContract(nextId);
 
-            var branches = new Queue<ContractList>(DiscoverContract(nextContract, applicationName));
+            var branches = new Queue<ContractList>(DiscoverContract(nextId, nextContract, applicationName));
             if (branches.Count != 0)
             {
                 branchesStack.Push(new StackItem(currentGraph, nextId, branches));
@@ -116,10 +116,10 @@ public class ExecutionService(
     /// <summary>
     /// Discovers all possible dependent contracts for the given contract.
     /// </summary>
-    private IEnumerable<ContractList> DiscoverContract(Contract contract, string? prefix = null)
+    private IEnumerable<ContractList> DiscoverContract(ContractId contractId, Contract contract, string? prefix = null)
     {
         var context = new ApplicationContext(
-            contract.Name,
+            contractId.Name,
             prefix ?? ""
         );
 
