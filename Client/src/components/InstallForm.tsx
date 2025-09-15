@@ -16,13 +16,13 @@ type Props = {
 }
 
 export default function InstallForm({packageName, application, contracts, alternatives, setError, refetch}: Props) {
-    const [prefix, setPrefix] = useState(application.prefix ?? packageName);
+    const [prefix, setPrefix] = useState(application.name);
     const [overrides, setOverrides] = useState<ContractList>({});
 
     const {install, isPending: isInstallPending} = useInstall({
         packageName,
         overrides,
-        prefix,
+        applicationName: prefix,
         setError
     })
 

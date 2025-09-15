@@ -16,7 +16,6 @@ import type { HttpEndpoint } from "./httpEndpoint";
 import type { Mysql } from "./mysql";
 import type { Network } from "./network";
 import type { Optional } from "./optional";
-import type { Package } from "./package";
 import type { Parameter } from "./parameter";
 import type { Password } from "./password";
 import type { PortEndpoint } from "./portEndpoint";
@@ -39,7 +38,6 @@ export type AlternativeContract =
   | Mysql
   | Network
   | Optional
-  | Package
   | Parameter
   | Password
   | PortEndpoint

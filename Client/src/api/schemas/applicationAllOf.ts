@@ -8,9 +8,8 @@ import type { Package } from "./package";
 import type { ApplicationAllOfContracts } from "./applicationAllOfContracts";
 
 export type ApplicationAllOf = {
+  name: string;
   package?: Package;
-  /** @nullable */
-  prefix?: string | null;
   /** @nullable */
   url: string | null;
   /** @nullable */

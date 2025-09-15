@@ -7,7 +7,6 @@ namespace Frierun.Server.Data;
 public record HttpEndpoint(
     int Port = 0,
     ContractId<Container>? Container = null,
-    ContractId<Domain>? Domain = null,
     Argument<bool?>? ResultSsl = null,
     Argument<string>? ResultHost = null,
     Argument<int>? ResultPort = null,
@@ -38,7 +37,6 @@ public record HttpEndpoint(
         {
             Port = OnlyOne(Port, contract.Port, port => port == 0),
             Container = OnlyOne(Container, contract.Container),
-            Domain = OnlyOne(Domain, contract.Domain),
             ResultSsl = ResultSsl.Merge(contract.ResultSsl),
             ResultHost = ResultHost.Merge(contract.ResultHost),
             ResultPort = ResultPort.Merge(contract.ResultPort),

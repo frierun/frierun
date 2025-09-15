@@ -9,11 +9,11 @@ import {ContractList} from "@/types.ts";
 type Props = {
     packageName: string;
     overrides: ContractList;
-    prefix: string;
+    applicationName: string;
     setError: (error: string | null) => void;
 }
 
-export default function useInstall({packageName, overrides, prefix, setError}: Props)
+export default function useInstall({packageName, overrides, applicationName, setError}: Props)
 {
     const {waitForReady} = useContext(StateContext);
     const {mutateAsync, isPending} = usePostPackagesIdInstall();
@@ -25,7 +25,7 @@ export default function useInstall({packageName, overrides, prefix, setError}: P
         const result = await mutateAsync({
             id: packageName,
             data: {
-                name: prefix,
+                name: applicationName,
                 contracts: overrides,
             }
         });

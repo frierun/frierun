@@ -23,7 +23,7 @@ public class TraefikHttpEndpointHandler(Application application)
             c => c.TraefikRouterName
         );
 
-        var domainId = contract.Domain ?? new ContractId<Domain>(context.Name);
+        var domainId = new ContractId<Domain>(context.Name);
 
         yield return new ContractList
         {

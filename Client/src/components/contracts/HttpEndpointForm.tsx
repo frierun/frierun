@@ -35,12 +35,12 @@ export default function HttpEndpointForm
             contract={contract}
             variants={variants}
             updateContract={updateContract}
-            contractName={contract => contract.port.toString() + (contract.container && ` in container ${contract.container}`)}
+            contractName={(_, contract) => contract.port.toString() + (contract.container && ` in container ${contract.container}`)}
             variantName={VariantName}
             updateVariant={() => {
                 // reset other related contracts
                 if (contract.handler?.typeName === 'TraefikHttpEndpointHandler') {
-                    updateContract(`Domain:${contract.domain}`, null);
+                    updateContract(contractId.replace("HttpEndpoint:", "Domain:"), null);
                 }
                 if (contract.handler?.typeName === 'PortHttpEndpointHandler') {
                     updateContract(contractId.replace('HttpEndpoint', 'PortEndpoint'), null);

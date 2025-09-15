@@ -27,10 +27,6 @@ type Props = {
     allContracts: ContractList;
 }
 
-const sameContract = (a: Contract, b: Contract) => {
-    return a.type === b.type && a.name === b.name;
-}
-
 type ContractsByTypeName = {
     [P in Contract['type']]: Extract<Contract, { type: P }>
 }
@@ -61,7 +57,7 @@ export default function ContractForm({contractId, alternatives, updateContract, 
                     .filter(alt => alt.contractId == contractId)
                     .map(alt => alt.contract);
 
-                const refreshVariants = variants.length === 0 || !sameContract(variants[0], contract) || filteredAlternatives.length > 0;
+                const refreshVariants = variants.length === 0 || filteredAlternatives.length > 0;
                 if (!refreshVariants) {
                     return variants;
                 }

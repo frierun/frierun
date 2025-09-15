@@ -6,7 +6,7 @@ type Props<TContract extends Contract> = {
     contract: TContract;
     variants?: TContract[];
     updateContract: (contractId: string, contract: Contract, isRefetch?: boolean) => void;
-    contractName?: (contract: TContract) => string;
+    contractName?: (contractId: string, contract: TContract) => string;
     variantName?: (contract: TContract) => string;
     updateVariant?: () => void;
     children?: ReactNode | undefined;
@@ -18,7 +18,7 @@ export default function BaseForm<T extends Contract>
      contract,
      variants = [contract],
      updateContract,
-     contractName = contract => contract.name,
+     contractName = contractId => contractId,
      variantName = contract => contract.handler?.applicationName ?? 'Unknown',
      updateVariant,
      children
@@ -42,7 +42,7 @@ export default function BaseForm<T extends Contract>
                 <label className={"inline-block w-48"}>
                     {contract.type}
                 </label>
-                {contractName(contract)}
+                {contractName(contractId, contract)}
             </div>
             {variants.length > 1 && (
                 <fieldset className="flex gap-4">

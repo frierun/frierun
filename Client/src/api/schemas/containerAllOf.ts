@@ -17,11 +17,12 @@ export type ContainerAllOf = {
   installed?: boolean;
   /** @nullable */
   command: string[] | null;
-  networkAliases: string[];
   env: ContainerAllOfEnv;
   labels: ContainerAllOfLabels;
   mounts: ContainerAllOfMounts;
+  portEndpoints: string[];
   network: string;
+  networkAliases: string[];
   /** @nullable */
   imageName: string | null;
 };
