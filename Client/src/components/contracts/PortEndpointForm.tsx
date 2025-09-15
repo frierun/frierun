@@ -31,7 +31,7 @@ export default function PortEndpointForm({contractId, contract, updateContract}:
             contractId={contractId}
             contract={contract}
             updateContract={updateContract}
-            contractName={(_, contract) => `from ${contract.port.toString()}/${contract.protocol}` + (contract.container && ` in container ${contract.container}`)}
+            contractName={contract => `from ${contract.port.toString()}/${contract.protocol}` + (contract.container && ` in container ${contract.container}`)}
         >
             <label className={"inline-block w-48"}>
                 Destination port:

@@ -35,7 +35,7 @@ export default function HttpEndpointForm
             contract={contract}
             variants={variants}
             updateContract={updateContract}
-            contractName={(_, contract) => contract.port.toString() + (contract.container && ` in container ${contract.container}`)}
+            contractName={contract => 'from ' + contract.port.toString() + (contract.container && ` in container ${contract.container}`)}
             variantName={VariantName}
             updateVariant={() => {
                 // reset other related contracts

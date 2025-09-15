@@ -7,8 +7,8 @@ contracts:
   Container:
     imageName: "docker.n8n.io/n8nio/n8n:latest"
     env:
-      VUE_APP_URL_BASE_API: "{{HttpEndpoint:5678:ResultHost}}"
-      WEBHOOK_URL: "{{HttpEndpoint:5678:Url}}"
+      VUE_APP_URL_BASE_API: "{{HttpEndpoint::ResultHost}}"
+      WEBHOOK_URL: "{{HttpEndpoint::Url}}"
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
       N8N_RUNNERS_ENABLED: "true"
     mounts:
