@@ -7,7 +7,7 @@ public sealed class DaemonFactory : ContractFaker<Daemon>
 {
     public DaemonFactory()
     {
-        CustomInstantiator(_ => new Daemon(""));
+        CustomInstantiator(_ => new Daemon());
         RuleFor(p => p.Command, f => new Argument<IEnumerable<string>>(new List<string>(f.Lorem.Words())));
         RuleFor(
             p => p.PreCommands,

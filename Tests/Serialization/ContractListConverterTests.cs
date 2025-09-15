@@ -113,7 +113,7 @@ public class ContractListConverterTests : BaseTests
     public void Write_SingleContainer_ProducesExpectedJson()
     {
         var name = Resolve<Faker>().Lorem.Word();
-        var contract = new Container(Name: name);
+        var contract = new Container();
         var contracts = new ContractList
         {
             [name] = contract
@@ -132,8 +132,8 @@ public class ContractListConverterTests : BaseTests
     {
         var name1 = Resolve<Faker>().Lorem.Word();
         var name2 = Resolve<Faker>().Lorem.Word();
-        var contract1 = new Container(Name: name1);
-        var contract2 = new Container(Name: name2);
+        var contract1 = new Container();
+        var contract2 = new Container();
         var contracts = new ContractList
         {
             [name1] = contract1,
@@ -152,7 +152,7 @@ public class ContractListConverterTests : BaseTests
     [Fact]
     public void Write_ContainerWithoutName_UsesTypeOnlyKey()
     {
-        var contract = new Container(Name: "");
+        var contract = new Container();
         var contracts = new ContractList
         {
             [""] = contract

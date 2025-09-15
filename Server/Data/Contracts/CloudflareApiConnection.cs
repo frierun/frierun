@@ -6,9 +6,8 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record CloudflareApiConnection(
-    string? Name = null,
     string? Token = null
-) : Contract<ICloudflareApiConnectionHandler>(Name ?? "")
+) : Contract<ICloudflareApiConnectionHandler>
 {
     [MemberNotNullWhen(true, nameof(Token))]
     public override bool Installed { get; init; }

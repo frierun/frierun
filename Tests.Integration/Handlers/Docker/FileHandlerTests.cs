@@ -158,7 +158,7 @@ public class FileHandlerTests : TestWithDocker
                     Command: new Argument<IEnumerable<string>>(["tail", "-f", "/dev/null"]),
                     Mounts: new Dictionary<string, ContainerMount> { { "/mnt", new ContainerMount() } }
                 ),
-                [""] = new Volume(Name: "", LocalPath: directory.FullName),
+                [""] = new Volume(LocalPath: directory.FullName),
                 [""] = new File(
                     Path: fileName,
                     Text: "test-text"

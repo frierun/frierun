@@ -6,10 +6,9 @@ namespace Frierun.Server.Data;
 public record SelectorOption(string Name, ContractList? Contracts);
 
 public record Selector(
-    string Name,
     IReadOnlyList<SelectorOption>? Options = null,
     string? Value = null
-) : Contract(Name ?? "")
+) : Contract
 {
     [MemberNotNullWhen(true, nameof(Value))]
     public override bool Installed { get; init; }

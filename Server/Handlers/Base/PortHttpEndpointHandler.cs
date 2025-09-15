@@ -6,9 +6,7 @@ public class PortHttpEndpointHandler : Handler<HttpEndpoint>
 {
     public override IEnumerable<ContractList> Initialize(HttpEndpoint contract, ApplicationContext context)
     {
-        var portEndpoint = new PortEndpoint(
-            Protocol.Tcp, contract.Port, Container: contract.Container, Name: context.Name
-        );
+        var portEndpoint = new PortEndpoint(Protocol.Tcp, contract.Port, Container: contract.Container);
         var portEndpointId = new ContractId<PortEndpoint>(context.Name);
         yield return new ContractList
         {

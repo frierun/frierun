@@ -23,44 +23,46 @@ public class TraefikHttpEndpointHandler(Application application)
             c => c.TraefikRouterName
         );
 
+        var domainId = contract.Domain ?? new ContractId<Domain>(context.Name);
+
         yield return new ContractList
         {
             [context] = contract with
             {
                 TraefikRouterName = routerName,
                 ResultSsl = new Argument<bool?>(plan =>
-                    GetCertificateResolver(plan.GetContract(contract.Domain)) != null
+                    GetCertificateResolver(plan.GetContract(domainId)) != null
                 ),
-                ResultHost = new Argument<string>(plan => plan.GetContract(contract.Domain).Value),
+                ResultHost = new Argument<string>(plan => plan.GetContract(domainId).Value),
                 ResultPort = new Argument<int>(plan =>
-                    GetCertificateResolver(plan.GetContract(contract.Domain)) == null ? _webPort : _webSecurePort
+                    GetCertificateResolver(plan.GetContract(domainId)) == null ? _webPort : _webSecurePort
                 ),
                 Handler = this,
                 DependsOn =
                 [
                     contract.Container,
-                    contract.Domain
+                    domainId
                 ]
             },
-            [contract.Container] = new Container(contract.Container.Name)
+            [contract.Container] = new Container
             {
                 Labels = new Dictionary<string, Argument<string>>
                 {
                     ["traefik.enable"] = "true",
                     [$"traefik.http.routers.{routerName}.rule"] = new(plan =>
-                        $"Host(`{plan.GetContract(contract.Domain).Value}`)"
+                        $"Host(`{plan.GetContract(domainId).Value}`)"
                     ),
                     [$"traefik.http.services.{routerName}.loadbalancer.server.port"] = contract.Port.ToString(),
                     [$"traefik.http.routers.{routerName}.tls"] = new(plan =>
-                        GetCertificateResolver(plan.GetContract(contract.Domain)) == null
+                        GetCertificateResolver(plan.GetContract(domainId)) == null
                             ? "false"
                             : "true"
                     ),
                     [$"traefik.http.routers.{routerName}.tls.certresolver"] = new(plan =>
-                        GetCertificateResolver(plan.GetContract(contract.Domain))
+                        GetCertificateResolver(plan.GetContract(domainId))
                     )
                 },
-                DependsOn = [contract.Domain]
+                DependsOn = [domainId]
             }
         };
     }

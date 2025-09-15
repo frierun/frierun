@@ -102,7 +102,7 @@ public class StateSerializerTests : BaseTests
         InstallPackage("docker");
         InstallPackage(
             "frierun",
-            new ContractList { ["config"] = new Volume("config", VolumeName: "test"), }
+            new ContractList { ["config"] = new Volume(VolumeName: "test"), }
         );
 
         var loadedState = stateManager.Load();
@@ -120,7 +120,7 @@ public class StateSerializerTests : BaseTests
         InstallPackage("docker");
         InstallPackage(
             "frierun",
-            new ContractList { ["config"] = new Volume("config", LocalPath: "/test"), }
+            new ContractList { ["config"] = new Volume(LocalPath: "/test"), }
         );
 
         var loadedState = stateManager.Load();

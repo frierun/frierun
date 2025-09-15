@@ -12,9 +12,7 @@ public class RedisHandlerTests : TestWithDocker
             Contracts: new ContractList
             {
                 [""] = new Redis(),
-                ["redis-client"] = new Container(
-                    Name: "redis-client"
-                )
+                ["redis-client"] = new Container
                 {
                     ImageName = "redis:7"
                 }

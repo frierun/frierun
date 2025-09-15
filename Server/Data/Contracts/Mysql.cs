@@ -4,7 +4,6 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record Mysql(
-    string? Name = null,
     ContractId<Network>? Network = null,
     string? Username = null,
     string? Password = null,
@@ -12,7 +11,7 @@ public record Mysql(
     string? Database = null,
     string? NetworkName = null,
     bool Admin = false
-) : Contract(Name ?? "")
+) : Contract
 {
     [MemberNotNullWhen(true, nameof(Username), nameof(Password), nameof(Host), nameof(NetworkName))]
     public override bool Installed { get; init; }

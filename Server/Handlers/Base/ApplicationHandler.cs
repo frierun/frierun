@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Data;
+﻿using System.Diagnostics;
+using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
@@ -6,6 +7,8 @@ public class ApplicationHandler : Handler<Application>
 {
     public override IEnumerable<ContractList> Initialize(Application application, ApplicationContext context)
     {
+        Debug.Assert(application.Name == context.Prefix);
+        
         var url = application.Url;
 
         // auto-detect application URL
@@ -39,7 +42,6 @@ public class ApplicationHandler : Handler<Application>
         {
             [context] = application with
             {
-                Prefix = context.Prefix,
                 Url = url,
                 Handler = this
             }

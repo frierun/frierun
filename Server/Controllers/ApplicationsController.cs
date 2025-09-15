@@ -1,4 +1,6 @@
-﻿using Frierun.Server.Data;
+﻿using System.Diagnostics;
+using Frierun.Server.Data;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Frierun.Server.Controllers;
@@ -6,6 +8,7 @@ namespace Frierun.Server.Controllers;
 [Route("/applications")]
 public class ApplicationsController : ControllerBase
 {
+    [UsedImplicitly]
     public record ApplicationResponse(
         string Name,
         string? PackageName,
@@ -19,13 +22,17 @@ public class ApplicationsController : ControllerBase
     {
         
         return state.Applications.Select(
-            application => new ApplicationResponse(
-                application.Name,
-                application.Package?.Name,
-                application.Url,
-                application.Description,
-                application.Package?.IconUrl
-            )
+            application =>
+            {
+                Debug.Assert(application.Installed);
+                return new ApplicationResponse(
+                    application.Name,
+                    application.Package?.Name,
+                    application.Url,
+                    application.Description,
+                    application.Package?.IconUrl
+                );
+            }
         );
     }
 

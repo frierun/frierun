@@ -6,10 +6,9 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record DockerApiConnection(
-    string? Name = null,
     string? Path = null,
     bool? IsPodman = null
-) : Contract<IDockerApiConnectionHandler>(Name ?? "")
+) : Contract<IDockerApiConnectionHandler>
 {
     /// <summary>
     /// Creates a Docker client using the current configuration.

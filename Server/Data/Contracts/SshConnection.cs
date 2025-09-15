@@ -6,13 +6,12 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record SshConnection(
-    string? Name = null,
     string? Host = null,
     int Port = 0,
     string? Username = null,
     string? Password = null
 )
-    : Contract<ISshConnectionHandler>(Name ?? "")
+    : Contract<ISshConnectionHandler>
 {
     /// <summary>
     /// Create an ssh client from the contract.

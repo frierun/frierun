@@ -7,10 +7,9 @@ public record Application(
     Package? Package = null,
     Argument<string>? Url = null,
     Argument<string>? Description = null,
-    string? Prefix = null,
     ContractList? Contracts = null,
     IReadOnlyList<string>? RequiredApplications = null
-    ) : Contract(Name)
+    ) : Contract
 {
     public Argument<string> Url { get; init; } = Url ?? new Argument<string>();
     public Argument<string> Description { get; init; } = Description ?? new Argument<string>();
@@ -47,7 +46,7 @@ public record Application(
 
         return MergeCommon(this, contract) with
         {
-            Prefix = OnlyOne(Prefix, contract.Prefix),
+            Name = OnlyOne(Name, contract.Name),
             Url = Url.Merge(contract.Url),
             Description = Description.Merge(contract.Description),
             Contracts = Contracts.Merge(contract.Contracts)

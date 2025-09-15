@@ -32,6 +32,12 @@
           "System.Threading.Tasks.Extensions": "4.5.4"
         }
       },
+      "JetBrains.Annotations": {
+        "type": "Direct",
+        "requested": "[2025.2.2, )",
+        "resolved": "2025.2.2",
+        "contentHash": "0X56ZRizuHdrnPpgXjWV7f2tQO1FlQg5O1967OGKnI/4ZRNOK642J8L7brM1nYvrxTTU5TP1yRyXLRLaXLPQ8A=="
+      },
       "Microsoft.AspNetCore.OpenApi": {
         "type": "Direct",
         "requested": "[9.0.0, )",

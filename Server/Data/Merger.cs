@@ -27,7 +27,6 @@ public static class Merger
 
         var result = contract with
         {
-            Name = OnlyOne(contract.Name, other.Name),
             Handler = OnlyOne(contract.Handler, other.Handler),
             HandlerApplication = OnlyOne(contract.HandlerApplication, other.HandlerApplication),
             DependsOn = contract.DependsOn.Concat(other.DependsOn).Distinct()

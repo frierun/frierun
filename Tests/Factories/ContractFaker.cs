@@ -14,7 +14,6 @@ public abstract class ContractFaker<TContract> : Faker<TContract>
 
     protected ContractFaker()
     {
-        this.UniqueRuleFor(p => p.Name, f => f.Lorem.Word(), _uniqueNames);
     }
     
     /// <summary>
@@ -23,7 +22,19 @@ public abstract class ContractFaker<TContract> : Faker<TContract>
     public new ContractEntry<TContract> Generate(string? ruleSets = null)
     {
         var result = base.Generate(ruleSets);
-        var contractId = new ContractId<TContract>(result.Name);
+        
+        int tries = 0;
+        string name;
+        do
+        {
+            if (++tries > 100)
+            {
+                throw new InvalidOperationException("Could not generate a unique value");
+            }
+            name = FakerHub.Lorem.Word();
+        } while (!_uniqueNames.Add(name));
+        
+        var contractId = new ContractId<TContract>(name);
         return new ContractEntry<TContract>(contractId, result);
     }
     

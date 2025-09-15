@@ -9,7 +9,7 @@ namespace Frierun.Tests;
 
 public class ExecutionServiceTests : BaseTests
 {
-    public record Contract1(string? Name = null) : Contract(Name ?? "")
+    public record Contract1 : Contract
     {
         public override Contract Merge(Contract other)
         {
@@ -17,7 +17,7 @@ public class ExecutionServiceTests : BaseTests
         }
     }
 
-    public record Contract2(string? Name = null) : Contract(Name ?? "")
+    public record Contract2 : Contract
     {
         public override Contract Merge(Contract other)
         {
@@ -42,7 +42,7 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_WithoutHandler_ThrowsException()
     {
-        var contract = new ContractEntry<Contract>("", Substitute.For<Contract>(""));
+        var contract = new ContractEntry<Contract>("", Substitute.For<Contract>());
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
 
         Assert.Throws<HandlerNotFoundException>(() => Service.Create(package.CreateApplication()));
@@ -102,8 +102,8 @@ public class ExecutionServiceTests : BaseTests
     {
         var handler = Mock<Handler<Contract1>, IHandler>([null]);
 
-        var contract1 = new ContractEntry<Contract1>("contract1", new Contract1("contract1") { Handler = handler });
-        var contract2 = new ContractEntry<Contract1>("contract2", new Contract1("contract2") { Handler = handler });
+        var contract1 = new ContractEntry<Contract1>("contract1", new Contract1 { Handler = handler });
+        var contract2 = new ContractEntry<Contract1>("contract2", new Contract1 { Handler = handler });
         var package = Factory<Package>().Generate() with { Contracts = [contract1] };
         handler
             .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())
@@ -119,7 +119,7 @@ public class ExecutionServiceTests : BaseTests
 
         var contract = new ContractEntry<Contract1>("", new Contract1());
         var unknownContract = new ContractEntry<Contract2>("", new Contract2());
-        var knownContract = new ContractEntry<Contract1>("second", new Contract1("second"));
+        var knownContract = new ContractEntry<Contract1>("second", new Contract1());
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         handler
             .Initialize(contract.Contract, Arg.Any<ApplicationContext>())
@@ -169,7 +169,7 @@ public class ExecutionServiceTests : BaseTests
 
         var contract = new ContractEntry<Contract1>("", new Contract1());
         var unknownContract = new ContractEntry<Contract2>("", new Contract2());
-        var knownContract = new ContractEntry<Contract1>("second", new Contract1("second"));
+        var knownContract = new ContractEntry<Contract1>("second", new Contract1());
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
         handler
             .Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>())

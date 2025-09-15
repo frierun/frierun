@@ -5,12 +5,11 @@ namespace Frierun.Server.Data;
 
 public record File(
     string Path,
-    string? Name = null,
     Argument<string>? Text = null,
     ContractId<Volume>? Volume = null,
     int? Owner = null,
     int? Group = null
-) : Contract(Name ?? $"{Path}{(Volume != null ? " in " + Volume.Name : "")}")
+) : Contract
 {
     public ContractId<Volume> Volume { get; init; } = Volume ?? new ContractId<Volume>("");
     public Argument<string> Text { get; init; } = Text ?? new Argument<string>();

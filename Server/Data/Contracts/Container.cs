@@ -7,7 +7,6 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record Container(
-    string? Name = null,
     string? ContainerName = null,
     string? NetworkName = null,
     Argument<string>? ImageName = null,
@@ -19,7 +18,7 @@ public record Container(
     IReadOnlyDictionary<string, Argument<string>>? Env = null,
     IReadOnlyDictionary<string, Argument<string>>? Labels = null,
     IReadOnlyDictionary<string, ContainerMount>? Mounts = null
-) : Contract<IContainerHandler>(Name ?? "")
+) : Contract<IContainerHandler>
 {
     [MemberNotNullWhen(true, nameof(ContainerName), nameof(NetworkName))]
     public override bool Installed { get; init; }

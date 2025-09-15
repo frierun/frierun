@@ -99,11 +99,9 @@ public class ExecutionPlan(
     private Application CreateApplication(Dictionary<ContractId, Contract> installedContracts)
     {
         var application = contracts.Values.OfType<Application>().First();
-        Debug.Assert(application != null);
 
         return application with
         {
-            Name = application.Prefix ?? application.Name,
             Contracts = new ContractList(installedContracts),
             RequiredApplications = _requiredApplications.Select(app => app.Name).ToList()
         };

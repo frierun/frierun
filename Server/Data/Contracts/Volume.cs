@@ -3,10 +3,9 @@
 namespace Frierun.Server.Data;
 
 public record Volume(
-    string Name,
     string? VolumeName = null,
     string? LocalPath = null
-) : Contract(Name)
+) : Contract
 {
     public override Contract Merge(Contract other) 
     {

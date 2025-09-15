@@ -18,10 +18,8 @@ public class ContainerHandler(Application application)
         var contractId = new ContractId<Container>(context.Name);
         yield return new ContractList(
             contract.Mounts.Values.Select(mount => new KeyValuePair<ContractId, Contract>(
-                    mount.Volume, new Volume(mount.Volume.Name)
-                    {
-                        HandlerApplication = Application?.Name,
-                    }
+                    mount.Volume,
+                    new Volume { HandlerApplication = Application?.Name }
                 )
             )
         )
@@ -57,10 +55,7 @@ public class ContainerHandler(Application application)
                 ),
                 DependsOn = [..contract.Mounts.Values.Select(mount => mount.Volume)]
             },
-            [contract.Network] = new Network(contract.Network.Name)
-            {
-                HandlerApplication = Application?.Name
-            }
+            [contract.Network] = new Network { HandlerApplication = Application?.Name }
         };
     }
 

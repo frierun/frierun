@@ -9,9 +9,8 @@ public class ContainerTests : BaseTests
     {
         var container = Factory<Container>().Generate();
 
-        var result = (Container)new Container(Name: container.Name).Merge(container);
+        var result = (Container)new Container().Merge(container);
 
-        Assert.Equal(container.Name, result.Name);
         Assert.Equal(container.ImageName, result.ImageName);
         Assert.Equal(container.NetworkName, result.NetworkName);
         Assert.Equal(container.ContainerName, result.ContainerName);
@@ -26,7 +25,6 @@ public class ContainerTests : BaseTests
         var container2 = new Container();
 
         var result = (Container)container.Merge(container2);
-        Assert.Empty(result.Name);
         Assert.Null(result.ImageName.Value);
         Assert.Null(result.NetworkName);
         Assert.Null(result.ContainerName);
@@ -37,19 +35,10 @@ public class ContainerTests : BaseTests
     }
 
     [Fact]
-    public void Merge_ContractsWithDifferentNames_ThrowsException()
-    {
-        var container = Factory<Container>().Generate();
-        var container2 = container with { Name = container.Name + "2" };
-
-        Assert.Throws<MergeException>(() => container.Merge(container2));
-    }
-
-    [Fact]
     public void Merge_ContainerWithDifferentContractType_ThrowsException()
     {
-        var container = Factory<Container>().Generate() with { Name = "" };
-        var volume = Factory<Volume>().Generate() with { Name = "" };
+        var container = Factory<Container>().Generate();
+        var volume = Factory<Volume>().Generate();
 
         Assert.Throws<MergeException>(() => container.Merge(volume));
     }
@@ -96,7 +85,7 @@ public class ContainerTests : BaseTests
 
         Assert.Throws<MergeException>(() => container.Merge(container2));
     }
-    
+
     [Fact]
     public void GetArguments_SeveralEnvArguments_ReturnsAllArguments()
     {
@@ -108,12 +97,12 @@ public class ContainerTests : BaseTests
                 { "key2", "value2" }
             }
         };
-        
+
         var arguments = container.GetArguments().ToList();
         Assert.Contains(arguments, a => a.ToString() == "value1");
         Assert.Contains(arguments, a => a.ToString() == "value2");
     }
-    
+
     [Fact]
     public void GetArguments_SeveralLabelArguments_ReturnsAllArguments()
     {
@@ -125,9 +114,9 @@ public class ContainerTests : BaseTests
                 { "key2", "value2" }
             }
         };
-        
+
         var arguments = container.GetArguments().ToList();
         Assert.Contains(arguments, a => a.ToString() == "value1");
         Assert.Contains(arguments, a => a.ToString() == "value2");
-    }    
+    }
 }

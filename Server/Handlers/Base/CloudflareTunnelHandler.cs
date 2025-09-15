@@ -20,7 +20,6 @@ public class CloudflareTunnelHandler : Handler<CloudflareTunnel>
             },
             [contract.Container] = new Container
             {
-                Name = contract.Container.Name,
                 ImageName = "cloudflare/cloudflared:latest",
                 Command = new Argument<IEnumerable<string>>(plan =>
                     [

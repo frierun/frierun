@@ -25,7 +25,7 @@ public class StaticDomainHandlerTests : BaseTests
     {
         InstallPackage(
             "static-zone",
-            new ContractList { ["Internal"] = new Selector("Internal", Value: "No") }
+            new ContractList { ["Internal"] = new Selector(Value: "No") }
         );
         var package = Factory<Package>().Generate() with
         {

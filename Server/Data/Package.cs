@@ -19,9 +19,8 @@ public record Package(
     
     public Application CreateApplication(string? name = null, ContractList? contracts = null)
     {
-        return new Application(Name)
+        return new Application(name ?? "")
         {
-            Prefix = name,
             Package = this,
             Description = new Argument<string>(ApplicationDescription),
             Url = new Argument<string>(ApplicationUrl),

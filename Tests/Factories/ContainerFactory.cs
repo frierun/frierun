@@ -6,7 +6,7 @@ public sealed class ContainerFactory : ContractFaker<Container>
 {
     public ContainerFactory()
     {
-        CustomInstantiator(_ => new Container(""));
+        CustomInstantiator(_ => new Container());
         RuleFor(p => p.ContainerName, f => f.Lorem.Word());
         RuleFor(p => p.ImageName, f => new Argument<string>(f.Internet.Url()));
         RuleFor(p => p.MountDockerSocket, f => f.Random.Bool());

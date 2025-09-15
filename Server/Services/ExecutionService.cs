@@ -22,7 +22,7 @@ public class ExecutionService(
         var applicationName = GetApplicationName(application);
 
         ContractId? nextId = new ContractId<Application>(applicationName);
-        Contract? nextContract = application;
+        Contract? nextContract = application with { Name = applicationName };
 
         while (nextId != null)
         {
@@ -92,9 +92,9 @@ public class ExecutionService(
     /// </summary>
     private string GetApplicationName(Application application)
     {
-        if (application.Prefix != null)
+        if (application.Name != "")
         {
-            if (state.Applications.Any(app => app.Name == application.Prefix))
+            if (state.Applications.Any(app => app.Name == application.Name))
             {
                 throw new HandlerException(
                     "Application with the same name already exists",
@@ -103,7 +103,7 @@ public class ExecutionService(
                 );
             }
 
-            return application.Prefix;
+            return application.Name;
         }
 
         var count = 1;

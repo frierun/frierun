@@ -23,30 +23,30 @@ public class ContractRegistry
     /// </summary>
     public Contract CreateContract(ContractId contractId)
     {
-        return CreateContract(contractId.TypeName, contractId.Name);
+        return CreateContract(contractId.TypeName);
     }
     
     /// <summary>
     /// Creates an empty contract by type name and name.
     /// </summary>
-    public Contract CreateContract(string typeName, string name)
+    public Contract CreateContract(string typeName)
     {
         return typeName switch
         {
-            nameof(CloudflareApiConnection) => new CloudflareApiConnection(name),
-            nameof(CloudflareTunnel) => new CloudflareTunnel(name),
-            nameof(Container) => new Container(name),
-            nameof(DockerApiConnection) => new DockerApiConnection(name),
-            nameof(Domain) => new Domain(name),
-            nameof(HttpEndpoint) => new HttpEndpoint(name),
-            nameof(Mysql) => new Mysql(name),
-            nameof(Network) => new Network(name),
-            nameof(Parameter) => new Parameter(name),
-            nameof(Password) => new Password(name),
-            nameof(Postgresql) => new Postgresql(name),
-            nameof(Redis) => new Redis(name),
-            nameof(SshConnection) => new SshConnection(name),
-            nameof(Volume) => new Volume(name),
+            nameof(CloudflareApiConnection) => new CloudflareApiConnection(),
+            nameof(CloudflareTunnel) => new CloudflareTunnel(),
+            nameof(Container) => new Container(),
+            nameof(DockerApiConnection) => new DockerApiConnection(),
+            nameof(Domain) => new Domain(),
+            nameof(HttpEndpoint) => new HttpEndpoint(),
+            nameof(Mysql) => new Mysql(),
+            nameof(Network) => new Network(),
+            nameof(Parameter) => new Parameter(),
+            nameof(Password) => new Password(),
+            nameof(Postgresql) => new Postgresql(),
+            nameof(Redis) => new Redis(),
+            nameof(SshConnection) => new SshConnection(),
+            nameof(Volume) => new Volume(),
             _ => throw new Exception("Can't create contract type: " + typeName)
         };
     }

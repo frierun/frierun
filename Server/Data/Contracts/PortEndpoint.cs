@@ -7,11 +7,10 @@ namespace Frierun.Server.Data;
 public record PortEndpoint(
     Protocol Protocol,
     int Port,
-    string? Name = null,
     ContractId<Container>? Container = null,
     int ExternalPort = 0,
     string? ExternalIp = null
-) : Contract(Name ?? $"{(Container != null ? Container.Name + ":" : "")}{Port}/{Protocol}")
+) : Contract
 {
     [MemberNotNullWhen(true, nameof(ExternalIp))]
     public override bool Installed { get; init; }

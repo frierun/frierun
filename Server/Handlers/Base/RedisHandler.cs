@@ -25,7 +25,6 @@ public class RedisHandler : Handler<Redis>
                 Container = containerId,
             },
             [containerId] = new Container(
-                Name: containerId.Name,
                 ImageName: "redis:7",
                 Network: contract.Network,
                 ContainerName: contract.Host,

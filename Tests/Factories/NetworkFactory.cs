@@ -7,7 +7,7 @@ public sealed class NetworkFactory: ContractFaker<Network>
 {
     public NetworkFactory()
     {
-        CustomInstantiator(_ => new Network(""));
+        CustomInstantiator(_ => new Network());
         RuleFor(p => p.NetworkName, f => f.Lorem.Word());
 
         RuleSet(

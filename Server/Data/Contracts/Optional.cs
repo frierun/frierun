@@ -4,10 +4,9 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record Optional(
-    string Name,
     ContractList? Contracts = null,
     bool? Value = null
-) : Contract(Name ?? "")
+) : Contract
 {
     [MemberNotNullWhen(true, nameof(Value))]
     public override bool Installed { get; init; }

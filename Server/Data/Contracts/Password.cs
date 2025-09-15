@@ -4,9 +4,8 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record Password(
-    string? Name = null,
     string? Value = null
-) : Contract(Name ?? "")
+) : Contract
 {
     [MemberNotNullWhen(true, nameof(Value))]
     public override bool Installed { get; init; }

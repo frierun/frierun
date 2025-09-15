@@ -4,14 +4,13 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record CloudflareTunnel(
-    string? Name = null,
     string? AccountId = null,
     string? TunnelName = null,
     string? TunnelId = null,
     string? Token = null,
     ContractId<CloudflareApiConnection>? CloudflareApiConnection = null,
     ContractId<Container>? Container = null
-) : Contract(Name ?? "")
+) : Contract
 {
     [MemberNotNullWhen(true, nameof(TunnelId), nameof(Token), nameof(AccountId))]
     public override bool Installed { get; init; }

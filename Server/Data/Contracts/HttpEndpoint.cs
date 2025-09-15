@@ -5,7 +5,6 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record HttpEndpoint(
-    string? Name = null,
     int Port = 0,
     ContractId<Container>? Container = null,
     ContractId<Domain>? Domain = null,
@@ -15,12 +14,11 @@ public record HttpEndpoint(
     string? TraefikRouterName = null, // for Traefik endpoints
     string? NetworkName = null, // for Traefik endpoints
     string? CloudflareZoneId = null // for Cloudflare endpoints
-) : Contract(Name ?? $"{Port}{(Container != null ? $" at {Container.Name}" : "")}")
+) : Contract
 {
     [MemberNotNullWhen(true, nameof(Url))] public override bool Installed { get; init; }
 
     public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");
-    public ContractId<Domain> Domain { get; init; } = Domain ?? new ContractId<Domain>(Name ?? "");
     public Argument<bool?> ResultSsl { get; init; } = ResultSsl ?? new Argument<bool?>();
     public Argument<string> ResultHost { get; init; } = ResultHost ?? new Argument<string>();
     public Argument<int> ResultPort { get; init; } = ResultPort ?? new Argument<int>();

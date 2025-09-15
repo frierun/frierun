@@ -4,11 +4,10 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record Daemon(
-    string? Name = null,
     string? DaemonName = null,
     Argument<IEnumerable<string>>? Command = null,
     Argument<IEnumerable<IEnumerable<string>>>? PreCommands = null
-) : Contract(Name ?? "")
+) : Contract
 {
     [MemberNotNullWhen(true, nameof(DaemonName))]
     public override bool Installed { get; init; }

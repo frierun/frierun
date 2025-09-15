@@ -16,10 +16,8 @@ public class ContainerHandler(Application application, DockerService dockerServi
     {
         yield return new ContractList(
             contract.Mounts.Values.Select(mount => new KeyValuePair<ContractId, Contract>(
-                    mount.Volume, new Volume(mount.Volume.Name)
-                    {
-                        HandlerApplication = Application?.Name,
-                    }
+                    mount.Volume,
+                    new Volume { HandlerApplication = Application?.Name }
                 )
             )
         )
@@ -43,10 +41,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
                     ..contract.Mounts.Values.Select(mount => mount.Volume)
                 ]
             },
-            [contract.Network] = new Network(contract.Network.Name)
-            {
-                HandlerApplication = Application?.Name,
-            }
+            [contract.Network] = new Network { HandlerApplication = Application?.Name }
         };
     }
 

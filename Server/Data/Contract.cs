@@ -4,9 +4,8 @@ using Frierun.Server.Handlers;
 
 namespace Frierun.Server.Data;
 
-public abstract record Contract<THandler>(
-    string Name)
-    : Contract(Name) where THandler : IHandler
+public abstract record Contract<THandler> : Contract
+    where THandler : IHandler
 {
     [JsonIgnore]
     public new THandler? Handler
@@ -37,7 +36,7 @@ public abstract record Contract<THandler>(
 [JsonDerivedType(typeof(Selector), nameof(Selector))]
 [JsonDerivedType(typeof(SshConnection), nameof(SshConnection))]
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
-public abstract record Contract(string Name)
+public abstract record Contract
 {
     [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = [];
 
@@ -53,7 +52,7 @@ public abstract record Contract(string Name)
     }
 
     [JsonIgnore] public string? HandlerApplication { get; init; }
-    
+
     public virtual bool Installed { get; init; }
     public virtual IEnumerable<IArgument> GetArguments() => [];
 

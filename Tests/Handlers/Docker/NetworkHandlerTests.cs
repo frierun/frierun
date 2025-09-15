@@ -22,7 +22,7 @@ public class NetworkHandlerTests : BaseTests
 
         var result = Handler<NetworkHandler>(docker)
             .Initialize(
-                new Network(""),
+                new Network(),
                 new ApplicationContext("", network.NetworkName)
             );
 

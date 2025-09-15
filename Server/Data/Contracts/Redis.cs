@@ -5,12 +5,11 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record Redis(
-    string? Name = null,
     ContractId<Network>? Network = null,
     ContractId<Container>? Container = null,
     ContractId<Volume>? Volume = null,
     Argument<string>? Host = null
-) : Contract(Name ?? "")
+) : Contract
 {
     [MemberNotNullWhen(true, nameof(Container), nameof(Volume))]
     public override bool Installed { get; init; }
