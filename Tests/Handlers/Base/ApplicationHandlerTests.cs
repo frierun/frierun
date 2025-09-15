@@ -21,11 +21,11 @@ public class ApplicationHandlerTests : BaseTests
                 ["tcp"] = new PortEndpoint(Protocol.Tcp, 2222)
             }
         };
-        Assert.NotNull(package.ApplicationUrl.Value);
+        Assert.NotNull(package.ApplicationUrl);
 
         var application = InstallPackage(package);
 
-        Assert.Equal(package.ApplicationUrl.Value, application.Url);
+        Assert.Equal(package.ApplicationUrl, application.Url);
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class ApplicationHandlerTests : BaseTests
         var parameter = Contract<Parameter>().Set(p => p.Value, value).Generate();
         var package = Factory<Package>().Generate() with
         {
-            ApplicationUrl = new Argument<string>($"{{{{{parameter.Id}:Value}}}}"),
+            ApplicationUrl = $"{{{{{parameter.Id}:Value}}}}",
             Contracts = [parameter]
         };
 
@@ -86,7 +86,7 @@ public class ApplicationHandlerTests : BaseTests
         var parameter = Contract<Parameter>().Set(p => p.Value, value).Generate();
         var package = Factory<Package>().Generate() with
         {
-            ApplicationDescription = new Argument<string>($"{{{{{parameter.Id}:Value}}}}"),
+            ApplicationDescription = $"{{{{{parameter.Id}:Value}}}}",
             Contracts = [parameter]
         };
 
