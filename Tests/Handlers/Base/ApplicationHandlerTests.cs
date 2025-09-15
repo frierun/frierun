@@ -31,14 +31,19 @@ public class ApplicationHandlerTests : BaseTests
     [Fact]
     public void Install_PackageWithHttpAndPortEndpoint_HttpEndpointHasPriority()
     {
+        var httpEndpoint = Contract<HttpEndpoint>()
+            .Set(p => p.Port, 80)
+            .Generate();
+        
+        var portEndpoint = Contract<PortEndpoint>()
+            .Set(p => p.Protocol, Protocol.Tcp)
+            .Set(p => p.Port, 2222)
+            .Generate();
+        
         var package = Factory<Package>().Generate() with
         {
             ApplicationUrl = new Argument<string>(),
-            Contracts = new ContractList
-            {
-                ["http"] = new HttpEndpoint(Port: 80),
-                ["tcp"] = new PortEndpoint(Protocol.Tcp, 2222)
-            }
+            Contracts = [httpEndpoint, portEndpoint]
         };
 
         var application = InstallPackage(package);
@@ -49,13 +54,15 @@ public class ApplicationHandlerTests : BaseTests
     [Fact]
     public void Install_PackageWithPortEndpoint_AutoDetectPortEndpoint()
     {
+        var portEndpoint = Contract<PortEndpoint>()
+            .Set(p => p.Protocol, Protocol.Tcp)
+            .Set(p => p.Port, 2222)
+            .Generate();
+        
         var package = Factory<Package>().Generate() with
         {
             ApplicationUrl = new Argument<string>(),
-            Contracts = new ContractList
-            {
-                ["tcp"] = new PortEndpoint(Protocol.Tcp, 2222)
-            }
+            Contracts = [portEndpoint]
         };
 
         var application = InstallPackage(package);

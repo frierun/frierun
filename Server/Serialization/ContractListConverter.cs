@@ -49,8 +49,9 @@ public class ContractListConverter(ContractRegistry contractRegistry) : JsonConv
             reader.Read();
 
             var contractType = contractRegistry.GetContractType(contractId.TypeName);
-            var contract = GetDelegateForType(contractType, options)(ref reader, contractType, options);
-            dictionary[contractId] = contract ?? contractRegistry.CreateContract(contractId);
+            var contract = GetDelegateForType(contractType, options)(ref reader, contractType, options) ??
+                           contractRegistry.CreateContract(contractId);
+            dictionary[contractId] = contract with { Name = contractId.Name };
         }
 
         return new ContractList(dictionary);

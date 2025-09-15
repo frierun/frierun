@@ -11,20 +11,27 @@ public class ApplicationHandler : Handler<Application>
         // auto-detect application URL
         if (url.Empty)
         {
-            var httpEndpoint = application.Contracts.Values.OfType<HttpEndpoint>().FirstOrDefault();
-            if (httpEndpoint != null)
+            var httpEndpointId = application.Contracts
+                .Where(pair => pair.Value.GetType() == typeof(HttpEndpoint))
+                .Select(pair => pair.Key)
+                .FirstOrDefault();
+            if (httpEndpointId != null)
             {
-                url = $"{{{{{httpEndpoint.Id}:Url}}}}";
+                url = $"{{{{{httpEndpointId}:Url}}}}";
             }
         }
 
         // use the first endpoint if not found any other
         if (url.Empty)
         {
-            var endpoint = application.Contracts.Values.OfType<PortEndpoint>().FirstOrDefault();
-            if (endpoint != null)
+            var endpointId = application.Contracts
+                .Where(pair => pair.Value.GetType() == typeof(PortEndpoint))
+                .Select(pair => pair.Key)
+                .FirstOrDefault();
+            
+            if (endpointId != null)
             {
-                url = $"{{{{{endpoint.Id}:Url}}}}";
+                url = $"{{{{{endpointId}:Url}}}}";
             }
         }
 
