@@ -182,7 +182,7 @@ public class FileHandlerTests : TestWithDocker
         return InstallAndCheck(
             new File(
                 Path: "test-file",
-                Text: "pre-text {{Parameter:Test:Value}} post-text"
+                Text: "pre-text {{Parameter::Value}} post-text"
             ),
             async containerName =>
             {
@@ -195,7 +195,7 @@ public class FileHandlerTests : TestWithDocker
                 );
                 Assert.Equal("pre-text value post-text", stdout.Trim());
             },
-            new Parameter("Test", Value: "value")
+            new Parameter(Value: "value")
         );
     }
 }
