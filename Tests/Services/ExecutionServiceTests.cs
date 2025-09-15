@@ -210,8 +210,8 @@ public class ExecutionServiceTests : BaseTests
 
         Assert.NotNull(plan);
         Assert.Equal(3, plan.Contracts.Count);
-        Assert.NotNull(plan.GetContract(contract.Contract));
-        Assert.NotNull(plan.GetContract(knownContract.Contract));
+        Assert.NotNull(plan.GetContract(contract.Id));
+        Assert.NotNull(plan.GetContract(knownContract.Id));
     }
 
     [Fact]

@@ -62,8 +62,6 @@ public abstract record Contract(string Name)
     /// </summary>
     public abstract Contract Merge(Contract other);
 
-    public static implicit operator ContractId(Contract contract) => new(contract.GetType().Name, contract.Name);
-
     /// <summary>
     /// Installs the contract using the handler.
     /// </summary>

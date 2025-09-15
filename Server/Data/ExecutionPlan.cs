@@ -29,11 +29,11 @@ public class ExecutionPlan(
             graph.AddVertex(contractId);
         }
 
-        foreach (var contract in contracts.Values)
+        foreach (var (contractId, contract) in contracts)
         {
             foreach (var dependency in contract.DependsOn)
             {
-                graph.AddEdge(dependency, contract);
+                graph.AddEdge(dependency, contractId);
             }
         }
 

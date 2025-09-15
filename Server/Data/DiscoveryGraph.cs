@@ -73,18 +73,18 @@ public class DiscoveryGraph
         {
             foreach (var (contractId, contract) in result)
             {
-                if (Contracts.TryGetValue(contract, out var oldContract))
+                if (Contracts.TryGetValue(contractId, out var oldContract))
                 {
-                    Contracts[contract] = oldContract.Merge(contract);
+                    Contracts[contractId] = oldContract.Merge(contract);
                 }
                 else
                 {
-                    Contracts[contract] = contract;
+                    Contracts[contractId] = contract;
                 }
 
                 if (contractId != initializedContractId)
                 {
-                    _toInitialize.Add(contract);
+                    _toInitialize.Add(contractId);
                 }
             }
         }

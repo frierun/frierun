@@ -49,7 +49,7 @@ public class ArgumentTests : BaseTests
 
         Assert.Throws<MergeException>(() => arg1.Merge(arg2));
     }
-    
+
     [Fact]
     public void Merge_SameFuncResolvers_ReturnsResolver()
     {
@@ -63,7 +63,7 @@ public class ArgumentTests : BaseTests
         Assert.Null(result.Value);
         Assert.Equal(arg1.Resolver, result.Resolver);
     }
-    
+
     [Fact]
     public void Merge_SameClassResolvers_ReturnsResolver()
     {
@@ -77,7 +77,7 @@ public class ArgumentTests : BaseTests
         Assert.Null(result.Value);
         Assert.Equal(arg1.Resolver, result.Resolver);
     }
-    
+
     [Fact]
     public void Merge_SameClassWithParameterResolvers_ReturnsResolver()
     {
@@ -102,7 +102,7 @@ public class ArgumentTests : BaseTests
 
         Assert.Throws<MergeException>(() => arg1.Merge(arg2));
     }
-    
+
 
     [Fact]
     public void Merge_WithRequiredContracts_CopiesContracts()
@@ -122,9 +122,9 @@ public class ArgumentTests : BaseTests
     {
         var arg1 = new Argument<int>(0);
         var arg2 = new Argument<int>(1);
-        
+
         var result = arg1.Merge(arg2);
-        
+
         Assert.Equal(1, result.Value);
     }
 
@@ -133,74 +133,82 @@ public class ArgumentTests : BaseTests
     {
         var arg1 = new Argument<int>(1);
         var arg2 = new Argument<int>(2);
-        
+
         Assert.Throws<MergeException>(() => arg1.Merge(arg2));
     }
 
     [Fact]
     public void Resolve_DependsOnArgument_ResolvesArgument()
     {
-        var arg = new Argument<string>("{{Parameter:Test1:Value}}");
-        var parameter = new Parameter("Test1", Value: new Argument<string>(_ => "test"));
+        var value = Resolve<Faker>().Lorem.Word();
+        var parameter = Contract<Parameter>()
+            .Set(p => p.Value, new Argument<string>(_ => value))
+            .Generate();
+        var arg = new Argument<string>($"{{{{{parameter.Id}:Value}}}}");
         var plan = new ExecutionPlan(
             new Dictionary<ContractId, Contract>
             {
-                [parameter] = parameter,
+                [parameter.Id] = parameter.Contract,
             },
             []
         );
-        Assert.False(parameter.Value.Resolved);
+        Assert.False(parameter.Contract.Value.Resolved);
 
         arg.Resolve(plan);
 
-        Assert.True(parameter.Value.Resolved);
-        Assert.Equal("test", arg.Value);
+        Assert.True(parameter.Contract.Value.Resolved);
+        Assert.Equal(value, arg.Value);
     }
 
     [Fact]
     public void Resolve_DependsOnProperty_ResolvesAllArguments()
     {
-        var arg = new Argument<string>("{{HttpEndpoint:Test:Url}}");
-        var httpEndpoint = new HttpEndpoint("Test")
-        {
-            ResultSsl = new Argument<bool?>(_ => true),
-            ResultHost = new Argument<string>(_ => "test.tld"),
-            ResultPort = new Argument<int>(_ => 444)
-        };
+        var httpEndpoint = Contract<HttpEndpoint>()
+            .Set(p => p.ResultSsl, new Argument<bool?>(_ => true))
+            .Set(p => p.ResultHost, new Argument<string>(_ => "test.tld"))
+            .Set(p => p.ResultPort, new Argument<int>(_ => 444))
+            .Generate();
+        var arg = new Argument<string>($"{{{{{httpEndpoint.Id}:Url}}}}");
         var plan = new ExecutionPlan(
             new Dictionary<ContractId, Contract>
             {
-                [httpEndpoint] = httpEndpoint,
+                [httpEndpoint.Id] = httpEndpoint.Contract
             },
             []
         );
-        Assert.False(httpEndpoint.ResultSsl.Resolved);
-        Assert.False(httpEndpoint.ResultHost.Resolved);
-        Assert.False(httpEndpoint.ResultPort.Resolved);
+        Assert.False(httpEndpoint.Contract.ResultSsl.Resolved);
+        Assert.False(httpEndpoint.Contract.ResultHost.Resolved);
+        Assert.False(httpEndpoint.Contract.ResultPort.Resolved);
 
         arg.Resolve(plan);
 
-        Assert.True(httpEndpoint.ResultSsl.Resolved);
-        Assert.True(httpEndpoint.ResultHost.Resolved);
-        Assert.True(httpEndpoint.ResultPort.Resolved);
+        Assert.True(httpEndpoint.Contract.ResultSsl.Resolved);
+        Assert.True(httpEndpoint.Contract.ResultHost.Resolved);
+        Assert.True(httpEndpoint.Contract.ResultPort.Resolved);
         Assert.Equal("https://test.tld:444/", arg.Value);
     }
-    
+
     [Fact]
     public void Resolve_RecursiveArguments_ThrowsException()
     {
-        var parameter1 = new Parameter("Test1", Value: "{{Parameter:Test1:Value}}");
-        var parameter2 = new Parameter("Test1", Value: "{{Parameter:Test1:Value}}");
+        var parameter1 = Contract<Parameter>().Generate();
+        var parameter2 = Contract<Parameter>()
+            .Set(p => p.Value, new Argument<string>($"{{{{{parameter1.Id}:Value}}}}"))
+            .Generate();
+
         var plan = new ExecutionPlan(
             new Dictionary<ContractId, Contract>
             {
-                [parameter1] = parameter1,
-                [parameter2] = parameter2,
+                [parameter1.Id] = parameter1.Contract with
+                {
+                    Value = new Argument<string>($"{{{{{parameter2.Id}:Value}}}}")
+                },
+                [parameter2.Id] = parameter2.Contract
             },
             []
         );
-        Assert.False(parameter1.Value.Resolved);
+        Assert.False(parameter2.Contract.Value.Resolved);
 
-        Assert.Throws<Exception>(() => parameter1.Value.Resolve(plan));
+        Assert.Throws<Exception>(() => parameter2.Contract.Value.Resolve(plan));
     }
 }
