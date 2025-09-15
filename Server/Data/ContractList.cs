@@ -76,4 +76,19 @@ public class ContractList : IReadOnlyDictionary<ContractId, Contract>
     public IEnumerable<ContractId> Keys => _contracts.Keys;
 
     public IEnumerable<Contract> Values => _contracts.Values;
+
+    /// <summary>
+    /// Merges two contract lists.
+    /// </summary>
+    public ContractList Merge(ContractList other)
+    {
+        return new ContractList(
+            this
+                .Concat(other)
+                .GroupBy(c => c.Key)
+                .Select(group =>
+                    group.Aggregate((a, b) => new KeyValuePair<ContractId, Contract>(a.Key, a.Value.Merge(b.Value)))
+                )
+        );
+    }
 }

@@ -4,6 +4,7 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
+import type { Application } from "./application";
 import type { CloudflareApiConnection } from "./cloudflareApiConnection";
 import type { CloudflareTunnel } from "./cloudflareTunnel";
 import type { Container } from "./container";
@@ -25,8 +26,9 @@ import type { Selector } from "./selector";
 import type { SshConnection } from "./sshConnection";
 import type { Volume } from "./volume";
 
-export type ApplicationContracts = {
+export type ApplicationAllOfContracts = {
   [key: string]:
+    | Application
     | CloudflareApiConnection
     | CloudflareTunnel
     | Container

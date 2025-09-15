@@ -31,7 +31,6 @@ public class ContractRegistryTests : BaseTests
     [InlineData(typeof(HttpEndpoint))]
     [InlineData(typeof(Mysql))]
     [InlineData(typeof(Network))]
-    [InlineData(typeof(Package))]
     [InlineData(typeof(Parameter))]
     [InlineData(typeof(Password))]
     [InlineData(typeof(Postgresql))]

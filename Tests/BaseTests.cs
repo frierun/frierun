@@ -176,24 +176,18 @@ public abstract class BaseTests
         Resolve<PackageRegistry>().Load();
         var package = Resolve<PackageRegistry>().Find(name)
                       ?? throw new Exception($"Package {name} not found");
-
-        if (overrides != null)
-        {
-            var overridePackage = new Package(name) { Contracts = new ContractList(overrides) };
-            package = (Package)package.Merge(overridePackage);
-        }
-
-        return InstallPackage(package);
+        
+        return InstallPackage(package, overrides);
     }
 
     /// <summary>
     /// Install package by name and returns application. Throw an exception if the installation fails.
     /// </summary>
-    protected Application InstallPackage(Package package)
+    protected Application InstallPackage(Package package, ContractList? overrides = null)
     {
         var executionService = Resolve<ExecutionService>();
         var installService = Resolve<InstallService>();
-        var plan = executionService.Create(package);
+        var plan = executionService.Create(package.CreateApplication(null, overrides));
         var application = installService.Handle(plan);
         if (application != null)
         {

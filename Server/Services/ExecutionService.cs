@@ -12,17 +12,17 @@ public class ExecutionService(
     private record StackItem(DiscoveryGraph Graph, ContractId ContractId, Queue<ContractList> Queue);
 
     /// <summary>
-    /// Creates an execution plan for the given package.
+    /// Creates an execution plan for the given application.
     /// </summary>
     /// <exception cref="HandlerException"></exception>
-    public ExecutionPlan Create(Package package)
+    public ExecutionPlan Create(Application application)
     {
         var branchesStack = new Stack<StackItem>();
         var currentGraph = new DiscoveryGraph();
-        var applicationName = GetApplicationName(package);
+        var applicationName = GetApplicationName(application);
 
-        ContractId? nextId = package.Id;
-        Contract? nextContract = package;
+        ContractId? nextId = application.Id;
+        Contract? nextContract = application;
 
         while (nextId != null)
         {
@@ -90,24 +90,29 @@ public class ExecutionService(
     /// <summary>
     /// Gets the application name from the package.
     /// </summary>
-    private string GetApplicationName(Package package)
+    private string GetApplicationName(Application application)
     {
-        if (package.Prefix != null)
+        if (application.Prefix != null)
         {
-            if (state.Applications.Any(application => application.Name == package.Prefix))
+            if (state.Applications.Any(app => app.Name == application.Prefix))
             {
-                throw new Exception("Application with the same name already exists");
+                throw new HandlerException(
+                    "Application with the same name already exists",
+                    "Choose a different name for the application or remove it",
+                    application
+                );
             }
 
-            return package.Prefix;
+            return application.Prefix;
         }
 
         var count = 1;
-        var applicationName = package.Name;
-        while (state.Applications.Any(application => application.Name == applicationName))
+        var packageName = application.Package?.Name ?? throw new Exception("Package not found");
+        var applicationName = packageName;
+        while (state.Applications.Any(app => app.Name == applicationName))
         {
             count++;
-            applicationName = $"{package.Name}{count}";
+            applicationName = $"{packageName}{count}";
         }
 
         return applicationName;

@@ -13,7 +13,7 @@ public class LazyHandlerConverterTests : BaseTests
     public void Read_StaticHandler_ReturnsHandler()
     {
         var converter = new LazyHandlerConverter(Resolve<Lazy<HandlerRegistry>>());
-        var typeName = nameof(PackageHandler);
+        var typeName = nameof(ApplicationHandler);
         var reader = new Utf8JsonReader(
             Encoding.UTF8.GetBytes(
                 $$"""
@@ -26,7 +26,7 @@ public class LazyHandlerConverterTests : BaseTests
         var result = converter.Read(ref reader, typeof(IHandler), new JsonSerializerOptions());
 
         Assert.NotNull(result.Value);
-        Assert.IsType<PackageHandler>(result.Value);
+        Assert.IsType<ApplicationHandler>(result.Value);
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public class LazyHandlerConverterTests : BaseTests
     [Fact]
     public void Write_StaticHandler_WritesNullApplicationName()
     {
-        const string typeName = nameof(PackageHandler);
+        const string typeName = nameof(ApplicationHandler);
         var handlerRegistry = Resolve<HandlerRegistry>();
         var handler = handlerRegistry.GetHandler(typeName);
         Assert.NotNull(handler);

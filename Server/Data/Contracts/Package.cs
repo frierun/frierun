@@ -14,36 +14,22 @@ public record Package(
     IReadOnlyList<string>? Tags = null,
     ContractList? Contracts = null,
     Application? Result = null
-) : Contract(Name)
+)
 {
     public IReadOnlyList<string> Tags { get; init; } = Tags ?? [];
     public ContractList Contracts { get; init; } = Contracts ?? [];
     public Argument<string> ApplicationUrl { get; init; } = ApplicationUrl ?? new Argument<string>();
     public Argument<string> ApplicationDescription { get; init; } = ApplicationDescription ?? new Argument<string>();
-
-    public override IEnumerable<IArgument> GetArguments()
+    
+    public Application CreateApplication(string? name = null, ContractList? contracts = null)
     {
-        yield return ApplicationUrl;
-        yield return ApplicationDescription;
-    }
-
-    public override Contract Merge(Contract other)
-    {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, contract) with
+        return new Application(Name)
         {
-            Prefix = OnlyOne(Prefix, contract.Prefix),
-            ApplicationUrl = ApplicationUrl.Merge(contract.ApplicationUrl),
-            ApplicationDescription = ApplicationDescription.Merge(contract.ApplicationDescription),
-            Contracts = new ContractList(
-                Contracts
-                    .Concat<KeyValuePair<ContractId, Contract>>(contract.Contracts)
-                    .GroupBy(c => c.Key)
-                    .Select(group =>
-                        group.Aggregate((a, b) => new KeyValuePair<ContractId, Contract>(a.Key, a.Value.Merge(b.Value)))
-                    )
-            )
+            Prefix = name,
+            Package = this,
+            Description = ApplicationDescription,
+            Url = ApplicationUrl,
+            Contracts = Contracts.Merge(contracts ?? []),
         };
     }
 }

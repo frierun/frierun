@@ -1,15 +1,15 @@
 ﻿import InstallForm from "../components/InstallForm.tsx";
 import {usePostPackagesIdPlan} from "@/api/endpoints/packages.ts";
 import {useCallback, useEffect, useState} from "react";
-import {Package} from "@/api/schemas";
 import {Alternative, ContractList} from "@/types.ts";
+import {Application} from "@/api/schemas";
 
 type Props = {
     name: string;
 }
 
 type Plan = {
-    packageContract: Package;
+    application: Application;
     contracts: ContractList;
     alternatives: Alternative[];
 }
@@ -24,12 +24,7 @@ export default function PackageInstall({name}: Props) {
         const result = await mutateAsync({
             id: name,
             data: {
-                type: 'Package',
-                name,
-                tags: [],
                 contracts: overrides,
-                applicationUrl: null,
-                applicationDescription: null
             }
         })
 
@@ -44,14 +39,15 @@ export default function PackageInstall({name}: Props) {
         }
 
         const contracts = Object.entries(result.data.contracts).map(entry => entry[1]);
-        const packageContract = contracts.find(contract => contract.type === 'Package');
-        if (!packageContract) {
-            setError("Package has no contract");
+        const application = contracts.find(contract => contract.type === 'Application');
+        if (!application?.package) {
+            setError("Package not found");
             return;
         }
 
+
         setPlan({
-            packageContract,
+            application,
             contracts: result.data.contracts,
             alternatives: result.data.alternatives
         });
@@ -79,10 +75,10 @@ export default function PackageInstall({name}: Props) {
                         </div>
                     }
                     <InstallForm
-                        packageContract={plan.packageContract}
+                        packageName={name}
+                        application={plan.application}
                         contracts={plan.contracts}
                         alternatives={plan.alternatives}
-                        name={name}
                         refetch={refetch}
                         setError={setError}
                     />

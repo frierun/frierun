@@ -13,7 +13,7 @@ public class HandlerRegistryTests : BaseTests
     [Theory]
     [InlineData(typeof(HttpEndpoint), typeof(PortHttpEndpointHandler))]
     [InlineData(typeof(Parameter), typeof(ParameterHandler))]
-    [InlineData(typeof(Package), typeof(PackageHandler))]
+    [InlineData(typeof(Application), typeof(ApplicationHandler))]
     [InlineData(typeof(Password), typeof(PasswordHandler))]
     public void GetHandlers_StaticHandler_ReturnsHandler(Type contractType, Type handlerType)
     {
@@ -30,7 +30,7 @@ public class HandlerRegistryTests : BaseTests
     {
         var registry = Resolve<HandlerRegistry>();
 
-        var result = registry.GetHandlers(typeof(Application));
+        var result = registry.GetHandlers(typeof(Package));
 
         Assert.Empty(result);
     }
@@ -141,7 +141,7 @@ public class HandlerRegistryTests : BaseTests
     }
 
     [Theory]
-    [InlineData(typeof(PackageHandler))]
+    [InlineData(typeof(ApplicationHandler))]
     [InlineData(typeof(ParameterHandler))]
     [InlineData(typeof(PasswordHandler))]
     [InlineData(typeof(PortHttpEndpointHandler))]

@@ -17,6 +17,7 @@ public abstract record Contract<THandler>(
 }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
+[JsonDerivedType(typeof(Application), nameof(Application))]
 [JsonDerivedType(typeof(CloudflareApiConnection), nameof(CloudflareApiConnection))]
 [JsonDerivedType(typeof(CloudflareTunnel), nameof(CloudflareTunnel))]
 [JsonDerivedType(typeof(Container), nameof(Container))]
@@ -28,7 +29,6 @@ public abstract record Contract<THandler>(
 [JsonDerivedType(typeof(Mysql), nameof(Mysql))]
 [JsonDerivedType(typeof(Network), nameof(Network))]
 [JsonDerivedType(typeof(Optional), nameof(Optional))]
-[JsonDerivedType(typeof(Package), nameof(Package))]
 [JsonDerivedType(typeof(Parameter), nameof(Parameter))]
 [JsonDerivedType(typeof(Password), nameof(Password))]
 [JsonDerivedType(typeof(PortEndpoint), nameof(PortEndpoint))]

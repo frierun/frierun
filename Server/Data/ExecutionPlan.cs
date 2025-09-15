@@ -2,14 +2,17 @@
 
 namespace Frierun.Server.Data;
 
-public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerable<ExecutionPlan.Alternative> alternatives) : IExecutionPlan
+public class ExecutionPlan(
+    Dictionary<ContractId, Contract> contracts,
+    IEnumerable<ExecutionPlan.Alternative> alternatives
+) : IExecutionPlan
 {
     private readonly HashSet<Application> _requiredApplications = [];
-    
-    public record Alternative(ContractId contractId, Contract contract);
+
+    public record Alternative(ContractId ContractId, Contract Contract);
 
     public ContractList Contracts => new(contracts);
-    
+
     /// <summary>
     /// List of all contracts that are alternatives to the main execution plan.
     /// </summary>
@@ -53,16 +56,7 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
     {
         return (T)GetContract((ContractId)contractId);
     }
-    
-    /// <summary>
-    /// Get contract by id.
-    /// </summary>
-    public T GetContract<T>(ContractId contractId)
-        where T : Contract
-    {
-        return (T)GetContract(contractId);
-    }
-    
+
     /// <summary>
     /// Installs all contracts in the execution plan.
     /// </summary>
@@ -70,19 +64,18 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
     {
         var graph = BuildGraph();
         var installedContracts = new Dictionary<ContractId, Contract>();
-        graph.RunDfs(
-            contractId =>
+        graph.RunDfs(contractId =>
             {
                 var contract = GetContract(contractId);
-                
+
                 foreach (var argument in contract.GetArguments())
                 {
                     argument.Resolve(this);
                 }
-                
+
                 var installedContract = contract.Install(this);
 
-                if (installedContract is not Package)
+                if (installedContract is not Application)
                 {
                     installedContracts[contractId] = installedContract;
                 }
@@ -97,15 +90,20 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
             }
         );
 
-        var application = contracts.Values.OfType<Package>().First().Result;
+        return CreateApplication(installedContracts);
+    }
+
+    /// <summary>
+    /// Creates an application from the installed contracts.
+    /// </summary>
+    private Application CreateApplication(Dictionary<ContractId, Contract> installedContracts)
+    {
+        var application = contracts.Values.OfType<Application>().First();
         Debug.Assert(application != null);
 
-        return new Application
+        return application with
         {
-            Name = application.Name,
-            Package = application.Package,
-            Description = application.Description,
-            Url = application.Url,
+            Name = application.Prefix ?? application.Name,
             Contracts = new ContractList(installedContracts),
             RequiredApplications = _requiredApplications.Select(app => app.Name).ToList()
         };

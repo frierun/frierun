@@ -41,7 +41,6 @@ public class ContractRegistry
             nameof(HttpEndpoint) => new HttpEndpoint(name),
             nameof(Mysql) => new Mysql(name),
             nameof(Network) => new Network(name),
-            nameof(Package) => new Package(name),
             nameof(Parameter) => new Parameter(name),
             nameof(Password) => new Password(name),
             nameof(Postgresql) => new Postgresql(name),

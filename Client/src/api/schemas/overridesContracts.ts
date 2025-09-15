@@ -29,7 +29,7 @@ import type { Volume } from "./volume";
 /**
  * @nullable
  */
-export type SelectorOptionContracts = {
+export type OverridesContracts = {
   [key: string]:
     | Application
     | CloudflareApiConnection

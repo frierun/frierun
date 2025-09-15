@@ -22,6 +22,7 @@ import type {
 import type {
   ExecutionPlan,
   HandlerExceptionResult,
+  Overrides,
   Package,
 } from "../schemas";
 
@@ -188,14 +189,14 @@ export const getPostPackagesIdPlanUrl = (id: string) => {
 
 export const postPackagesIdPlan = async (
   id: string,
-  _package: Package,
+  overrides: Overrides,
   options?: RequestInit,
 ): Promise<postPackagesIdPlanResponse> => {
   return customFetch<postPackagesIdPlanResponse>(getPostPackagesIdPlanUrl(id), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(_package),
+    body: JSON.stringify(overrides),
   });
 };
 
@@ -206,14 +207,14 @@ export const getPostPackagesIdPlanMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postPackagesIdPlan>>,
     TError,
-    { id: string; data: Package },
+    { id: string; data: Overrides },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postPackagesIdPlan>>,
   TError,
-  { id: string; data: Package },
+  { id: string; data: Overrides },
   TContext
 > => {
   const mutationKey = ["postPackagesIdPlan"];
@@ -227,7 +228,7 @@ export const getPostPackagesIdPlanMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postPackagesIdPlan>>,
-    { id: string; data: Package }
+    { id: string; data: Overrides }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -240,7 +241,7 @@ export const getPostPackagesIdPlanMutationOptions = <
 export type PostPackagesIdPlanMutationResult = NonNullable<
   Awaited<ReturnType<typeof postPackagesIdPlan>>
 >;
-export type PostPackagesIdPlanMutationBody = Package;
+export type PostPackagesIdPlanMutationBody = Overrides;
 export type PostPackagesIdPlanMutationError = void | HandlerExceptionResult;
 
 export const usePostPackagesIdPlan = <
@@ -250,14 +251,14 @@ export const usePostPackagesIdPlan = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postPackagesIdPlan>>,
     TError,
-    { id: string; data: Package },
+    { id: string; data: Overrides },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
   Awaited<ReturnType<typeof postPackagesIdPlan>>,
   TError,
-  { id: string; data: Package },
+  { id: string; data: Overrides },
   TContext
 > => {
   const mutationOptions = getPostPackagesIdPlanMutationOptions(options);
@@ -295,7 +296,7 @@ export const getPostPackagesIdInstallUrl = (id: string) => {
 
 export const postPackagesIdInstall = async (
   id: string,
-  _package: Package,
+  overrides: Overrides,
   options?: RequestInit,
 ): Promise<postPackagesIdInstallResponse> => {
   return customFetch<postPackagesIdInstallResponse>(
@@ -304,7 +305,7 @@ export const postPackagesIdInstall = async (
       ...options,
       method: "POST",
       headers: { "Content-Type": "application/json", ...options?.headers },
-      body: JSON.stringify(_package),
+      body: JSON.stringify(overrides),
     },
   );
 };
@@ -316,14 +317,14 @@ export const getPostPackagesIdInstallMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postPackagesIdInstall>>,
     TError,
-    { id: string; data: Package },
+    { id: string; data: Overrides },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postPackagesIdInstall>>,
   TError,
-  { id: string; data: Package },
+  { id: string; data: Overrides },
   TContext
 > => {
   const mutationKey = ["postPackagesIdInstall"];
@@ -337,7 +338,7 @@ export const getPostPackagesIdInstallMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postPackagesIdInstall>>,
-    { id: string; data: Package }
+    { id: string; data: Overrides }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -350,7 +351,7 @@ export const getPostPackagesIdInstallMutationOptions = <
 export type PostPackagesIdInstallMutationResult = NonNullable<
   Awaited<ReturnType<typeof postPackagesIdInstall>>
 >;
-export type PostPackagesIdInstallMutationBody = Package;
+export type PostPackagesIdInstallMutationBody = Overrides;
 export type PostPackagesIdInstallMutationError = void | HandlerExceptionResult;
 
 export const usePostPackagesIdInstall = <
@@ -360,14 +361,14 @@ export const usePostPackagesIdInstall = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postPackagesIdInstall>>,
     TError,
-    { id: string; data: Package },
+    { id: string; data: Overrides },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
   Awaited<ReturnType<typeof postPackagesIdInstall>>,
   TError,
-  { id: string; data: Package },
+  { id: string; data: Overrides },
   TContext
 > => {
   const mutationOptions = getPostPackagesIdInstallMutationOptions(options);

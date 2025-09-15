@@ -46,19 +46,13 @@ public abstract class BaseTests : IDisposable
         Resolve<PackageRegistry>().Load();
         var package = Resolve<PackageRegistry>().Find(name)
                       ?? throw new Exception($"Package {name} not found");
-
-        if (overrides != null)
-        {
-            var overridePackage = new Package(name) { Contracts = new ContractList(overrides) };
-            package = (Package)package.Merge(overridePackage);
-        }
-
-        return InstallPackage(package);
+        
+        return InstallPackage(package, overrides);
     }
 
-    protected Application InstallPackage(Package package)
+    protected Application InstallPackage(Package package, ContractList? overrides = null)
     {
-        var plan = Resolve<ExecutionService>().Create(package);
+        var plan = Resolve<ExecutionService>().Create(package.CreateApplication(null, overrides));
         return Resolve<InstallService>().Handle(plan) ??
                throw new Exception($"Package {package.Name} not installed");
     }

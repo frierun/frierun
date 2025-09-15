@@ -3,9 +3,9 @@ using Frierun.Server.Data;
 
 namespace Frierun.Tests.Handlers.Base;
 
-public class PackageHandlerTests : BaseTests
+public class ApplicationHandlerTests : BaseTests
 {
-    public PackageHandlerTests()
+    public ApplicationHandlerTests()
     {
         InstallPackage("docker");
     }

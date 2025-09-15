@@ -13,6 +13,8 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
     {
         return packageRegistry.Packages;
     }
+    
+    public record Overrides(string? Name, ContractList? Contracts);
 
     /// <summary>
     /// Gets package and default parameters
@@ -23,7 +25,7 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
     [SwaggerResponse(StatusCodes.Status409Conflict, "Error installing contract", typeof(HandlerExceptionResult))]
     public IActionResult Plan(
         string id,
-        [FromBody] Package overrides,
+        [FromBody] Overrides overrides,
         PackageRegistry packageRegistry,
         ExecutionService executionService
     )
@@ -34,10 +36,10 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
             return NotFound();
         }
 
-        package = (Package)package.Merge(overrides);
+        var application = package.CreateApplication(overrides.Name, overrides.Contracts);
         try
         {
-            return Ok(executionService.Create(package));
+            return Ok(executionService.Create(application));
         }
         catch (HandlerException e)
         {
@@ -54,7 +56,7 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
     [SwaggerResponse(StatusCodes.Status409Conflict, "Error installing contract", typeof(HandlerExceptionResult))]
     public IActionResult Install(
         string id,
-        [FromBody] Package overrides,
+        [FromBody] Overrides overrides,
         PackageRegistry packageRegistry,
         InstallService installService,
         ExecutionService executionService
@@ -67,11 +69,11 @@ public class PackagesController(ILogger<PackagesController> logger) : Controller
             return NotFound();
         }
 
-        package = (Package)package.Merge(overrides);
+        var application = package.CreateApplication(overrides.Name, overrides.Contracts);
 
         try
         {
-            var plan = executionService.Create(package);
+            var plan = executionService.Create(application);
             logger.LogInformation("Installing package {id}", id);
             Task.Run(() => installService.Handle(plan));
         }
