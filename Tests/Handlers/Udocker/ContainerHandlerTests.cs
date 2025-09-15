@@ -291,7 +291,7 @@ public class ContainerHandlerTests : BaseTests
         var udocker1 = InstallPackage("termux-udocker");
         var udocker2 = InstallPackage("termux-udocker");
         var container = Contract<Container>().Generate("udocker");
-        var port = Contract<PortEndpoint>().Set(p => p.Container, container.Id).Generate();
+        var port = Contract<PortEndpoint>().Set(p => p.Container, container.Id).Generate("udocker");
 
         var application1 = InstallPackage(
             Factory<Package>().Generate() with

@@ -92,9 +92,9 @@ public class ContainerHandler(Application application)
         }
 
         // exposes ports
-        var endpoints = plan.Contracts.Values.OfType<PortEndpoint>().Where(ep => ep.Container == contract.Id);
-        foreach (var endpoint in endpoints)
+        foreach (var endpointId in contract.PortEndpoints)
         {
+            var endpoint = plan.GetContract(endpointId);
             command.Add($"--publish={endpoint.ExternalPort}:{endpoint.Port}");
         }
 

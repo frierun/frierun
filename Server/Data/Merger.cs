@@ -7,7 +7,7 @@ public static class Merger
     /// </summary>
     public static TContract EnsureSame<TContract>(TContract contract, Contract other) where TContract : Contract
     {
-        if (other is not TContract t || other.Id != contract.Id)
+        if (other is not TContract t)
         {
             throw new MergeException("Invalid contract");
         }

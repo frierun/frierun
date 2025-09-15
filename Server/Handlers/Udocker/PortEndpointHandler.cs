@@ -18,6 +18,11 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
             yield break;
         }
 
+        if (contract.Protocol != Protocol.Tcp)
+        {
+            yield break;
+        }
+
         if (contract.ExternalPort != 0)
         {
             if (State.Contracts.OfType<PortEndpoint>()
@@ -55,6 +60,7 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
             },
             [contract.Container] = new Container(contract.Container.Name)
             {
+                PortEndpoints = [new ContractId<PortEndpoint>(context.Name)],
                 HandlerApplication = Application?.Name,
             }
         };

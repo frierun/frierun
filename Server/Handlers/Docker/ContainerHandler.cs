@@ -134,9 +134,9 @@ public class ContainerHandler(Application application, DockerService dockerServi
         }
 
         // exposes ports
-        var endpoints = plan.Contracts.Values.OfType<PortEndpoint>().Where(ep => ep.Container == contract.Id);
-        foreach (var endpoint in endpoints)
+        foreach (var endpointId in contract.PortEndpoints)
         {
+            var endpoint = plan.GetContract(endpointId);
             dockerParameters.HostConfig.PortBindings[$"{endpoint.Port}/{endpoint.Protocol.ToString().ToLower()}"] =
                 new List<PortBinding>
                 {

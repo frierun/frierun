@@ -11,5 +11,9 @@ public sealed class PortEndpointFactory : ContractFaker<PortEndpoint>
         RuleFor(p => p.Protocol, f => f.Random.Enum<Protocol>());
         RuleFor(p => p.Port, f => f.Internet.Port());
         RuleFor(p => p.Container, _ => containerFactory.Generate().Id);
+
+        RuleSet(
+            "udocker", set => { set.RuleFor(p => p.Protocol, _ => Protocol.Tcp); }
+        );
     }
 }

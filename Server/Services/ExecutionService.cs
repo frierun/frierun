@@ -21,7 +21,7 @@ public class ExecutionService(
         var currentGraph = new DiscoveryGraph();
         var applicationName = GetApplicationName(application);
 
-        ContractId? nextId = application.Id;
+        ContractId? nextId = new ContractId<Application>(applicationName);
         Contract? nextContract = application;
 
         while (nextId != null)
