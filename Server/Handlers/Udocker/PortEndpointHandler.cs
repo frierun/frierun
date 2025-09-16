@@ -60,7 +60,14 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
             },
             [contract.Container] = new Container
             {
-                PortEndpoints = [new ContractId<PortEndpoint>(context.Name)],
+                Ports =
+                [
+                    new ContainerPort(
+                        InternalPort: contract.Port,
+                        ExternalPort: contract.ExternalPort,
+                        Protocol: contract.Protocol
+                    )
+                ],
                 HandlerApplication = Application?.Name,
             }
         };

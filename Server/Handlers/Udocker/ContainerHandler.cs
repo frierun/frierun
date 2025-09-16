@@ -87,10 +87,9 @@ public class ContainerHandler(Application application)
         }
 
         // exposes ports
-        foreach (var endpointId in contract.PortEndpoints)
+        foreach (var port in contract.Ports)
         {
-            var endpoint = plan.GetContract(endpointId);
-            command.Add($"--publish={endpoint.ExternalPort}:{endpoint.Port}");
+            command.Add($"--publish={port.ExternalPort}:{port.InternalPort}");
         }
 
         // envs

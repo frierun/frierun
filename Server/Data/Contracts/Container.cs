@@ -12,7 +12,7 @@ public record Container(
     Argument<string>? ImageName = null,
     bool MountDockerSocket = false,
     ContractId<Network>? Network = null,
-    IEnumerable<ContractId<PortEndpoint>>? PortEndpoints = null,
+    IEnumerable<ContainerPort>? Ports = null,
     Argument<IEnumerable<string>>? Command = null,
     IEnumerable<string>? NetworkAliases = null,
     IReadOnlyDictionary<string, Argument<string>>? Env = null,
@@ -27,7 +27,7 @@ public record Container(
     public IReadOnlyDictionary<string, Argument<string>> Env { get; init; } = Env ?? new Dictionary<string, Argument<string>>();
     public IReadOnlyDictionary<string, Argument<string>> Labels { get; init; } = Labels ?? new Dictionary<string, Argument<string>>();
     public IReadOnlyDictionary<string, ContainerMount> Mounts { get; init; } = Mounts ?? new Dictionary<string, ContainerMount>();
-    public IEnumerable<ContractId<PortEndpoint>> PortEndpoints { get; init; } = PortEndpoints ?? [];
+    public IEnumerable<ContainerPort> Ports { get; init; } = Ports ?? [];
     public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>("");
     public IEnumerable<string> NetworkAliases { get; init; } = NetworkAliases ?? [];
     public Argument<string> ImageName { get; init; } = ImageName ?? new Argument<string>();
@@ -63,7 +63,7 @@ public record Container(
             ImageName = ImageName.Merge(contract.ImageName),
             MountDockerSocket = MountDockerSocket || contract.MountDockerSocket,
             Network = OnlyOne(Network, contract.Network),
-            PortEndpoints = PortEndpoints.Concat(contract.PortEndpoints).Distinct(),
+            Ports = Ports.Concat(contract.Ports).Distinct(),
             Command = Command.Merge(contract.Command),
             NetworkAliases = NetworkAliases.Concat(contract.NetworkAliases).Distinct(),
             Env = MergeDictionaries(Env, contract.Env),
