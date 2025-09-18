@@ -14,7 +14,7 @@ public record Postgresql(
 ) : Contract
 {
     [MemberNotNullWhen(true, nameof(Username), nameof(Password), nameof(Host), nameof(NetworkName))]
-    public override bool Installed { get; init; }
+    public override bool Installed => Id != null;
     
     public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>("");
 

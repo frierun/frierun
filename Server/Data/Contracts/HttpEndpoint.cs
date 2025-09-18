@@ -15,8 +15,6 @@ public record HttpEndpoint(
     string? CloudflareZoneId = null // for Cloudflare endpoints
 ) : Contract
 {
-    [MemberNotNullWhen(true, nameof(Url))] public override bool Installed { get; init; }
-
     public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");
     public Argument<bool?> ResultSsl { get; init; } = ResultSsl ?? new Argument<bool?>();
     public Argument<string> ResultHost { get; init; } = ResultHost ?? new Argument<string>();

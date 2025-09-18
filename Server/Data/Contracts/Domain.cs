@@ -9,7 +9,7 @@ public record Domain(
 ) : Contract
 {
     [MemberNotNullWhen(true, nameof(Value), nameof(IsInternal))]
-    public override bool Installed { get; init; }
+    public override bool Installed => Id != null;
     
     public override Contract Merge(Contract other)
     {

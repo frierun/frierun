@@ -38,6 +38,8 @@ public abstract record Contract<THandler> : Contract
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
 public abstract record Contract
 {
+    public Guid? Id { get; init; }
+
     [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = [];
 
     [JsonPropertyName("handler")]
@@ -53,7 +55,7 @@ public abstract record Contract
 
     [JsonIgnore] public string? HandlerApplication { get; init; }
 
-    public virtual bool Installed { get; init; }
+    public virtual bool Installed => Id != null;
     public virtual IEnumerable<IArgument> GetArguments() => [];
 
     /// <summary>
@@ -68,7 +70,7 @@ public abstract record Contract
     {
         Debug.Assert(!Installed);
         Debug.Assert(LazyHandler.Value != null, "Handler must be initialized");
-        return LazyHandler.Value.Install(this, plan) with { Installed = true };
+        return LazyHandler.Value.Install(this, plan) with { Id = Guid.CreateVersion7() };
     }
 
     /// <summary>

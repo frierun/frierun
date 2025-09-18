@@ -21,7 +21,7 @@ public record Container(
 ) : Contract<IContainerHandler>
 {
     [MemberNotNullWhen(true, nameof(ContainerName), nameof(NetworkName))]
-    public override bool Installed { get; init; }
+    public override bool Installed => Id != null;
     
     public Argument<IEnumerable<string>> Command { get; init; } = Command ?? new Argument<IEnumerable<string>>();
     public IReadOnlyDictionary<string, Argument<string>> Env { get; init; } = Env ?? new Dictionary<string, Argument<string>>();

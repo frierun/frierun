@@ -14,7 +14,7 @@ public record Mysql(
 ) : Contract
 {
     [MemberNotNullWhen(true, nameof(Username), nameof(Password), nameof(Host), nameof(NetworkName))]
-    public override bool Installed { get; init; }
+    public override bool Installed => Id != null;
 
     public override Contract Merge(Contract other)
     {

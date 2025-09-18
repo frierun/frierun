@@ -11,7 +11,5 @@ public sealed class ApplicationFactory : ContractFaker<Application>
         RuleFor(p => p.Package, _ => packageFactory.Generate());
         RuleFor(p => p.Url, f => new Argument<string>(f.Internet.Url()));
         RuleFor(p => p.Description, f => new Argument<string>(f.Lorem.Sentence()));
-        RuleFor(p => p.Contracts, _ => []);
-        RuleFor(p => p.RequiredApplications, _ => []);
     }
 }

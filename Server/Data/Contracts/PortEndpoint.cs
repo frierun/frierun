@@ -13,7 +13,7 @@ public record PortEndpoint(
 ) : Contract
 {
     [MemberNotNullWhen(true, nameof(ExternalIp))]
-    public override bool Installed { get; init; }
+    public override bool Installed => Id != null;
     
     public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");    
 

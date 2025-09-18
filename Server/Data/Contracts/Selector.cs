@@ -11,7 +11,7 @@ public record Selector(
 ) : Contract
 {
     [MemberNotNullWhen(true, nameof(Value))]
-    public override bool Installed { get; init; }
+    public override bool Installed => Id != null;
     
     public IReadOnlyList<SelectorOption> Options { get; init; } = Options ?? [];
     

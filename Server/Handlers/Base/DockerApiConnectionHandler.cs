@@ -37,7 +37,6 @@ public class DockerApiConnectionHandler : Handler<DockerApiConnection>, IDockerA
                     {
                         Path = socketPath,
                         Handler = this,
-                        Installed = true
                     }
                 );
             }

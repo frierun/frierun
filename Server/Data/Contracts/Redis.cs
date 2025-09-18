@@ -12,7 +12,7 @@ public record Redis(
 ) : Contract
 {
     [MemberNotNullWhen(true, nameof(Container), nameof(Volume))]
-    public override bool Installed { get; init; }
+    public override bool Installed => Id != null;
 
     public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>("");
     public Argument<string> Host { get; init; } = Host ?? new Argument<string>();
