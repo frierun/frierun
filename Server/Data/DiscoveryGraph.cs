@@ -2,8 +2,8 @@
 
 public class DiscoveryGraph
 {
-    private readonly HashSet<ContractId> _toInitialize = [];
-    private readonly HashSet<ContractId> _emptyContracts = [];
+    private readonly HashSet<ContractRef> _toInitialize = [];
+    private readonly HashSet<ContractRef> _emptyContracts = [];
 
     /// <summary>
     /// Prevents infinite recursion during reinitialization
@@ -12,7 +12,7 @@ public class DiscoveryGraph
 
     private const int MaxContracts = 1000;
 
-    public Dictionary<ContractId, Contract> Contracts { get; } = new();
+    public Dictionary<ContractRef, Contract> Contracts { get; } = new();
 
     public DiscoveryGraph()
     {
@@ -20,7 +20,7 @@ public class DiscoveryGraph
 
     public DiscoveryGraph(DiscoveryGraph graph)
     {
-        Contracts = new Dictionary<ContractId, Contract>(graph.Contracts);
+        Contracts = new Dictionary<ContractRef, Contract>(graph.Contracts);
         _toInitialize = [..graph._toInitialize];
         _emptyContracts = [..graph._emptyContracts];
         _count = graph._count;
@@ -29,20 +29,20 @@ public class DiscoveryGraph
     /// <summary>
     /// Returns next contract to initialize.
     /// </summary>
-    public (ContractId? Id, Contract? Contract) Next()
+    public (ContractRef? Ref, Contract? Contract) Next()
     {
         // reinitializing freshly updated contracts
         while (_toInitialize.Count > 0)
         {
-            var contractId = _toInitialize.First();
-            _toInitialize.Remove(contractId);
+            var contractRef = _toInitialize.First();
+            _toInitialize.Remove(contractRef);
             _count++;
             if (_count > MaxContracts)
             {
                 throw new Exception("Infinite recursion found during contract reinitialization");
             }
 
-            return (contractId, Contracts[contractId]);
+            return (contractRef, Contracts[contractRef]);
         }
 
         _count = 0;
@@ -50,14 +50,14 @@ public class DiscoveryGraph
         // initialize empty contracts
         while (_emptyContracts.Count > 0)
         {
-            var contractId = _emptyContracts.First();
-            _emptyContracts.Remove(contractId);
-            if (Contracts.ContainsKey(contractId))
+            var contractRef = _emptyContracts.First();
+            _emptyContracts.Remove(contractRef);
+            if (Contracts.ContainsKey(contractRef))
             {
                 continue;
             }
 
-            return (contractId, null);
+            return (contractRef, null);
         }
 
         return (null, null);
@@ -67,24 +67,24 @@ public class DiscoveryGraph
     /// Applies contract initialization result.
     /// </summary>
     /// <returns>True if the result is not conflicting with the graph</returns>
-    public bool Apply(ContractId initializedContractId, ContractList result)
+    public bool Apply(ContractRef initializedContractRef, ContractList result)
     {
         try
         {
-            foreach (var (contractId, contract) in result)
+            foreach (var (contractRef, contract) in result)
             {
-                if (Contracts.TryGetValue(contractId, out var oldContract))
+                if (Contracts.TryGetValue(contractRef, out var oldContract))
                 {
-                    Contracts[contractId] = oldContract.Merge(contract);
+                    Contracts[contractRef] = oldContract.Merge(contract);
                 }
                 else
                 {
-                    Contracts[contractId] = contract;
+                    Contracts[contractRef] = contract;
                 }
 
-                if (contractId != initializedContractId)
+                if (contractRef != initializedContractRef)
                 {
-                    _toInitialize.Add(contractId);
+                    _toInitialize.Add(contractRef);
                 }
             }
         }
@@ -93,22 +93,22 @@ public class DiscoveryGraph
             return false;
         }
 
-        var initializedContract = result[initializedContractId];
-        foreach (var contractId in initializedContract.DependsOn)
+        var initializedContract = result[initializedContractRef];
+        foreach (var contractRef in initializedContract.DependsOn)
         {
-            if (!Contracts.ContainsKey(contractId))
+            if (!Contracts.ContainsKey(contractRef))
             {
-                _emptyContracts.Add(contractId);
+                _emptyContracts.Add(contractRef);
             }
         }
 
         foreach (var argument in initializedContract.GetArguments())
         {
-            foreach (var contractId in argument.RequiredContracts)
+            foreach (var contractRef in argument.RequiredContracts)
             {
-                if (!Contracts.ContainsKey(contractId))
+                if (!Contracts.ContainsKey(contractRef))
                 {
-                    _emptyContracts.Add(contractId);
+                    _emptyContracts.Add(contractRef);
                 }
             }
         }

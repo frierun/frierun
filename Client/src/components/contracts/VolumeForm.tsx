@@ -8,7 +8,7 @@ function VariantName(contract: Volume): string {
     return contract.handler?.typeName.replace("Handler", "") ?? 'Unknown';
 }
 
-export default function VolumeForm({contractId, contract, variants, updateContract}: ContractProps<Volume>) {
+export default function VolumeForm({contractRef, contract, variants, updateContract}: ContractProps<Volume>) {
     const [value, setValue] = useState('');
     const {data} = useGetVolumes();
 
@@ -18,7 +18,7 @@ export default function VolumeForm({contractId, contract, variants, updateContra
 
     return (
         <BaseForm
-            contractId={contractId}
+            contractRef={contractRef}
             contract={contract}
             variants={variants}
             variantName={VariantName}
@@ -35,7 +35,7 @@ export default function VolumeForm({contractId, contract, variants, updateContra
                             value={value}
                             onChange={e => {
                                 setValue(e.target.value);
-                                updateContract(contractId, {
+                                updateContract(contractRef, {
                                     ...contract,
                                     volumeName: e.target.value
                                 });
@@ -60,7 +60,7 @@ export default function VolumeForm({contractId, contract, variants, updateContra
                             value={value}
                             onChange={e => {
                                 setValue(e.target.value);
-                                updateContract(contractId, {
+                                updateContract(contractRef, {
                                     ...contract,
                                     localPath: e.target.value
                                 });

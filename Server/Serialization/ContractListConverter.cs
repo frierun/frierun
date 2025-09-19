@@ -31,8 +31,8 @@ public class ContractListConverter(ContractRegistry contractRegistry) : JsonConv
             throw new JsonException();
         }
 
-        var contractIdConverter = (JsonConverter<ContractId>)options.GetConverter(typeof(ContractId));
-        var dictionary = new Dictionary<ContractId, Contract>();
+        var contractRefConverter = (JsonConverter<ContractRef>)options.GetConverter(typeof(ContractRef));
+        var dictionary = new Dictionary<ContractRef, Contract>();
         while (reader.Read())
         {
             if (reader.TokenType == JsonTokenType.EndObject)
@@ -45,13 +45,13 @@ public class ContractListConverter(ContractRegistry contractRegistry) : JsonConv
                 throw new JsonException();
             }
 
-            var contractId = contractIdConverter.ReadAsPropertyName(ref reader, typeof(ContractId), options);
+            var contractRef = contractRefConverter.ReadAsPropertyName(ref reader, typeof(ContractRef), options);
             reader.Read();
 
-            var contractType = contractRegistry.GetContractType(contractId.TypeName);
+            var contractType = contractRegistry.GetContractType(contractRef.TypeName);
             var contract = GetDelegateForType(contractType, options)(ref reader, contractType, options) ??
-                           contractRegistry.CreateContract(contractId);
-            dictionary[contractId] = contract;
+                           contractRegistry.CreateContract(contractRef);
+            dictionary[contractRef] = contract;
         }
 
         return new ContractList(dictionary);
@@ -59,8 +59,8 @@ public class ContractListConverter(ContractRegistry contractRegistry) : JsonConv
 
     public override void Write(Utf8JsonWriter writer, ContractList value, JsonSerializerOptions options)
     {
-        var converter = (JsonConverter<IReadOnlyDictionary<ContractId, Contract>>)
-            options.GetConverter(typeof(IReadOnlyDictionary<ContractId, Contract>));
+        var converter = (JsonConverter<IReadOnlyDictionary<ContractRef, Contract>>)
+            options.GetConverter(typeof(IReadOnlyDictionary<ContractRef, Contract>));
         converter.Write(writer, value, options);
     }
 }

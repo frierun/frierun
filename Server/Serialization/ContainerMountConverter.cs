@@ -11,7 +11,7 @@ public class ContainerMountConverter : JsonConverter<ContainerMount>
         if (reader.TokenType == JsonTokenType.String)
         {
             var volumeName = reader.GetString();
-            return new ContainerMount(Volume: new ContractId<Volume>(volumeName ?? ""));
+            return new ContainerMount(Volume: new ContractRef<Volume>(volumeName ?? ""));
         }
 
         var newOptions = new JsonSerializerOptions(options);

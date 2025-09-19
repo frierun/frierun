@@ -14,7 +14,7 @@ export type CloudflareTunnelAllOf = {
   tunnelId?: string | null;
   /** @nullable */
   token?: string | null;
-  installed?: boolean;
+  readonly installed?: boolean;
   cloudflareApiConnection: string;
   container: string;
 };

@@ -4,7 +4,7 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record Mysql(
-    ContractId<Network>? Network = null,
+    ContractRef<Network>? Network = null,
     string? Username = null,
     string? Password = null,
     string? Host = null,
@@ -32,5 +32,5 @@ public record Mysql(
         };
     }
 
-    public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>("");
+    public ContractRef<Network> Network { get; init; } = Network ?? new ContractRef<Network>("");
 }

@@ -97,7 +97,7 @@ public class ArgumentOfTConverterTests : BaseTests
         Assert.Null(result.Value);
         Assert.NotNull(result.Resolver);
         var requiredContract = result.RequiredContracts.Single();
-        Assert.Equal(new ContractId<Parameter>("Test"), requiredContract);;
+        Assert.Equal(new ContractRef<Parameter>("Test"), requiredContract);;
     }
 
     [Fact]

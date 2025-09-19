@@ -6,6 +6,7 @@
  */
 import type { Package } from "./package";
 import type { ApplicationAllOfContracts } from "./applicationAllOfContracts";
+import type { ApplicationAllOfContractRefs } from "./applicationAllOfContractRefs";
 
 export type ApplicationAllOf = {
   name: string;
@@ -16,4 +17,5 @@ export type ApplicationAllOf = {
   description: string | null;
   requiredApplications: string[];
   contracts: ApplicationAllOfContracts;
+  contractRefs: ApplicationAllOfContractRefs;
 };

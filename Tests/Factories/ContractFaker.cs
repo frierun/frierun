@@ -34,8 +34,8 @@ public abstract class ContractFaker<TContract> : Faker<TContract>
             name = FakerHub.Lorem.Word();
         } while (!_uniqueNames.Add(name));
         
-        var contractId = new ContractId<TContract>(name);
-        return new ContractEntry<TContract>(contractId, result);
+        var contractRef = new ContractRef<TContract>(name);
+        return new ContractEntry<TContract>(contractRef, result);
     }
     
     /// <summary>

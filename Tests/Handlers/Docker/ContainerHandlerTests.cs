@@ -137,7 +137,7 @@ public class ContainerHandlerTests : BaseTests
         var docker1 = InstallPackage("docker");
         var docker2 = InstallPackage("docker");
         var container = Contract<Container>().Generate();
-        var portEndpoint = Contract<PortEndpoint>().Set(p => p.Container, container.Id).Generate();
+        var portEndpoint = Contract<PortEndpoint>().Set(p => p.Container, container.Ref).Generate();
 
         var application1 = InstallPackage(
             Factory<Package>().Generate() with
@@ -152,8 +152,8 @@ public class ContainerHandlerTests : BaseTests
             }
         );
 
-        var port1 = State.GetContract(application1, portEndpoint.Id);
-        var port2 = State.GetContract(application2, portEndpoint.Id);
+        var port1 = State.GetContract(application1, portEndpoint.Ref);
+        var port2 = State.GetContract(application2, portEndpoint.Ref);
         Assert.Equal(Handler<PortEndpointHandler>(docker1), port1.Handler);
         Assert.Equal(Handler<PortEndpointHandler>(docker2), port2.Handler);
         Assert.NotEqual(port1.Handler, port2.Handler);
@@ -192,7 +192,7 @@ public class ContainerHandlerTests : BaseTests
         InstallPackage("docker");
         var parameter = Contract<Parameter>().Set(p => p.Value, value).Generate();
         var container = Contract<Container>()
-            .Set(p => p.Env, new Dictionary<string, Argument<string>> { [name] = new($"{{{{{parameter.Id}:Value}}}}") })
+            .Set(p => p.Env, new Dictionary<string, Argument<string>> { [name] = new($"{{{{{parameter.Ref}:Value}}}}") })
             .Generate();
         var package = Factory<Package>().Generate() with
         {

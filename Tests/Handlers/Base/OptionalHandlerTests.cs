@@ -15,15 +15,15 @@ public class OptionalHandlerTests : BaseTests
             .Generate();
         var handler = Handler<OptionalHandler>();
 
-        var result = handler.Initialize(optional.Contract, new ApplicationContext(optional.Id, "prefix")).ToList();
+        var result = handler.Initialize(optional.Contract, new ApplicationContext(optional.Ref, "prefix")).ToList();
 
         Assert.Equal(2, result.Count);
 
-        Assert.Equal(true, ((Optional)result[0][optional.Id]).Value);
+        Assert.Equal(true, ((Optional)result[0][optional.Ref]).Value);
         Assert.Equal(2, result[0].Count);
-        Assert.Equal(container.Contract, result[0][container.Id]);
+        Assert.Equal(container.Contract, result[0][container.Ref]);
 
-        Assert.Equal(false, ((Optional)result[1][optional.Id]).Value);
+        Assert.Equal(false, ((Optional)result[1][optional.Ref]).Value);
         Assert.Single(result[1]);
     }
 
@@ -37,12 +37,12 @@ public class OptionalHandlerTests : BaseTests
             .Generate();
         var handler = Handler<OptionalHandler>();
 
-        var result = handler.Initialize(optional.Contract, new ApplicationContext(optional.Id, "prefix")).ToList();
+        var result = handler.Initialize(optional.Contract, new ApplicationContext(optional.Ref, "prefix")).ToList();
 
         Assert.Single(result);
-        Assert.Equal(true, ((Optional)result[0][optional.Id]).Value);
+        Assert.Equal(true, ((Optional)result[0][optional.Ref]).Value);
         Assert.Equal(2, result[0].Count);
-        Assert.Equal(container.Contract, result[0][container.Id]);
+        Assert.Equal(container.Contract, result[0][container.Ref]);
     }
 
     [Fact]
@@ -55,10 +55,10 @@ public class OptionalHandlerTests : BaseTests
             .Generate();
         var handler = Handler<OptionalHandler>();
 
-        var result = handler.Initialize(optional.Contract, new ApplicationContext(optional.Id, "prefix")).ToList();
+        var result = handler.Initialize(optional.Contract, new ApplicationContext(optional.Ref, "prefix")).ToList();
 
         Assert.Single(result);
-        Assert.Equal(false, ((Optional)result[0][optional.Id]).Value);
+        Assert.Equal(false, ((Optional)result[0][optional.Ref]).Value);
         Assert.Single(result[0]);
     }
 }

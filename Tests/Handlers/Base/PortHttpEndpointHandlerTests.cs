@@ -9,7 +9,7 @@ public class PortHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         var container = Contract<Container>().Generate();
-        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.Container, container.Id).Generate();
+        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.Container, container.Ref).Generate();
         var package = Factory<Package>().Generate() with
         {
             Contracts = [container, httpEndpoint]
@@ -17,7 +17,7 @@ public class PortHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var resultHttpEndpoint = State.GetContract(application, httpEndpoint.Id);
+        var resultHttpEndpoint = State.GetContract(application, httpEndpoint.Ref);
         Assert.False(resultHttpEndpoint.ResultSsl.Value);
         Assert.Equal(httpEndpoint.Contract.Port, resultHttpEndpoint.ResultPort.Value);
         Assert.NotNull(resultHttpEndpoint.ResultHost.Value);
@@ -28,7 +28,7 @@ public class PortHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         var container = Contract<Container>().Generate();
-        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.Container, container.Id).Generate();
+        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.Container, container.Ref).Generate();
         var package = Factory<Package>().Generate() with
         {
             Contracts = [container, httpEndpoint]
@@ -37,8 +37,8 @@ public class PortHttpEndpointHandlerTests : BaseTests
         var application = InstallPackage(package);
 
         Assert.Contains(
-            new ContractId<PortEndpoint>(httpEndpoint.Id.Name),
-            State.GetContract(application, httpEndpoint.Id).DependsOn
+            new ContractRef<PortEndpoint>(httpEndpoint.Ref.Name),
+            State.GetContract(application, httpEndpoint.Ref).DependsOn
         );
     }
 }

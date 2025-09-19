@@ -15,9 +15,9 @@ public class ContainerHandler(State state, Application application)
             yield break;
         }
 
-        var contractId = new ContractId<Container>(context.Name);
+        var containerRef = new ContractRef<Container>(context.Name);
         yield return new ContractList(
-            contract.Mounts.Values.Select(mount => new KeyValuePair<ContractId, Contract>(
+            contract.Mounts.Values.Select(mount => new KeyValuePair<ContractRef, Contract>(
                     mount.Volume,
                     new Volume { HandlerApplication = Application?.Name }
                 )
@@ -34,7 +34,7 @@ public class ContainerHandler(State state, Application application)
                 DependsOn =
                 [
                     contract.Network,
-                    new ContractId<Daemon>(context.Name),
+                    new ContractRef<Daemon>(context.Name),
                     ..contract.Mounts.Values.Select(mount => mount.Volume)
                 ]
             },
@@ -42,14 +42,14 @@ public class ContainerHandler(State state, Application application)
             {
                 HandlerApplication = Application?.Name,
                 Command = new Argument<IEnumerable<string>>(
-                    new ArgumentResolver<ContractId<Container>, IEnumerable<string>>(
-                        contractId,
+                    new ArgumentResolver<ContractRef<Container>, IEnumerable<string>>(
+                        containerRef,
                         GetCommands
                     )
                 ),
                 PreCommands = new Argument<IEnumerable<IEnumerable<string>>>(
-                    new ArgumentResolver<ContractId<Container>, IEnumerable<IEnumerable<string>>>(
-                        contractId,
+                    new ArgumentResolver<ContractRef<Container>, IEnumerable<IEnumerable<string>>>(
+                        containerRef,
                         GetPreCommands
                     )
                 ),
@@ -62,9 +62,9 @@ public class ContainerHandler(State state, Application application)
     /// <summary>
     /// Gets udocker commands for the daemon
     /// </summary>
-    private static IEnumerable<string> GetCommands(ContractId<Container> contractId, ExecutionPlan plan)
+    private static IEnumerable<string> GetCommands(ContractRef<Container> contractRef, ExecutionPlan plan)
     {
-        var contract = plan.GetContract(contractId);
+        var contract = plan.GetContract(contractRef);
         foreach (var argument in contract.GetArguments())
         {
             argument.Resolve(plan);
@@ -106,9 +106,9 @@ public class ContainerHandler(State state, Application application)
     /// <summary>
     /// Gets preparation commands to run udocker via daemon
     /// </summary>
-    private static IEnumerable<IEnumerable<string>> GetPreCommands(ContractId<Container> contractId, ExecutionPlan plan)
+    private static IEnumerable<IEnumerable<string>> GetPreCommands(ContractRef<Container> contractRef, ExecutionPlan plan)
     {
-        var contract = plan.GetContract(contractId);
+        var contract = plan.GetContract(contractRef);
         foreach (var argument in contract.GetArguments())
         {
             argument.Resolve(plan);

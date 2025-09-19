@@ -9,6 +9,6 @@ import type { OptionalAllOfContracts } from "./optionalAllOfContracts";
 export type OptionalAllOf = {
   /** @nullable */
   value?: boolean | null;
-  installed?: boolean;
+  readonly installed?: boolean;
   contracts: OptionalAllOfContracts;
 };

@@ -13,7 +13,7 @@ public class StaticDomainHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var installedDomain = State.GetContract(application, domain.Id);
+        var installedDomain = State.GetContract(application, domain.Ref);
         Assert.True(installedDomain.Installed);
         Assert.True(installedDomain.IsInternal);
     }
@@ -30,7 +30,7 @@ public class StaticDomainHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var installedDomain = State.GetContract(application, domain.Id);
+        var installedDomain = State.GetContract(application, domain.Ref);
         Assert.True(installedDomain.Installed);
         Assert.False(installedDomain.IsInternal);
     }

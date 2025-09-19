@@ -17,7 +17,7 @@ public class TraefikHttpEndpointHandler(State state, Application application)
             c => c.TraefikRouterName
         );
 
-        var domainId = new ContractId<Domain>(context.Name);
+        var domainId = new ContractRef<Domain>(context.Name);
 
         yield return new ContractList
         {

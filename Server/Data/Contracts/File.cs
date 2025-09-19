@@ -6,12 +6,12 @@ namespace Frierun.Server.Data;
 public record File(
     string Path,
     Argument<string>? Text = null,
-    ContractId<Volume>? Volume = null,
+    ContractRef<Volume>? Volume = null,
     int? Owner = null,
     int? Group = null
 ) : Contract
 {
-    public ContractId<Volume> Volume { get; init; } = Volume ?? new ContractId<Volume>("");
+    public ContractRef<Volume> Volume { get; init; } = Volume ?? new ContractRef<Volume>("");
     public Argument<string> Text { get; init; } = Text ?? new Argument<string>();
 
     public override IEnumerable<IArgument> GetArguments()

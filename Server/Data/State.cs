@@ -36,16 +36,16 @@ public class State
     public TContract GetContract<TContract>(Application app, string name = "")
         where TContract : Contract
     {
-        return GetContract<TContract>(app, new ContractId<TContract>(name));
+        return GetContract<TContract>(app, new ContractRef<TContract>(name));
     }
     
     /// <summary>
     /// Gets contract from the application by name.
     /// </summary>
-    public TContract GetContract<TContract>(Application app, ContractId<TContract> contractId)
+    public TContract GetContract<TContract>(Application app, ContractRef<TContract> contractRef)
         where TContract : Contract
     {
-        var guid = app.ContractRefs[contractId];
+        var guid = app.ContractRefs[contractRef];
         return GetContract<TContract>(guid);
     }
     

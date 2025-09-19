@@ -5,15 +5,15 @@ using Frierun.Server.Data;
 
 namespace Frierun.Tests;
 
-public class ContractIdOfTConverterTests : BaseTests
+public class ContractRefOfTConverterTests : BaseTests
 {
     [Fact]
     public void Read_Container_ReturnsContainer()
     {
-        var converter = new ContractIdOfTConverter();
+        var converter = new ContractRefOfTConverter();
         var name = Resolve<Faker>().Lorem.Word();
 
-        var result = JsonSerializer.Deserialize<ContractId<Container>>(
+        var result = JsonSerializer.Deserialize<ContractRef<Container>>(
             $"""
              "{name}"
              """,
@@ -27,15 +27,15 @@ public class ContractIdOfTConverterTests : BaseTests
         );
 
         Assert.NotNull(result);
-        Assert.IsType<ContractId<Container>>(result);
+        Assert.IsType<ContractRef<Container>>(result);
     }
 
     [Fact]
     public void Write_Container_ReturnsName()
     {
-        var converter = new ContractIdOfTConverter();
+        var converter = new ContractRefOfTConverter();
         var name = Resolve<Faker>().Lorem.Word();
-        var container = new ContractId<Container>(name);
+        var container = new ContractRef<Container>(name);
 
         var result = JsonSerializer.Serialize(
             container, new JsonSerializerOptions

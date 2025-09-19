@@ -3,23 +3,23 @@ using System.Diagnostics;
 
 namespace Frierun.Server.Data;
 
-public class ContractId<TContract> : ContractId
+public class ContractRef<TContract> : ContractRef
     where TContract : Contract
 {
-    public ContractId(string? name = null) : base(typeof(TContract).Name, name ?? "")
+    public ContractRef(string? name = null) : base(typeof(TContract).Name, name ?? "")
     {
     }
 
-    public ContractId(ContractId contractId) : base(typeof(TContract).Name, contractId.Name)
+    public ContractRef(ContractRef contractRef) : base(typeof(TContract).Name, contractRef.Name)
     {
-        Debug.Assert(contractId.TypeName == typeof(TContract).Name);
+        Debug.Assert(contractRef.TypeName == typeof(TContract).Name);
     }
 }
 
-public class ContractId(
+public class ContractRef(
     string typeName,
     string name
-) : IEquatable<ContractId>
+) : IEquatable<ContractRef>
 {
     public string TypeName { get; } = typeName;
     public string Name { get; } = name;
@@ -29,7 +29,7 @@ public class ContractId(
         return $"{TypeName}:{Name}";
     }
 
-    public bool Equals(ContractId? other)
+    public bool Equals(ContractRef? other)
     {
         if (other is null)
         {
@@ -56,12 +56,12 @@ public class ContractId(
             return true;
         }
 
-        if (obj is not ContractId contractId)
+        if (obj is not ContractRef contractRef)
         {
             return false;
         }
 
-        return Equals(contractId);
+        return Equals(contractRef);
     }
 
     public override int GetHashCode()
@@ -72,12 +72,12 @@ public class ContractId(
         }
     }
     
-    public static bool operator ==(ContractId? left, ContractId? right)
+    public static bool operator ==(ContractRef? left, ContractRef? right)
     {
         return Equals(left, right);
     }
 
-    public static bool operator !=(ContractId? left, ContractId? right)
+    public static bool operator !=(ContractRef? left, ContractRef? right)
     {
         return !(left == right);
     }

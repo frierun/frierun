@@ -101,7 +101,7 @@ public class ExecutionServiceTests : BaseTests
 
         Assert.NotNull(plan);
         Assert.Equal(2, plan.Contracts.Count);
-        Assert.NotNull(plan.GetContract(contract.Id));
+        Assert.NotNull(plan.GetContract(contract.Ref));
         // ReSharper disable once IteratorMethodResultIsIgnored
         handler.Received(1).Initialize(Arg.Any<Contract1>(), Arg.Any<ApplicationContext>());
     }
@@ -137,12 +137,12 @@ public class ExecutionServiceTests : BaseTests
                     new ContractList
                     {
                         [info.Arg<ApplicationContext>().Name] = info.Arg<Contract1>() with { Handler = handler },
-                        [unknownContract.Id] = unknownContract.Contract
+                        [unknownContract.Ref] = unknownContract.Contract
                     },
                     new ContractList
                     {
                         [info.Arg<ApplicationContext>().Name] = info.Arg<Contract1>() with { Handler = handler },
-                        [knownContract.Id] = knownContract.Contract
+                        [knownContract.Ref] = knownContract.Contract
                     }
                 ]
             );
@@ -153,7 +153,7 @@ public class ExecutionServiceTests : BaseTests
                     new ContractList
                     {
                         [info.Arg<ApplicationContext>().Name] = info.Arg<Contract1>() with { Handler = handler },
-                        [unknownContract.Id] = unknownContract.Contract
+                        [unknownContract.Ref] = unknownContract.Contract
                     },
                     new ContractList
                     {
@@ -166,8 +166,8 @@ public class ExecutionServiceTests : BaseTests
 
         Assert.NotNull(plan);
         Assert.Equal(3, plan.Contracts.Count);
-        Assert.NotNull(plan.GetContract(contract.Id));
-        Assert.NotNull(plan.GetContract(knownContract.Id));
+        Assert.NotNull(plan.GetContract(contract.Ref));
+        Assert.NotNull(plan.GetContract(knownContract.Ref));
     }
 
     [Fact]
@@ -187,7 +187,7 @@ public class ExecutionServiceTests : BaseTests
                     new ContractList
                     {
                         [info.Arg<ApplicationContext>().Name] = info.Arg<Contract1>() with { Handler = handler },
-                        [unknownContract.Id] = unknownContract.Contract
+                        [unknownContract.Ref] = unknownContract.Contract
                     },
                 ]
             );
@@ -199,7 +199,7 @@ public class ExecutionServiceTests : BaseTests
                     new ContractList
                     {
                         [info.Arg<ApplicationContext>().Name] = info.Arg<Contract1>() with { Handler = handler2 },
-                        [knownContract.Id] = knownContract.Contract
+                        [knownContract.Ref] = knownContract.Contract
                     }
                 ]
             );
@@ -219,8 +219,8 @@ public class ExecutionServiceTests : BaseTests
 
         Assert.NotNull(plan);
         Assert.Equal(3, plan.Contracts.Count);
-        Assert.NotNull(plan.GetContract(contract.Id));
-        Assert.NotNull(plan.GetContract(knownContract.Id));
+        Assert.NotNull(plan.GetContract(contract.Ref));
+        Assert.NotNull(plan.GetContract(knownContract.Ref));
     }
 
     [Fact]
@@ -234,7 +234,7 @@ public class ExecutionServiceTests : BaseTests
 
         var plan = Service.Create(package.CreateApplication());
 
-        var parameter = plan.GetContract(new ContractId<Parameter>("Test"));
+        var parameter = plan.GetContract(new ContractRef<Parameter>("Test"));
         Assert.NotNull(parameter.Value);
     }
 
@@ -265,7 +265,7 @@ public class ExecutionServiceTests : BaseTests
 
         var plan = Service.Create(package.CreateApplication());
 
-        var parameter = plan.GetContract(new ContractId<Parameter>("Test"));
+        var parameter = plan.GetContract(new ContractRef<Parameter>("Test"));
         Assert.NotNull(parameter.Value);
     }
 
@@ -279,7 +279,7 @@ public class ExecutionServiceTests : BaseTests
 
         var plan = Service.Create(package.CreateApplication());
 
-        Assert.Single(plan.Alternatives, alternative => alternative.ContractId == container.Id);
+        Assert.Single(plan.Alternatives, alternative => alternative.ContractRef == container.Ref);
     }
 
     [Fact]
@@ -300,7 +300,7 @@ public class ExecutionServiceTests : BaseTests
         var plan1 = Service.Create(package1.CreateApplication());
         var plan2 = Service.Create(package2.CreateApplication());
 
-        Assert.DoesNotContain(plan1.Alternatives, alternative => alternative.ContractId == container.Id);
-        Assert.DoesNotContain(plan2.Alternatives, alternative => alternative.ContractId == container.Id);
+        Assert.DoesNotContain(plan1.Alternatives, alternative => alternative.ContractRef == container.Ref);
+        Assert.DoesNotContain(plan2.Alternatives, alternative => alternative.ContractRef == container.Ref);
     }
 }

@@ -15,8 +15,8 @@ public class PackageSerializer(ILogger<PackageSerializer> logger, ContractRegist
         Converters =
         {
             new ContainerMountConverter(),
-            new ContractIdConverter(),
-            new ContractIdOfTConverter(),
+            new ContractRefConverter(),
+            new ContractRefOfTConverter(),
             new ContractListConverter(contractRegistry),
             new ArgumentOfTConverter(),
             new YamlBoolConverter()

@@ -8,7 +8,7 @@
 export type DaemonAllOf = {
   /** @nullable */
   daemonName?: string | null;
-  installed?: boolean;
+  readonly installed?: boolean;
   /** @nullable */
   command: string[] | null;
   /** @nullable */

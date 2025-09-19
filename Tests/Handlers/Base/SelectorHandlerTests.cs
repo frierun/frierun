@@ -23,12 +23,12 @@ public class SelectorHandlerTests : BaseTests
             .Generate();
         var handler = Handler<SelectorHandler>();
 
-        var result = handler.Initialize(selector.Contract, new ApplicationContext(selector.Id, "prefix")).ToList();
+        var result = handler.Initialize(selector.Contract, new ApplicationContext(selector.Ref, "prefix")).ToList();
 
         Assert.Single(result);
-        Assert.Equal("option2", ((Selector)result[0][selector.Id]).Value);
+        Assert.Equal("option2", ((Selector)result[0][selector.Ref]).Value);
         Assert.Equal(2, result[0].Count);
-        Assert.Equal(container2.Contract, result[0][container2.Id]);
+        Assert.Equal(container2.Contract, result[0][container2.Ref]);
     }
 
     [Fact]
@@ -47,16 +47,16 @@ public class SelectorHandlerTests : BaseTests
             .Generate();
         var handler = Handler<SelectorHandler>();
 
-        var result = handler.Initialize(selector.Contract, new ApplicationContext(selector.Id, "prefix")).ToList();
+        var result = handler.Initialize(selector.Contract, new ApplicationContext(selector.Ref, "prefix")).ToList();
 
         Assert.Equal(2, result.Count);
-        Assert.Equal("option1", ((Selector)result[0][selector.Id]).Value);
+        Assert.Equal("option1", ((Selector)result[0][selector.Ref]).Value);
         Assert.Equal(2, result[0].Count);
-        Assert.Equal(container1.Contract, result[0][container1.Id]);
+        Assert.Equal(container1.Contract, result[0][container1.Ref]);
 
-        Assert.Equal("option2", ((Selector)result[1][selector.Id]).Value);
+        Assert.Equal("option2", ((Selector)result[1][selector.Ref]).Value);
         Assert.Equal(2, result[1].Count);
-        Assert.Equal(container2.Contract, result[1][container2.Id]);
+        Assert.Equal(container2.Contract, result[1][container2.Ref]);
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class SelectorHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var installedSelector = State.GetContract(application, contract.Id);
+        var installedSelector = State.GetContract(application, contract.Ref);
         Assert.True(installedSelector.Installed);
         Assert.Equal(contract.Contract.Value, installedSelector.Value);
     }

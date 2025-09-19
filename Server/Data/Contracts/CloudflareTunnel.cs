@@ -8,17 +8,17 @@ public record CloudflareTunnel(
     string? TunnelName = null,
     string? TunnelId = null,
     string? Token = null,
-    ContractId<CloudflareApiConnection>? CloudflareApiConnection = null,
-    ContractId<Container>? Container = null
+    ContractRef<CloudflareApiConnection>? CloudflareApiConnection = null,
+    ContractRef<Container>? Container = null
 ) : Contract
 {
     [MemberNotNullWhen(true, nameof(TunnelId), nameof(Token), nameof(AccountId))]
     public override bool Installed => Id != null;
 
-    public ContractId<CloudflareApiConnection> CloudflareApiConnection { get; init; } =
-        CloudflareApiConnection ?? new ContractId<CloudflareApiConnection>("");
+    public ContractRef<CloudflareApiConnection> CloudflareApiConnection { get; init; } =
+        CloudflareApiConnection ?? new ContractRef<CloudflareApiConnection>("");
 
-    public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");
+    public ContractRef<Container> Container { get; init; } = Container ?? new ContractRef<Container>("");
     
     public override Contract Merge(Contract other)
     {

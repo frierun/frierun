@@ -23,7 +23,7 @@ public class MysqlHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var database = State.GetContract(application, mysql.Id);
+        var database = State.GetContract(application, mysql.Ref);
         Assert.True(database.Installed);
         Assert.StartsWith(package.Name, database.Username);
         Assert.StartsWith(package.Name, database.Database);
@@ -44,8 +44,8 @@ public class MysqlHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.True(State.GetContract(application, mysql1.Id).Installed);
-        Assert.True(State.GetContract(application, mysql2.Id).Installed);
+        Assert.True(State.GetContract(application, mysql1.Ref).Installed);
+        Assert.True(State.GetContract(application, mysql2.Ref).Installed);
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
             application.Name,
             Arg.Any<NetworkConnectParameters>()

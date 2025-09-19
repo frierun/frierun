@@ -2,10 +2,10 @@
 import {ContractProps} from "@/components/contracts/ContractForm.tsx";
 import BaseForm from "@/components/contracts/BaseForm.tsx";
 
-export default function OptionalForm({contractId, contract, variants, updateContract}: ContractProps<Optional>) {
+export default function OptionalForm({contractRef, contract, variants, updateContract}: ContractProps<Optional>) {
     return (
         <BaseForm
-            contractId={contractId}
+            contractRef={contractRef}
             contract={contract}
             variants={variants}
             updateContract={updateContract}

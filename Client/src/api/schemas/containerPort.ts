@@ -6,12 +6,8 @@
  */
 import type { Protocol } from "./protocol";
 
-export type PortEndpointAllOf = {
-  protocol: Protocol;
-  port: number;
+export interface ContainerPort {
+  internalPort: number;
   externalPort: number;
-  /** @nullable */
-  externalIp?: string | null;
-  readonly installed?: boolean;
-  container: string;
-};
+  protocol: Protocol;
+}

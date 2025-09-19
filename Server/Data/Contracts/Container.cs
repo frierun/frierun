@@ -11,7 +11,7 @@ public record Container(
     string? NetworkName = null,
     Argument<string>? ImageName = null,
     bool MountDockerSocket = false,
-    ContractId<Network>? Network = null,
+    ContractRef<Network>? Network = null,
     IEnumerable<ContainerPort>? Ports = null,
     Argument<IEnumerable<string>>? Command = null,
     IEnumerable<string>? NetworkAliases = null,
@@ -28,7 +28,7 @@ public record Container(
     public IReadOnlyDictionary<string, Argument<string>> Labels { get; init; } = Labels ?? new Dictionary<string, Argument<string>>();
     public IReadOnlyDictionary<string, ContainerMount> Mounts { get; init; } = Mounts ?? new Dictionary<string, ContainerMount>();
     public IEnumerable<ContainerPort> Ports { get; init; } = Ports ?? [];
-    public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>("");
+    public ContractRef<Network> Network { get; init; } = Network ?? new ContractRef<Network>("");
     public IEnumerable<string> NetworkAliases { get; init; } = NetworkAliases ?? [];
     public Argument<string> ImageName { get; init; } = ImageName ?? new Argument<string>();
    

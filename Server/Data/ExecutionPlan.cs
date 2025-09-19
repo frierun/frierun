@@ -1,13 +1,13 @@
 ﻿namespace Frierun.Server.Data;
 
 public class ExecutionPlan(
-    Dictionary<ContractId, Contract> contracts,
+    Dictionary<ContractRef, Contract> contracts,
     IEnumerable<ExecutionPlan.Alternative> alternatives
 ) : IExecutionPlan
 {
     private readonly HashSet<Application> _requiredApplications = [];
 
-    public record Alternative(ContractId ContractId, Contract Contract);
+    public record Alternative(ContractRef ContractRef, Contract Contract);
 
     public ContractList Contracts => new(contracts);
 
@@ -19,19 +19,19 @@ public class ExecutionPlan(
     /// <summary>
     /// Builds the graph of contracts.
     /// </summary>
-    private DirectedAcyclicGraph<ContractId> BuildGraph()
+    private DirectedAcyclicGraph<ContractRef> BuildGraph()
     {
-        var graph = new DirectedAcyclicGraph<ContractId>();
-        foreach (var contractId in contracts.Keys)
+        var graph = new DirectedAcyclicGraph<ContractRef>();
+        foreach (var contractRef in contracts.Keys)
         {
-            graph.AddVertex(contractId);
+            graph.AddVertex(contractRef);
         }
 
-        foreach (var (contractId, contract) in contracts)
+        foreach (var (contractRef, contract) in contracts)
         {
             foreach (var dependency in contract.DependsOn)
             {
-                graph.AddEdge(dependency, contractId);
+                graph.AddEdge(dependency, contractRef);
             }
         }
 
@@ -41,18 +41,18 @@ public class ExecutionPlan(
     /// <summary>
     /// Get contract by id.
     /// </summary>
-    public Contract GetContract(ContractId contractId)
+    public Contract GetContract(ContractRef contractRef)
     {
-        return contracts[contractId];
+        return contracts[contractRef];
     }
 
     /// <summary>
     /// Get contract by id.
     /// </summary>
-    public T GetContract<T>(ContractId<T> contractId)
+    public T GetContract<T>(ContractRef<T> contractRef)
         where T : Contract
     {
-        return (T)GetContract((ContractId)contractId);
+        return (T)GetContract((ContractRef)contractRef);
     }
 
     /// <summary>
@@ -61,10 +61,10 @@ public class ExecutionPlan(
     public Application Install()
     {
         var graph = BuildGraph();
-        var installedContracts = new Dictionary<ContractId, Contract>();
-        graph.RunDfs(contractId =>
+        var installedContracts = new Dictionary<ContractRef, Contract>();
+        graph.RunDfs(contractRef =>
             {
-                var contract = GetContract(contractId);
+                var contract = GetContract(contractRef);
 
                 foreach (var argument in contract.GetArguments())
                 {
@@ -75,10 +75,10 @@ public class ExecutionPlan(
 
                 if (installedContract is not Application)
                 {
-                    installedContracts[contractId] = installedContract;
+                    installedContracts[contractRef] = installedContract;
                 }
 
-                contracts[contractId] = installedContract;
+                contracts[contractRef] = installedContract;
 
                 var handlerApplication = installedContract.Handler?.Application;
                 if (handlerApplication != null)
@@ -94,7 +94,7 @@ public class ExecutionPlan(
     /// <summary>
     /// Creates an application from the installed contracts.
     /// </summary>
-    private Application CreateApplication(Dictionary<ContractId, Contract> installedContracts)
+    private Application CreateApplication(Dictionary<ContractRef, Contract> installedContracts)
     {
         var application = contracts.Values.OfType<Application>().First();
 

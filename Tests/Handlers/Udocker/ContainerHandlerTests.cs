@@ -30,18 +30,18 @@ public class ContainerHandlerTests : BaseTests
     {
         var parameter = Contract<Parameter>().Generate();
         var container = Contract<Container>()
-            .Set(p => p.ImageName, $"{{{{{parameter.Id}:Value}}}}")
-            .Set(p => p.Env, new Dictionary<string, Argument<string>> { ["Test"] = $"{{{{{parameter.Id}:Value}}}}" })
+            .Set(p => p.ImageName, $"{{{{{parameter.Ref}:Value}}}}")
+            .Set(p => p.Env, new Dictionary<string, Argument<string>> { ["Test"] = $"{{{{{parameter.Ref}:Value}}}}" })
             .Generate("udocker");
         var handler = Handler<ContainerHandler>(_udocker);
-        var result = handler.Initialize(container.Contract, new ApplicationContext(container.Id, "")).Single();
+        var result = handler.Initialize(container.Contract, new ApplicationContext(container.Ref, "")).Single();
         var daemon = result.Values.OfType<Daemon>().Single();
-        container = container with { Contract = (Container)container.Contract.Merge(result[container.Id]) };
+        container = container with { Contract = (Container)container.Contract.Merge(result[container.Ref]) };
         var plan = new ExecutionPlan(
-            new Dictionary<ContractId, Contract>
+            new Dictionary<ContractRef, Contract>
             {
-                { container.Id, container.Contract },
-                { parameter.Id, parameter.Contract }
+                { container.Ref, container.Contract },
+                { parameter.Ref, parameter.Contract }
             },
             []
         );
@@ -60,18 +60,18 @@ public class ContainerHandlerTests : BaseTests
     {
         var parameter = Contract<Parameter>().Generate();
         var container = Contract<Container>()
-            .Set(p => p.ImageName, $"{{{{{parameter.Id}:Value}}}}")
-            .Set(p => p.Env, new Dictionary<string, Argument<string>> { ["Test"] = $"{{{{{parameter.Id}:Value}}}}" })
+            .Set(p => p.ImageName, $"{{{{{parameter.Ref}:Value}}}}")
+            .Set(p => p.Env, new Dictionary<string, Argument<string>> { ["Test"] = $"{{{{{parameter.Ref}:Value}}}}" })
             .Generate("udocker");
         var handler = Handler<ContainerHandler>(_udocker);
-        var result = handler.Initialize(container.Contract, new ApplicationContext(container.Id, "")).Single();
+        var result = handler.Initialize(container.Contract, new ApplicationContext(container.Ref, "")).Single();
         var daemon = result.Values.OfType<Daemon>().Single();
-        container = container with { Contract = (Container)container.Contract.Merge(result[container.Id]) };
+        container = container with { Contract = (Container)container.Contract.Merge(result[container.Ref]) };
         var plan = new ExecutionPlan(
-            new Dictionary<ContractId, Contract>
+            new Dictionary<ContractRef, Contract>
             {
-                { container.Id, container.Contract },
-                { parameter.Id, parameter.Contract }
+                { container.Ref, container.Contract },
+                { parameter.Ref, parameter.Contract }
             },
             []
         );
@@ -94,7 +94,7 @@ public class ContainerHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var daemon = State.GetContract<Daemon>(application, container.Id.Name);
+        var daemon = State.GetContract<Daemon>(application, container.Ref.Name);
         Assert.NotNull(daemon.Command.Value);
         Assert.Contains("udocker", daemon.Command.Value);
         Assert.Contains(container.Contract.ContainerName, daemon.Command.Value);
@@ -124,7 +124,7 @@ public class ContainerHandlerTests : BaseTests
         var application = InstallPackage(package);
 
         var volume = State.GetContract<Volume>(application);
-        var daemon = State.GetContract<Daemon>(application, container.Id.Name);
+        var daemon = State.GetContract<Daemon>(application, container.Ref.Name);
         Assert.NotNull(daemon.Command.Value);
         Assert.Contains($"--volume={volume.LocalPath}:/test", daemon.Command.Value);
 
@@ -139,15 +139,15 @@ public class ContainerHandlerTests : BaseTests
         var container = Contract<Container>().Generate("udocker");
         var portEndpoint = Contract<PortEndpoint>()
             .Set(p => p.Protocol, Protocol.Tcp)
-            .Set(p => p.Container, container.Id)
+            .Set(p => p.Container, container.Ref)
             .Generate();
         var package = Factory<Package>().Generate() with { Contracts = [container, portEndpoint] };
 
         var application = InstallPackage(package);
 
-        var installedPortEndpoint = State.GetContract(application, portEndpoint.Id);
+        var installedPortEndpoint = State.GetContract(application, portEndpoint.Ref);
         Assert.True(installedPortEndpoint.Installed);
-        var daemon = State.GetContract<Daemon>(application, container.Id.Name);
+        var daemon = State.GetContract<Daemon>(application, container.Ref.Name);
         Assert.NotNull(daemon.Command.Value);
         Assert.Contains(
             $"--publish={installedPortEndpoint.ExternalPort}:{installedPortEndpoint.Port}",
@@ -167,7 +167,7 @@ public class ContainerHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var daemon = State.GetContract<Daemon>(application, container.Id.Name);
+        var daemon = State.GetContract<Daemon>(application, container.Ref.Name);
         Assert.NotNull(daemon.Command.Value);
         Assert.Contains($"--env={name}={value}", daemon.Command.Value);
     }
@@ -180,7 +180,7 @@ public class ContainerHandlerTests : BaseTests
 
         var parameter = Contract<Parameter>().Set(p => p.Value, value).Generate();
         var container = Contract<Container>()
-            .Set(p => p.Env, new Dictionary<string, Argument<string>> { [name] = $"{{{{{parameter.Id}:Value}}}}" })
+            .Set(p => p.Env, new Dictionary<string, Argument<string>> { [name] = $"{{{{{parameter.Ref}:Value}}}}" })
             .Generate("udocker");
         var package = Factory<Package>().Generate() with
         {
@@ -189,7 +189,7 @@ public class ContainerHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var daemon = State.GetContract<Daemon>(application, container.Id.Name);
+        var daemon = State.GetContract<Daemon>(application, container.Ref.Name);
         Assert.NotNull(daemon.Command.Value);
         Assert.Contains($"--env={name}={value}", daemon.Command.Value);
     }
@@ -222,7 +222,7 @@ public class ContainerHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var daemon = State.GetContract<Daemon>(application, container.Id.Name);
+        var daemon = State.GetContract<Daemon>(application, container.Ref.Name);
         Assert.NotNull(daemon.Command.Value);
         Assert.Contains($"--env={name}={value}", daemon.Command.Value);
     }
@@ -289,7 +289,7 @@ public class ContainerHandlerTests : BaseTests
         var udocker1 = InstallPackage("termux-udocker");
         var udocker2 = InstallPackage("termux-udocker");
         var container = Contract<Container>().Generate("udocker");
-        var portEndpoint = Contract<PortEndpoint>().Set(p => p.Container, container.Id).Generate("udocker");
+        var portEndpoint = Contract<PortEndpoint>().Set(p => p.Container, container.Ref).Generate("udocker");
 
         var application1 = InstallPackage(
             Factory<Package>().Generate() with
@@ -312,8 +312,8 @@ public class ContainerHandlerTests : BaseTests
             }
         );
 
-        var port1 = State.GetContract(application1, portEndpoint.Id);
-        var port2 = State.GetContract(application2, portEndpoint.Id);
+        var port1 = State.GetContract(application1, portEndpoint.Ref);
+        var port2 = State.GetContract(application2, portEndpoint.Ref);
         Assert.Equal(Handler<PortEndpointHandler>(udocker1), port1.Handler);
         Assert.Equal(Handler<PortEndpointHandler>(udocker2), port2.Handler);
         Assert.NotEqual(port1.Handler, port2.Handler);
@@ -339,8 +339,8 @@ public class ContainerHandlerTests : BaseTests
             }
         );
 
-        var daemon1 = State.GetContract<Daemon>(application1, container.Id.Name);
-        var daemon2 = State.GetContract<Daemon>(application2, container.Id.Name);
+        var daemon1 = State.GetContract<Daemon>(application1, container.Ref.Name);
+        var daemon2 = State.GetContract<Daemon>(application2, container.Ref.Name);
         Assert.Equal(Handler<DaemonHandler>(udocker1), daemon1.Handler);
         Assert.Equal(Handler<DaemonHandler>(udocker2), daemon2.Handler);
         Assert.NotEqual(daemon1.Handler, daemon2.Handler);

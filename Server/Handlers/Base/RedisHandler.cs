@@ -7,9 +7,9 @@ public class RedisHandler(State state) : Handler<Redis>(state)
     public override IEnumerable<ContractList> Initialize(Redis contract, ApplicationContext context)
     {
         var name = "redis" + (string.IsNullOrEmpty(context.Name) ? "" : $"-{context.Name}");
-        var containerId = contract.Container ?? new ContractId<Container>(name);
+        var containerId = contract.Container ?? new ContractRef<Container>(name);
 
-        var volume = contract.Volume ?? new ContractId<Volume>(name + "-data");
+        var volume = contract.Volume ?? new ContractRef<Volume>(name + "-data");
 
         if (contract.Host.Empty)
         {

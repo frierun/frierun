@@ -5,8 +5,4 @@
  * OpenAPI spec version: 1.0
  */
 
-export type NetworkAllOf = {
-  /** @nullable */
-  networkName?: string | null;
-  readonly installed?: boolean;
-};
+export type ApplicationAllOfContractRefs = { [key: string]: string };

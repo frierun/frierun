@@ -26,12 +26,12 @@ export default function InstallForm({packageName, application, contracts, altern
         setError
     })
 
-    const updateContract = useCallback((contractId: string, contract: Contract|null, isRefetch?: boolean) => {
+    const updateContract = useCallback((contractRef: string, contract: Contract|null, isRefetch?: boolean) => {
         setOverrides(overrides => {
-            const newOverrides = Object.fromEntries(Object.entries(overrides).filter(entry => entry[0] != contractId));
+            const newOverrides = Object.fromEntries(Object.entries(overrides).filter(entry => entry[0] != contractRef));
 
-            if (contracts[contractId] !== contract && contract !== null) {
-                newOverrides[contractId] = contract;
+            if (contracts[contractRef] !== contract && contract !== null) {
+                newOverrides[contractRef] = contract;
             }
 
             if (isRefetch) {
@@ -81,7 +81,7 @@ export default function InstallForm({packageName, application, contracts, altern
                     {Object.entries(contracts).map(entry => (
                         <ContractForm
                             key={entry[0]}
-                            contractId={entry[0]}
+                            contractRef={entry[0]}
                             alternatives={alternatives}
                             updateContract={updateContract}
                             allContracts={contracts}

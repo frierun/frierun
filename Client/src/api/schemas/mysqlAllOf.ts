@@ -17,6 +17,6 @@ export type MysqlAllOf = {
   /** @nullable */
   networkName?: string | null;
   admin: boolean;
-  installed?: boolean;
+  readonly installed?: boolean;
   network: string;
 };

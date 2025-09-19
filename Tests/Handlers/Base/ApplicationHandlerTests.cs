@@ -77,7 +77,7 @@ public class ApplicationHandlerTests : BaseTests
         var parameter = Contract<Parameter>().Set(p => p.Value, value).Generate();
         var package = Factory<Package>().Generate() with
         {
-            ApplicationUrl = $"{{{{{parameter.Id}:Value}}}}",
+            ApplicationUrl = $"{{{{{parameter.Ref}:Value}}}}",
             Contracts = [parameter]
         };
 
@@ -93,7 +93,7 @@ public class ApplicationHandlerTests : BaseTests
         var parameter = Contract<Parameter>().Set(p => p.Value, value).Generate();
         var package = Factory<Package>().Generate() with
         {
-            ApplicationDescription = $"{{{{{parameter.Id}:Value}}}}",
+            ApplicationDescription = $"{{{{{parameter.Ref}:Value}}}}",
             Contracts = [parameter]
         };
 

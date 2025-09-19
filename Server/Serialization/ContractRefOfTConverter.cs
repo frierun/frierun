@@ -4,7 +4,7 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server;
 
-public class ContractIdOfTConverter : JsonConverterFactory
+public class ContractRefOfTConverter : JsonConverterFactory
 {
     public override bool CanConvert(Type typeToConvert)
     {
@@ -13,7 +13,7 @@ public class ContractIdOfTConverter : JsonConverterFactory
             return false;
         }
 
-        return typeToConvert.GetGenericTypeDefinition() == typeof(ContractId<>);
+        return typeToConvert.GetGenericTypeDefinition() == typeof(ContractRef<>);
     }
 
     public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
@@ -22,16 +22,16 @@ public class ContractIdOfTConverter : JsonConverterFactory
         var contractType = typeArguments[0];
 
         var converter = (JsonConverter)Activator.CreateInstance(
-            typeof(ContractIdOfTConverterInner<>).MakeGenericType([contractType])
+            typeof(ContractRefOfTConverterInner<>).MakeGenericType([contractType])
         )!;
 
         return converter;
     }
 
-    private class ContractIdOfTConverterInner<TContract> : JsonConverter<ContractId<TContract>>
+    private class ContractRefOfTConverterInner<TContract> : JsonConverter<ContractRef<TContract>>
         where TContract : Contract
     {
-        public override ContractId<TContract>? Read(
+        public override ContractRef<TContract>? Read(
             ref Utf8JsonReader reader,
             Type typeToConvert,
             JsonSerializerOptions options
@@ -45,13 +45,13 @@ public class ContractIdOfTConverter : JsonConverterFactory
                 name = parts[0];
             }
         
-            return (ContractId<TContract>)Activator.CreateInstance(
-                typeof(ContractId<TContract>),
+            return (ContractRef<TContract>)Activator.CreateInstance(
+                typeof(ContractRef<TContract>),
                 name
             )!;
         }
 
-        public override void Write(Utf8JsonWriter writer, ContractId<TContract> value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, ContractRef<TContract> value, JsonSerializerOptions options)
         {
             writer.WriteStringValue(value.Name);
         }

@@ -5,7 +5,7 @@ import BaseForm from "@/components/contracts/BaseForm.tsx";
 
 export default function CloudflareApiConnectionForm(
     {
-        contractId,
+        contractRef,
         contract,
         updateContract
     }: ContractProps<CloudflareApiConnection>
@@ -17,7 +17,7 @@ export default function CloudflareApiConnectionForm(
     }, [contract]);
 
     return (
-        <BaseForm contractId={contractId} contract={contract} updateContract={updateContract}>
+        <BaseForm contractRef={contractRef} contract={contract} updateContract={updateContract}>
             <div className={"my-1.5"}>
                 <label className={"inline-block w-48"}>
                     Token:
@@ -27,7 +27,7 @@ export default function CloudflareApiConnectionForm(
                     value={token}
                     onChange={e => {
                         setToken(e.target.value);
-                        updateContract(contractId,
+                        updateContract(contractRef,
                             {
                                 ...contract,
                                 token: e.target.value,

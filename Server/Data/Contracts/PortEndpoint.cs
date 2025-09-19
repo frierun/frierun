@@ -7,7 +7,7 @@ namespace Frierun.Server.Data;
 public record PortEndpoint(
     Protocol Protocol,
     int Port,
-    ContractId<Container>? Container = null,
+    ContractRef<Container>? Container = null,
     int ExternalPort = 0,
     string? ExternalIp = null
 ) : Contract
@@ -15,7 +15,7 @@ public record PortEndpoint(
     [MemberNotNullWhen(true, nameof(ExternalIp))]
     public override bool Installed => Id != null;
     
-    public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");    
+    public ContractRef<Container> Container { get; init; } = Container ?? new ContractRef<Container>("");    
 
     [JsonIgnore]
     public string Url => $"{Protocol.ToString().ToLower()}://{ExternalIp}:{ExternalPort}";

@@ -8,5 +8,5 @@
 export type CloudflareApiConnectionAllOf = {
   /** @nullable */
   token?: string | null;
-  installed?: boolean;
+  readonly installed?: boolean;
 };

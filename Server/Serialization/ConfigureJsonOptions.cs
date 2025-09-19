@@ -12,8 +12,8 @@ public class ConfigureJsonOptions(
     public void Configure(JsonOptions options)
     {
         options.JsonSerializerOptions.Converters.Add(new ArgumentOfTConverter());
-        options.JsonSerializerOptions.Converters.Add(new ContractIdConverter());
-        options.JsonSerializerOptions.Converters.Add(new ContractIdOfTConverter());
+        options.JsonSerializerOptions.Converters.Add(new ContractRefConverter());
+        options.JsonSerializerOptions.Converters.Add(new ContractRefOfTConverter());
         options.JsonSerializerOptions.Converters.Add(new ContractListConverter(contractRegistry));
         options.JsonSerializerOptions.Converters.Add(new LazyHandlerConverter(lazyHandlerRegistry));
     }

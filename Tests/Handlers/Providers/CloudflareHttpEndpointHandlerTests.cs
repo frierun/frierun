@@ -74,7 +74,7 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.Equal("zoneId2", State.GetContract(application, httpEndpoint.Id).CloudflareZoneId);
+        Assert.Equal("zoneId2", State.GetContract(application, httpEndpoint.Ref).CloudflareZoneId);
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.Equal("zoneId2", State.GetContract(application, httpEndpoint.Id).CloudflareZoneId);
+        Assert.Equal("zoneId2", State.GetContract(application, httpEndpoint.Ref).CloudflareZoneId);
     }
 
     [Fact]
@@ -129,7 +129,7 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var installedHttpEndpoint = State.GetContract(application, httpEndpoint.Id);
+        var installedHttpEndpoint = State.GetContract(application, httpEndpoint.Ref);
         var container = State.GetContract(application, httpEndpoint.Contract.Container);
         var host = $"http://{container.ContainerName}:{installedHttpEndpoint.Port}";
         CloudflareClient.UpdateTunnelConfiguration(
@@ -170,7 +170,7 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var installedHttpEndpoint = State.GetContract(application, httpEndpoint.Id);
+        var installedHttpEndpoint = State.GetContract(application, httpEndpoint.Ref);
         var container = State.GetContract(application, httpEndpoint.Contract.Container);
         var host = $"http://{container.ContainerName}:{installedHttpEndpoint.Port}";
         CloudflareClient.UpdateTunnelConfiguration(
@@ -206,7 +206,7 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.Equal("zoneId1", State.GetContract(application, httpEndpoint.Id).CloudflareZoneId);
+        Assert.Equal("zoneId1", State.GetContract(application, httpEndpoint.Ref).CloudflareZoneId);
 
         CloudflareClient.Received(1).DeleteDnsRecord("zoneId1", "recordId1");
         CloudflareClient.Received(1).DeleteDnsRecord("zoneId1", "recordId2");
@@ -247,7 +247,7 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
         var httpEndpoint = Contract<HttpEndpoint>().Generate();
         var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
         var application = InstallPackage(package);
-        var installedHttpEndpoint = State.GetContract(application, httpEndpoint.Id);
+        var installedHttpEndpoint = State.GetContract(application, httpEndpoint.Ref);
         CloudflareClient.GetTunnelConfiguration(Arg.Any<string>(), Arg.Any<string>())
             .ReturnsForAnyArgs(
                 new JsonObject

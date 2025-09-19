@@ -13,7 +13,6 @@ export type HttpEndpointAllOf = {
   networkName?: string | null;
   /** @nullable */
   cloudflareZoneId?: string | null;
-  installed?: boolean;
   container: string;
   /** @nullable */
   resultSsl: boolean | null;

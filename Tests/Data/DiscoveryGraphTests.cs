@@ -12,16 +12,16 @@ public class DiscoveryGraphTests : BaseTests
         var empty = Contract<Parameter>().Generate();
         var root = Contract<Parameter>()
             .SetHandler<ParameterHandler>()
-            .Set(p => p.DependsOn, [empty.Id])
+            .Set(p => p.DependsOn, [empty.Ref])
             .Generate();
         var queued = Contract<Parameter>().Generate();
         var graph = new DiscoveryGraph();
 
-        var result = graph.Apply(root.Id, [root, queued]);
+        var result = graph.Apply(root.Ref, [root, queued]);
 
         Assert.True(result);
-        Assert.Equal((queued.Id, queued.Contract), graph.Next());
-        Assert.Equal((empty.Id, null), graph.Next());
+        Assert.Equal((Ref: queued.Ref, queued.Contract), graph.Next());
+        Assert.Equal((Ref: empty.Ref, null), graph.Next());
         Assert.Equal((null, null), graph.Next());
     }
 
@@ -31,7 +31,7 @@ public class DiscoveryGraphTests : BaseTests
         var root = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
         var graph = new DiscoveryGraph();
 
-        var result = graph.Apply(root.Id, [root]);
+        var result = graph.Apply(root.Ref, [root]);
 
         Assert.True(result);
         Assert.Equal((null, null), graph.Next());
@@ -44,14 +44,14 @@ public class DiscoveryGraphTests : BaseTests
         var child = Contract<Parameter>().Generate();
         var graph = new DiscoveryGraph();
 
-        var result = graph.Apply(root.Id, [root, child]);
+        var result = graph.Apply(root.Ref, [root, child]);
         Assert.True(result);
-        var (contractId, contract) = graph.Next();
-        Assert.Equal(child.Id, contractId);
+        var (contractRef, contract) = graph.Next();
+        Assert.Equal(child.Ref, contractRef);
         Assert.NotNull(contract);
 
         result = graph.Apply(
-            child.Id,
+            child.Ref,
             [
                 child.With(c => c with { Handler = Handler<ParameterHandler>() }),
                 root
@@ -59,8 +59,8 @@ public class DiscoveryGraphTests : BaseTests
         );
 
         Assert.True(result);
-        (contractId, contract) = graph.Next();
-        Assert.Equal(root.Id, contractId);
+        (contractRef, contract) = graph.Next();
+        Assert.Equal(root.Ref, contractRef);
         Assert.NotNull(contract);
     }
 
@@ -75,7 +75,7 @@ public class DiscoveryGraphTests : BaseTests
             {
                 for (int i = 0; i < 10000; i++)
                 {
-                    var result = graph.Apply(root.Id, [root, child]);
+                    var result = graph.Apply(root.Ref, [root, child]);
                     Assert.True(result);
                     graph.Next();
                 }
@@ -91,27 +91,27 @@ public class DiscoveryGraphTests : BaseTests
 
         var graph = new DiscoveryGraph();
         graph.Apply(
-            root.Id,
+            root.Ref,
             [
                 root,
                 child.With(c => c with { Value = new Argument<string>() })
             ]
         );
-        var (nextContractId, nextContract) = graph.Next();
-        Assert.Equal(child.Id, nextContractId);
+        var (nextContractRef, nextContract) = graph.Next();
+        Assert.Equal(child.Ref, nextContractRef);
         Assert.NotNull(nextContract);
         Assert.Null(((Parameter)nextContract).Value.Value);
 
 
         var result = graph.Apply(
-            child.Id,
+            child.Ref,
             [
                 child.With(c => c with { DefaultValue = null, Handler = Handler<ParameterHandler>() })
             ]
         );
         Assert.True(result);
 
-        var resultContract = (Parameter)graph.Contracts[child.Id];
+        var resultContract = (Parameter)graph.Contracts[child.Ref];
         Assert.Equal(child.Contract.Value, resultContract.Value);
         Assert.Equal(child.Contract.DefaultValue, resultContract.DefaultValue);
     }
@@ -123,10 +123,10 @@ public class DiscoveryGraphTests : BaseTests
         var contract = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
         var graph = new DiscoveryGraph();
 
-        Assert.True(graph.Apply(contract.Id, [contract.With(c => c with { DefaultValue = null })]));
-        Assert.True(graph.Apply(contract.Id, [contract.With(c => c with { Value = new Argument<string>() })]));
+        Assert.True(graph.Apply(contract.Ref, [contract.With(c => c with { DefaultValue = null })]));
+        Assert.True(graph.Apply(contract.Ref, [contract.With(c => c with { Value = new Argument<string>() })]));
 
-        var resultContract = (Parameter)graph.Contracts[contract.Id];
+        var resultContract = (Parameter)graph.Contracts[contract.Ref];
         Assert.Equal(contract.Contract.Value, resultContract.Value);
         Assert.Equal(contract.Contract.DefaultValue, resultContract.DefaultValue);
     }
@@ -137,10 +137,10 @@ public class DiscoveryGraphTests : BaseTests
         var contract = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
         var graph = new DiscoveryGraph();
 
-        Assert.True(graph.Apply(contract.Id, [contract]));
+        Assert.True(graph.Apply(contract.Ref, [contract]));
         Assert.False(
             graph.Apply(
-                contract.Id,
+                contract.Ref,
                 [contract.With(c => c with { Value = contract.Contract.Value + "conflict" })]
             )
         );
@@ -158,12 +158,12 @@ public class DiscoveryGraphTests : BaseTests
         var value = Resolve<Faker>().Lorem.Word();
         var graph = new DiscoveryGraph();
 
-        var result = graph.Apply(root.Id, [root]);
+        var result = graph.Apply(root.Ref, [root]);
         Assert.True(result);
-        Assert.Null(graph.Next().Id);
+        Assert.Null(graph.Next().Ref);
 
         result = graph.Apply(
-            child.Id,
+            child.Ref,
             [
                 child,
                 root.With(c => c with { Value = value })
@@ -171,8 +171,8 @@ public class DiscoveryGraphTests : BaseTests
         );
         Assert.True(result);
 
-        var (contractId, contract) = graph.Next();
-        Assert.Equal(root.Id, contractId);
+        var (contractRef, contract) = graph.Next();
+        Assert.Equal(root.Ref, contractRef);
         Assert.NotNull(contract);
         Assert.Equal(value, ((Parameter)contract).Value);
     }
@@ -184,10 +184,10 @@ public class DiscoveryGraphTests : BaseTests
         var child = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
         var graph = new DiscoveryGraph();
 
-        graph.Apply(root.Id, [root]);
+        graph.Apply(root.Ref, [root]);
 
         var result = graph.Apply(
-            child.Id,
+            child.Ref,
             [
                 child,
                 root.With(c => c with { Value = root.Contract.Value + "_conflict" })

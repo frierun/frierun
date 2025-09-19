@@ -27,10 +27,10 @@ public class CloudflareTunnelHandler(State state) : Handler<CloudflareTunnel>(st
                         "--no-autoupdate",
                         "run",
                         "--token",
-                        plan.GetContract(new ContractId<CloudflareTunnel>(context.Name)).Token ?? ""
+                        plan.GetContract(new ContractRef<CloudflareTunnel>(context.Name)).Token ?? ""
                     ]
                 ),
-                DependsOn = [new ContractId<CloudflareTunnel>(context.Name)]
+                DependsOn = [new ContractRef<CloudflareTunnel>(context.Name)]
             }
         };
     }

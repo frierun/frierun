@@ -2,16 +2,16 @@
 
 namespace Frierun.Tests.Factories;
 
-public record ContractEntry<TContract>(ContractId<TContract> Id, TContract Contract)
+public record ContractEntry<TContract>(ContractRef<TContract> Ref, TContract Contract)
     where TContract : Contract
 {
-    public ContractEntry(string name, TContract contract) : this(new ContractId<TContract>(name), contract)
+    public ContractEntry(string name, TContract contract) : this(new ContractRef<TContract>(name), contract)
     {
         
     }
     
-    public ContractEntry<TContract> With(Func<TContract, TContract> customizer) => new(Id, customizer(Contract));
+    public ContractEntry<TContract> With(Func<TContract, TContract> customizer) => new(Ref, customizer(Contract));
 
-    public static implicit operator KeyValuePair<ContractId, Contract>(ContractEntry<TContract> entry) =>
-        new(entry.Id, entry.Contract);
+    public static implicit operator KeyValuePair<ContractRef, Contract>(ContractEntry<TContract> entry) =>
+        new(entry.Ref, entry.Contract);
 }

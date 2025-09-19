@@ -12,8 +12,6 @@ export interface Package {
   /** @nullable */
   url?: string | null;
   /** @nullable */
-  prefix?: string | null;
-  /** @nullable */
   iconUrl?: string | null;
   /** @nullable */
   applicationUrl?: string | null;

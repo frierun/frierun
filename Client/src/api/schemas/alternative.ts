@@ -7,6 +7,6 @@
 import type { AlternativeContract } from "./alternativeContract";
 
 export interface Alternative {
-  contractId: string;
+  contractRef: string;
   contract: AlternativeContract;
 }

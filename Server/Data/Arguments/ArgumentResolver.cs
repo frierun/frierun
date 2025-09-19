@@ -7,7 +7,7 @@ public class ArgumentResolver<TResult>(Func<ExecutionPlan, TResult?> resolver) :
     public static implicit operator ArgumentResolver<TResult>(Func<ExecutionPlan, TResult?> value) => new(value);
 
     public TResult? Resolve(ExecutionPlan plan) => _resolver(plan);
-    public IEnumerable<ContractId> RequiredContracts => [];
+    public IEnumerable<ContractRef> RequiredContracts => [];
 
     public bool Equals(ArgumentResolver<TResult>? other)
     {
@@ -61,7 +61,7 @@ public class ArgumentResolver<T, TResult>(T parameter, Func<T, ExecutionPlan, TR
     {
         return _resolver(_parameter, plan);
     }
-    public IEnumerable<ContractId> RequiredContracts => [];
+    public IEnumerable<ContractRef> RequiredContracts => [];
 
     public bool Equals(ArgumentResolver<T, TResult>? other)
     {

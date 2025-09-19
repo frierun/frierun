@@ -3,6 +3,6 @@
 export type ContractList = ExecutionPlanContracts;
 export type Contract = ContractList[keyof ContractList];
 export type Alternative = {
-    contractId: string;
+    contractRef: string;
     contract: AlternativeContract;
 }

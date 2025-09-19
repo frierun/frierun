@@ -40,7 +40,7 @@ public abstract record Contract
 {
     public Guid? Id { get; init; }
 
-    [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = [];
+    [JsonIgnore] public IEnumerable<ContractRef> DependsOn { get; init; } = [];
 
     [JsonPropertyName("handler")]
     [JsonInclude]

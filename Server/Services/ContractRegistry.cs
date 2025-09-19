@@ -21,9 +21,9 @@ public class ContractRegistry
     /// <summary>
     /// Creates an empty contract by id
     /// </summary>
-    public Contract CreateContract(ContractId contractId)
+    public Contract CreateContract(ContractRef contractRef)
     {
-        return CreateContract(contractId.TypeName);
+        return CreateContract(contractRef.TypeName);
     }
     
     /// <summary>

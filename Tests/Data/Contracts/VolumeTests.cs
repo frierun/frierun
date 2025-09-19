@@ -8,8 +8,8 @@ public class VolumeTests : BaseTests
     [Fact]
     public void Merge_ContractsWithDifferentDependencies_KeepsDependencies()
     {
-        var dependency = new ContractId<Container>("test");
-        var dependency2 = new ContractId<Container>("test2");
+        var dependency = new ContractRef<Container>("test");
+        var dependency2 = new ContractRef<Container>("test2");
         var volume = Factory<Volume>().Generate() with { DependsOn = [dependency] };
 
         var result = volume.Merge(volume with { DependsOn = [dependency2] });

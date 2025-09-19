@@ -31,7 +31,7 @@ public class TemplateResolver : IArgumentResolver<string>
                         throw new Exception($"Invalid insertion format: {insertion}");
                     }
 
-                    return new ContractId(match.Groups[1].Value, match.Groups[2].Value);
+                    return new ContractRef(match.Groups[1].Value, match.Groups[2].Value);
                 }
             )
             .ToList();
@@ -54,7 +54,7 @@ public class TemplateResolver : IArgumentResolver<string>
         return _resolver.Invoke(plan);
     }
 
-    public IEnumerable<ContractId> RequiredContracts { get; }
+    public IEnumerable<ContractRef> RequiredContracts { get; }
     
     /// <summary>
     /// Resolves insertion value.
@@ -71,14 +71,14 @@ public class TemplateResolver : IArgumentResolver<string>
         var contractName = match.Groups[2].Value;
         var propertyName = match.Groups[3].Value;
 
-        var contractId = new ContractId(typeName, contractName);
+        var contractRef = new ContractRef(typeName, contractName);
 
-        var contract = plan.GetContract(contractId);
+        var contract = plan.GetContract(contractRef);
 
         var propertyInfo = contract.GetType().GetProperty(propertyName);
         if (propertyInfo == null)
         {
-            throw new Exception($"Property not found: {propertyName} in {contractId}");
+            throw new Exception($"Property not found: {propertyName} in {contractRef}");
         }
 
         if (propertyInfo.PropertyType.IsAssignableTo(typeof(IArgument)))

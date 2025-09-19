@@ -13,7 +13,7 @@ public class ContractListConverterTests : BaseTests
         {
             Converters =
             {
-                new ContractIdConverter(),
+                new ContractRefConverter(),
                 new ContractListConverter(Resolve<ContractRegistry>())
             }
         };
@@ -44,9 +44,9 @@ public class ContractListConverterTests : BaseTests
 
         Assert.NotNull(result);
         Assert.Single(result);
-        var contractId = new ContractId(nameof(Container), containerName);
-        Assert.True(result.ContainsKey(contractId));
-        Assert.IsType<Container>(result[contractId]);
+        var contractRef = new ContractRef(nameof(Container), containerName);
+        Assert.True(result.ContainsKey(contractRef));
+        Assert.IsType<Container>(result[contractRef]);
     }
 
     [Fact]
@@ -69,10 +69,10 @@ public class ContractListConverterTests : BaseTests
 
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
-        var contractId1 = new ContractId(nameof(Container), containerName1);
-        var contractId2 = new ContractId(nameof(Container), containerName2);
-        Assert.True(result.ContainsKey(contractId1));
-        Assert.True(result.ContainsKey(contractId2));
+        var contractRef1 = new ContractRef(nameof(Container), containerName1);
+        var contractRef2 = new ContractRef(nameof(Container), containerName2);
+        Assert.True(result.ContainsKey(contractRef1));
+        Assert.True(result.ContainsKey(contractRef2));
     }
 
     [Fact]
@@ -98,8 +98,8 @@ public class ContractListConverterTests : BaseTests
 
         Assert.NotNull(result);
         Assert.Single(result);
-        var contractId = new ContractId(nameof(Container), "");
-        Assert.True(result.ContainsKey(contractId));
+        var contractRef = new ContractRef(nameof(Container), "");
+        Assert.True(result.ContainsKey(contractRef));
     }
 
     [Fact]

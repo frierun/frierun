@@ -12,7 +12,7 @@ public class PasswordHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var installedPassword = State.GetContract(application, password.Id);
+        var installedPassword = State.GetContract(application, password.Ref);
         Assert.True(installedPassword.Installed);
         Assert.NotNull(installedPassword.Value);
     }
@@ -23,13 +23,13 @@ public class PasswordHandlerTests : BaseTests
         var password = Contract<Password>().Generate();
         var package = Factory<Package>().Generate() with
         {
-            ApplicationDescription = $"GeneratedPassword: {{{{{password.Id}:Value}}}}",
+            ApplicationDescription = $"GeneratedPassword: {{{{{password.Ref}:Value}}}}",
             Contracts = [password]
         };
 
         var application = InstallPackage(package);
 
-        var installedPassword = State.GetContract(application, password.Id);
+        var installedPassword = State.GetContract(application, password.Ref);
         Assert.True(installedPassword.Installed);
         Assert.Equal(application.Description, $"GeneratedPassword: {installedPassword.Value}");
     }

@@ -7,10 +7,10 @@ public class FileHandlerTests : TestWithDocker
 {
     private async Task InstallAndCheck(File contract, Func<string, Task> checkContainer, Parameter? parameter = null)
     {
-        var contracts = new Dictionary<ContractId, Contract>
+        var contracts = new Dictionary<ContractRef, Contract>
         {
             {
-                new ContractId<Container>(),
+                new ContractRef<Container>(),
                 new Container(
                     ImageName: "alpine:latest",
                     Command: new Argument<IEnumerable<string>>(["tail", "-f", "/dev/null"]),
@@ -18,14 +18,14 @@ public class FileHandlerTests : TestWithDocker
                 )
             },
             {
-                new ContractId<File>(),
+                new ContractRef<File>(),
                 contract
             }
         };
 
         if (parameter != null)
         {
-            contracts[new ContractId<Parameter>()] = parameter;
+            contracts[new ContractRef<Parameter>()] = parameter;
         }
 
         var package = new Package(

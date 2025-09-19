@@ -10,14 +10,14 @@ public record Application(
     Argument<string>? Description = null,
     ContractList? Contracts = null,
     IReadOnlyList<string>? RequiredApplications = null,
-    IReadOnlyDictionary<ContractId, Guid>? ContractRefs = null
+    IReadOnlyDictionary<ContractRef, Guid>? ContractRefs = null
 ) : Contract
 {
     public Argument<string> Url { get; init; } = Url ?? new Argument<string>();
     public Argument<string> Description { get; init; } = Description ?? new Argument<string>();
     public IReadOnlyList<string> RequiredApplications { get; init; } = RequiredApplications ?? [];
     public ContractList Contracts { get; init; } = Contracts ?? new ContractList();
-    public IReadOnlyDictionary<ContractId, Guid> ContractRefs { get; init; } = ContractRefs ?? new Dictionary<ContractId, Guid>();
+    public IReadOnlyDictionary<ContractRef, Guid> ContractRefs { get; init; } = ContractRefs ?? new Dictionary<ContractRef, Guid>();
 
     public override IEnumerable<IArgument> GetArguments()
     {

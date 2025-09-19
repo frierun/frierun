@@ -2,10 +2,10 @@
 import {Contract} from "@/types.ts";
 
 type Props<TContract extends Contract> = {
-    contractId: string;
+    contractRef: string;
     contract: TContract;
     variants?: TContract[];
-    updateContract: (contractId: string, contract: Contract, isRefetch?: boolean) => void;
+    updateContract: (contractRef: string, contract: Contract, isRefetch?: boolean) => void;
     contractName?: (contract: TContract) => string;
     variantName?: (contract: TContract) => string;
     updateVariant?: () => void;
@@ -14,7 +14,7 @@ type Props<TContract extends Contract> = {
 
 export default function BaseForm<T extends Contract>
 ({
-     contractId,
+     contractRef,
      contract,
      variants = [contract],
      updateContract,
@@ -42,7 +42,7 @@ export default function BaseForm<T extends Contract>
                 <label className={"inline-block w-48"}>
                     {contract.type}
                 </label>
-                {contractName ? contractName(contract) : contractId.split(':')[1]}
+                {contractName ? contractName(contract) : contractRef.split(':')[1]}
             </div>
             {variants.length > 1 && (
                 <fieldset className="flex gap-4">
@@ -54,7 +54,7 @@ export default function BaseForm<T extends Contract>
                                 checked={idx === selected}
                                 onChange={() => {
                                     setSelected(idx);
-                                    updateContract(contractId, variant, true);
+                                    updateContract(contractRef, variant, true);
                                     if (updateVariant) {
                                         updateVariant();
                                     }

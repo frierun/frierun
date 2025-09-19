@@ -13,17 +13,17 @@ import CloudflareApiConnectionForm from "@/components/contracts/CloudflareApiCon
 import {Alternative, Contract, ContractList} from "@/types.ts";
 
 export type ContractProps<TContract extends Contract> = {
-    contractId: string;
+    contractRef: string;
     contract: TContract;
     variants: TContract[];
     allContracts: Contract[];
-    updateContract: (contractId: string, contract: Contract|null, isRefetch?: boolean) => void;
+    updateContract: (contractRef: string, contract: Contract|null, isRefetch?: boolean) => void;
 }
 
 type Props = {
-    contractId: string;
+    contractRef: string;
     alternatives: Alternative[];
-    updateContract: (contractId: string, contract: Contract|null, isRefetch?: boolean) => void;
+    updateContract: (contractRef: string, contract: Contract|null, isRefetch?: boolean) => void;
     allContracts: ContractList;
 }
 
@@ -47,14 +47,14 @@ const contractForms: Partial<FormsByTypeName> = {
     Volume: VolumeForm,
 }
 
-export default function ContractForm({contractId, alternatives, updateContract, allContracts}: Props) {
+export default function ContractForm({contractRef, alternatives, updateContract, allContracts}: Props) {
     const [variants, setVariants] = useState<Contract[]>([]);
-    const contract = allContracts[contractId];
+    const contract = allContracts[contractRef];
 
     useEffect(() => {
         setVariants(variants => {
                 const filteredAlternatives = alternatives
-                    .filter(alt => alt.contractId == contractId)
+                    .filter(alt => alt.contractRef == contractRef)
                     .map(alt => alt.contract);
 
                 const refreshVariants = variants.length === 0 || filteredAlternatives.length > 0;
@@ -65,7 +65,7 @@ export default function ContractForm({contractId, alternatives, updateContract, 
                 return [contract, ...filteredAlternatives]
             }
         );
-    }, [contract, contractId, alternatives]);
+    }, [contract, contractRef, alternatives]);
     
     if (variants.length == 0) {
         return <></>
@@ -78,7 +78,7 @@ export default function ContractForm({contractId, alternatives, updateContract, 
 
     return (
         <ContractForm
-            contractId={contractId}
+            contractRef={contractRef}
             // @ts-expect-error contract is typed as never
             contract={contract}
             // @ts-expect-error variants are typed as never[]

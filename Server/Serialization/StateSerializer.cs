@@ -19,8 +19,8 @@ public class StateSerializer(
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         Converters =
         {
-            new ContractIdConverter(),
-            new ContractIdOfTConverter(),
+            new ContractRefConverter(),
+            new ContractRefOfTConverter(),
             new ContractListConverter(contractRegistry),
             new ArgumentOfTConverter(),
             new LazyHandlerConverter(lazyHandlerRegistry),

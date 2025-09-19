@@ -144,11 +144,11 @@ public class ArgumentTests : BaseTests
         var parameter = Contract<Parameter>()
             .Set(p => p.Value, new Argument<string>(_ => value))
             .Generate();
-        var arg = new Argument<string>($"{{{{{parameter.Id}:Value}}}}");
+        var arg = new Argument<string>($"{{{{{parameter.Ref}:Value}}}}");
         var plan = new ExecutionPlan(
-            new Dictionary<ContractId, Contract>
+            new Dictionary<ContractRef, Contract>
             {
-                [parameter.Id] = parameter.Contract,
+                [parameter.Ref] = parameter.Contract,
             },
             []
         );
@@ -168,11 +168,11 @@ public class ArgumentTests : BaseTests
             .Set(p => p.ResultHost, new Argument<string>(_ => "test.tld"))
             .Set(p => p.ResultPort, new Argument<int>(_ => 444))
             .Generate();
-        var arg = new Argument<string>($"{{{{{httpEndpoint.Id}:Url}}}}");
+        var arg = new Argument<string>($"{{{{{httpEndpoint.Ref}:Url}}}}");
         var plan = new ExecutionPlan(
-            new Dictionary<ContractId, Contract>
+            new Dictionary<ContractRef, Contract>
             {
-                [httpEndpoint.Id] = httpEndpoint.Contract
+                [httpEndpoint.Ref] = httpEndpoint.Contract
             },
             []
         );
@@ -193,17 +193,17 @@ public class ArgumentTests : BaseTests
     {
         var parameter1 = Contract<Parameter>().Generate();
         var parameter2 = Contract<Parameter>()
-            .Set(p => p.Value, new Argument<string>($"{{{{{parameter1.Id}:Value}}}}"))
+            .Set(p => p.Value, new Argument<string>($"{{{{{parameter1.Ref}:Value}}}}"))
             .Generate();
 
         var plan = new ExecutionPlan(
-            new Dictionary<ContractId, Contract>
+            new Dictionary<ContractRef, Contract>
             {
-                [parameter1.Id] = parameter1.Contract with
+                [parameter1.Ref] = parameter1.Contract with
                 {
-                    Value = new Argument<string>($"{{{{{parameter2.Id}:Value}}}}")
+                    Value = new Argument<string>($"{{{{{parameter2.Ref}:Value}}}}")
                 },
-                [parameter2.Id] = parameter2.Contract
+                [parameter2.Ref] = parameter2.Contract
             },
             []
         );

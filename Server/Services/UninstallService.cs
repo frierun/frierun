@@ -39,14 +39,14 @@ public class UninstallService(
 
     private void UninstallContracts(Application application)
     {
-        var contracts = new Dictionary<ContractId, Contract>(application.Contracts);
+        var contracts = new Dictionary<ContractRef, Contract>(application.Contracts);
         while (contracts.Count > 0)
         {
-            var contractId = contracts
+            var contractRef = contracts
                 .First(pair => !contracts.Any(dependPair => dependPair.Value.DependsOn.Contains(pair.Key))).Key;
 
-            contracts[contractId].Uninstall();
-            contracts.Remove(contractId);
+            contracts[contractRef].Uninstall();
+            contracts.Remove(contractRef);
         }
     }
 }

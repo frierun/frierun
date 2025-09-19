@@ -7,6 +7,7 @@
 import type { ContainerAllOfEnv } from "./containerAllOfEnv";
 import type { ContainerAllOfLabels } from "./containerAllOfLabels";
 import type { ContainerAllOfMounts } from "./containerAllOfMounts";
+import type { ContainerPort } from "./containerPort";
 
 export type ContainerAllOf = {
   /** @nullable */
@@ -14,13 +15,13 @@ export type ContainerAllOf = {
   /** @nullable */
   networkName?: string | null;
   mountDockerSocket: boolean;
-  installed?: boolean;
+  readonly installed?: boolean;
   /** @nullable */
   command: string[] | null;
   env: ContainerAllOfEnv;
   labels: ContainerAllOfLabels;
   mounts: ContainerAllOfMounts;
-  portEndpoints: string[];
+  ports: ContainerPort[];
   network: string;
   networkAliases: string[];
   /** @nullable */

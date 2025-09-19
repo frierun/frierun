@@ -1,9 +1,9 @@
 ﻿namespace Frierun.Server.Data;
 
 public record ContainerMount(
-    ContractId<Volume>? Volume = null,
+    ContractRef<Volume>? Volume = null,
     bool ReadOnly = false
 )
 {
-    public ContractId<Volume> Volume { get; init; } = Volume ?? new ContractId<Volume>("");
+    public ContractRef<Volume> Volume { get; init; } = Volume ?? new ContractRef<Volume>("");
 }

@@ -5,7 +5,7 @@ import BaseForm from "@/components/contracts/BaseForm.tsx";
 
 export default function DockerApiConnectionForm(
     {
-        contractId,
+        contractRef,
         contract,
         updateContract
     }: ContractProps<DockerApiConnection>
@@ -17,7 +17,7 @@ export default function DockerApiConnectionForm(
     }, [contract]);
 
     return (
-        <BaseForm contractId={contractId} contract={contract} updateContract={updateContract}>
+        <BaseForm contractRef={contractRef} contract={contract} updateContract={updateContract}>
             <div className={"my-1.5"}>
                 <label className={"inline-block w-48"}>
                     Socket path:
@@ -27,7 +27,7 @@ export default function DockerApiConnectionForm(
                     value={path}
                     onChange={e => {
                         setPath(e.target.value);
-                        updateContract(contractId,
+                        updateContract(contractRef,
                             {
                                 ...contract,
                                 path: e.target.value,

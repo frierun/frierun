@@ -6,7 +6,7 @@ namespace Frierun.Server.Data;
 
 public record HttpEndpoint(
     int Port = 0,
-    ContractId<Container>? Container = null,
+    ContractRef<Container>? Container = null,
     Argument<bool?>? ResultSsl = null,
     Argument<string>? ResultHost = null,
     Argument<int>? ResultPort = null,
@@ -15,7 +15,7 @@ public record HttpEndpoint(
     string? CloudflareZoneId = null // for Cloudflare endpoints
 ) : Contract
 {
-    public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");
+    public ContractRef<Container> Container { get; init; } = Container ?? new ContractRef<Container>("");
     public Argument<bool?> ResultSsl { get; init; } = ResultSsl ?? new Argument<bool?>();
     public Argument<string> ResultHost { get; init; } = ResultHost ?? new Argument<string>();
     public Argument<int> ResultPort { get; init; } = ResultPort ?? new Argument<int>();
