@@ -6,8 +6,8 @@ using NSubstitute;
 
 namespace Frierun.Tests.Handlers;
 
-public class FakeDockerApiConnectionHandler
-    : Handler<DockerApiConnection>, IDockerApiConnectionHandler
+public class FakeDockerApiConnectionHandler(State state)
+    : Handler<DockerApiConnection>(state), IDockerApiConnectionHandler
 {
     public string SocketRootPath { get; set; } = "/var/run/docker.sock";
     public IDockerClient Client { get; } = CreateClientSubstitute();
@@ -21,7 +21,7 @@ public class FakeDockerApiConnectionHandler
     {
         return SocketRootPath;
     }
-    
+
     /// <summary>
     /// Creates substitute for docker client.
     /// </summary>
@@ -30,7 +30,7 @@ public class FakeDockerApiConnectionHandler
         var client = NSubstitute.Substitute.For<IDockerClient>();
         client.Containers
             .CreateContainerAsync(default)
-            .ReturnsForAnyArgs(Task.FromResult(new CreateContainerResponse {ID = "containerId"}));
+            .ReturnsForAnyArgs(Task.FromResult(new CreateContainerResponse { ID = "containerId" }));
         client.Containers
             .StartContainerAsync(default, default)
             .ReturnsForAnyArgs(Task.FromResult(true));
@@ -50,5 +50,5 @@ public class FakeDockerApiConnectionHandler
             .ReturnsForAnyArgs(Task.FromResult(new MultiplexedStream(new MemoryStream(), false)));
 
         return client;
-    }    
+    }
 }

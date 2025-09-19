@@ -25,6 +25,15 @@ public class ExecutionServiceTests : BaseTests
         }
     }
 
+    /// <summary>
+    /// Mocks handler for specified contract type.
+    /// </summary>
+    private Handler<TContract> MockHandler<TContract>()
+        where TContract : Contract
+    {
+        return Mock<Handler<TContract>, IHandler>([Substitute.For<State>(), null]);
+    }
+    
     private ExecutionService Service => Resolve<ExecutionService>();
 
     [Fact]
@@ -51,7 +60,7 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_HandlerWithoutOptions_ThrowsException()
     {
-        var handler = Mock<Handler<Contract1>, IHandler>([null]);
+        var handler = MockHandler<Contract1>();
 
         var contract = new ContractEntry<Contract1>("", new Contract1());
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
@@ -65,7 +74,7 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_HandlerReturnsUnknownContract_ThrowsException()
     {
-        var handler = Mock<Handler<Contract1>, IHandler>([null]);
+        var handler = MockHandler<Contract1>();
 
         var contract = new ContractEntry<Contract1>("", new Contract1());
         var unknownContract = new ContractEntry<Contract2>("", new Contract2());
@@ -80,7 +89,7 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_CorrectHandler_ExecutesInitialize()
     {
-        var handler = Mock<Handler<Contract1>, IHandler>([null]);
+        var handler = MockHandler<Contract1>();
 
         var contract = new ContractEntry<Contract1>("", new Contract1());
         var package = Factory<Package>().Generate() with { Contracts = [contract] };
@@ -100,7 +109,7 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_RecursiveHandler_ThrowsException()
     {
-        var handler = Mock<Handler<Contract1>, IHandler>([null]);
+        var handler = MockHandler<Contract1>();
 
         var contract1 = new ContractEntry<Contract1>("contract1", new Contract1 { Handler = handler });
         var contract2 = new ContractEntry<Contract1>("contract2", new Contract1 { Handler = handler });
@@ -115,7 +124,7 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_HandlerWithTwoBranches_InitializesPlan()
     {
-        var handler = Mock<Handler<Contract1>, IHandler>([null]);
+        var handler = MockHandler<Contract1>();
 
         var contract = new ContractEntry<Contract1>("", new Contract1());
         var unknownContract = new ContractEntry<Contract2>("", new Contract2());
@@ -164,8 +173,8 @@ public class ExecutionServiceTests : BaseTests
     [Fact]
     public void Create_TwoHandlers_InitializesPlan()
     {
-        var handler = Mock<Handler<Contract1>, IHandler>([null]);
-        var handler2 = Mock<Handler<Contract1>, IHandler>([null]);
+        var handler = MockHandler<Contract1>();
+        var handler2 = MockHandler<Contract1>();
 
         var contract = new ContractEntry<Contract1>("", new Contract1());
         var unknownContract = new ContractEntry<Contract2>("", new Contract2());

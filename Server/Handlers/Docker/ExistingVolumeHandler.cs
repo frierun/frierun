@@ -3,8 +3,8 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class ExistingVolumeHandler(Application application, DockerService dockerService)
-    : Handler<Volume>(application)
+public class ExistingVolumeHandler(State state, Application application, DockerService dockerService)
+    : Handler<Volume>(state, application)
 {
     public override IEnumerable<ContractList> Initialize(Volume contract, ApplicationContext context)
     {

@@ -2,7 +2,7 @@
 
 namespace Frierun.Server.Handlers.Base;
 
-public class PortHttpEndpointHandler : Handler<HttpEndpoint>
+public class PortHttpEndpointHandler(State state) : Handler<HttpEndpoint>(state)
 {
     public override IEnumerable<ContractList> Initialize(HttpEndpoint contract, ApplicationContext context)
     {

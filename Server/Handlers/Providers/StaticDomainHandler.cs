@@ -2,8 +2,8 @@
 
 namespace Frierun.Server.Handlers;
 
-public class StaticDomainHandler(Application application)
-    : Handler<Domain>(application)
+public class StaticDomainHandler(State state, Application application)
+    : Handler<Domain>(state, application)
 {
     private readonly string _domainName = application
         .GetContract(new ContractId<Parameter>("Domain"))

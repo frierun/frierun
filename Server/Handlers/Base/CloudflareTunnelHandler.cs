@@ -3,7 +3,7 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class CloudflareTunnelHandler : Handler<CloudflareTunnel>
+public class CloudflareTunnelHandler(State state) : Handler<CloudflareTunnel>(state)
 {
     public override IEnumerable<ContractList> Initialize(CloudflareTunnel contract, ApplicationContext context)
     {

@@ -4,8 +4,8 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Udocker;
 
-public class DaemonHandler(Application application)
-    : Handler<Daemon>(application)
+public class DaemonHandler(State state, Application application)
+    : Handler<Daemon>(state, application)
 {
     private const string PrefixPath = "/data/data/com.termux/files/usr";
     private const string DaemonsPath = PrefixPath + "/var/service";

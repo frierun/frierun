@@ -4,7 +4,7 @@ using Network = Frierun.Server.Data.Network;
 
 namespace Frierun.Server.Handlers.Udocker;
 
-public class NetworkHandler(Application application) : Handler<Network>(application)
+public class NetworkHandler(State state, Application application) : Handler<Network>(state, application)
 {
     public override IEnumerable<ContractList> Initialize(Network contract, ApplicationContext context)
     {

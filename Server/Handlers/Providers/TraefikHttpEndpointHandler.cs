@@ -3,8 +3,8 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers;
 
-public class TraefikHttpEndpointHandler(Application application)
-    : Handler<HttpEndpoint>(application)
+public class TraefikHttpEndpointHandler(State state, Application application)
+    : Handler<HttpEndpoint>(state, application)
 {
     private readonly Container _container = application.GetContract(new ContractId<Container>());
 

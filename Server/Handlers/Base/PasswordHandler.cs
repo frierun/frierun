@@ -3,7 +3,7 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class PasswordHandler : Handler<Password>
+public class PasswordHandler(State state) : Handler<Password>(state)
 {
     public override IEnumerable<ContractList> Initialize(Password contract, ApplicationContext context)
     {

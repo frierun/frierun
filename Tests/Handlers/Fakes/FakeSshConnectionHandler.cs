@@ -6,7 +6,7 @@ using Renci.SshNet;
 
 namespace Frierun.Tests.Handlers;
 
-public class FakeSshConnectionHandler : Handler<SshConnection>, ISshConnectionHandler
+public class FakeSshConnectionHandler(State state) : Handler<SshConnection>(state), ISshConnectionHandler
 {
     public ISshClient SshClient { get; } = CreateSshClientSubstitute();
     public ISftpClient SftpClient { get; } = NSubstitute.Substitute.For<ISftpClient>();

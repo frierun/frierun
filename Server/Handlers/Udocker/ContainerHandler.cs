@@ -3,8 +3,8 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Udocker;
 
-public class ContainerHandler(Application application)
-    : Handler<Container>(application), IContainerHandler
+public class ContainerHandler(State state, Application application)
+    : Handler<Container>(state, application), IContainerHandler
 {
     private readonly SshConnection _connection = application.GetContract(new ContractId<SshConnection>());
 

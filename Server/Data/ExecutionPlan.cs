@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Frierun.Server.Data;
+﻿namespace Frierun.Server.Data;
 
 public class ExecutionPlan(
     Dictionary<ContractId, Contract> contracts,
@@ -99,7 +97,7 @@ public class ExecutionPlan(
     private Application CreateApplication(Dictionary<ContractId, Contract> installedContracts)
     {
         var application = contracts.Values.OfType<Application>().First();
-
+        
         return application with
         {
             Contracts = new ContractList(installedContracts),

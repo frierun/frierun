@@ -4,8 +4,8 @@ using Network = Frierun.Server.Data.Network;
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class NetworkHandler(Application application, DockerService dockerService)
-    : Handler<Network>(application)
+public class NetworkHandler(State state, Application application, DockerService dockerService)
+    : Handler<Network>(state, application)
 {
     public override IEnumerable<ContractList> Initialize(Network contract, ApplicationContext context)
     {

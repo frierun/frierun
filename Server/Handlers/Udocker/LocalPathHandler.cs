@@ -3,7 +3,7 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Udocker;
 
-public class LocalPathHandler(Application application) : Handler<Volume>(application)
+public class LocalPathHandler(State state, Application application) : Handler<Volume>(state, application)
 {
     private const string HomePath = "/data/data/com.termux/files/home";
 

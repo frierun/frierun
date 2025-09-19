@@ -3,7 +3,7 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class CloudflareApiConnectionHandler : Handler<CloudflareApiConnection>, ICloudflareApiConnectionHandler
+public class CloudflareApiConnectionHandler(State state) : Handler<CloudflareApiConnection>(state), ICloudflareApiConnectionHandler
 {
     public override CloudflareApiConnection Install(CloudflareApiConnection contract, ExecutionPlan plan)
     {

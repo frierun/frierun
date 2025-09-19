@@ -4,7 +4,7 @@ using Renci.SshNet;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class SshConnectionHandler : Handler<SshConnection>, ISshConnectionHandler
+public class SshConnectionHandler(State state) : Handler<SshConnection>(state), ISshConnectionHandler
 {
     public override IEnumerable<ContractList> Initialize(SshConnection contract, ApplicationContext context)
     {

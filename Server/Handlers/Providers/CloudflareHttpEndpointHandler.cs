@@ -4,8 +4,8 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers;
 
-public class CloudflareHttpEndpointHandler(Application application, ICloudflareClient client)
-    : Handler<HttpEndpoint>(application)
+public class CloudflareHttpEndpointHandler(State state, Application application, ICloudflareClient client)
+    : Handler<HttpEndpoint>(state, application)
 {
     private readonly Container _container = application.GetContract(new ContractId<Container>());
     private readonly CloudflareTunnel _tunnel = application.GetContract(new ContractId<CloudflareTunnel>());

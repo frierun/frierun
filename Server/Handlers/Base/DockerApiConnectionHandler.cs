@@ -7,7 +7,7 @@ using File = System.IO.File;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class DockerApiConnectionHandler : Handler<DockerApiConnection>, IDockerApiConnectionHandler
+public class DockerApiConnectionHandler(State state) : Handler<DockerApiConnection>(state), IDockerApiConnectionHandler
 {
     public override IEnumerable<DockerApiConnection> Discover()
     {

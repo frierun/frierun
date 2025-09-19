@@ -2,7 +2,7 @@
 
 namespace Frierun.Server.Handlers.Base;
 
-public class OptionalHandler : Handler<Optional>
+public class OptionalHandler(State state) : Handler<Optional>(state)
 {
     public override IEnumerable<ContractList> Initialize(Optional contract, ApplicationContext context)
     {

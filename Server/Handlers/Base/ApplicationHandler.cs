@@ -3,7 +3,7 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class ApplicationHandler : Handler<Application>
+public class ApplicationHandler(State state) : Handler<Application>(state)
 {
     public override IEnumerable<ContractList> Initialize(Application application, ApplicationContext context)
     {
@@ -14,7 +14,7 @@ public class ApplicationHandler : Handler<Application>
         // auto-detect application URL
         if (url.Empty)
         {
-            var httpEndpointId = application.Contracts
+            var httpEndpointId = application.Package?.Contracts
                 .Where(pair => pair.Value.GetType() == typeof(HttpEndpoint))
                 .Select(pair => pair.Key)
                 .FirstOrDefault();
@@ -27,7 +27,7 @@ public class ApplicationHandler : Handler<Application>
         // use the first endpoint if not found any other
         if (url.Empty)
         {
-            var endpointId = application.Contracts
+            var endpointId = application.Package?.Contracts
                 .Where(pair => pair.Value.GetType() == typeof(PortEndpoint))
                 .Select(pair => pair.Key)
                 .FirstOrDefault();
@@ -38,7 +38,7 @@ public class ApplicationHandler : Handler<Application>
             }
         }
 
-        yield return new ContractList(application.Contracts)
+        yield return new ContractList(application.Package?.Contracts ?? [])
         {
             [context] = application with
             {

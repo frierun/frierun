@@ -2,7 +2,7 @@
 
 namespace Frierun.Server.Handlers.Base;
 
-public class SelectorHandler : Handler<Selector>
+public class SelectorHandler(State state) : Handler<Selector>(state)
 {
     public override IEnumerable<ContractList> Initialize(Selector contract, ApplicationContext context)
     {

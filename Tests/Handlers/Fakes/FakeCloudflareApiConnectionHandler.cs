@@ -6,7 +6,7 @@ using NSubstitute;
 
 namespace Frierun.Tests.Handlers;
 
-public class FakeCloudflareApiConnectionHandler : Handler<CloudflareApiConnection>, ICloudflareApiConnectionHandler
+public class FakeCloudflareApiConnectionHandler(State state) : Handler<CloudflareApiConnection>(state), ICloudflareApiConnectionHandler
 {
     public ICloudflareClient Client { get; } = CreateClientSubstitute();
 

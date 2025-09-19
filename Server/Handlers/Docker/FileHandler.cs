@@ -5,7 +5,8 @@ using Mount = Docker.DotNet.Models.Mount;
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class FileHandler(Application application, DockerService dockerService) : Handler<File>(application)
+public class FileHandler(State state, Application application, DockerService dockerService)
+    : Handler<File>(state, application)
 {
     public override IEnumerable<ContractList> Initialize(File contract, ApplicationContext context)
     {

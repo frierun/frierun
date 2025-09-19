@@ -4,8 +4,8 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers;
 
-public class PostgresqlHandler(Application application, ILogger<PostgresqlHandler> logger)
-    : Handler<Postgresql>(application)
+public class PostgresqlHandler(State state, Application application, ILogger<PostgresqlHandler> logger)
+    : Handler<Postgresql>(state, application)
 {
     private readonly Container _container = application.GetContract(new ContractId<Container>());
 

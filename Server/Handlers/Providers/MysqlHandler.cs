@@ -4,8 +4,8 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers;
 
-public class MysqlHandler(Application application)
-    : Handler<Mysql>(application)
+public class MysqlHandler(State state, Application application)
+    : Handler<Mysql>(state, application)
 {
     private readonly Container _container = application.GetContract(new ContractId<Container>());
 

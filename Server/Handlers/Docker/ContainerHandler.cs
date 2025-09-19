@@ -6,8 +6,8 @@ using Network = Frierun.Server.Data.Network;
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class ContainerHandler(Application application, DockerService dockerService)
-    : Handler<Container>(application), IContainerHandler
+public class ContainerHandler(State state, Application application, DockerService dockerService)
+    : Handler<Container>(state, application), IContainerHandler
 {
     private readonly DockerApiConnection _dockerApiConnection =
         application.GetContract(new ContractId<DockerApiConnection>());

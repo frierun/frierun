@@ -2,7 +2,7 @@
 
 namespace Frierun.Server.Handlers.Base;
 
-public class RedisHandler : Handler<Redis>
+public class RedisHandler(State state) : Handler<Redis>(state)
 {
     public override IEnumerable<ContractList> Initialize(Redis contract, ApplicationContext context)
     {

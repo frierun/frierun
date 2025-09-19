@@ -2,7 +2,7 @@
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class PortEndpointHandler(Application application) : Handler<PortEndpoint>(application)
+public class PortEndpointHandler(State state, Application application) : Handler<PortEndpoint>(state, application)
 {
     public override IEnumerable<ContractList> Initialize(PortEndpoint contract, ApplicationContext context)
     {

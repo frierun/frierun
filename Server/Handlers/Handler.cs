@@ -3,10 +3,10 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers;
 
-public class Handler<TContract>(Application? application = null) : IHandler
+public class Handler<TContract>(State state, Application? application = null) : IHandler
     where TContract : Contract
 {
-    public required State State { protected get; init; }
+    public State State => state;
     public Application? Application => application;
 
     public virtual IEnumerable<TContract> Discover()

@@ -2,7 +2,7 @@
 
 namespace Frierun.Server.Handlers.Base;
 
-public class ParameterHandler : Handler<Parameter>
+public class ParameterHandler(State state) : Handler<Parameter>(state)
 {
     public override IEnumerable<ContractList> Initialize(Parameter contract, ApplicationContext context)
     {

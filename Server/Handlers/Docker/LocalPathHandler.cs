@@ -3,7 +3,7 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class LocalPathHandler(Application application) : Handler<Volume>(application)
+public class LocalPathHandler(State state, Application application) : Handler<Volume>(state, application)
 {
     public override IEnumerable<ContractList> Initialize(Volume contract, ApplicationContext context)
     {

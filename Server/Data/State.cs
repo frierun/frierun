@@ -23,7 +23,24 @@ public class State
     public IEnumerable<Contract> Contracts => _applications
         .SelectMany(application => application.Contracts.Values)
         .Concat(UnmanagedContracts);
-    
+
+    /// <summary>
+    /// Gets contract by Guid.
+    /// </summary>
+    public TContract GetContract<TContract>(Guid id) where TContract : Contract =>
+        (TContract)Contracts.Single(c => c.Id == id);
+
+    /// <summary>
+    /// Gets contract from the application by name.
+    /// </summary>
+    public TContract GetContract<TContract>(Application app, string name = "")
+        where TContract : Contract
+    {
+        var contractId = new ContractId<TContract>(name);
+        var guid = app.ContractRefs[contractId];
+        return GetContract<TContract>(guid);
+    }
+
     /// <summary>
     /// Adds a newly installed application to the state.
     /// </summary>

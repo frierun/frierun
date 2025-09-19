@@ -21,10 +21,12 @@ public record Package(
     {
         return new Application(name ?? "")
         {
-            Package = this,
+            Package = this with
+            {
+                Contracts = Contracts.Merge(contracts ?? [])
+            },
             Description = new Argument<string>(ApplicationDescription),
             Url = new Argument<string>(ApplicationUrl),
-            Contracts = Contracts.Merge(contracts ?? []),
         };
     }
 }
