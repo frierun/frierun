@@ -24,8 +24,8 @@ public class VolumeHandlerTests : BaseTests
         var application1 = InstallPackage(package1);
         var application2 = InstallPackage(package2);
 
-        var volume1 = application1.GetContracts<Volume>().Single();
-        var volume2 = application2.GetContracts<Volume>().Single();
+        var volume1 = State.GetContract(application1, volume.Id);
+        var volume2 = State.GetContract(application2, volume.Id);
         Assert.NotSame(volume1, volume2);
 
         DockerClient.Volumes.Received(1).CreateAsync(Arg.Is<VolumesCreateParameters>(arg => arg.Name == volumeName));

@@ -18,14 +18,12 @@ public class PostgresqlHandlerTests : BaseTests
     [Fact]
     public void Install_PackageWithContract_CreatesDatabase()
     {
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = [Contract<Postgresql>().Generate()]
-        };
+        var postgresql = Contract<Postgresql>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [postgresql] };
 
         var application = InstallPackage(package);
 
-        var database = application.GetContracts<Postgresql>().Single();
+        var database = State.GetContract(application, postgresql.Id);
         Assert.True(database.Installed);
         Assert.StartsWith(package.Name, database.Username);
         Assert.StartsWith(package.Name, database.Database);
@@ -40,18 +38,14 @@ public class PostgresqlHandlerTests : BaseTests
     [Fact]
     public void Install_PackageWithTwoContracts_OnlyOneNetworkAttached()
     {
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts =
-            [
-                Contract<Postgresql>().Generate(),
-                Contract<Postgresql>().Generate()
-            ]
-        };
+        var postgresql1 = Contract<Postgresql>().Generate();
+        var postgresql2 = Contract<Postgresql>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [postgresql1, postgresql2] };
 
         var application = InstallPackage(package);
 
-        Assert.Equal(2, application.GetContracts<Postgresql>().Count());
+        Assert.True(State.GetContract(application, postgresql1.Id).Installed);
+        Assert.True(State.GetContract(application, postgresql2.Id).Installed);
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
             application.Name,
             Arg.Any<NetworkConnectParameters>()
@@ -82,15 +76,12 @@ public class PostgresqlHandlerTests : BaseTests
     [Fact]
     public void Initialize_PrefixIsPostgres_UserIsNotPostgres()
     {
-        var package = Factory<Package>().Generate() with
-        {
-            Prefix = "postgres",
-            Contracts = [Contract<Postgresql>().Generate()]
-        };
+        var postgresql = Contract<Postgresql>().Generate();
+        var package = Factory<Package>().Generate() with { Prefix = "postgres", Contracts = [postgresql] };
 
         var application = InstallPackage(package);
 
-        var database = application.GetContracts<Postgresql>().Single();
+        var database = State.GetContract(application, postgresql.Id);
         Assert.NotEqual(package.Name, database.Username);
     }
 }

@@ -41,7 +41,7 @@ public class HandlerRegistryTests : BaseTests
         InstallPackage("docker");
         InstallPackage("traefik");
         var registry = new HandlerRegistry(
-            Resolve<State>(),
+            State,
             Resolve<IIndex<string, ProviderScopeBuilder>>(),
             Resolve<ILifetimeScope>()
         );

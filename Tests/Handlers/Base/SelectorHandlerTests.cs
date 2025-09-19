@@ -70,7 +70,7 @@ public class SelectorHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var installedSelector = Resolve<State>().GetContract(application, contract.Id);
+        var installedSelector = State.GetContract(application, contract.Id);
         Assert.True(installedSelector.Installed);
         Assert.Equal(contract.Contract.Value, installedSelector.Value);
     }

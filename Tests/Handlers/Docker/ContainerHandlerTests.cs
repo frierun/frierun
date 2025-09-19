@@ -18,7 +18,7 @@ public class ContainerHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.True(application.GetContracts<Network>().Single().Installed);
+        Assert.True(State.GetContract<Network>(application).Installed);
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public class ContainerHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.True(application.GetContracts<Volume>().Single().Installed);
+        Assert.True(State.GetContract<Volume>(application).Installed);
     }
 
     [Fact]
@@ -95,8 +95,8 @@ public class ContainerHandlerTests : BaseTests
             }
         );
 
-        var network1 = application1.GetContracts<Network>().Single();
-        var network2 = application2.GetContracts<Network>().Single();
+        var network1 = State.GetContract<Network>(application1);
+        var network2 = State.GetContract<Network>(application2);
         Assert.Equal(Handler<NetworkHandler>(docker1), network1.Handler);
         Assert.Equal(Handler<NetworkHandler>(docker2), network2.Handler);
         Assert.NotEqual(network1.Handler, network2.Handler);
@@ -124,8 +124,8 @@ public class ContainerHandlerTests : BaseTests
             }
         );
 
-        var volume1 = application1.GetContracts<Volume>().Single();
-        var volume2 = application2.GetContracts<Volume>().Single();
+        var volume1 = State.GetContract<Volume>(application1);
+        var volume2 = State.GetContract<Volume>(application2);
         Assert.Equal(Handler<NewVolumeHandler>(docker1), volume1.Handler);
         Assert.Equal(Handler<NewVolumeHandler>(docker2), volume2.Handler);
         Assert.NotEqual(volume1.Handler, volume2.Handler);
@@ -152,8 +152,8 @@ public class ContainerHandlerTests : BaseTests
             }
         );
 
-        var port1 = application1.GetContracts<PortEndpoint>().Single();
-        var port2 = application2.GetContracts<PortEndpoint>().Single();
+        var port1 = State.GetContract(application1, portEndpoint.Id);
+        var port2 = State.GetContract(application2, portEndpoint.Id);
         Assert.Equal(Handler<PortEndpointHandler>(docker1), port1.Handler);
         Assert.Equal(Handler<PortEndpointHandler>(docker2), port2.Handler);
         Assert.NotEqual(port1.Handler, port2.Handler);

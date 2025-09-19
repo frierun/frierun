@@ -13,39 +13,35 @@ public class DaemonHandlerTests : BaseTests
     [Fact]
     public void Install_Contract_CreatesFilesAndDirectories()
     {
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = [Contract<Daemon>().Generate()]
-        };
+        var daemon = Contract<Daemon>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [daemon] };
 
         var application = InstallPackage(package);
 
-        var daemon = application.GetContracts<Daemon>().Single();
-        Assert.True(daemon.Installed);
-        var directory = "/data/data/com.termux/files/usr/var/service/" + daemon.DaemonName;
+        var installedDaemon = State.GetContract(application, daemon.Id);
+        Assert.True(installedDaemon.Installed);
+        var directory = "/data/data/com.termux/files/usr/var/service/" + installedDaemon.DaemonName;
         SftpClient.Received(1).CreateDirectory(directory);
         SftpClient.Received(1).WriteAllText(directory + "/run", Arg.Any<string>());
         SshClient.Received(1).RunCommand(
-            Arg.Is<string>(arg => arg.StartsWith("sv-enable") && arg.Contains(daemon.DaemonName))
+            Arg.Is<string>(arg => arg.StartsWith("sv-enable") && arg.Contains(installedDaemon.DaemonName))
         );
     }
 
     [Fact]
     public void Uninstall_Contract_StopsDaemon()
     {
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = [Contract<Daemon>().Generate()]
-        };
+        var daemon = Contract<Daemon>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [daemon] };
         var application = InstallPackage(package);
-        var daemon = application.GetContracts<Daemon>().Single();
-        var directory = "/data/data/com.termux/files/usr/var/service/" + daemon.DaemonName;
-        Assert.True(daemon.Installed);
+        var installedDaemon = State.GetContract(application, daemon.Id);
+        var directory = "/data/data/com.termux/files/usr/var/service/" + installedDaemon.DaemonName;
+        Assert.True(installedDaemon.Installed);
 
         UninstallApplication(application);
 
         SshClient.Received(1).RunCommand(
-            Arg.Is<string>(arg => arg.StartsWith("sv-disable") && arg.Contains(daemon.DaemonName))
+            Arg.Is<string>(arg => arg.StartsWith("sv-disable") && arg.Contains(installedDaemon.DaemonName))
         );
         SshClient.Received(1).RunCommand(Arg.Is<string>(arg => arg.StartsWith("rm -rf") && arg.Contains(directory)));
     }

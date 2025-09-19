@@ -13,14 +13,14 @@ public class CloudflareTunnelHandlerTests : BaseTests
 
         var application = InstallPackage("cloudflare-tunnel");
 
-        var cloudflareTunnel = Resolve<State>().GetContract<CloudflareTunnel>(application);
+        var cloudflareTunnel = State.GetContract<CloudflareTunnel>(application);
         Assert.Equal("accountId1", cloudflareTunnel.AccountId);
         Assert.NotNull(cloudflareTunnel.TunnelName);
 
         CloudflareClient.Received(1).CreateTunnel("accountId1", cloudflareTunnel.TunnelName);
         Assert.Equal("tunnel token", cloudflareTunnel.Token);
 
-        var container = Resolve<State>().GetContract<Container>(application);
+        var container = State.GetContract<Container>(application);
         Assert.Equal("cloudflare/cloudflared:latest", container.ImageName.Value);
         Assert.Equal(["tunnel", "--no-autoupdate", "run", "--token", "tunnel token"], container.Command.Value);
     }
@@ -48,7 +48,7 @@ public class CloudflareTunnelHandlerTests : BaseTests
             }
         );
 
-        var cloudflareTunnel = Resolve<State>().GetContract<CloudflareTunnel>(application);
+        var cloudflareTunnel = State.GetContract<CloudflareTunnel>(application);
         Assert.Equal("accountId2", cloudflareTunnel.AccountId);
     }
 
@@ -76,7 +76,7 @@ public class CloudflareTunnelHandlerTests : BaseTests
         var application = InstallPackage("cloudflare-tunnel");
 
         Assert.NotNull(application);
-        var cloudflareTunnel = Resolve<State>().GetContract<CloudflareTunnel>(application);
+        var cloudflareTunnel = State.GetContract<CloudflareTunnel>(application);
         var accountId = cloudflareTunnel.AccountId;
         var tunnelId = cloudflareTunnel.TunnelId;
         Assert.NotNull(accountId);

@@ -25,8 +25,8 @@ public class NetworkHandlerTests : BaseTests
         var application1 = InstallPackage(package1);
         var application2 = InstallPackage(package2);
 
-        var network1 = application1.GetContracts<Network>().Single();
-        var network2 = application2.GetContracts<Network>().Single();
+        var network1 = State.GetContract<Network>(application1);
+        var network2 = State.GetContract<Network>(application2);
         Assert.Equal(network1.NetworkName, network2.NetworkName);
     }
 

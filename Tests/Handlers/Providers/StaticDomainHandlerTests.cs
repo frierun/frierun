@@ -8,16 +8,14 @@ public class StaticDomainHandlerTests : BaseTests
     public void Install_InternalDomainPackage_InstallInternalDomain()
     {
         InstallPackage("static-zone");
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = [Contract<Domain>().Generate()]
-        };
+        var domain = Contract<Domain>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [domain] };
 
         var application = InstallPackage(package);
 
-        var domain = application.GetContracts<Domain>().Single();
-        Assert.True(domain.Installed);
-        Assert.True(domain.IsInternal);
+        var installedDomain = State.GetContract(application, domain.Id);
+        Assert.True(installedDomain.Installed);
+        Assert.True(installedDomain.IsInternal);
     }
 
     [Fact]
@@ -27,15 +25,13 @@ public class StaticDomainHandlerTests : BaseTests
             "static-zone",
             new ContractList { ["Internal"] = new Selector(Value: "No") }
         );
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = [Contract<Domain>().Generate()]
-        };
+        var domain = Contract<Domain>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [domain] };
 
         var application = InstallPackage(package);
 
-        var domain = application.GetContracts<Domain>().Single();
-        Assert.True(domain.Installed);
-        Assert.False(domain.IsInternal);
+        var installedDomain = State.GetContract(application, domain.Id);
+        Assert.True(installedDomain.Installed);
+        Assert.False(installedDomain.IsInternal);
     }
 }

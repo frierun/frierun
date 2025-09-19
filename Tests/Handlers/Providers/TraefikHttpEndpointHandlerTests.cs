@@ -19,16 +19,12 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
         InstallPackage("traefik");
 
         var container = Contract<Container>().Generate();
-
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = [container, Contract<HttpEndpoint>().Set(p => p.Container, container.Id).Generate()]
-        };
+        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.Container, container.Id).Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [container, httpEndpoint] };
 
         var application = InstallPackage(package);
 
-        var httpEndpoint = application.GetContracts<HttpEndpoint>().Single();
-        Assert.Contains(container.Id, httpEndpoint.DependsOn);
+        Assert.Contains(container.Id, State.GetContract(application, httpEndpoint.Id).DependsOn);
     }
 
     [Fact]
@@ -36,15 +32,16 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("static-zone");
         InstallPackage("traefik");
-        var package = Factory<Package>().Generate() with { Contracts = [Contract<HttpEndpoint>().Generate()] };
+        var httpEndpoint = Contract<HttpEndpoint>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
 
         var application = InstallPackage(package);
 
-        var endpointContract = application.GetContracts<HttpEndpoint>().Single();
-        Assert.True(endpointContract.Installed);
-        Assert.Equal(80, endpointContract.Url.Port);
-        Assert.Equal("http", endpointContract.Url.Scheme);
-        Assert.StartsWith("http://", endpointContract.Url.ToString());
+        var installedHttpEndpoint = State.GetContract(application, httpEndpoint.Id);
+        Assert.True(installedHttpEndpoint.Installed);
+        Assert.Equal(80, installedHttpEndpoint.Url.Port);
+        Assert.Equal("http", installedHttpEndpoint.Url.Scheme);
+        Assert.StartsWith("http://", installedHttpEndpoint.Url.ToString());
     }
 
     [Fact]
@@ -55,15 +52,16 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
             new ContractList { ["Internal"] = new Selector(Value: "No") }
         );
         InstallPackage("traefik");
-        var package = Factory<Package>().Generate() with { Contracts = [Contract<HttpEndpoint>().Generate()] };
+        var httpEndpoint = Contract<HttpEndpoint>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
 
         var application = InstallPackage(package);
 
-        var endpointContract = application.GetContracts<HttpEndpoint>().Single();
-        Assert.True(endpointContract.Installed);
-        Assert.Equal(443, endpointContract.Url.Port);
-        Assert.Equal("https", endpointContract.Url.Scheme);
-        Assert.StartsWith("https://", endpointContract.Url.ToString());
+        var installedHttpEndpoint = State.GetContract(application, httpEndpoint.Id);
+        Assert.True(installedHttpEndpoint.Installed);
+        Assert.Equal(443, installedHttpEndpoint.Url.Port);
+        Assert.Equal("https", installedHttpEndpoint.Url.Scheme);
+        Assert.StartsWith("https://", installedHttpEndpoint.Url.ToString());
     }
 
     [Fact]
@@ -84,15 +82,16 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
                 ["WebSecure"] = new PortEndpoint(Protocol.Tcp, 443, ExternalPort: 444),
             }
         );
-        var package = Factory<Package>().Generate() with { Contracts = [Contract<HttpEndpoint>().Generate()] };
+        var httpEndpoint = Contract<HttpEndpoint>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
 
         var application = InstallPackage(package);
 
-        var endpointContract = application.GetContracts<HttpEndpoint>().Single();
-        Assert.True(endpointContract.Installed);
-        Assert.Equal(81, endpointContract.Url.Port);
-        Assert.Equal("http", endpointContract.Url.Scheme);
-        Assert.StartsWith("http://", endpointContract.Url.ToString());
+        var installedHttpEndpoint = State.GetContract(application, httpEndpoint.Id);
+        Assert.True(installedHttpEndpoint.Installed);
+        Assert.Equal(81, installedHttpEndpoint.Url.Port);
+        Assert.Equal("http", installedHttpEndpoint.Url.Scheme);
+        Assert.StartsWith("http://", installedHttpEndpoint.Url.ToString());
     }
 
     [Fact]
@@ -103,25 +102,18 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
             new ContractList { ["Internal"] = new Selector(Value: "No") }
         );
         InstallPackage("traefik");
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts =
-            [
-                Contract<HttpEndpoint>().Generate(),
-                Contract<HttpEndpoint>().Generate()
-            ]
-        };
+        var httpEndpoint1 = Contract<HttpEndpoint>().Generate();
+        var httpEndpoint2 = Contract<HttpEndpoint>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint1, httpEndpoint2] };
 
         var application = InstallPackage(package);
 
-        var installedContracts = application.GetContracts<HttpEndpoint>().ToList();
-        Assert.Equal(2, installedContracts.Count);
-        for (var i = 0; i < 2; i++)
-        {
-            var contract = installedContracts[i];
-            Assert.True(contract.Installed);
-            Assert.Equal(application.Name, contract.NetworkName);
-        }
+        var installedHttpEndpoint1 = State.GetContract(application, httpEndpoint1.Id);
+        var installedHttpEndpoint2 = State.GetContract(application, httpEndpoint2.Id);
+        Assert.True(installedHttpEndpoint1.Installed);
+        Assert.True(installedHttpEndpoint2.Installed);
+        Assert.Equal(application.Name, installedHttpEndpoint1.NetworkName);
+        Assert.Equal(application.Name, installedHttpEndpoint2.NetworkName);
 
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
             application.Name,
@@ -160,11 +152,12 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("static-zone");
         InstallPackage("traefik");
-        var package = Factory<Package>().Generate() with { Contracts = [Contract<HttpEndpoint>().Generate()] };
+        var httpEndpoint = Contract<HttpEndpoint>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
 
         var application = InstallPackage(package);
 
-        var contract = application.GetContracts<HttpEndpoint>().Single();
+        var contract = State.GetContract(application, httpEndpoint.Id);
         var router = contract.TraefikRouterName;
         var host = $"Host(`{contract.ResultHost.Value}`)";
         Assert.NotNull(router);
@@ -189,11 +182,12 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
             new ContractList { ["Internal"] = new Selector(Value: "No") }
         );
         InstallPackage("traefik");
-        var package = Factory<Package>().Generate() with { Contracts = [Contract<HttpEndpoint>().Generate()] };
+        var httpEndpoint = Contract<HttpEndpoint>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
 
         var application = InstallPackage(package);
 
-        var contract = application.GetContracts<HttpEndpoint>().Single();
+        var contract = State.GetContract(application, httpEndpoint.Id);
         var router = contract.TraefikRouterName;
         var host = $"Host(`{contract.ResultHost.Value}`)";
         Assert.NotNull(router);

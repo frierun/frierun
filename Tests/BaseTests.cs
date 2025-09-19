@@ -24,6 +24,7 @@ public abstract class BaseTests
     protected ICloudflareClient CloudflareClient => Handler<FakeCloudflareApiConnectionHandler>().Client;
     protected ISshClient SshClient => Handler<FakeSshConnectionHandler>().SshClient;
     protected ISftpClient SftpClient => Handler<FakeSshConnectionHandler>().SftpClient;
+    protected State State => Resolve<State>();
 
     /// <summary>
     /// Resolve an object from the provider.

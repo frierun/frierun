@@ -10,7 +10,7 @@ public class UninstallServiceTests : BaseTests
     {
         var docker = InstallPackage("docker");
         var frierun = InstallPackage("frierun");
-        var state = Resolve<State>();
+        var state = State;
         Assert.Equal(2, state.Applications.Count());
         var uninstallService = Resolve<UninstallService>();
         
@@ -26,7 +26,7 @@ public class UninstallServiceTests : BaseTests
         var docker = InstallPackage("docker");
         var traefik = InstallPackage("traefik");
         var frierun = InstallPackage("frierun");
-        var state = Resolve<State>();
+        var state = State;
         Assert.Equal(3, state.Applications.Count());
         var uninstallService = Resolve<UninstallService>();
         
@@ -45,7 +45,8 @@ public class UninstallServiceTests : BaseTests
         var traefik = InstallPackage("traefik");
         var application = InstallPackage("frierun");
         
-        Assert.Single(application.GetContracts<HttpEndpoint>());
+        var httpEndpoint = State.GetContract<HttpEndpoint>(application);
+        Assert.True(httpEndpoint.Installed);
         
         Assert.Throws<Exception>(() => Resolve<UninstallService>().Handle(traefik));
     }

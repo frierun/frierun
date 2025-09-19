@@ -17,7 +17,7 @@ public class PortHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var resultHttpEndpoint = Resolve<State>().GetContract(application, httpEndpoint.Id);
+        var resultHttpEndpoint = State.GetContract(application, httpEndpoint.Id);
         Assert.False(resultHttpEndpoint.ResultSsl.Value);
         Assert.Equal(httpEndpoint.Contract.Port, resultHttpEndpoint.ResultPort.Value);
         Assert.NotNull(resultHttpEndpoint.ResultHost.Value);
@@ -38,7 +38,7 @@ public class PortHttpEndpointHandlerTests : BaseTests
 
         Assert.Contains(
             new ContractId<PortEndpoint>(httpEndpoint.Id.Name),
-            application.GetContracts<HttpEndpoint>().Single().DependsOn
+            State.GetContract(application, httpEndpoint.Id).DependsOn
         );
     }
 }

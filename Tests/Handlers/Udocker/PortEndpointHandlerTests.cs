@@ -18,7 +18,7 @@ public class PortEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var installedPort = application.GetContracts<PortEndpoint>().Single();
+        var installedPort = State.GetContract(application, portEndpoint.Id);
         Assert.True(installedPort.Installed);
         Assert.True(installedPort.ExternalPort >= 1024);
     }

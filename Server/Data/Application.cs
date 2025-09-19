@@ -25,15 +25,6 @@ public record Application(
         yield return Description;
     }
     
-    /// <summary>
-    /// Gets all contracts of the specified type
-    /// </summary>
-    public IEnumerable<T> GetContracts<T>()
-        where T : Contract
-    {
-        return Contracts.Values.OfType<T>();
-    }
-
     public override Application Merge(Contract other)
     {
         var contract = EnsureSame(this, other);

@@ -79,7 +79,7 @@ public class StateSerializerTests : BaseTests
     public void Load_FrierunWithTraefikEndpoint_Serialized()
     {
         var stateManager = Resolve<StateSerializer>();
-        var state = Resolve<State>();
+        var state = State;
         InstallPackage("static-zone");
         InstallPackage("docker");
         InstallPackage("traefik");
@@ -98,7 +98,7 @@ public class StateSerializerTests : BaseTests
     public void Load_FrierunWithDockerVolume_Serialized()
     {
         var stateManager = Resolve<StateSerializer>();
-        var state = Resolve<State>();
+        var state = State;
         InstallPackage("docker");
         InstallPackage(
             "frierun",
@@ -116,7 +116,7 @@ public class StateSerializerTests : BaseTests
     public void Load_FrierunWithLocalPath_Serialized()
     {
         var stateManager = Resolve<StateSerializer>();
-        var state = Resolve<State>();
+        var state = State;
         InstallPackage("docker");
         InstallPackage(
             "frierun",

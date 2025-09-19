@@ -94,7 +94,7 @@ public class ContainerHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var daemon = application.GetContracts<Daemon>().Single();
+        var daemon = State.GetContract<Daemon>(application, container.Id.Name);
         Assert.NotNull(daemon.Command.Value);
         Assert.Contains("udocker", daemon.Command.Value);
         Assert.Contains(container.Contract.ContainerName, daemon.Command.Value);
@@ -123,8 +123,8 @@ public class ContainerHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var volume = application.GetContracts<Volume>().Single();
-        var daemon = application.GetContracts<Daemon>().Single();
+        var volume = State.GetContract<Volume>(application);
+        var daemon = State.GetContract<Daemon>(application, container.Id.Name);
         Assert.NotNull(daemon.Command.Value);
         Assert.Contains($"--volume={volume.LocalPath}:/test", daemon.Command.Value);
 
@@ -137,24 +137,22 @@ public class ContainerHandlerTests : BaseTests
     public void Install_ContainerWithPort_PublishesPort()
     {
         var container = Contract<Container>().Generate("udocker");
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts =
-            [
-                container,
-                Contract<PortEndpoint>()
-                    .Set(p => p.Protocol, Protocol.Tcp)
-                    .Set(p => p.Container, container.Id)
-                    .Generate()
-            ]
-        };
+        var portEndpoint = Contract<PortEndpoint>()
+            .Set(p => p.Protocol, Protocol.Tcp)
+            .Set(p => p.Container, container.Id)
+            .Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [container, portEndpoint] };
 
         var application = InstallPackage(package);
 
-        var portEndpoint = application.GetContracts<PortEndpoint>().Single();
-        var daemon = application.GetContracts<Daemon>().Single();
+        var installedPortEndpoint = State.GetContract(application, portEndpoint.Id);
+        Assert.True(installedPortEndpoint.Installed);
+        var daemon = State.GetContract<Daemon>(application, container.Id.Name);
         Assert.NotNull(daemon.Command.Value);
-        Assert.Contains($"--publish={portEndpoint.ExternalPort}:{portEndpoint.Port}", daemon.Command.Value);
+        Assert.Contains(
+            $"--publish={installedPortEndpoint.ExternalPort}:{installedPortEndpoint.Port}",
+            daemon.Command.Value
+        );
     }
 
     [Fact]
@@ -169,7 +167,7 @@ public class ContainerHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var daemon = application.GetContracts<Daemon>().Single();
+        var daemon = State.GetContract<Daemon>(application, container.Id.Name);
         Assert.NotNull(daemon.Command.Value);
         Assert.Contains($"--env={name}={value}", daemon.Command.Value);
     }
@@ -191,7 +189,7 @@ public class ContainerHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var daemon = application.GetContracts<Daemon>().Single();
+        var daemon = State.GetContract<Daemon>(application, container.Id.Name);
         Assert.NotNull(daemon.Command.Value);
         Assert.Contains($"--env={name}={value}", daemon.Command.Value);
     }
@@ -224,7 +222,7 @@ public class ContainerHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var daemon = application.GetContracts<Daemon>().Single();
+        var daemon = State.GetContract<Daemon>(application, container.Id.Name);
         Assert.NotNull(daemon.Command.Value);
         Assert.Contains($"--env={name}={value}", daemon.Command.Value);
     }
@@ -249,8 +247,8 @@ public class ContainerHandlerTests : BaseTests
             }
         );
 
-        var network1 = application1.GetContracts<Network>().Single();
-        var network2 = application2.GetContracts<Network>().Single();
+        var network1 = State.GetContract<Network>(application1);
+        var network2 = State.GetContract<Network>(application2);
         Assert.Equal(Handler<NetworkHandler>(udocker1), network1.Handler);
         Assert.Equal(Handler<NetworkHandler>(udocker2), network2.Handler);
         Assert.NotEqual(network1.Handler, network2.Handler);
@@ -278,8 +276,8 @@ public class ContainerHandlerTests : BaseTests
             }
         );
 
-        var volume1 = application1.GetContracts<Volume>().Single();
-        var volume2 = application2.GetContracts<Volume>().Single();
+        var volume1 = State.GetContract<Volume>(application1);
+        var volume2 = State.GetContract<Volume>(application2);
         Assert.Equal(Handler<LocalPathHandler>(udocker1), volume1.Handler);
         Assert.Equal(Handler<LocalPathHandler>(udocker2), volume2.Handler);
         Assert.NotEqual(volume1.Handler, volume2.Handler);
@@ -291,14 +289,14 @@ public class ContainerHandlerTests : BaseTests
         var udocker1 = InstallPackage("termux-udocker");
         var udocker2 = InstallPackage("termux-udocker");
         var container = Contract<Container>().Generate("udocker");
-        var port = Contract<PortEndpoint>().Set(p => p.Container, container.Id).Generate("udocker");
+        var portEndpoint = Contract<PortEndpoint>().Set(p => p.Container, container.Id).Generate("udocker");
 
         var application1 = InstallPackage(
             Factory<Package>().Generate() with
             {
                 Contracts =
                 [
-                    port,
+                    portEndpoint,
                     container.With(c => c with { HandlerApplication = udocker1.Name })
                 ]
             }
@@ -308,14 +306,14 @@ public class ContainerHandlerTests : BaseTests
             {
                 Contracts =
                 [
-                    port,
+                    portEndpoint,
                     container.With(c => c with { HandlerApplication = udocker2.Name })
                 ]
             }
         );
 
-        var port1 = application1.GetContracts<PortEndpoint>().Single();
-        var port2 = application2.GetContracts<PortEndpoint>().Single();
+        var port1 = State.GetContract(application1, portEndpoint.Id);
+        var port2 = State.GetContract(application2, portEndpoint.Id);
         Assert.Equal(Handler<PortEndpointHandler>(udocker1), port1.Handler);
         Assert.Equal(Handler<PortEndpointHandler>(udocker2), port2.Handler);
         Assert.NotEqual(port1.Handler, port2.Handler);
@@ -341,8 +339,8 @@ public class ContainerHandlerTests : BaseTests
             }
         );
 
-        var daemon1 = application1.GetContracts<Daemon>().Single();
-        var daemon2 = application2.GetContracts<Daemon>().Single();
+        var daemon1 = State.GetContract<Daemon>(application1, container.Id.Name);
+        var daemon2 = State.GetContract<Daemon>(application2, container.Id.Name);
         Assert.Equal(Handler<DaemonHandler>(udocker1), daemon1.Handler);
         Assert.Equal(Handler<DaemonHandler>(udocker2), daemon2.Handler);
         Assert.NotEqual(daemon1.Handler, daemon2.Handler);
