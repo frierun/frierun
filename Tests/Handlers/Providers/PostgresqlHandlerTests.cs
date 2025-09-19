@@ -74,14 +74,31 @@ public class PostgresqlHandlerTests : BaseTests
     }
 
     [Fact]
-    public void Initialize_PrefixIsPostgres_UserIsNotPostgres()
+    public void Initialize_EmptyId_UserAndDatabaseEqualPackageName()
     {
-        var postgresql = Contract<Postgresql>().Generate();
-        var package = Factory<Package>().Generate() with { Prefix = "postgres", Contracts = [postgresql] };
+        var postgresql = Factory<Postgresql>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = new ContractList { [""] = postgresql } };
 
         var application = InstallPackage(package);
 
-        var database = State.GetContract(application, postgresql.Id);
-        Assert.NotEqual(package.Name, database.Username);
+        Assert.Equal(package.Name, application.Name);
+        Assert.Equal(package.Name, State.GetContract<Postgresql>(application).Username);
+        Assert.Equal(package.Name, State.GetContract<Postgresql>(application).Database);
+    }
+
+    [Fact]
+    public void Initialize_EmptyIdWithPrefixPostgres_UserIsNotPostgres()
+    {
+        var postgresql = Factory<Postgresql>().Generate();
+        var package = Factory<Package>().Generate() with
+        {
+            Name = "postgres", Contracts = new ContractList { [""] = postgresql }
+        };
+
+        var application = InstallPackage(package);
+
+        Assert.Equal(package.Name, application.Name);
+        Assert.NotEqual(package.Name, State.GetContract<Postgresql>(application).Username);
+        Assert.Equal(package.Name, State.GetContract<Postgresql>(application).Database);
     }
 }

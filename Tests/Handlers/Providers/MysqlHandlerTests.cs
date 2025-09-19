@@ -74,26 +74,49 @@ public class MysqlHandlerTests : BaseTests
     }
 
     [Fact]
-    public void Initialize_PrefixIsRoot_UserIsNotRoot()
+    public void Initialize_EmptyId_UserAndDatabaseEqualPackageName()
     {
-        var mysql = Contract<Mysql>().Generate();
-        var package = Factory<Package>().Generate() with { Prefix = "root", Contracts = [mysql] };
+        var mysql = Factory<Mysql>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = new ContractList { [""] = mysql } };
 
         var application = InstallPackage(package);
 
-        Assert.NotEqual(package.Name, State.GetContract(application, mysql.Id).Username);
+        Assert.Equal(package.Name, application.Name);        
+        Assert.Equal(package.Name, State.GetContract<Mysql>(application).Username);
+        Assert.Equal(package.Name, State.GetContract<Mysql>(application).Database);
     }
 
     [Fact]
-    public void Initialize_PrefixIsMysql_DatabaseIsNotMysql()
+    public void Initialize_EmptyIdWithPrefixRoot_UserIsNotRoot()
     {
-        UninstallApplication(_providerApplication);
-        InstallPackage("mariadb");
-        var mysql = Contract<Mysql>().Generate();
-        var package = Factory<Package>().Generate() with { Prefix = "mysql", Contracts = [mysql] };
+        var mysql = Factory<Mysql>().Generate();
+        var package = Factory<Package>().Generate() with
+        {
+            Name = "root", Contracts = new ContractList { [""] = mysql }
+        };
 
         var application = InstallPackage(package);
 
-        Assert.NotEqual(package.Name, State.GetContract(application, mysql.Id).Database);
+        Assert.Equal(package.Name, application.Name);
+        Assert.NotEqual(package.Name, State.GetContract<Mysql>(application).Username);
+        Assert.Equal(package.Name, State.GetContract<Mysql>(application).Database);
+    }
+
+    [Fact]
+    public void Initialize_EmptyIdWithPrefixMysql_DatabaseIsNotMysql()
+    {
+        UninstallApplication(_providerApplication);
+        InstallPackage("mariadb");
+        var mysql = Factory<Mysql>().Generate();
+        var package = Factory<Package>().Generate() with
+        {
+            Name = "mysql", Contracts = new ContractList { [""] = mysql }
+        };
+
+        var application = InstallPackage(package);
+
+        Assert.Equal(package.Name, application.Name);
+        Assert.Equal(package.Name, State.GetContract<Mysql>(application).Username);
+        Assert.NotEqual(package.Name, State.GetContract<Mysql>(application).Database);
     }
 }

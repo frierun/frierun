@@ -3,7 +3,6 @@
 public record Package(
     string Name,
     string? Url = null,
-    string? Prefix = null,
     string? IconUrl = null,
     string? ApplicationUrl = null,
     string? ApplicationDescription = null,
