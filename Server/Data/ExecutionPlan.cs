@@ -97,11 +97,14 @@ public class ExecutionPlan(
     private Application CreateApplication(Dictionary<ContractId, Contract> installedContracts)
     {
         var application = contracts.Values.OfType<Application>().First();
-        
+
         return application with
         {
             Contracts = new ContractList(installedContracts),
-            RequiredApplications = _requiredApplications.Select(app => app.Name).ToList()
+            RequiredApplications = _requiredApplications.Select(app => app.Name).ToList(),
+            ContractRefs = installedContracts.ToDictionary(
+                pair => pair.Key, pair => pair.Value.Id ?? throw new Exception($"Contract {pair.Key} is not installed")
+            ),
         };
     }
 }

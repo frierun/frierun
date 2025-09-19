@@ -9,8 +9,7 @@ namespace Frierun.Server.Handlers.Docker;
 public class ContainerHandler(State state, Application application, DockerService dockerService)
     : Handler<Container>(state, application), IContainerHandler
 {
-    private readonly DockerApiConnection _dockerApiConnection =
-        application.GetContract(new ContractId<DockerApiConnection>());
+    private readonly DockerApiConnection _dockerApiConnection = state.GetContract<DockerApiConnection>(application);
 
     public override IEnumerable<ContractList> Initialize(Container contract, ApplicationContext context)
     {

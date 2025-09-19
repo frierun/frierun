@@ -35,7 +35,7 @@ public class PortEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var installedPort = application.GetContract(port.Id);
+        var installedPort = Resolve<State>().GetContract(application, port.Id);;
         Assert.True(installedPort.Installed);
 
         DockerClient.Containers.Received(1).CreateContainerAsync(

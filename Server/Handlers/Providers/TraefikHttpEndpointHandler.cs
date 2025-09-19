@@ -6,15 +6,9 @@ namespace Frierun.Server.Handlers;
 public class TraefikHttpEndpointHandler(State state, Application application)
     : Handler<HttpEndpoint>(state, application)
 {
-    private readonly Container _container = application.GetContract(new ContractId<Container>());
-
-    private readonly int _webPort = application
-        .GetContract(new ContractId<PortEndpoint>("Web"))
-        .ExternalPort;
-
-    private readonly int _webSecurePort = application
-        .GetContract(new ContractId<PortEndpoint>("WebSecure"))
-        .ExternalPort;
+    private readonly Container _container = state.GetContract<Container>(application);
+    private readonly int _webPort = state.GetContract<PortEndpoint>(application, "Web").ExternalPort;
+    private readonly int _webSecurePort = state.GetContract<PortEndpoint>(application, "WebSecure").ExternalPort;
 
     public override IEnumerable<ContractList> Initialize(HttpEndpoint contract, ApplicationContext context)
     {

@@ -9,7 +9,7 @@ public class DaemonHandler(State state, Application application)
 {
     private const string PrefixPath = "/data/data/com.termux/files/usr";
     private const string DaemonsPath = PrefixPath + "/var/service";
-    private readonly SshConnection _connection = application.GetContract(new ContractId<SshConnection>());
+    private readonly SshConnection _connection = state.GetContract<SshConnection>(application);
 
     public override IEnumerable<ContractList> Initialize(Daemon contract, ApplicationContext context)
     {

@@ -12,10 +12,10 @@ public class RedisHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var database = application.GetContract(new ContractId<Redis>());
+        var database = Resolve<State>().GetContract<Redis>(application);
         Assert.True(database.Installed);
 
-        var dbContainer = application.GetContract(database.Container);
+        var dbContainer = Resolve<State>().GetContract(application, database.Container);
         Assert.True(dbContainer.Installed);
         Assert.Equal(database.Host, dbContainer.ContainerName);
     }

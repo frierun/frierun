@@ -15,7 +15,7 @@ public abstract class TestWithDocker : BaseTests, IDisposable
     protected TestWithDocker()
     {
         _docker = InstallPackage("docker");
-        DockerClient = _docker.GetContract(new ContractId<DockerApiConnection>()).CreateClient();
+        DockerClient = Resolve<State>().GetContract<DockerApiConnection>(_docker).CreateClient();
         DockerService = new DockerService(
             Resolve<ILogger<DockerService>>(),
             DockerClient

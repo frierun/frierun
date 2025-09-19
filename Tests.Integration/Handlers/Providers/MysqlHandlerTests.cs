@@ -26,9 +26,9 @@ public class MysqlHandlerTests : TestWithDocker
         };
         var application = InstallPackage(package);
 
-        var container = application.GetContract(new ContractId<Container>());
+        var container = Resolve<State>().GetContract<Container>(application);
         Assert.True(container.Installed);
-        var database = application.GetContract(new ContractId<Mysql>());
+        var database = Resolve<State>().GetContract<Mysql>(application);
         Assert.True(database.Installed);
         Assert.Equal("db-client", database.Username);
         Assert.Equal("db-client", database.Database);
@@ -78,9 +78,9 @@ public class MysqlHandlerTests : TestWithDocker
         };
         var application = InstallPackage(package);
 
-        var container = application.GetContract(new ContractId<Container>());
+        var container = Resolve<State>().GetContract<Container>(application);
         Assert.True(container.Installed);
-        var database = application.GetContract(new ContractId<Mysql>());
+        var database = Resolve<State>().GetContract<Mysql>(application);
         Assert.True(database.Installed);
         Assert.Equal("root", database.Username);
         Assert.Null(database.Database);

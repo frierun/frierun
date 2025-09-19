@@ -108,7 +108,7 @@ public class CloudflareTunnelHandler(State state) : Handler<CloudflareTunnel>(st
     {
         Debug.Assert(contract.Installed);
         var application = State.Applications.Single(application => application.Contracts.Values.Contains(contract));
-        var cloudflareApiConnection = application.GetContract(contract.CloudflareApiConnection);
+        var cloudflareApiConnection = State.GetContract(application, contract.CloudflareApiConnection);
 
         var client = cloudflareApiConnection.CreateClient();
         try

@@ -16,10 +16,9 @@ public class AutofacModule : Module
         builder.RegisterType<Console>().AsSelf().SingleInstance();
         builder.RegisterType<Discover>().As<Command>().SingleInstance();
         builder.RegisterType<Serve>().As<Command>().SingleInstance();
-        
+
         // Handlers
-        builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder =>
+        builder.RegisterInstance<ProviderScopeBuilder>(static builder =>
                 {
                     var assembly = Assembly.GetExecutingAssembly();
                     builder.RegisterAssemblyTypes(assembly)
@@ -31,8 +30,7 @@ public class AutofacModule : Module
             .Named<ProviderScopeBuilder>("base")
             .SingleInstance();
 
-        builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder =>
+        builder.RegisterInstance<ProviderScopeBuilder>(static builder =>
                 {
                     builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
                         .Where(type => type.Namespace?.StartsWith("Frierun.Server.Handlers.Docker") == true)
@@ -40,20 +38,18 @@ public class AutofacModule : Module
                         .SingleInstance();
 
                     builder.RegisterType<DockerService>().AsSelf().SingleInstance();
-                    builder.Register<IDockerClient>(
-                            static context => context
-                                .Resolve<Application>()
-                                .GetContract(new ContractId<DockerApiConnection>())
-                                .CreateClient()
+                    builder.Register<IDockerClient>(static context => context
+                            .Resolve<State>()
+                            .GetContract<DockerApiConnection>(context.Resolve<Application>())
+                            .CreateClient()
                         )
                         .SingleInstance();
                 }
             )
             .Named<ProviderScopeBuilder>("docker")
             .SingleInstance();
-        
-        builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder =>
+
+        builder.RegisterInstance<ProviderScopeBuilder>(static builder =>
                 {
                     builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
                         .Where(type => type.Namespace?.StartsWith("Frierun.Server.Handlers.Udocker") == true)
@@ -64,18 +60,16 @@ public class AutofacModule : Module
             .Named<ProviderScopeBuilder>("termux-udocker")
             .SingleInstance();
 
-        builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder =>
+        builder.RegisterInstance<ProviderScopeBuilder>(static builder =>
                 {
                     builder.RegisterType<CloudflareHttpEndpointHandler>()
                         .AsImplementedInterfaces()
                         .SingleInstance();
 
-                    builder.Register<ICloudflareClient>(
-                            static context => context
-                                .Resolve<Application>()
-                                .GetContract(new ContractId<CloudflareApiConnection>())
-                                .CreateClient()
+                    builder.Register<ICloudflareClient>(static context => context
+                            .Resolve<State>()
+                            .GetContract<CloudflareApiConnection>(context.Resolve<Application>())
+                            .CreateClient()
                         )
                         .SingleInstance();
                 }
@@ -83,38 +77,34 @@ public class AutofacModule : Module
             .Named<ProviderScopeBuilder>("cloudflare-tunnel")
             .SingleInstance();
 
-        builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder => builder.RegisterType<MysqlHandler>()
-                    .AsImplementedInterfaces()
-                    .SingleInstance()
+        builder.RegisterInstance<ProviderScopeBuilder>(static builder => builder.RegisterType<MysqlHandler>()
+                .AsImplementedInterfaces()
+                .SingleInstance()
             )
             .Named<ProviderScopeBuilder>("mysql")
             .SingleInstance();
-        builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder => builder.RegisterType<MysqlHandler>()
-                    .AsImplementedInterfaces()
-                    .SingleInstance()
+        builder.RegisterInstance<ProviderScopeBuilder>(static builder => builder.RegisterType<MysqlHandler>()
+                .AsImplementedInterfaces()
+                .SingleInstance()
             )
             .Named<ProviderScopeBuilder>("mariadb")
             .SingleInstance();
-        builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder => builder.RegisterType<PostgresqlHandler>()
-                    .AsImplementedInterfaces()
-                    .SingleInstance()
+        builder.RegisterInstance<ProviderScopeBuilder>(static builder => builder.RegisterType<PostgresqlHandler>()
+                .AsImplementedInterfaces()
+                .SingleInstance()
             )
             .Named<ProviderScopeBuilder>("postgresql")
             .SingleInstance();
-        builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder => builder.RegisterType<StaticDomainHandler>()
-                    .AsImplementedInterfaces()
-                    .SingleInstance()
+        builder.RegisterInstance<ProviderScopeBuilder>(static builder => builder.RegisterType<StaticDomainHandler>()
+                .AsImplementedInterfaces()
+                .SingleInstance()
             )
             .Named<ProviderScopeBuilder>("static-zone")
             .SingleInstance();
-        builder.RegisterInstance<ProviderScopeBuilder>(
-                static builder => builder.RegisterType<TraefikHttpEndpointHandler>()
-                    .AsImplementedInterfaces()
-                    .SingleInstance()
+        builder.RegisterInstance<ProviderScopeBuilder>(static builder => builder
+                .RegisterType<TraefikHttpEndpointHandler>()
+                .AsImplementedInterfaces()
+                .SingleInstance()
             )
             .Named<ProviderScopeBuilder>("traefik")
             .SingleInstance();

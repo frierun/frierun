@@ -6,7 +6,7 @@ namespace Frierun.Server.Handlers.Udocker;
 public class ContainerHandler(State state, Application application)
     : Handler<Container>(state, application), IContainerHandler
 {
-    private readonly SshConnection _connection = application.GetContract(new ContractId<SshConnection>());
+    private readonly SshConnection _connection = state.GetContract<SshConnection>(application);
 
     public override IEnumerable<ContractList> Initialize(Container contract, ApplicationContext context)
     {

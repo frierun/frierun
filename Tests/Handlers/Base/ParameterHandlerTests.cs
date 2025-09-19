@@ -15,7 +15,7 @@ public class ParameterHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        var installedParameter = application.GetContract(parameter.Id);
+        var installedParameter = Resolve<State>().GetContract(application, parameter.Id);
         Assert.Equal(parameter.Contract.DefaultValue, installedParameter.Value.Value);
     }
 }

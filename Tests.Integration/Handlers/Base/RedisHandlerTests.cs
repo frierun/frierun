@@ -20,8 +20,8 @@ public class RedisHandlerTests : TestWithDocker
         );
         var application = InstallPackage(package);
 
-        var container = application.GetContract(new ContractId<Container>("redis-client"));
-        var database = application.GetContract(new ContractId<Redis>());
+        var container = Resolve<State>().GetContract<Container>(application, "redis-client");
+        var database = Resolve<State>().GetContract<Redis>(application);
         Assert.True(container.Installed);
         Assert.True(database.Installed);
 

@@ -4,7 +4,7 @@ namespace Frierun.Server.Handlers.Udocker;
 
 public class PortEndpointHandler(State state, Application application) : Handler<PortEndpoint>(state, application)
 {
-    private readonly SshConnection _connection = application.GetContract(new ContractId<SshConnection>());
+    private readonly SshConnection _connection = state.GetContract<SshConnection>(application);
 
     public override IEnumerable<ContractList> Initialize(PortEndpoint contract, ApplicationContext context)
     {

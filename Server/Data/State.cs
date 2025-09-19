@@ -36,10 +36,19 @@ public class State
     public TContract GetContract<TContract>(Application app, string name = "")
         where TContract : Contract
     {
-        var contractId = new ContractId<TContract>(name);
+        return GetContract<TContract>(app, new ContractId<TContract>(name));
+    }
+    
+    /// <summary>
+    /// Gets contract from the application by name.
+    /// </summary>
+    public TContract GetContract<TContract>(Application app, ContractId<TContract> contractId)
+        where TContract : Contract
+    {
         var guid = app.ContractRefs[contractId];
         return GetContract<TContract>(guid);
     }
+    
 
     /// <summary>
     /// Adds a newly installed application to the state.

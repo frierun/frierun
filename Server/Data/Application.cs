@@ -24,16 +24,7 @@ public record Application(
         yield return Url;
         yield return Description;
     }
-
-    /// <summary>
-    /// Get contract by id.
-    /// </summary>
-    public T GetContract<T>(ContractId<T> contractId)
-        where T : Contract
-    {
-        return (T)Contracts[contractId];
-    }
-
+    
     /// <summary>
     /// Gets all contracts of the specified type
     /// </summary>

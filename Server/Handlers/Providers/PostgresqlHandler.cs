@@ -7,9 +7,9 @@ namespace Frierun.Server.Handlers;
 public class PostgresqlHandler(State state, Application application, ILogger<PostgresqlHandler> logger)
     : Handler<Postgresql>(state, application)
 {
-    private readonly Container _container = application.GetContract(new ContractId<Container>());
+    private readonly Container _container = state.GetContract<Container>(application);
 
-    private readonly string _rootPassword = application.GetContract(new ContractId<Password>()).Value ??
+    private readonly string _rootPassword = state.GetContract<Password>(application).Value ??
                                             throw new Exception("Root password not found");
 
     public override IEnumerable<ContractList> Initialize(Postgresql contract, ApplicationContext context)

@@ -16,7 +16,7 @@ public class PodmanTests : BaseTests
             new ContractList { [""] = new DockerApiConnection(Path: socketUri) }
         );
 
-        var dockerApiConnection = application.GetContract(new ContractId<DockerApiConnection>());
+        var dockerApiConnection = Resolve<State>().GetContract<DockerApiConnection>(application);
         Assert.True(dockerApiConnection.Installed);
         Assert.True(dockerApiConnection.IsPodman);
         Assert.Equal(socketPath, dockerApiConnection.GetSocketRootPath());
