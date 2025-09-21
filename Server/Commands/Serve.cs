@@ -32,8 +32,10 @@ public class Serve(ILifetimeScope root) : BaseCommand("serve", "Start webserver"
                 options.UseAllOfForInheritance();
                 options.EnableAnnotations(true, true);
 
-                options.MapType(typeof(ContractRef<>), () => new OpenApiSchema { Type = "string" });
+                options.MapType(typeof(ContractId), () => new OpenApiSchema { Type = "string" });
+                options.MapType(typeof(ContractId<>), () => new OpenApiSchema { Type = "string" });
                 options.MapType(typeof(ContractRef), () => new OpenApiSchema { Type = "string" });
+                options.MapType(typeof(ContractRef<>), () => new OpenApiSchema { Type = "string" });
 
                 options.MapType<Argument<bool?>>(() => new OpenApiSchema { Type = "boolean", Nullable = true });
                 options.MapType<Argument<int>>(() => new OpenApiSchema { Type = "integer", Format = "int32" });
