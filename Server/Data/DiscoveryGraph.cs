@@ -94,8 +94,13 @@ public class DiscoveryGraph
         }
 
         var initializedContract = result[initializedContractRef];
-        foreach (var contractRef in initializedContract.DependsOn)
+        foreach (var contractId in initializedContract.DependsOn)
         {
+            var contractRef = contractId.Ref;
+            if (contractRef == null)
+            {
+                continue;
+            }
             if (!Contracts.ContainsKey(contractRef))
             {
                 _emptyContracts.Add(contractRef);

@@ -1,4 +1,6 @@
-﻿namespace Frierun.Server.Data;
+﻿using System.Diagnostics;
+
+namespace Frierun.Server.Data;
 
 public class ExecutionPlan(
     Dictionary<ContractRef, Contract> contracts,
@@ -31,7 +33,12 @@ public class ExecutionPlan(
         {
             foreach (var dependency in contract.DependsOn)
             {
-                graph.AddEdge(dependency, contractRef);
+                var dependencyRef = dependency.Ref;
+                if (dependencyRef == null)
+                {
+                    continue;
+                }
+                graph.AddEdge(dependencyRef, contractRef);
             }
         }
 
@@ -39,7 +46,7 @@ public class ExecutionPlan(
     }
 
     /// <summary>
-    /// Get contract by id.
+    /// Get contract by ref.
     /// </summary>
     public Contract GetContract(ContractRef contractRef)
     {
@@ -47,13 +54,38 @@ public class ExecutionPlan(
     }
 
     /// <summary>
-    /// Get contract by id.
+    /// Get contract by ref.
     /// </summary>
     public T GetContract<T>(ContractRef<T> contractRef)
         where T : Contract
     {
         return (T)GetContract((ContractRef)contractRef);
     }
+    
+    /// <summary>
+    /// Get contract by ref.
+    /// </summary>
+    public Contract GetContract(ContractId contractId)
+    {
+        var guid = contractId.Guid;
+        if (guid != null)
+        {
+            return contracts.Values.First(contract => contract.Id == guid);
+        }
+        
+        Debug.Assert(contractId.Ref != null, "Contract ID must have either a GUID or a ContractRef");;
+        return contracts[contractId.Ref];
+    }
+    
+    /// <summary>
+    /// Get contract by id.
+    /// </summary>
+    public T GetContract<T>(ContractId<T> contractId)
+        where T : Contract
+    {
+        return (T)GetContract((ContractId)contractId);
+    }
+    
 
     /// <summary>
     /// Installs all contracts in the execution plan.

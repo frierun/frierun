@@ -49,13 +49,7 @@ public class ContractIdOfTConverter : JsonConverterFactory
                 return new ContractId<TContract>(guid);
             }
 
-            var contractRefConverter = (JsonConverter<ContractRef<TContract>>)options.GetConverter(typeof(ContractRef<TContract>));
-            var contractRef = contractRefConverter.Read(ref reader, typeof(ContractRef<TContract>), options);
-            if (contractRef is null)
-            {
-                return null;
-            }
-            return new ContractId<TContract>(contractRef);
+            return new ContractId<TContract>(value);
         }
 
         public override void Write(Utf8JsonWriter writer, ContractId<TContract> value, JsonSerializerOptions options)

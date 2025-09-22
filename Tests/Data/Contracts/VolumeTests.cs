@@ -14,9 +14,8 @@ public class VolumeTests : BaseTests
 
         var result = volume.Merge(volume with { DependsOn = [dependency2] });
 
-        Assert.Equal([dependency, dependency2], result.DependsOn);
+        Assert.Equal([dependency, dependency2], result.DependsOn.ToList());
     }
-
 
     [Fact]
     public void Merge_ContractsWithDifferentHandlers_ThrowsException()

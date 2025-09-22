@@ -8,18 +8,23 @@ public record CloudflareTunnel(
     string? TunnelName = null,
     string? TunnelId = null,
     string? Token = null,
-    ContractRef<CloudflareApiConnection>? CloudflareApiConnection = null,
+    ContractId<CloudflareApiConnection>? CloudflareApiConnection = null,
     ContractRef<Container>? Container = null
 ) : Contract
 {
     [MemberNotNullWhen(true, nameof(TunnelId), nameof(Token), nameof(AccountId))]
     public override bool Installed => Id != null;
 
-    public ContractRef<CloudflareApiConnection> CloudflareApiConnection { get; init; } =
-        CloudflareApiConnection ?? new ContractRef<CloudflareApiConnection>("");
+    public ContractId<CloudflareApiConnection> CloudflareApiConnection { get; init; } =
+        CloudflareApiConnection ?? new ContractId<CloudflareApiConnection>("");
 
     public ContractRef<Container> Container { get; init; } = Container ?? new ContractRef<Container>("");
-    
+
+    public override IEnumerable<IArgument> GetArguments()
+    {
+        yield return CloudflareApiConnection;
+    }
+
     public override Contract Merge(Contract other)
     {
         var contract = EnsureSame(this, other);
@@ -27,7 +32,7 @@ public record CloudflareTunnel(
         return MergeCommon(this, other) with
         {
             AccountId = OnlyOne(AccountId, contract.AccountId),
-            CloudflareApiConnection = OnlyOne(CloudflareApiConnection, contract.CloudflareApiConnection),
+            CloudflareApiConnection = (ContractId<CloudflareApiConnection>)CloudflareApiConnection.Merge(contract.CloudflareApiConnection),
             Container = OnlyOne(Container, contract.Container),
             TunnelId = OnlyOne(TunnelId, contract.TunnelId),
             TunnelName = OnlyOne(TunnelName, contract.TunnelName),

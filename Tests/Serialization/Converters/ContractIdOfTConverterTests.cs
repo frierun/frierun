@@ -61,7 +61,7 @@ public class ContractIdOfTConverterTests : BaseTests
     public void Write_Name_ReturnsExpectedValue()
     {
         var name = Resolve<Faker>().Lorem.Word();
-        var contractId = new ContractId<Container>(new ContractRef<Container>(name));
+        var contractId = new ContractId<Container>(name);
         
         var result = JsonSerializer.Serialize(contractId, CreateOptions());
         
