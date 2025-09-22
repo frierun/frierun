@@ -28,10 +28,10 @@ public class DiscoverTests : BaseTests
         var console = Resolve<Console>();
 
         console.Run(["discover"]);
-        var unmanageCount = state.UnmanagedContracts.Count;
+        var unmanageCount = state.Contracts.Count;
         console.Run(["discover"]);
         
-        Assert.Equal(unmanageCount, state.UnmanagedContracts.Count);
+        Assert.Equal(unmanageCount, state.Contracts.Count);
     }
 
     [Fact]

@@ -14,7 +14,7 @@ public class Discover(ILogger<Discover> logger, HandlerRegistry handlerRegistry,
             foreach (var contract in handler.Discover())
             {
                 logger.LogInformation("Found contract: {type}", contract);
-                state.UnmanagedContracts.Add(contract);
+                state.AddContract(contract);
             }
         }
         

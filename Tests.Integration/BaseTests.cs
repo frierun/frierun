@@ -17,9 +17,9 @@ public abstract class BaseTests : IDisposable
 
         // clear state
         var state = Resolve<State>();
-        foreach (var application in state.Applications.ToList())
+        foreach (var contract in state.Contracts.Values.ToList())
         {
-            state.RemoveApplication(application);
+            state.RemoveContract(contract);
         }
     }
 

@@ -24,9 +24,8 @@ public class UninstallService(
                 }
             }
 
+            state.RemoveContract(application);
             UninstallContracts(application);
-
-            state.RemoveApplication(application);
 
             stateSerializer.Save(state);
         }
@@ -42,7 +41,7 @@ public class UninstallService(
         while (contractRefs.Count > 0)
         {
             var guid = contractRefs
-                .First(guid => state.ContractsById.Values.All(depend => !depend.DependsOn.Contains(guid)));
+                .First(guid => state.Contracts.Values.All(depend => !depend.DependsOn.Contains(guid)));
 
             var contract = state.GetContract(guid);
             contract.Uninstall();

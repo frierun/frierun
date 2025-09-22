@@ -4,24 +4,17 @@ namespace Frierun.Server.Data;
 
 public class State
 {
-    private readonly List<Application> _applications = [];
     private readonly Dictionary<Guid, Contract> _contracts = new();
     
     public event Action<Application> ApplicationAdded = _ => { };
     public event Action<Application> ApplicationRemoved = _ => { };
-
-    public List<Contract> UnmanagedContracts { get; init; } = [];
-
-    public IEnumerable<Application> Applications
-    {
-        get => _applications;
-        init => _applications = [..value];
-    }
+    
+    public IEnumerable<Application> Applications => GetContracts<Application>();
 
     /// <summary>
     /// Lists all installed contracts
     /// </summary>
-    public IReadOnlyDictionary<Guid, Contract> ContractsById
+    public IReadOnlyDictionary<Guid, Contract> Contracts
     {
         get => _contracts;
         init => _contracts = new Dictionary<Guid, Contract>(value);
@@ -60,25 +53,6 @@ public class State
         return _contracts.Values.OfType<TContract>();
     }
     
-
-    /// <summary>
-    /// Adds a newly installed application to the state.
-    /// </summary>
-    public void AddApplication(Application application)
-    {
-        _applications.Add(application);
-        ApplicationAdded(application);
-    }
-
-    /// <summary>
-    /// Removes an application from the state.
-    /// </summary>
-    public void RemoveApplication(Application application)
-    {
-        _applications.Remove(application);
-        ApplicationRemoved(application);
-    }
-
     /// <summary>
     /// Adds a newly installed contract to the state.
     /// </summary>
@@ -86,6 +60,11 @@ public class State
     {
         Debug.Assert(contract.Id != null);
         _contracts[(Guid)contract.Id] = contract;
+
+        if (contract is Application application)
+        {
+            ApplicationAdded(application);
+        }
     }
     
     /// <summary>
@@ -95,5 +74,10 @@ public class State
     {
         Debug.Assert(contract.Id != null);
         _contracts.Remove((Guid)contract.Id);
+        
+        if (contract is Application application)
+        {
+            ApplicationRemoved(application);
+        }
     }    
 }

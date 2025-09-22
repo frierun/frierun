@@ -124,9 +124,13 @@ public class ExecutionPlan(
         var application = CreateApplication(installedContracts);
         foreach (var (_, contract) in contracts)
         {
+            if (contract is Application)
+            {
+                state.AddContract(application);
+                continue;
+            }
             state.AddContract(contract);
         }
-        state.AddApplication(application);
         
         return application;
     }

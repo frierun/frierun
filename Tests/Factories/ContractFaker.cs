@@ -14,6 +14,9 @@ public abstract class ContractFaker<TContract> : Faker<TContract>
 
     protected ContractFaker()
     {
+        base.RuleSet(
+            "installed", set => { set.RuleFor(p => p.Id, _ => Guid.CreateVersion7()); }
+        );
     }
     
     /// <summary>

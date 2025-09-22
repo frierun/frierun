@@ -31,9 +31,9 @@ public class StateSerializerTests : BaseTests
     [Fact]
     public void Load_FileWithApplication_ReturnsNewInstanceOfApplication()
     {
-        var application = Factory<Application>().Generate();
+        var application = Factory<Application>().Generate("installed");
         var state = new State();
-        state.AddApplication(application);
+        state.AddContract(application);
         var stateManager = Resolve<StateSerializer>();
         stateManager.Save(state);
 
@@ -47,9 +47,9 @@ public class StateSerializerTests : BaseTests
     [Fact]
     public void Load_FileWithApplication_ReturnsSameInstanceOfPackage()
     {
-        var application = Factory<Application>().Generate();
+        var application = Factory<Application>().Generate("installed");
         var state = new State();
-        state.AddApplication(application);
+        state.AddContract(application);
         var stateManager = Resolve<StateSerializer>();
         stateManager.Save(state);
 
@@ -62,9 +62,9 @@ public class StateSerializerTests : BaseTests
     [Fact]
     public void Save_StateWithApplication_DoesntSerializePackageContent()
     {
-        var application = Factory<Application>().Generate();
+        var application = Factory<Application>().Generate("installed");
         var state = new State();
-        state.AddApplication(application);
+        state.AddContract(application);
         var stateManager = Resolve<StateSerializer>();
 
         stateManager.Save(state);
