@@ -16,14 +16,20 @@ public record Application(
     public Argument<string> Description { get; init; } = Description ?? new Argument<string>();
     public IReadOnlyList<string> RequiredApplications { get; init; } = RequiredApplications ?? [];
     public ContractList Contracts { get; init; } = Contracts ?? new ContractList();
-    public IReadOnlyDictionary<ContractRef, Guid> ContractRefs { get; init; } = ContractRefs ?? new Dictionary<ContractRef, Guid>();
+
+    public IReadOnlyDictionary<ContractRef, Guid> ContractRefs { get; init; } =
+        ContractRefs ?? new Dictionary<ContractRef, Guid>();
 
     public override IEnumerable<IArgument> GetArguments()
     {
         yield return Url;
         yield return Description;
+        foreach (var argument in base.GetArguments())
+        {
+            yield return argument;
+        }
     }
-    
+
     public override Application Merge(Contract other)
     {
         var contract = EnsureSame(this, other);

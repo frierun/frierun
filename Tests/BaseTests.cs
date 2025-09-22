@@ -156,6 +156,14 @@ public abstract class BaseTests
         return Resolve<ContractFaker<T>>();
     }
 
+    /// <summary>
+    /// Create a mock service and registers it in the container.
+    /// </summary>
+    protected T Mock<T>(object?[]? constructorArguments = null)
+        where T : class
+    {
+        return Mock<T, T>(constructorArguments);
+    }
 
     /// <summary>
     /// Create a mock service and registers it in the container.
@@ -177,7 +185,7 @@ public abstract class BaseTests
         Resolve<PackageRegistry>().Load();
         var package = Resolve<PackageRegistry>().Find(name)
                       ?? throw new Exception($"Package {name} not found");
-        
+
         return InstallPackage(package, overrides);
     }
 

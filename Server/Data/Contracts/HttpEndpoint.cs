@@ -25,6 +25,10 @@ public record HttpEndpoint(
         yield return ResultSsl;
         yield return ResultHost;
         yield return ResultPort;
+        foreach (var argument in base.GetArguments())
+        {
+            yield return argument;
+        }
     }
 
     public override Contract Merge(Contract other)

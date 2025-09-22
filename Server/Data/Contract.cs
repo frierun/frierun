@@ -56,7 +56,8 @@ public abstract record Contract
     [JsonIgnore] public string? HandlerApplication { get; init; }
 
     public virtual bool Installed => Id != null;
-    public virtual IEnumerable<IArgument> GetArguments() => [];
+
+    public virtual IEnumerable<IArgument> GetArguments() => DependsOn;
 
     /// <summary>
     /// Merges contracts restrictions of the same type 

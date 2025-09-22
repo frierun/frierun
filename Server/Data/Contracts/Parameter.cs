@@ -16,6 +16,10 @@ public record Parameter(
     public override IEnumerable<IArgument> GetArguments()
     {
         yield return Value;
+        foreach (var argument in base.GetArguments())
+        {
+            yield return argument;
+        }
     }
 
     public override Contract Merge(Contract other)

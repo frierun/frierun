@@ -24,7 +24,9 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.Contains(container.Ref, State.GetContract(application, httpEndpoint.Ref).DependsOn);
+        Assert.Contains(
+            State.GetContract(application, container.Ref).Id,
+            State.GetContract(application, httpEndpoint.Ref).DependsOn);
     }
 
     [Fact]

@@ -50,6 +50,10 @@ public record Container(
         {
             yield return pair.Value;
         }
+        foreach (var argument in base.GetArguments())
+        {
+            yield return argument;
+        }
     }
     
     public override Contract Merge(Contract other)

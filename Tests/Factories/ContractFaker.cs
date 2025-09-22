@@ -17,7 +17,7 @@ public abstract class ContractFaker<TContract> : Faker<TContract>
     }
     
     /// <summary>
-    /// Generates name and contract
+    /// Generates contract entry
     /// </summary>
     public new ContractEntry<TContract> Generate(string? ruleSets = null)
     {
@@ -36,6 +36,16 @@ public abstract class ContractFaker<TContract> : Faker<TContract>
         
         var contractRef = new ContractRef<TContract>(name);
         return new ContractEntry<TContract>(contractRef, result);
+    }
+
+    /// <summary>
+    /// Generates a list of contract entries
+    /// </summary>
+    public new List<ContractEntry<TContract>> Generate(int count, string? ruleSets = null)
+    {
+        return Enumerable.Range(1, count)
+            .Select(_ => this.Generate(ruleSets))
+            .ToList();
     }
     
     /// <summary>

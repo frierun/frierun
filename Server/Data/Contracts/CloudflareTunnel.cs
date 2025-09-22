@@ -23,6 +23,10 @@ public record CloudflareTunnel(
     public override IEnumerable<IArgument> GetArguments()
     {
         yield return CloudflareApiConnection;
+        foreach (var argument in base.GetArguments())
+        {
+            yield return argument;
+        }
     }
 
     public override Contract Merge(Contract other)

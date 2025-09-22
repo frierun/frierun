@@ -41,7 +41,9 @@ public class ContainerHandlerTests : BaseTests
             new Dictionary<ContractRef, Contract>
             {
                 { container.Ref, container.Contract },
-                { parameter.Ref, parameter.Contract }
+                { new ContractRef<Network>(), new Network() },
+                { parameter.Ref, parameter.Contract },
+                { new ContractRef<Daemon>(container.Ref.Name), daemon}
             },
             []
         );
@@ -71,7 +73,9 @@ public class ContainerHandlerTests : BaseTests
             new Dictionary<ContractRef, Contract>
             {
                 { container.Ref, container.Contract },
-                { parameter.Ref, parameter.Contract }
+                { new ContractRef<Network>(), new Network() },
+                { parameter.Ref, parameter.Contract },
+                { new ContractRef<Daemon>(container.Ref.Name), daemon}
             },
             []
         );

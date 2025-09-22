@@ -20,6 +20,10 @@ public record Redis(
     public override IEnumerable<IArgument> GetArguments()
     {
         yield return Host;
+        foreach (var argument in base.GetArguments())
+        {
+            yield return argument;
+        }
     }
 
     public override Contract Merge(Contract other)

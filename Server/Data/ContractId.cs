@@ -38,6 +38,7 @@ public class ContractId : IArgument, IEquatable<ContractId>
     public Guid? Guid { get; private set; }
 
     public static implicit operator ContractId(ContractRef refId) => new(refId);
+    public static implicit operator ContractId(Guid guid) => new(guid);
 
     public ContractId(ContractRef refId)
     {
@@ -58,7 +59,13 @@ public class ContractId : IArgument, IEquatable<ContractId>
 
         Debug.Assert(Ref != null, "Contract ID must have either a GUID or a ContractRef");
 
-        Guid = plan.GetContract(Ref).Id;
+        var contract = plan.GetContract(Ref);
+        if (!contract.Installed)
+        {
+            return;
+        }
+        
+        Guid = contract.Id;
         Ref = null;
     }
 

@@ -17,6 +17,10 @@ public record File(
     public override IEnumerable<IArgument> GetArguments()
     {
         yield return Text;
+        foreach (var argument in base.GetArguments())
+        {
+            yield return argument;
+        }
     }
 
     public override Contract Merge(Contract other)

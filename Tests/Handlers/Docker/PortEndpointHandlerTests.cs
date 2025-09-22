@@ -19,7 +19,11 @@ public class PortEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.Contains(container.Ref, State.GetContract(application, portEndpoint.Ref).DependsOn);
+
+        Assert.Contains(
+            State.GetContract(application, container.Ref).Id, 
+            State.GetContract(application, portEndpoint.Ref).DependsOn
+        );
     }
 
     [Fact]

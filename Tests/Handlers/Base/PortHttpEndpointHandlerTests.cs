@@ -36,8 +36,8 @@ public class PortHttpEndpointHandlerTests : BaseTests
 
         var application = InstallPackage(package);
 
-        Assert.Contains(
-            new ContractRef<PortEndpoint>(httpEndpoint.Ref.Name),
+        Assert.Contains( 
+            State.GetContract<PortEndpoint>(application, httpEndpoint.Ref.Name).Id,
             State.GetContract(application, httpEndpoint.Ref).DependsOn
         );
     }

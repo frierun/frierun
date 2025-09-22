@@ -43,7 +43,7 @@ public class UninstallService(
         while (contracts.Count > 0)
         {
             var contractRef = contracts
-                .First(pair => !contracts.Any(dependPair => dependPair.Value.DependsOn.Contains(pair.Key))).Key;
+                .First(pair => contracts.All(dependPair => !dependPair.Value.DependsOn.Contains(pair.Value.Id))).Key;
 
             contracts[contractRef].Uninstall();
             contracts.Remove(contractRef);

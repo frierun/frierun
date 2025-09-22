@@ -21,6 +21,10 @@ public record Daemon(
     {
         yield return Command;
         yield return PreCommands;
+        foreach (var argument in base.GetArguments())
+        {
+            yield return argument;
+        }
     }
 
     public override Contract Merge(Contract other)
