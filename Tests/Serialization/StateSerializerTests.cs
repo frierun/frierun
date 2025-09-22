@@ -89,8 +89,8 @@ public class StateSerializerTests : BaseTests
 
         Assert.NotEmpty(loadedState.Applications);
         Assert.Equal(
-            state.Contracts.OfType<HttpEndpoint>().Single().NetworkName,
-            loadedState.Contracts.OfType<HttpEndpoint>().Single().NetworkName
+            state.GetContracts<HttpEndpoint>().Single().NetworkName,
+            loadedState.GetContracts<HttpEndpoint>().Single().NetworkName
         );
     }
 
@@ -108,8 +108,8 @@ public class StateSerializerTests : BaseTests
         var loadedState = stateManager.Load();
 
         Assert.NotEmpty(loadedState.Applications);
-        Assert.NotNull(state.Contracts.OfType<Volume>().Single().VolumeName);
-        Assert.NotNull(loadedState.Contracts.OfType<Volume>().Single().VolumeName);
+        Assert.NotNull(state.GetContracts<Volume>().Single().VolumeName);
+        Assert.NotNull(loadedState.GetContracts<Volume>().Single().VolumeName);
     }
 
     [Fact]
@@ -126,7 +126,7 @@ public class StateSerializerTests : BaseTests
         var loadedState = stateManager.Load();
 
         Assert.NotEmpty(loadedState.Applications);
-        Assert.NotNull(state.Contracts.OfType<Volume>().Single().LocalPath);
-        Assert.NotNull(loadedState.Contracts.OfType<Volume>().Single().LocalPath);
+        Assert.NotNull(state.GetContracts<Volume>().Single().LocalPath);
+        Assert.NotNull(loadedState.GetContracts<Volume>().Single().LocalPath);
     }
 }

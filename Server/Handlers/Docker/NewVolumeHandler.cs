@@ -13,9 +13,8 @@ public class NewVolumeHandler(State state, Application application, DockerServic
             yield break;
         }
 
-        if (contract.VolumeName != null && State.Contracts
-                .OfType<Volume>()
-                .Any(volume => volume.VolumeName == contract.VolumeName))
+        if (contract.VolumeName != null &&
+            State.GetContracts<Volume>().Any(volume => volume.VolumeName == contract.VolumeName))
         {
             yield break;
         }
@@ -47,9 +46,7 @@ public class NewVolumeHandler(State state, Application application, DockerServic
     {
         Debug.Assert(contract.VolumeName != null);
 
-        var volumeUsed = State.Contracts
-            .OfType<Volume>()
-            .Count(volume => volume.VolumeName == contract.VolumeName);
+        var volumeUsed = State.GetContracts<Volume>().Count(volume => volume.VolumeName == contract.VolumeName);
 
         if (volumeUsed > 1)
         {

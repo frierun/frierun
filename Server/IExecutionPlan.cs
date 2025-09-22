@@ -7,5 +7,6 @@ public interface IExecutionPlan
     /// <summary>
     /// Installs all contracts in the execution plan.
     /// </summary>
-    public Application Install();
+    /// <param name="state"></param>
+    public Application Install(State state);
 }

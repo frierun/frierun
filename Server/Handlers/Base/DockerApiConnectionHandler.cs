@@ -19,7 +19,7 @@ public class DockerApiConnectionHandler(State state) : Handler<DockerApiConnecti
         foreach (var filePath in paths)
         {
             var socketPath = $"{protocol}:{filePath}";
-            if (State.Contracts.OfType<DockerApiConnection>().Any(contract => contract.Path == socketPath))
+            if (State.GetContracts<DockerApiConnection>().Any(contract => contract.Path == socketPath))
             {
                 continue;
             }

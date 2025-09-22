@@ -13,16 +13,15 @@ public class ExistingVolumeHandler(State state, Application application, DockerS
             yield break;
         }
 
-        var volumeName = contract.VolumeName ?? State.Contracts
-            .OfType<Volume>()
-            .FirstOrDefault(volume => volume.VolumeName != null)?.VolumeName;
+        var volumeName = contract.VolumeName ??
+                         State.GetContracts<Volume>().FirstOrDefault(volume => volume.VolumeName != null)?.VolumeName;
 
         if (volumeName == null)
         {
             yield break;
         }
 
-        if (State.Contracts.OfType<Volume>().All(volume => volume.VolumeName != volumeName))
+        if (State.GetContracts<Volume>().All(volume => volume.VolumeName != volumeName))
         {
             yield break;
         }
@@ -47,9 +46,7 @@ public class ExistingVolumeHandler(State state, Application application, DockerS
     {
         Debug.Assert(contract.VolumeName != null);
 
-        var volumeUsed = State.Contracts
-            .OfType<Volume>()
-            .Count(volume => volume.VolumeName == contract.VolumeName);
+        var volumeUsed = State.GetContracts<Volume>().Count(volume => volume.VolumeName == contract.VolumeName);
 
         if (volumeUsed > 1)
         {

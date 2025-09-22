@@ -73,8 +73,7 @@ public class Handler<TContract>(State state, Application? application = null) : 
         var name = $"{baseName}{suffix}";
 
         while (forbidden?.Contains(name) == true
-               || State.Contracts
-                   .OfType<TContract>()
+               || State.GetContracts<TContract>()
                    .Where(c => c.Handler?.Application == Application)
                    .Any(c => predicate(c) == name)
               )

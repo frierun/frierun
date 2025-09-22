@@ -13,7 +13,7 @@ public class PortEndpointHandler(State state, Application application) : Handler
 
         if (contract.ExternalPort != 0)
         {
-            if (State.Contracts.OfType<PortEndpoint>()
+            if (State.GetContracts<PortEndpoint>()
                 .Any(endpoint => endpoint.Port == contract.ExternalPort && endpoint.Protocol == contract.Protocol))
             {
                 yield break;
@@ -23,7 +23,7 @@ public class PortEndpointHandler(State state, Application application) : Handler
         {
             var port = contract.Port;
 
-            while (State.Contracts.OfType<PortEndpoint>()
+            while (State.GetContracts<PortEndpoint>()
                    .Any(endpoint => endpoint.Port == port && endpoint.Protocol == contract.Protocol)
                   )
             {
@@ -52,7 +52,7 @@ public class PortEndpointHandler(State state, Application application) : Handler
                 [
                     new ContainerPort(
                         InternalPort: contract.Port,
-                        ExternalPort: contract.ExternalPort, 
+                        ExternalPort: contract.ExternalPort,
                         Protocol: contract.Protocol
                     )
                 ],

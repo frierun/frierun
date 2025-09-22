@@ -1,10 +1,12 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics;
 
 namespace Frierun.Server.Data;
 
 public class State
 {
     private readonly List<Application> _applications = [];
+    private readonly Dictionary<Guid, Contract> _contracts = new();
+    
     public event Action<Application> ApplicationAdded = _ => { };
     public event Action<Application> ApplicationRemoved = _ => { };
 
@@ -19,16 +21,17 @@ public class State
     /// <summary>
     /// Lists all installed contracts
     /// </summary>
-    [JsonIgnore]
-    public IEnumerable<Contract> Contracts => _applications
-        .SelectMany(application => application.Contracts.Values)
-        .Concat(UnmanagedContracts);
+    public IReadOnlyDictionary<Guid, Contract> ContractsById
+    {
+        get => _contracts;
+        init => _contracts = new Dictionary<Guid, Contract>(value);
+    }
 
     /// <summary>
     /// Gets contract by Guid.
     /// </summary>
-    public TContract GetContract<TContract>(Guid id) where TContract : Contract =>
-        (TContract)Contracts.Single(c => c.Id == id);
+    public TContract GetContract<TContract>(Guid id) where TContract : Contract => (TContract)_contracts[id];
+    public Contract GetContract(Guid id) => _contracts[id];
 
     /// <summary>
     /// Gets contract from the application by name.
@@ -36,7 +39,7 @@ public class State
     public TContract GetContract<TContract>(Application app, string name = "")
         where TContract : Contract
     {
-        return GetContract<TContract>(app, new ContractRef<TContract>(name));
+        return GetContract(app, new ContractRef<TContract>(name));
     }
     
     /// <summary>
@@ -47,6 +50,14 @@ public class State
     {
         var guid = app.ContractRefs[contractRef];
         return GetContract<TContract>(guid);
+    }
+
+    /// <summary>
+    /// Gets a contract list by type.
+    /// </summary>
+    public IEnumerable<TContract> GetContracts<TContract>() where TContract : Contract
+    {
+        return _contracts.Values.OfType<TContract>();
     }
     
 
@@ -67,4 +78,22 @@ public class State
         _applications.Remove(application);
         ApplicationRemoved(application);
     }
+
+    /// <summary>
+    /// Adds a newly installed contract to the state.
+    /// </summary>
+    public void AddContract(Contract contract)
+    {
+        Debug.Assert(contract.Id != null);
+        _contracts[(Guid)contract.Id] = contract;
+    }
+    
+    /// <summary>
+    /// Removes a contract from the state.
+    /// </summary>
+    public void RemoveContract(Contract contract)
+    {
+        Debug.Assert(contract.Id != null);
+        _contracts.Remove((Guid)contract.Id);
+    }    
 }

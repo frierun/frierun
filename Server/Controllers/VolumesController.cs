@@ -9,8 +9,8 @@ public class VolumesController : ControllerBase
     [HttpGet]
     public IEnumerable<string> List(State state)
     {
-        return state.Contracts
-            .OfType<Volume>()
+        return state
+            .GetContracts<Volume>()
             .Select(volume => volume.VolumeName)
             .OfType<string>();
     }

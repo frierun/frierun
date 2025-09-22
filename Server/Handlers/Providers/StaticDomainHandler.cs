@@ -61,6 +61,6 @@ public class StaticDomainHandler(State state, Application application)
     /// </summary>
     private bool IsDomainExist(string domain)
     {
-        return State.Contracts.OfType<Domain>().Any(c => c.Value == domain);
+        return State.GetContracts<Domain>().Any(c => c.Value == domain);
     }
 }

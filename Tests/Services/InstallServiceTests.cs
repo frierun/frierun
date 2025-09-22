@@ -14,12 +14,12 @@ public class InstallServiceTests : BaseTests
     {
         var application = Factory<Application>().Generate(); 
         var executionPlan = Substitute.For<IExecutionPlan>();
-        executionPlan.Install().Returns(application);
+        executionPlan.Install(State).Returns(application);
         var service = Resolve<InstallService>();
 
         service.Handle(executionPlan);
 
-        executionPlan.Received(1).Install();
+        executionPlan.Received(1).Install(State);
     }
     
     [Fact]
@@ -28,7 +28,7 @@ public class InstallServiceTests : BaseTests
         var stateManager = Resolve<StateManager>();
         var application = Factory<Application>().Generate(); 
         var executionPlan = Substitute.For<IExecutionPlan>();
-        executionPlan.Install().Returns(application).AndDoes(_ => Assert.False(stateManager.Ready));
+        executionPlan.Install(State).Returns(application).AndDoes(_ => Assert.False(stateManager.Ready));
         var service = Resolve<InstallService>();
         
         service.Handle(executionPlan);
@@ -41,7 +41,7 @@ public class InstallServiceTests : BaseTests
     {
         var stateManager = Resolve<StateManager>();
         var executionPlan = Substitute.For<IExecutionPlan>();
-        executionPlan.Install().Throws(_ => new Exception());
+        executionPlan.Install(State).Throws(_ => new Exception());
         var service = Resolve<InstallService>();
         
         Assert.Throws<Exception>(() => service.Handle(executionPlan));
@@ -56,7 +56,7 @@ public class InstallServiceTests : BaseTests
         var executionPlan = Substitute.For<IExecutionPlan>();
         var contract = Factory<Container>().Generate();
         var error = new HandlerException("test", "test", contract);
-        executionPlan.Install().Throws(_ => error);
+        executionPlan.Install(State).Throws(_ => error);
         var service = Resolve<InstallService>();
 
         service.Handle(executionPlan);

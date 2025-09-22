@@ -85,12 +85,13 @@ public class ExecutionPlan(
     {
         return (T)GetContract((ContractId)contractId);
     }
-    
+
 
     /// <summary>
     /// Installs all contracts in the execution plan.
     /// </summary>
-    public Application Install()
+    /// <param name="state"></param>
+    public Application Install(State state)
     {
         var graph = BuildGraph();
         var installedContracts = new Dictionary<ContractRef, Contract>();
@@ -120,7 +121,14 @@ public class ExecutionPlan(
             }
         );
 
-        return CreateApplication(installedContracts);
+        var application = CreateApplication(installedContracts);
+        foreach (var (_, contract) in contracts)
+        {
+            state.AddContract(contract);
+        }
+        state.AddApplication(application);
+        
+        return application;
     }
 
     /// <summary>
@@ -132,7 +140,6 @@ public class ExecutionPlan(
 
         return application with
         {
-            Contracts = new ContractList(installedContracts),
             RequiredApplications = _requiredApplications.Select(app => app.Name).ToList(),
             ContractRefs = installedContracts.ToDictionary(
                 pair => pair.Key, pair => pair.Value.Id ?? throw new Exception($"Contract {pair.Key} is not installed")

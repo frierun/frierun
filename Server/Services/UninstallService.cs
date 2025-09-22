@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Frierun.Server.Data;
+﻿using Frierun.Server.Data;
 
 namespace Frierun.Server;
 
@@ -39,14 +38,16 @@ public class UninstallService(
 
     private void UninstallContracts(Application application)
     {
-        var contracts = new Dictionary<ContractRef, Contract>(application.Contracts);
-        while (contracts.Count > 0)
+        var contractRefs = new HashSet<Guid>(application.ContractRefs.Values);
+        while (contractRefs.Count > 0)
         {
-            var contractRef = contracts
-                .First(pair => contracts.All(dependPair => !dependPair.Value.DependsOn.Contains(pair.Value.Id))).Key;
+            var guid = contractRefs
+                .First(guid => state.ContractsById.Values.All(depend => !depend.DependsOn.Contains(guid)));
 
-            contracts[contractRef].Uninstall();
-            contracts.Remove(contractRef);
+            var contract = state.GetContract(guid);
+            contract.Uninstall();
+            state.RemoveContract(contract);
+            contractRefs.Remove(guid);
         }
     }
 }

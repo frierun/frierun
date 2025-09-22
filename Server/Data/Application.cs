@@ -7,7 +7,6 @@ public record Application(
     Package? Package = null,
     Argument<string>? Url = null,
     Argument<string>? Description = null,
-    ContractList? Contracts = null,
     IReadOnlyList<string>? RequiredApplications = null,
     IReadOnlyDictionary<ContractRef, Guid>? ContractRefs = null
 ) : Contract
@@ -15,7 +14,6 @@ public record Application(
     public Argument<string> Url { get; init; } = Url ?? new Argument<string>();
     public Argument<string> Description { get; init; } = Description ?? new Argument<string>();
     public IReadOnlyList<string> RequiredApplications { get; init; } = RequiredApplications ?? [];
-    public ContractList Contracts { get; init; } = Contracts ?? new ContractList();
 
     public IReadOnlyDictionary<ContractRef, Guid> ContractRefs { get; init; } =
         ContractRefs ?? new Dictionary<ContractRef, Guid>();
@@ -39,7 +37,6 @@ public record Application(
             Name = OnlyOne(Name, contract.Name),
             Url = Url.Merge(contract.Url),
             Description = Description.Merge(contract.Description),
-            Contracts = Contracts.Merge(contract.Contracts)
         };
     }
 }

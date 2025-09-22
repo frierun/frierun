@@ -90,7 +90,7 @@ public class UninstallServiceTests : BaseTests
         var application = InstallPackage(package);
         if (reverse)
         {
-            application = application with { Contracts = new ContractList(application.Contracts.Reverse()) };
+            application = application with { ContractRefs = new Dictionary<ContractRef, Guid>(application.ContractRefs.Reverse()) };
         }
 
         Resolve<UninstallService>().Handle(application);

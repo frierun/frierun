@@ -44,6 +44,6 @@ public class DiscoverTests : BaseTests
         console.Run(["discover"]);
 
         var state = Resolve<State>();
-        Assert.NotEmpty(state.Contracts.OfType<DockerApiConnection>());
+        Assert.NotEmpty(state.GetContracts<DockerApiConnection>());
     }
 }
