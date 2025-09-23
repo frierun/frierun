@@ -35,6 +35,7 @@ public class DockerApiConnectionHandler(State state) : Handler<DockerApiConnecti
                 contract = Verify(
                     new DockerApiConnection
                     {
+                        Id = Guid.CreateVersion7(),
                         Path = socketPath,
                         Handler = this,
                     }
