@@ -33,9 +33,7 @@ public record SshConnection(
     
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, other) with
+        return MergeCommon(this, other, out var contract) with
         {
             Host = OnlyOne(Host, contract.Host),
             Port = OnlyOne(Port, contract.Port, port => port == 0),

@@ -13,9 +13,7 @@ public record Domain(
     
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, other) with
+        return MergeCommon(this, other, out var contract) with
         {
             Value = OnlyOne(Value, contract.Value),
             IsInternal = OnlyOne(IsInternal, contract.IsInternal)       

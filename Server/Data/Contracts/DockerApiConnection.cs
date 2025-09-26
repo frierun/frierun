@@ -30,9 +30,7 @@ public record DockerApiConnection(
 
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, other) with
+        return MergeCommon(this, other, out var contract) with
         {
             Path = OnlyOne(Path, contract.Path),
             IsPodman = OnlyOne(IsPodman, contract.IsPodman)

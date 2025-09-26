@@ -17,9 +17,7 @@ public record Selector(
     
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, contract) with
+        return MergeCommon(this, other, out var contract) with
         {
             Value = OnlyOne(Value, contract.Value),
         };

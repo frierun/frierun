@@ -11,7 +11,7 @@ public record CloudflareApiConnection(
 {
     [MemberNotNullWhen(true, nameof(Token))]
     public override bool Installed => Id != null;
-    
+
     /// <summary>
     /// Create a cloudflare client from the contract.
     /// </summary>
@@ -23,9 +23,7 @@ public record CloudflareApiConnection(
 
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, other) with
+        return MergeCommon(this, other, out var contract) with
         {
             Token = OnlyOne(Token, contract.Token)
         };

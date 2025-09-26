@@ -20,9 +20,7 @@ public record Postgresql(
 
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, contract) with
+        return MergeCommon(this, other, out var contract) with
         {
             Network = OnlyOne(Network, contract.Network),
             Username = OnlyOne(Username, contract.Username),

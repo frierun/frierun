@@ -30,9 +30,7 @@ public record Application(
 
     public override Application Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, contract) with
+        return MergeCommon(this, other, out var contract) with
         {
             Name = OnlyOne(Name, contract.Name),
             Url = Url.Merge(contract.Url),

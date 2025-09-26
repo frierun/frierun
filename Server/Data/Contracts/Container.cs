@@ -58,9 +58,7 @@ public record Container(
     
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, other) with
+        return MergeCommon(this, other, out var contract) with
         {
             ContainerName = OnlyOne(ContainerName, contract.ContainerName),
             NetworkName = OnlyOne(NetworkName, contract.NetworkName),

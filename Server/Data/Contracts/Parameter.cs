@@ -24,9 +24,7 @@ public record Parameter(
 
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, contract) with
+        return MergeCommon(this, other, out var contract) with
         {
             Value = Value.Merge(contract.Value),
             DefaultValue = OnlyOne(DefaultValue, contract.DefaultValue)

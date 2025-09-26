@@ -3,23 +3,11 @@
 public static class Merger
 {
     /// <summary>
-    /// Ensures that the provided contract is the same type and id as the provided one.
-    /// </summary>
-    public static TContract EnsureSame<TContract>(TContract contract, Contract other) where TContract : Contract
-    {
-        if (other is not TContract t)
-        {
-            throw new MergeException("Invalid contract");
-        }
-
-        return t;
-    }
-
-    /// <summary>
     /// Merges common part of the contract.
     /// </summary>
-    public static TContract MergeCommon<TContract>(TContract contract, Contract other) where TContract : Contract
+    public static TContract MergeCommon<TContract>(TContract contract, Contract other, out TContract castOther) where TContract : Contract
     {
+        castOther = (TContract)other;
         if (contract.Installed || other.Installed)
         {
             throw new MergeException("Can't merge installed contracts");

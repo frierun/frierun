@@ -33,9 +33,7 @@ public record HttpEndpoint(
 
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, contract) with
+        return MergeCommon(this, other, out var contract) with
         {
             Port = OnlyOne(Port, contract.Port, port => port == 0),
             Container = OnlyOne(Container, contract.Container),

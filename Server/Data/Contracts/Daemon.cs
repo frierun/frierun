@@ -29,9 +29,7 @@ public record Daemon(
 
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, other) with
+        return MergeCommon(this, other, out var contract) with
         {
             DaemonName = OnlyOne(DaemonName, contract.DaemonName),
             Command = Command.Merge(contract.Command),
