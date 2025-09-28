@@ -38,6 +38,7 @@ public class ExecutionPlan(
                 {
                     continue;
                 }
+
                 graph.AddEdge(dependencyRef, contractRef);
             }
         }
@@ -61,7 +62,7 @@ public class ExecutionPlan(
     {
         return (T)GetContract((ContractRef)contractRef);
     }
-    
+
     /// <summary>
     /// Get contract by ref.
     /// </summary>
@@ -72,11 +73,12 @@ public class ExecutionPlan(
         {
             return contracts.Values.First(contract => contract.Id == guid);
         }
-        
-        Debug.Assert(contractId.Ref != null, "Contract ID must have either a GUID or a ContractRef");;
+
+        Debug.Assert(contractId.Ref != null, "Contract ID must have either a GUID or a ContractRef");
+        ;
         return contracts[contractId.Ref];
     }
-    
+
     /// <summary>
     /// Get contract by id.
     /// </summary>
@@ -94,7 +96,6 @@ public class ExecutionPlan(
     public Application Install(State state)
     {
         var graph = BuildGraph();
-        var installedContracts = new Dictionary<ContractRef, Contract>();
         graph.RunDfs(contractRef =>
             {
                 var contract = GetContract(contractRef);
@@ -104,16 +105,14 @@ public class ExecutionPlan(
                     argument.Resolve(this);
                 }
 
-                var installedContract = contract.Install(this);
-
-                if (installedContract is not Application)
+                if (!contract.Installed)
                 {
-                    installedContracts[contractRef] = installedContract;
+                    contract = contract.Install(this);
                 }
 
-                contracts[contractRef] = installedContract;
+                contracts[contractRef] = contract;
 
-                var handlerApplication = installedContract.Handler?.Application;
+                var handlerApplication = contract.Handler?.Application;
                 if (handlerApplication != null)
                 {
                     _requiredApplications.Add(handlerApplication);
@@ -121,7 +120,7 @@ public class ExecutionPlan(
             }
         );
 
-        var application = CreateApplication(installedContracts);
+        var application = CreateApplication();
         foreach (var (_, contract) in contracts)
         {
             if (contract is Application)
@@ -129,25 +128,29 @@ public class ExecutionPlan(
                 state.AddContract(application);
                 continue;
             }
+
             state.AddContract(contract);
         }
-        
+
         return application;
     }
 
     /// <summary>
     /// Creates an application from the installed contracts.
     /// </summary>
-    private Application CreateApplication(Dictionary<ContractRef, Contract> installedContracts)
+    private Application CreateApplication()
     {
         var application = contracts.Values.OfType<Application>().First();
 
         return application with
         {
             RequiredApplications = _requiredApplications.Select(app => app.Name).ToList(),
-            ContractRefs = installedContracts.ToDictionary(
-                pair => pair.Key, pair => pair.Value.Id ?? throw new Exception($"Contract {pair.Key} is not installed")
-            ),
+            ContractRefs = contracts
+                .Where(pair => pair.Value is not Application)
+                .ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value.Id
+                )
         };
     }
 }

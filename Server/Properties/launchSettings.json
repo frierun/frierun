@@ -23,9 +23,9 @@
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy"
       }
     },
-    "init": {
+    "discover": {
       "commandName": "Project",
-      "commandLineArgs": "init",
+      "commandLineArgs": "discover",
       "dotnetRunMessages": true,
       "launchBrowser": false
     }

@@ -10,7 +10,7 @@ public record CloudflareApiConnection(
 ) : Contract<ICloudflareApiConnectionHandler>
 {
     [MemberNotNullWhen(true, nameof(Token))]
-    public override bool Installed => Id != null;
+    public override bool Installed => Id != Guid.Empty;
 
     /// <summary>
     /// Create a cloudflare client from the contract.

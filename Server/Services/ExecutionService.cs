@@ -1,4 +1,5 @@
-﻿using Frierun.Server.Data;
+﻿using System.Diagnostics;
+using Frierun.Server.Data;
 using Frierun.Server.Handlers;
 
 namespace Frierun.Server;
@@ -28,7 +29,8 @@ public class ExecutionService(
         {
             nextContract ??= contractRegistry.CreateContract(nextId);
 
-            var branches = new Queue<ContractList>(DiscoverContract(nextId, nextContract, applicationName));
+            var contractLists = DiscoverContract(nextId, nextContract, applicationName).SelectMany(lists => lists);
+            var branches = new Queue<ContractList>(contractLists);
             if (branches.Count != 0)
             {
                 branchesStack.Push(new StackItem(currentGraph, nextId, branches));
@@ -121,23 +123,52 @@ public class ExecutionService(
     /// <summary>
     /// Discovers all possible dependent contracts for the given contract.
     /// </summary>
-    private IEnumerable<ContractList> DiscoverContract(ContractRef contractRef, Contract contract, string? prefix = null)
+    private IEnumerable<IEnumerable<ContractList>> DiscoverContract(
+        ContractRef contractRef,
+        Contract contract,
+        string? prefix = null
+    )
     {
         var context = new ApplicationContext(
             contractRef.Name,
             prefix ?? ""
         );
 
-        if (contract.Handler != null)
+        if (contract.Installed)
         {
-            return contract.Handler.Initialize(contract, context);
+            var installedContract = state.GetContract(contract.Id);
+            Debug.Assert(installedContract.Installed);
+            yield return installedContract.Handler.Initialize(installedContract, context);
+            yield break;
         }
 
-        return handlerRegistry
+        if (contract.Handler != null)
+        {
+            yield return contract.Handler.Initialize(contract, context);
+            yield break;
+        }
+
+        var installedContracts = state.Contracts.Values.Where(c => c.GetType() == contract.GetType());
+        foreach (var installedContract in installedContracts)
+        {
+            if (!installedContract.IsFulfilling(contract))
+            {
+                continue;
+            }
+
+            Debug.Assert(installedContract.Installed);
+            yield return installedContract.Handler.Initialize(installedContract, context);
+        }
+
+        var handlers = handlerRegistry
             .GetHandlers(contract.GetType())
+            .Where(handler => contract.Handler == null || contract.Handler == handler)
             .Where(handler =>
                 contract.HandlerApplication == null || handler.Application?.Name == contract.HandlerApplication
-            )
-            .SelectMany(handler => handler.Initialize(contract, context));
+            );
+        foreach (var handler in handlers)
+        {
+            yield return handler.Initialize(contract, context);
+        }
     }
 }

@@ -13,7 +13,7 @@ public record CloudflareTunnel(
 ) : Contract
 {
     [MemberNotNullWhen(true, nameof(TunnelId), nameof(Token), nameof(AccountId))]
-    public override bool Installed => Id != null;
+    public override bool Installed => Id != Guid.Empty;
 
     public ContractId<CloudflareApiConnection> CloudflareApiConnection { get; init; } =
         CloudflareApiConnection ?? new ContractId<CloudflareApiConnection>("");

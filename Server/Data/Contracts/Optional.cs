@@ -9,7 +9,7 @@ public record Optional(
 ) : Contract
 {
     [MemberNotNullWhen(true, nameof(Value))]
-    public override bool Installed => Id != null;
+    public override bool Installed => Id != Guid.Empty;
     
     public ContractList Contracts { get; init; } = Contracts ?? [];
     

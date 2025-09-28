@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text.Json.Serialization;
 
 namespace Frierun.Server.Data;
 
@@ -9,6 +10,7 @@ public class State
     public event Action<Application> ApplicationAdded = _ => { };
     public event Action<Application> ApplicationRemoved = _ => { };
     
+    [JsonIgnore]
     public IEnumerable<Application> Applications => GetContracts<Application>();
 
     /// <summary>
@@ -58,8 +60,8 @@ public class State
     /// </summary>
     public void AddContract(Contract contract)
     {
-        Debug.Assert(contract.Id != null);
-        _contracts[(Guid)contract.Id] = contract;
+        Debug.Assert(contract.Id != Guid.Empty);
+        _contracts[contract.Id] = contract;
 
         if (contract is Application application)
         {
@@ -72,8 +74,8 @@ public class State
     /// </summary>
     public void RemoveContract(Contract contract)
     {
-        Debug.Assert(contract.Id != null);
-        _contracts.Remove((Guid)contract.Id);
+        Debug.Assert(contract.Id != Guid.Empty);
+        _contracts.Remove(contract.Id);
         
         if (contract is Application application)
         {

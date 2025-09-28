@@ -73,19 +73,29 @@ public class DiscoveryGraph
         {
             foreach (var (contractRef, contract) in result)
             {
-                if (Contracts.TryGetValue(contractRef, out var oldContract))
-                {
-                    Contracts[contractRef] = oldContract.Merge(contract);
-                }
-                else
-                {
-                    Contracts[contractRef] = contract;
-                }
-
                 if (contractRef != initializedContractRef)
                 {
                     _toInitialize.Add(contractRef);
                 }
+
+                if (!Contracts.TryGetValue(contractRef, out var oldContract))
+                {
+                    Contracts[contractRef] = contract;
+                    continue;
+                }
+
+                if (oldContract.Installed && oldContract.IsFulfilling(contract))
+                {
+                    continue;
+                }
+
+                if (contract.Installed && contract.IsFulfilling(oldContract))
+                {
+                    Contracts[contractRef] = contract;
+                    continue;
+                }
+
+                Contracts[contractRef] = oldContract.Merge(contract);
             }
         }
         catch (MergeException)

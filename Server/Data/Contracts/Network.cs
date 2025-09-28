@@ -8,7 +8,7 @@ public record Network(
 ) : Contract
 {
     [MemberNotNullWhen(true, nameof(NetworkName))]
-    public override bool Installed => Id != null;
+    public override bool Installed => Id != Guid.Empty;
 
     public override Contract Merge(Contract other)
     {

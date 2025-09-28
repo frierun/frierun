@@ -10,7 +10,7 @@ public record Daemon(
 ) : Contract
 {
     [MemberNotNullWhen(true, nameof(DaemonName))]
-    public override bool Installed => Id != null;
+    public override bool Installed => Id != Guid.Empty;
 
     public Argument<IEnumerable<string>> Command { get; init; } = Command ?? new Argument<IEnumerable<string>>();
 

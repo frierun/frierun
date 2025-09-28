@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using Frierun.Server.Handlers;
 
@@ -38,7 +39,10 @@ public abstract record Contract<THandler> : Contract
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
 public abstract record Contract
 {
-    public Guid? Id { get; init; }
+    [MemberNotNullWhen(true, nameof(Id), nameof(Handler))]
+    public virtual bool Installed => Id != Guid.Empty;
+    
+    public Guid Id { get; init; } = Guid.Empty;
 
     [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = [];
 
@@ -55,7 +59,6 @@ public abstract record Contract
 
     [JsonIgnore] public string? HandlerApplication { get; init; }
 
-    public virtual bool Installed => Id != null;
 
     public virtual IEnumerable<IArgument> GetArguments() => DependsOn;
 
@@ -63,6 +66,14 @@ public abstract record Contract
     /// Merges contracts restrictions of the same type 
     /// </summary>
     public abstract Contract Merge(Contract other);
+
+    /// <summary>
+    /// Checks if the installed contract is fulfilling the other contract.
+    /// </summary>
+    public virtual bool IsFulfilling(Contract other)
+    {
+        return false;
+    }
 
     /// <summary>
     /// Installs the contract using the handler.

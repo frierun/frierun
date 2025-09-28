@@ -7,7 +7,13 @@ public static class Merger
     /// </summary>
     public static TContract MergeCommon<TContract>(TContract contract, Contract other, out TContract castOther) where TContract : Contract
     {
-        castOther = (TContract)other;
+        if (other is not TContract cast)
+        {
+            throw new MergeException("Merge different types");
+        }
+
+        castOther = cast;
+        
         if (contract.Installed || other.Installed)
         {
             throw new MergeException("Can't merge installed contracts");

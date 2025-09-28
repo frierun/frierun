@@ -36,4 +36,24 @@ public record DockerApiConnection(
             IsPodman = OnlyOne(IsPodman, contract.IsPodman)
         };
     }
+
+    public override bool IsFulfilling(Contract other)
+    {
+        if (other is not DockerApiConnection contract)
+        {
+            return false;
+        }
+
+        if (contract.Path != null && Path != contract.Path)
+        {
+            return false;
+        }
+
+        if (contract.IsPodman != null && IsPodman != contract.IsPodman)
+        {
+            return false;
+        }
+
+        return true;
+    }
 }

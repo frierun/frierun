@@ -9,7 +9,7 @@ public record Parameter(
 ) : Contract
 {
     [MemberNotNullWhen(true, nameof(Value))]
-    public override bool Installed => Id != null;
+    public override bool Installed => Id != Guid.Empty;
 
     public Argument<string> Value { get; init; } = Value ?? new Argument<string>();
 

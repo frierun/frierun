@@ -8,7 +8,7 @@ public record Password(
 ) : Contract
 {
     [MemberNotNullWhen(true, nameof(Value))]
-    public override bool Installed => Id != null;
+    public override bool Installed => Id != Guid.Empty;
 
     public override Contract Merge(Contract other)
     {
