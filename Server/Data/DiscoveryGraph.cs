@@ -83,19 +83,8 @@ public class DiscoveryGraph
                     Contracts[contractRef] = contract;
                     continue;
                 }
-
-                if (oldContract.Installed && oldContract.IsFulfilling(contract))
-                {
-                    continue;
-                }
-
-                if (contract.Installed && contract.IsFulfilling(oldContract))
-                {
-                    Contracts[contractRef] = contract;
-                    continue;
-                }
-
-                Contracts[contractRef] = oldContract.Merge(contract);
+                
+                Contracts[contractRef] = Merger.Merge(contract, oldContract);
             }
         }
         catch (MergeException)

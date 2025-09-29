@@ -23,6 +23,7 @@ public class PackageSerializer(ILogger<PackageSerializer> logger, ContractRegist
             new ArgumentOfTConverter(),
             new YamlBoolConverter()
         },
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         NumberHandling = JsonNumberHandling.AllowReadingFromString,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         TypeInfoResolver = new DefaultJsonTypeInfoResolver

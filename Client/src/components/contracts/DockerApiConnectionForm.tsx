@@ -7,7 +7,8 @@ export default function DockerApiConnectionForm(
     {
         contractRef,
         contract,
-        updateContract
+        updateContract,
+        variants
     }: ContractProps<DockerApiConnection>
 ) {
     const [path, setPath] = useState('');
@@ -15,9 +16,9 @@ export default function DockerApiConnectionForm(
     useEffect(() => {
         setPath(contract.path ?? '');
     }, [contract]);
-
+    
     return (
-        <BaseForm contractRef={contractRef} contract={contract} updateContract={updateContract}>
+        <BaseForm contractRef={contractRef} contract={contract} updateContract={updateContract} variants={variants}>
             <div className={"my-1.5"}>
                 <label className={"inline-block w-48"}>
                     Socket path:
@@ -25,6 +26,7 @@ export default function DockerApiConnectionForm(
                 <input
                     type="text"
                     value={path}
+                    disabled={contract.id !== undefined}
                     onChange={e => {
                         setPath(e.target.value);
                         updateContract(contractRef,

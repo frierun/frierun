@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
 namespace Frierun.Server;
@@ -11,6 +12,7 @@ public class ConfigureJsonOptions(
 {
     public void Configure(JsonOptions options)
     {
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         options.JsonSerializerOptions.Converters.Add(new ArgumentOfTConverter());
         options.JsonSerializerOptions.Converters.Add(new ContractIdConverter());
         options.JsonSerializerOptions.Converters.Add(new ContractIdOfTConverter());

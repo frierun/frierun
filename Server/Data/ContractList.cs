@@ -29,12 +29,12 @@ public class ContractList : IReadOnlyDictionary<ContractRef, Contract>
     {
         _contracts = new Dictionary<ContractRef, Contract>(contracts);
     }
-    
+
     public ContractList(ContractList contracts)
     {
         _contracts = new Dictionary<ContractRef, Contract>(contracts);
     }
-    
+
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
@@ -62,7 +62,7 @@ public class ContractList : IReadOnlyDictionary<ContractRef, Contract>
         get => _contracts[key];
         init => _contracts[key] = value;
     }
-    
+
     public Contract this[ApplicationContext context]
     {
         init => _contracts[new ContractRef(value.GetType().Name, context.Name)] = value;
@@ -87,7 +87,9 @@ public class ContractList : IReadOnlyDictionary<ContractRef, Contract>
                 .Concat(other)
                 .GroupBy(c => c.Key)
                 .Select(group =>
-                    group.Aggregate((a, b) => new KeyValuePair<ContractRef, Contract>(a.Key, a.Value.Merge(b.Value)))
+                    group.Aggregate((a, b) =>
+                        new KeyValuePair<ContractRef, Contract>(a.Key, Merger.Merge(a.Value, b.Value))
+                    )
                 )
         );
     }

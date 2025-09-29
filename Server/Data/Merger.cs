@@ -3,6 +3,24 @@
 public static class Merger
 {
     /// <summary>
+    /// Merges two contracts. If any of them is installed, it is returned.
+    /// </summary>
+    public static Contract Merge(Contract contract, Contract other)
+    {
+        if (contract.Installed && contract.IsFulfilling(other))
+        {
+            return contract;
+        }
+
+        if (other.Installed && other.IsFulfilling(contract))
+        {
+            return other;
+        }
+
+        return contract.Merge(other);
+    }
+    
+    /// <summary>
     /// Merges common part of the contract.
     /// </summary>
     public static TContract MergeCommon<TContract>(TContract contract, Contract other, out TContract castOther) where TContract : Contract

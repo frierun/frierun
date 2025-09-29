@@ -19,7 +19,7 @@ export default function BaseForm<T extends Contract>
      variants = [contract],
      updateContract,
      contractName,
-     variantName = contract => contract.handler?.applicationName ?? 'Unknown',
+     variantName = contract => contract.id ?? contract.handler?.applicationName ?? 'New',
      updateVariant,
      children
  }: Props<T>) {

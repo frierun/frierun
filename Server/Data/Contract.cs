@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using Frierun.Server.Handlers;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Frierun.Server.Data;
 
@@ -37,11 +38,13 @@ public abstract record Contract<THandler> : Contract
 [JsonDerivedType(typeof(Selector), nameof(Selector))]
 [JsonDerivedType(typeof(SshConnection), nameof(SshConnection))]
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
+[SwaggerSchema(Required = ["type"])]
 public abstract record Contract
 {
     [MemberNotNullWhen(true, nameof(Id), nameof(Handler))]
     public virtual bool Installed => Id != Guid.Empty;
     
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Guid Id { get; init; } = Guid.Empty;
 
     [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = [];
