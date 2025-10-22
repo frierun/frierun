@@ -126,8 +126,8 @@ public class ContainerHandlerTests : BaseTests
 
         var volume1 = State.GetContract<Volume>(application1);
         var volume2 = State.GetContract<Volume>(application2);
-        Assert.Equal(Handler<NewVolumeHandler>(docker1), volume1.Handler);
-        Assert.Equal(Handler<NewVolumeHandler>(docker2), volume2.Handler);
+        Assert.Equal(Handler<VolumeHandler>(docker1), volume1.Handler);
+        Assert.Equal(Handler<VolumeHandler>(docker2), volume2.Handler);
         Assert.NotEqual(volume1.Handler, volume2.Handler);
     }
 

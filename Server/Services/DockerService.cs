@@ -134,7 +134,7 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
     }
 
     /// <summary>
-    /// Removes volume by name
+    /// Creates volume by name
     /// </summary>
     public async Task<bool> CreateVolume(string volumeName)
     {
@@ -156,6 +156,24 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
         return true;
     }
 
+    /// <summary>
+    /// Creates volume by name
+    /// </summary>
+    public async Task<IList<VolumeResponse>> ListVolumes()
+    {
+        try
+        {
+            var result = await client.Volumes.ListAsync();
+            return result.Volumes;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to list volumes");
+            return new List<VolumeResponse>();
+        }
+
+    }
+    
 
     /// <summary>
     /// Removes volume by name

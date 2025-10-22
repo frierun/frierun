@@ -15,4 +15,14 @@ public record Volume(
             LocalPath = OnlyOne(LocalPath, contract.LocalPath)
         };
     }
+
+    public override bool IsFulfilling(Contract other)
+    {
+        if (other.HandlerApplication != null && other.HandlerApplication != Handler?.Application?.Name)
+        {
+            return false;
+        }
+
+        return true;
+    }
 }

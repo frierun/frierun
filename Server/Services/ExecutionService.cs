@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Frierun.Server.Data;
+﻿using Frierun.Server.Data;
 using Frierun.Server.Handlers;
 
 namespace Frierun.Server;
@@ -29,7 +28,7 @@ public class ExecutionService(
         {
             nextContract ??= contractRegistry.CreateContract(nextId);
 
-            var contractLists = DiscoverContract(nextId, nextContract, applicationName).SelectMany(lists => lists);
+            var contractLists = DiscoverContract(nextId, nextContract, applicationName);
             var branches = new Queue<ContractList>(contractLists);
             if (branches.Count != 0)
             {
@@ -123,7 +122,7 @@ public class ExecutionService(
     /// <summary>
     /// Discovers all possible dependent contracts for the given contract.
     /// </summary>
-    private IEnumerable<IEnumerable<ContractList>> DiscoverContract(
+    private IEnumerable<ContractList> DiscoverContract(
         ContractRef contractRef,
         Contract contract,
         string? prefix = null
@@ -134,41 +133,12 @@ public class ExecutionService(
             prefix ?? ""
         );
 
-        if (contract.Installed)
-        {
-            var installedContract = state.GetContract(contract.Id);
-            Debug.Assert(installedContract.Installed);
-            yield return installedContract.Handler.Initialize(installedContract, context);
-            yield break;
-        }
-
-        if (contract.Handler != null)
-        {
-            yield return contract.Handler.Initialize(contract, context);
-            yield break;
-        }
-
-        var installedContracts = state.Contracts.Values.Where(c => c.GetType() == contract.GetType());
-        foreach (var installedContract in installedContracts)
-        {
-            if (!installedContract.IsFulfilling(contract))
-            {
-                continue;
-            }
-
-            Debug.Assert(installedContract.Installed);
-            yield return installedContract.Handler.Initialize(installedContract, context);
-        }
-
-        var handlers = handlerRegistry
+        return handlerRegistry
             .GetHandlers(contract.GetType())
             .Where(handler => contract.Handler == null || contract.Handler == handler)
             .Where(handler =>
                 contract.HandlerApplication == null || handler.Application?.Name == contract.HandlerApplication
-            );
-        foreach (var handler in handlers)
-        {
-            yield return handler.Initialize(contract, context);
-        }
+            )
+            .SelectMany(handler => handler.Initialize(contract, context));
     }
 }

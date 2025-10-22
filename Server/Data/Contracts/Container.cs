@@ -36,8 +36,6 @@ public record Container(
     [JsonInclude]
     private IDictionary<string, int> ConnectedNetworks { get; init; } = new Dictionary<string, int>();
 
-    
- 
     public override IEnumerable<IArgument> GetArguments()
     {
         yield return ImageName;

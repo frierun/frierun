@@ -16,6 +16,20 @@ public class Handler<TContract>(State state, Application? application = null) : 
 
     public virtual IEnumerable<ContractList> Initialize(TContract contract, ApplicationContext context)
     {
+        if (contract.Installed)
+        {
+            yield return new ContractList { [context] = state.GetContract(contract.Id) };
+            yield break;
+        }
+
+        foreach (var installedContract in State.GetContracts<TContract>().Where(c => c.Handler == this))
+        {
+            if (!installedContract.IsFulfilling(contract))
+                continue;
+            
+            yield return new ContractList { [context] = installedContract };
+        }
+
         yield return new ContractList
         {
             [context] = contract with

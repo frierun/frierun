@@ -192,7 +192,7 @@ public class HandlerRegistry : IDisposable
             return true;
         }
 
-        if (handlerType == typeof(NewVolumeHandler))
+        if (handlerType == typeof(VolumeHandler))
         {
             return true;
         }

@@ -1,16 +1,19 @@
 ﻿import {useEffect, useState} from "react";
 import {Volume} from "@/api/schemas";
-import {useGetVolumes} from "@/api/endpoints/volumes.ts";
 import {ContractProps} from "@/components/contracts/ContractForm.tsx";
 import BaseForm from "@/components/contracts/BaseForm.tsx";
 
 function VariantName(contract: Volume): string {
-    return contract.handler?.typeName.replace("Handler", "") ?? 'Unknown';
+    if (contract.handler?.typeName === 'LocalPathHandler') {
+        return "LocalPath";
+    }
+    
+    const handlerName = contract.handler?.typeName.replace("Handler", "") ?? 'Unknown';
+    return contract.id ? "Existing " + handlerName :  "New " + handlerName;
 }
 
 export default function VolumeForm({contractRef, contract, variants, updateContract}: ContractProps<Volume>) {
     const [value, setValue] = useState('');
-    const {data} = useGetVolumes();
 
     useEffect(() => {
         setValue((contract.handler?.typeName === 'LocalPathHandler' ? contract.localPath : contract.volumeName) ?? '');
@@ -24,15 +27,17 @@ export default function VolumeForm({contractRef, contract, variants, updateContr
             variantName={VariantName}
             updateContract={updateContract}
         >
-            {contract.handler?.typeName == 'ExistingVolumeHandler' &&
+            {contract.handler?.typeName == 'VolumeHandler' &&
                 (
                     <div>
                         <label className={"inline-block w-48"}>
-                            Existing volume name:
+                            Volume name:
                         </label>
 
-                        <select
+                        <input
+                            type="text"
                             value={value}
+                            disabled={contract.id !== undefined}
                             onChange={e => {
                                 setValue(e.target.value);
                                 updateContract(contractRef, {
@@ -40,12 +45,7 @@ export default function VolumeForm({contractRef, contract, variants, updateContr
                                     volumeName: e.target.value
                                 });
                             }}
-                        >
-                            {data?.data.map(volume => (
-                                <option key={volume} value={volume}>{volume}</option>
-                            ))}
-                        </select>
-
+                        />
                     </div>
                 )
             }

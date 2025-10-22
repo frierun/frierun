@@ -22,8 +22,8 @@ public class VolumeTests : BaseTests
     {
         var docker1 = InstallPackage("docker");
         var docker2 = InstallPackage("docker");
-        var volume1 = Factory<Volume>().Generate() with { Handler = Handler<NewVolumeHandler>(docker1) };
-        var volume2 = Factory<Volume>().Generate() with { Handler = Handler<NewVolumeHandler>(docker2) };
+        var volume1 = Factory<Volume>().Generate() with { Handler = Handler<VolumeHandler>(docker1) };
+        var volume2 = Factory<Volume>().Generate() with { Handler = Handler<VolumeHandler>(docker2) };
 
         Assert.Throws<MergeException>(() => volume1.Merge(volume2));
     }
@@ -33,7 +33,7 @@ public class VolumeTests : BaseTests
     {
         var docker1 = InstallPackage("docker");
         var docker2 = InstallPackage("docker");
-        var volume1 = Factory<Volume>().Generate() with { Handler = Handler<NewVolumeHandler>(docker1) };
+        var volume1 = Factory<Volume>().Generate() with { Handler = Handler<VolumeHandler>(docker1) };
         var volume2 = Factory<Volume>().Generate() with { HandlerApplication = docker2.Name };
 
         Assert.Throws<MergeException>(() => volume1.Merge(volume2));

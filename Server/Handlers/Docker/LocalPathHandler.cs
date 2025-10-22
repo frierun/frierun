@@ -7,6 +7,11 @@ public class LocalPathHandler(State state, Application application) : Handler<Vo
 {
     public override IEnumerable<ContractList> Initialize(Volume contract, ApplicationContext context)
     {
+        if (contract.Installed)
+        {
+            yield break;
+        }
+        
         if (contract.VolumeName != null)
         {
             yield break;
