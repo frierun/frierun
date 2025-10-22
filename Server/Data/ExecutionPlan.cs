@@ -150,7 +150,10 @@ public class ExecutionPlan(
                 .ToDictionary(
                     pair => pair.Key,
                     pair => pair.Value.Id
-                )
+                ),
+            DependsOn = contracts
+                .Where(pair => pair.Value is not Application)
+                .Select(pair => new ContractId(pair.Value.Id))
         };
     }
 }

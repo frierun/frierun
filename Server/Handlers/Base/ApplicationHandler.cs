@@ -43,7 +43,7 @@ public class ApplicationHandler(State state) : Handler<Application>(state)
             [context] = application with
             {
                 Url = url,
-                Handler = this
+                Handler = this,
             }
         };
     }

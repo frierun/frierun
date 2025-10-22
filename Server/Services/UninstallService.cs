@@ -41,8 +41,13 @@ public class UninstallService(
         while (contractRefs.Count > 0)
         {
             var guid = contractRefs
-                .First(guid => state.Contracts.Values.All(depend => !depend.DependsOn.Contains(guid)));
+                .FirstOrDefault(guid => state.Contracts.Values.All(depend => !depend.DependsOn.Contains(guid)));
 
+            if (guid == Guid.Empty)
+            {
+                break;
+            }
+            
             var contract = state.GetContract(guid);
             contract.Uninstall();
             state.RemoveContract(contract);

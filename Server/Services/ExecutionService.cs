@@ -133,9 +133,13 @@ public class ExecutionService(
             prefix ?? ""
         );
 
+        if (contract.Handler != null)
+        {
+            return contract.Handler.Initialize(contract, context);
+        }
+
         return handlerRegistry
             .GetHandlers(contract.GetType())
-            .Where(handler => contract.Handler == null || contract.Handler == handler)
             .Where(handler =>
                 contract.HandlerApplication == null || handler.Application?.Name == contract.HandlerApplication
             )
