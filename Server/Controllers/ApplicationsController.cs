@@ -20,7 +20,6 @@ public class ApplicationsController : ControllerBase
     [HttpGet]
     public IEnumerable<ApplicationResponse> List(State state)
     {
-        
         return state.Applications.Select(
             application =>
             {
