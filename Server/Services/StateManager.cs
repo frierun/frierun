@@ -10,7 +10,7 @@ public class StateManager
     public HandlerExceptionResult? Error => Exception?.Result;
     [JsonIgnore] public HandlerException? Exception { get; set; }
     
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
     
     /// <summary>
     /// Starts task with given name. Returns false if task is already running.

@@ -9,25 +9,61 @@ public class DiscoverService(
     StateSerializer stateSerializer,
     PackageRegistry packageRegistry,
     ExecutionService executionService,
-    InstallService installService
-    )
+    InstallService installService,
+    StateManager stateManager
+)
 {
     public void Discover()
     {
         logger.LogInformation("Discover and add contracts.");
 
-        foreach (var handler in handlerRegistry.GetAllHandlers())
+        if (!stateManager.StartTask("discover"))
         {
-            foreach (var contract in handler.Discover())
-            {
-                logger.LogInformation("Found contract: {type}", contract);
-                state.AddContract(contract);
-            }
+            return;
         }
 
-        stateSerializer.Save(state);
-        
+        try
+        {
+            foreach (var handler in handlerRegistry.GetAllHandlers())
+            {
+                foreach (var contract in handler.Discover())
+                {
+                    if (state.Contracts.Values
+                        .Where(installedContract => installedContract.Handler == handler)
+                        .Any(installedContract => installedContract.IsFulfilling(contract))
+                       )
+                    {
+                        continue;
+                    }
+
+                    AddContract(
+                        contract with
+                        {
+                            Id = Guid.CreateVersion7(),
+                            Handler = handler
+                        }
+                    );
+                }
+
+                stateSerializer.Save(state);
+            }
+        }
+        finally
+        {
+            stateManager.FinishTask();
+        }
+
+
         InstallDocker();
+    }
+
+    /// <summary>
+    /// Adds contract to the state.
+    /// </summary>
+    private void AddContract(Contract contract)
+    {
+        logger.LogInformation("Found contract: {type}", contract);
+        state.AddContract(contract);
     }
 
     /// <summary>
@@ -39,7 +75,7 @@ public class DiscoverService(
         {
             return;
         }
-        
+
         var dockerApiConnection = state.GetContracts<DockerApiConnection>().FirstOrDefault();
         if (dockerApiConnection == null)
         {

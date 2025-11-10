@@ -10,9 +10,7 @@ public class VolumeHandler(State state, Application application, DockerService d
     {
         return dockerService.ListVolumes().Result.Select(volume => new Volume
             {
-                Id = Guid.CreateVersion7(),
-                VolumeName = volume.Name,
-                Handler = this
+                VolumeName = volume.Name
             }
         );
     }

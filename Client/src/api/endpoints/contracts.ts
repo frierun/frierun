@@ -4,14 +4,17 @@
  * Frierun.Server
  * OpenAPI spec version: 1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
@@ -150,3 +153,96 @@ export function useGetContracts<
 
   return query;
 }
+
+export type postContractsDiscoverResponse200 = {
+  data: void;
+  status: 200;
+};
+
+export type postContractsDiscoverResponseComposite =
+  postContractsDiscoverResponse200;
+
+export type postContractsDiscoverResponse =
+  postContractsDiscoverResponseComposite & {
+    headers: Headers;
+  };
+
+export const getPostContractsDiscoverUrl = () => {
+  return `/api/v1/contracts/discover`;
+};
+
+export const postContractsDiscover = async (
+  options?: RequestInit,
+): Promise<postContractsDiscoverResponse> => {
+  return customFetch<postContractsDiscoverResponse>(
+    getPostContractsDiscoverUrl(),
+    {
+      ...options,
+      method: "POST",
+    },
+  );
+};
+
+export const getPostContractsDiscoverMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postContractsDiscover>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postContractsDiscover>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["postContractsDiscover"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postContractsDiscover>>,
+    void
+  > = () => {
+    return postContractsDiscover(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostContractsDiscoverMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postContractsDiscover>>
+>;
+
+export type PostContractsDiscoverMutationError = unknown;
+
+export const usePostContractsDiscover = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postContractsDiscover>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postContractsDiscover>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationOptions = getPostContractsDiscoverMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};

@@ -11,4 +11,14 @@ public class ContractsController : ControllerBase
     {
         return state.Contracts.Values;
     }
+
+    /// <summary>
+    /// Discovers contracts.
+    /// </summary>
+    [HttpPost("discover")]
+    public IActionResult Discover(DiscoverService discoverService)
+    {
+        discoverService.Discover();
+        return Ok();
+    }
 }

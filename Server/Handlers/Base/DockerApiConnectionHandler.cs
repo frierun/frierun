@@ -19,11 +19,6 @@ public class DockerApiConnectionHandler(State state) : Handler<DockerApiConnecti
         foreach (var filePath in paths)
         {
             var socketPath = $"{protocol}:{filePath}";
-            if (State.GetContracts<DockerApiConnection>().Any(contract => contract.Path == socketPath))
-            {
-                continue;
-            }
-
             if (!File.Exists(filePath))
             {
                 continue;
@@ -35,9 +30,7 @@ public class DockerApiConnectionHandler(State state) : Handler<DockerApiConnecti
                 contract = Verify(
                     new DockerApiConnection
                     {
-                        Id = Guid.CreateVersion7(),
-                        Path = socketPath,
-                        Handler = this,
+                        Path = socketPath
                     }
                 );
             }

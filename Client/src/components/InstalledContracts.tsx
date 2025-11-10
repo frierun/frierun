@@ -1,5 +1,6 @@
 ﻿import {useGetContracts} from "@/api/endpoints/contracts.ts";
 import InstalledContract from "@/components/InstalledContract.tsx";
+import DiscoverButton from "@/components/DiscoverButton.tsx";
 
 export default function InstalledContracts() {
     const {data, isPending, isError} = useGetContracts();
@@ -11,13 +12,14 @@ export default function InstalledContracts() {
         <>
             <div className={"my-12"}>
                 <h1>Installed contracts</h1>
-                <div>
-                    <div className={"grid lg:grid-cols-3 xxl:grid-cols-4 gap-3"}>
-                        {data.data
-                            .map((item) => (
-                                <InstalledContract key={item.id} contract={item}/>
-                            ))}
-                    </div>
+                <div className={"mb-4"}>
+                    <DiscoverButton />
+                </div>
+                <div className={"grid lg:grid-cols-3 xxl:grid-cols-4 gap-3"}>
+                    {data.data
+                        .map((item) => (
+                            <InstalledContract key={item.id} contract={item}/>
+                        ))}
                 </div>
             </div>
 

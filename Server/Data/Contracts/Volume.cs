@@ -18,7 +18,22 @@ public record Volume(
 
     public override bool IsFulfilling(Contract other)
     {
+        if (other is not Volume contract)
+        {
+            return false;
+        }
+        
         if (other.HandlerApplication != null && other.HandlerApplication != Handler?.Application?.Name)
+        {
+            return false;
+        }
+
+        if (contract.VolumeName != null && contract.VolumeName != VolumeName)
+        {
+            return false;
+        }
+
+        if (contract.LocalPath != null)
         {
             return false;
         }
