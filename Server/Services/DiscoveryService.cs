@@ -1,8 +1,10 @@
-﻿using Frierun.Server.Data;
+﻿using System.Diagnostics;
+using Frierun.Server.Data;
+using Frierun.Server.Handlers;
 
 namespace Frierun.Server;
 
-public class DiscoverService(
+public class DiscoveryService(
     ILogger<Discover> logger,
     HandlerRegistry handlerRegistry,
     State state,
@@ -26,35 +28,54 @@ public class DiscoverService(
         {
             foreach (var handler in handlerRegistry.GetAllHandlers())
             {
-                foreach (var contract in handler.Discover())
-                {
-                    if (state.Contracts.Values
-                        .Where(installedContract => installedContract.Handler == handler)
-                        .Any(installedContract => installedContract.IsSubset(contract))
-                       )
-                    {
-                        continue;
-                    }
-
-                    AddContract(
-                        contract with
-                        {
-                            Id = Guid.CreateVersion7(),
-                            Handler = handler
-                        }
-                    );
-                }
-
-                stateSerializer.Save(state);
+                Discover(handler);
             }
+            stateSerializer.Save(state);
         }
         finally
         {
             stateManager.FinishTask();
         }
 
-
         InstallDocker();
+    }
+
+    /// <summary>
+    /// Discovers contracts for the application.
+    /// </summary>
+    public void Discover(Application application)
+    {
+        foreach (var handler in handlerRegistry.GetHandlers(application))
+        {
+            Discover(handler);
+        }
+    }
+
+    /// <summary>
+    /// Discovers contracts for the handler.
+    /// </summary>
+    private void Discover(IHandler handler)
+    {
+        Debug.Assert(!stateManager.Ready, "Task must be already running.");
+        
+        foreach (var contract in handler.Discover())
+        {
+            if (state.Contracts.Values
+                .Where(installedContract => installedContract.Handler == handler)
+                .Any(installedContract => installedContract.IsSubset(contract))
+               )
+            {
+                continue;
+            }
+
+            AddContract(
+                contract with
+                {
+                    Id = Guid.CreateVersion7(),
+                    Handler = handler
+                }
+            );
+        }
     }
 
     /// <summary>

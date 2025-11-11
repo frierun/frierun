@@ -1,12 +1,10 @@
-﻿using Frierun.Server.Data;
+﻿namespace Frierun.Server;
 
-namespace Frierun.Server;
-
-public class Discover(DiscoverService discoverService)
+public class Discover(DiscoveryService discoveryService)
     : BaseCommand("discover", "Discover and add contracts.")
 {
     protected override void Execute()
     {
-        discoverService.Discover();
+        discoveryService.Discover();
     }
 }

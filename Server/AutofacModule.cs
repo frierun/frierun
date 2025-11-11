@@ -111,7 +111,7 @@ public class AutofacModule : Module
 
         // Services
         builder.RegisterType<ContractRegistry>().AsSelf().SingleInstance();
-        builder.RegisterType<DiscoverService>().AsSelf().SingleInstance();
+        builder.RegisterType<DiscoveryService>().AsSelf().SingleInstance();
         builder.RegisterType<ExecutionService>().AsSelf().SingleInstance();
         builder.RegisterType<InstallService>().AsSelf().SingleInstance();
         builder.RegisterType<PackageRegistry>().AsSelf().SingleInstance();

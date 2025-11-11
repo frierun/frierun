@@ -16,9 +16,9 @@ public class ContractsController : ControllerBase
     /// Discovers contracts.
     /// </summary>
     [HttpPost("discover")]
-    public IActionResult Discover(DiscoverService discoverService)
+    public IActionResult Discover(DiscoveryService discoveryService)
     {
-        discoverService.Discover();
+        discoveryService.Discover();
         return Ok();
     }
 }

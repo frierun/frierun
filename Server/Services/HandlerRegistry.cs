@@ -219,6 +219,18 @@ public class HandlerRegistry : IDisposable
     }
 
     /// <summary>
+    /// Gets handlers for the application
+    /// </summary>
+    public IEnumerable<IHandler> GetHandlers(Application application)
+    {
+        lock (_lock)
+        {
+            LoadApplication(application.Name);
+            return _handlerPerApplication[application];
+        }
+    }
+
+    /// <summary>
     /// Gets specific handler
     /// </summary>
     public IHandler? GetHandler(string typeName, string? applicationName = null)
