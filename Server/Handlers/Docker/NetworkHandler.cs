@@ -7,6 +7,15 @@ namespace Frierun.Server.Handlers.Docker;
 public class NetworkHandler(State state, Application application, DockerService dockerService)
     : Handler<Network>(state, application)
 {
+    public override IEnumerable<Network> Discover()
+    {
+        return dockerService.ListNetworks().Result.Select(network => new Network()
+            {
+                NetworkName = network.Name
+            }
+        );
+    }
+    
     public override IEnumerable<ContractList> Initialize(Network contract, ApplicationContext context)
     {
         yield return new ContractList

@@ -17,4 +17,11 @@ public record Network(
             NetworkName = MergeValue(NetworkName, contract.NetworkName)
         };
     }
+    
+    public override bool IsSubset(Contract other)
+    {
+        return IsSubsetContract(this, other, out var contract)
+               && IsSubsetValue(NetworkName, contract.NetworkName);
+    }
+    
 }

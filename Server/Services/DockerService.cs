@@ -209,7 +209,7 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
     }
 
     /// <summary>
-    /// Creates new network for a container group
+    /// Create a new network for a container group
     /// </summary>
     public async Task<bool> CreateNetwork(string networkName)
     {
@@ -231,9 +231,26 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
 
         return true;
     }
+    
+    /// <summary>
+    /// List all networks
+    /// </summary>
+    public async Task<IList<NetworkResponse>> ListNetworks()
+    {
+        try
+        {
+            return await client.Networks.ListNetworksAsync();
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to list networks");
+            return [];
+        }
+    }
+    
 
     /// <summary>
-    /// Removes network
+    /// Remove network
     /// </summary>
     public async Task<bool> RemoveNetwork(string networkName)
     {
