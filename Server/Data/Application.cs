@@ -32,7 +32,7 @@ public record Application(
     {
         return MergeCommon(this, other, out var contract) with
         {
-            Name = OnlyOne(Name, contract.Name),
+            Name = MergeValue(Name, contract.Name),
             Url = Url.Merge(contract.Url),
             Description = Description.Merge(contract.Description),
         };

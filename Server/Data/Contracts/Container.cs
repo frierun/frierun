@@ -10,7 +10,7 @@ public record Container(
     string? ContainerName = null,
     string? NetworkName = null,
     Argument<string>? ImageName = null,
-    bool MountDockerSocket = false,
+    bool? MountDockerSocket = null,
     ContractRef<Network>? Network = null,
     IEnumerable<ContainerPort>? Ports = null,
     Argument<IEnumerable<string>>? Command = null,
@@ -58,19 +58,35 @@ public record Container(
     {
         return MergeCommon(this, other, out var contract) with
         {
-            ContainerName = OnlyOne(ContainerName, contract.ContainerName),
-            NetworkName = OnlyOne(NetworkName, contract.NetworkName),
+            ContainerName = MergeValue(ContainerName, contract.ContainerName),
+            NetworkName = MergeValue(NetworkName, contract.NetworkName),
             ImageName = ImageName.Merge(contract.ImageName),
-            MountDockerSocket = MountDockerSocket || contract.MountDockerSocket,
-            Network = OnlyOne(Network, contract.Network),
+            MountDockerSocket = MergeValue(MountDockerSocket, contract.MountDockerSocket),
+            Network = MergeValue(Network, contract.Network),
             Ports = Ports.Concat(contract.Ports).Distinct(),
             Command = Command.Merge(contract.Command),
             NetworkAliases = NetworkAliases.Concat(contract.NetworkAliases).Distinct(),
-            Env = MergeDictionaries(Env, contract.Env),
-            Labels = MergeDictionaries(Labels, contract.Labels),
-            Mounts = MergeDictionaries(Mounts, contract.Mounts)
+            Env = MergeDictionary(Env, contract.Env),
+            Labels = MergeDictionary(Labels, contract.Labels),
+            Mounts = MergeDictionary(Mounts, contract.Mounts)
         };
-    }    
+    }
+
+    public override bool IsSubset(Contract other)
+    {
+        return IsSubsetContract(this, other, out var contract)
+            && IsSubsetValue(ContainerName, contract.ContainerName)
+            && IsSubsetValue(NetworkName, contract.NetworkName)
+            && IsSubsetArgument(ImageName, contract.ImageName)
+            && IsSubsetValue(MountDockerSocket, contract.MountDockerSocket)
+            && IsSubsetValue(Network, contract.Network)
+            && IsSubsetList(Ports, contract.Ports)
+            && IsSubsetArgument(Command, contract.Command)
+            && IsSubsetList(NetworkAliases, contract.NetworkAliases)
+            && IsSubsetDictionary(Env, contract.Env)
+            && IsSubsetDictionary(Labels, contract.Labels)
+            && IsSubsetDictionary(Mounts, contract.Mounts);
+    }
 
     /// <summary>
     /// Attaches the container to a network.

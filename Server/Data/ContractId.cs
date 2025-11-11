@@ -20,13 +20,13 @@ public class ContractId<TContract> : ContractId where TContract : Contract
     public override object Merge(object other)
     {
         var contractId = (ContractId<TContract>)other;
-        var guid = Merger.OnlyOne(Guid, contractId.Guid);
+        var guid = Merger.MergeValue(Guid, contractId.Guid);
         if (guid != null)
         {
             return new ContractId((Guid)guid);
         }
 
-        var refId = Merger.OnlyOne(Ref, contractId.Ref);
+        var refId = Merger.MergeValue(Ref, contractId.Ref);
         Debug.Assert(refId != null, "Contract ID must have either a GUID or a ContractRef");
         return new ContractId<TContract>(refId.Name);
     }
@@ -74,13 +74,13 @@ public class ContractId : IArgument, IEquatable<ContractId>
     public virtual object Merge(object other)
     {
         var contractId = (ContractId)other;
-        var guid = Merger.OnlyOne(Guid, contractId.Guid);
+        var guid = Merger.MergeValue(Guid, contractId.Guid);
         if (guid != null)
         {
             return new ContractId((Guid)guid);
         }
 
-        var refId = Merger.OnlyOne(Ref, contractId.Ref);
+        var refId = Merger.MergeValue(Ref, contractId.Ref);
         Debug.Assert(refId != null, "Contract ID must have either a GUID or a ContractRef");
         return new ContractId(refId);
     }

@@ -25,7 +25,7 @@ public class ContainerHandlerTests : BaseTests
     public void Install_RequireDocker_MountsSocket()
     {
         InstallPackage("docker");
-        var container = Contract<Container>().Set(p => p.MountDockerSocket, true).Generate();
+        var container = Contract<Container>().Set<bool?>(p => p.MountDockerSocket, true).Generate();
         var package = Factory<Package>().Generate() with { Contracts = [container] };
 
         InstallPackage(package);
@@ -46,7 +46,7 @@ public class ContainerHandlerTests : BaseTests
         const string path = "/run/podman/podman.sock";
         Handler<FakeDockerApiConnectionHandler>().SocketRootPath = path;
         InstallPackage("docker");
-        var container = Contract<Container>().Set(p => p.MountDockerSocket, true).Generate();
+        var container = Contract<Container>().Set<bool?>(p => p.MountDockerSocket, true).Generate();
         var package = Factory<Package>().Generate() with { Contracts = [container] };
 
         InstallPackage(package);

@@ -20,12 +20,12 @@ public record Mysql(
     {
         return MergeCommon(this, other, out var contract) with
         {
-            Username = OnlyOne(Username, contract.Username),
-            Password = OnlyOne(Password, contract.Password),
-            Host = OnlyOne(Host, contract.Host),
-            Database = OnlyOne(Database, contract.Database),
-            NetworkName = OnlyOne(NetworkName, contract.NetworkName),
-            Network = OnlyOne(Network, contract.Network),
+            Username = MergeValue(Username, contract.Username),
+            Password = MergeValue(Password, contract.Password),
+            Host = MergeValue(Host, contract.Host),
+            Database = MergeValue(Database, contract.Database),
+            NetworkName = MergeValue(NetworkName, contract.NetworkName),
+            Network = MergeValue(Network, contract.Network),
             Admin = Admin || contract.Admin
         };
     }

@@ -32,28 +32,15 @@ public record DockerApiConnection(
     {
         return MergeCommon(this, other, out var contract) with
         {
-            Path = OnlyOne(Path, contract.Path),
-            IsPodman = OnlyOne(IsPodman, contract.IsPodman)
+            Path = MergeValue(Path, contract.Path),
+            IsPodman = MergeValue(IsPodman, contract.IsPodman)
         };
     }
 
-    public override bool IsFulfilling(Contract other)
+    public override bool IsSubset(Contract other)
     {
-        if (other is not DockerApiConnection contract)
-        {
-            return false;
-        }
-
-        if (contract.Path != null && Path != contract.Path)
-        {
-            return false;
-        }
-
-        if (contract.IsPodman != null && IsPodman != contract.IsPodman)
-        {
-            return false;
-        }
-
-        return true;
+        return IsSubsetContract(this, other, out var contract)
+               && IsSubsetValue(Path, contract.Path)
+               && IsSubsetValue(IsPodman, contract.IsPodman);
     }
 }

@@ -33,12 +33,12 @@ public record CloudflareTunnel(
     {
         return MergeCommon(this, other, out var contract) with
         {
-            AccountId = OnlyOne(AccountId, contract.AccountId),
+            AccountId = MergeValue(AccountId, contract.AccountId),
             CloudflareApiConnection = (ContractId<CloudflareApiConnection>)CloudflareApiConnection.Merge(contract.CloudflareApiConnection),
-            Container = OnlyOne(Container, contract.Container),
-            TunnelId = OnlyOne(TunnelId, contract.TunnelId),
-            TunnelName = OnlyOne(TunnelName, contract.TunnelName),
-            Token = OnlyOne(Token, contract.Token)
+            Container = MergeValue(Container, contract.Container),
+            TunnelId = MergeValue(TunnelId, contract.TunnelId),
+            TunnelName = MergeValue(TunnelName, contract.TunnelName),
+            Token = MergeValue(Token, contract.Token)
         };
     }
 }

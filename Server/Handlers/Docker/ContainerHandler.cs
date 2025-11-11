@@ -11,8 +11,31 @@ public class ContainerHandler(State state, Application application, DockerServic
 {
     private readonly DockerApiConnection _dockerApiConnection = state.GetContract<DockerApiConnection>(application);
 
+    public override IEnumerable<Container> Discover()
+    {
+        /*
+        return dockerService.ListContainers().Result.Select(container => new Container
+            {
+                ContainerName = container.Names[0],
+                NetworkName = container.NetworkSettings.Networks.First().Key,
+                ImageName = container.Image,
+                MountDockerSocket = false,
+                
+            }
+        );
+        */
+        return [];
+    }
+
     public override IEnumerable<ContractList> Initialize(Container contract, ApplicationContext context)
     {
+        // contract is set
+        if (contract.Installed)
+        {
+            yield return new ContractList { [context] = State.GetContract(contract.Id) };
+            yield break;
+        }
+        
         yield return new ContractList(
             contract.Mounts.Values.Select(mount => new KeyValuePair<ContractRef, Contract>(
                     mount.Volume,
@@ -85,7 +108,7 @@ public class ContainerHandler(State state, Application application, DockerServic
         };
 
         // docker socket
-        if (contract.MountDockerSocket)
+        if (contract.MountDockerSocket == true)
         {
             dockerParameters.HostConfig.Mounts.Add(
                 new Mount

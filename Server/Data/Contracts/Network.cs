@@ -14,7 +14,7 @@ public record Network(
     {
         return MergeCommon(this, other, out var contract) with
         {
-            NetworkName = OnlyOne(NetworkName, contract.NetworkName)
+            NetworkName = MergeValue(NetworkName, contract.NetworkName)
         };
     }
 }

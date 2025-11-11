@@ -27,11 +27,11 @@ public record File(
     {
         return MergeCommon(this, other, out var contract) with
         {
-            Path = OnlyOne(Path, contract.Path),
+            Path = MergeValue(Path, contract.Path),
             Text = Text.Merge(contract.Text),
-            Volume = OnlyOne(Volume, contract.Volume),
-            Owner = OnlyOne(Owner, contract.Owner),
-            Group = OnlyOne(Group, contract.Group)       
+            Volume = MergeValue(Volume, contract.Volume),
+            Owner = MergeValue(Owner, contract.Owner),
+            Group = MergeValue(Group, contract.Group)       
         };
     }
 }

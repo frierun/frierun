@@ -73,7 +73,7 @@ public abstract record Contract
     /// <summary>
     /// Checks if the installed contract is fulfilling the other contract.
     /// </summary>
-    public virtual bool IsFulfilling(Contract other)
+    public virtual bool IsSubset(Contract other)
     {
         return false;
     }

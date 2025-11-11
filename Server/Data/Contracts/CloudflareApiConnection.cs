@@ -25,7 +25,7 @@ public record CloudflareApiConnection(
     {
         return MergeCommon(this, other, out var contract) with
         {
-            Token = OnlyOne(Token, contract.Token)
+            Token = MergeValue(Token, contract.Token)
         };
     }
 }

@@ -10,7 +10,7 @@ public class ContainerHandler(State state, Application application)
 
     public override IEnumerable<ContractList> Initialize(Container contract, ApplicationContext context)
     {
-        if (contract.MountDockerSocket)
+        if (contract.MountDockerSocket == true)
         {
             yield break;
         }

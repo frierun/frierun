@@ -132,6 +132,23 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
 
         return true;
     }
+    
+    /// <summary>
+    /// Lists all containers
+    /// </summary>
+    public async Task<IList<ContainerListResponse>> ListContainers()
+    {
+        try
+        {
+            return await client.Containers.ListContainersAsync(new ContainersListParameters());
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to list containers");
+            return [];
+        }
+    }
+    
 
     /// <summary>
     /// Creates volume by name
@@ -157,7 +174,7 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
     }
 
     /// <summary>
-    /// Creates volume by name
+    /// Lists all volumes
     /// </summary>
     public async Task<IList<VolumeResponse>> ListVolumes()
     {
@@ -169,11 +186,9 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
         catch (Exception e)
         {
             logger.LogError(e, "Failed to list volumes");
-            return new List<VolumeResponse>();
+            return [];
         }
-
     }
-    
 
     /// <summary>
     /// Removes volume by name

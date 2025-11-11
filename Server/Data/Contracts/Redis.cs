@@ -30,9 +30,9 @@ public record Redis(
     {
         return MergeCommon(this, other, out var contract) with
         {
-            Network = OnlyOne(Network, contract.Network),
-            Container = OnlyOne(Container, contract.Container),
-            Volume = OnlyOne(Volume, contract.Volume),
+            Network = MergeValue(Network, contract.Network),
+            Container = MergeValue(Container, contract.Container),
+            Volume = MergeValue(Volume, contract.Volume),
             Host = Host.Merge(contract.Host)
         };
     }

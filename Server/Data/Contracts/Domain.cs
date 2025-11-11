@@ -15,8 +15,8 @@ public record Domain(
     {
         return MergeCommon(this, other, out var contract) with
         {
-            Value = OnlyOne(Value, contract.Value),
-            IsInternal = OnlyOne(IsInternal, contract.IsInternal)       
+            Value = MergeValue(Value, contract.Value),
+            IsInternal = MergeValue(IsInternal, contract.IsInternal)       
         };
     }    
 }

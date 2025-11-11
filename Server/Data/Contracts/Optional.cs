@@ -17,7 +17,7 @@ public record Optional(
     {
         return MergeCommon(this, other, out var contract) with
         {
-            Value = OnlyOne(Value, contract.Value),
+            Value = MergeValue(Value, contract.Value),
         };
     }
 }

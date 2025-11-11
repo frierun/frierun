@@ -35,10 +35,10 @@ public record SshConnection(
     {
         return MergeCommon(this, other, out var contract) with
         {
-            Host = OnlyOne(Host, contract.Host),
-            Port = OnlyOne(Port, contract.Port, port => port == 0),
-            Username = OnlyOne(Username, contract.Username),
-            Password = OnlyOne(Password, contract.Password)
+            Host = MergeValue(Host, contract.Host),
+            Port = MergeValue(Port, contract.Port, port => port == 0),
+            Username = MergeValue(Username, contract.Username),
+            Password = MergeValue(Password, contract.Password)
         };
     }
     

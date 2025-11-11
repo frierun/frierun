@@ -24,7 +24,7 @@ public class Handler<TContract>(State state, Application? application = null) : 
 
         foreach (var installedContract in State.GetContracts<TContract>().Where(c => c.Handler == this))
         {
-            if (!installedContract.IsFulfilling(contract))
+            if (!installedContract.IsSubset(contract))
                 continue;
             
             yield return new ContractList { [context] = installedContract };

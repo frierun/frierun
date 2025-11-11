@@ -98,8 +98,8 @@ public class Argument<T> : IEquatable<Argument<T>>, IArgument
     {
         var merged = new Argument<T>
         {
-            Value = Merger.OnlyOne(Value, other.Value),
-            Resolver = Merger.OnlyOne(Resolver, other.Resolver),
+            Value = Merger.MergeValue(Value, other.Value),
+            Resolver = Merger.MergeValue(Resolver, other.Resolver),
         };
 
         if (merged is { Resolved: true, Resolver: not null })

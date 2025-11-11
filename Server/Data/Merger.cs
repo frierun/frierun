@@ -7,23 +7,24 @@ public static class Merger
     /// </summary>
     public static Contract Merge(Contract contract, Contract other)
     {
-        if (contract.Installed && contract.IsFulfilling(other))
+        if (contract.Installed && contract.IsSubset(other))
         {
             return contract;
         }
 
-        if (other.Installed && other.IsFulfilling(contract))
+        if (other.Installed && other.IsSubset(contract))
         {
             return other;
         }
 
         return contract.Merge(other);
     }
-    
+
     /// <summary>
     /// Merges common part of the contract.
     /// </summary>
-    public static TContract MergeCommon<TContract>(TContract contract, Contract other, out TContract castOther) where TContract : Contract
+    public static TContract MergeCommon<TContract>(TContract contract, Contract other, out TContract castOther)
+        where TContract : Contract
     {
         if (other is not TContract cast)
         {
@@ -31,7 +32,7 @@ public static class Merger
         }
 
         castOther = cast;
-        
+
         if (contract.Installed || other.Installed)
         {
             throw new MergeException("Can't merge installed contracts");
@@ -39,8 +40,8 @@ public static class Merger
 
         var result = contract with
         {
-            Handler = OnlyOne(contract.Handler, other.Handler),
-            HandlerApplication = OnlyOne(contract.HandlerApplication, other.HandlerApplication),
+            Handler = MergeValue(contract.Handler, other.Handler),
+            HandlerApplication = MergeValue(contract.HandlerApplication, other.HandlerApplication),
             DependsOn = contract.DependsOn.Concat(other.DependsOn).Distinct()
         };
 
@@ -56,7 +57,7 @@ public static class Merger
     /// <summary>
     /// Ensures that only one of the provided values is set and returns it.
     /// </summary>
-    public static T OnlyOne<T>(T value1, T value2, Func<T, bool>? isUnset = null)
+    public static T MergeValue<T>(T value1, T value2, Func<T, bool>? isUnset = null)
     {
         isUnset ??= value => Equals(value, default(T));
 
@@ -78,7 +79,7 @@ public static class Merger
         throw new MergeException("Can't merge two different values");
     }
 
-    public static Dictionary<TKey, TValue> MergeDictionaries<TKey, TValue>(
+    public static Dictionary<TKey, TValue> MergeDictionary<TKey, TValue>(
         IEnumerable<KeyValuePair<TKey, TValue>> dict1,
         IEnumerable<KeyValuePair<TKey, TValue>> dict2
     ) where TKey : notnull
@@ -112,5 +113,118 @@ public static class Merger
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Checks if the other contract is fulfilling the contract. Also casts it to the type of the contract.
+    /// </summary>
+    public static bool IsSubsetContract<TContract>(TContract contract, Contract other, out TContract castOther)
+        where TContract : Contract
+    {
+        if (other is not TContract cast)
+        {
+            castOther = contract;
+            return false;
+        }
+
+        castOther = cast;
+
+        if (other.HandlerApplication != null && other.HandlerApplication != contract.Handler?.Application?.Name)
+        {
+            return false;
+        }
+
+        if (other.Handler != null && other.Handler != contract.Handler)
+        {
+            return false;
+        }
+
+        if (other.Id != Guid.Empty && other.Id != contract.Id)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Ensures that other value is not set or equal to the value.
+    /// </summary>
+    public static bool IsSubsetValue<T>(T value, T other, Func<T, bool>? isUnset = null)
+    {
+        isUnset ??= t => Equals(t, default(T));
+
+        if (isUnset(other))
+        {
+            return true;
+        }
+
+        if (value?.Equals(other) == true)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Ensures that other value is not set or equal to the value. 
+    /// </summary>
+    public static bool IsSubsetArgument<T>(Argument<T> value, Argument<T> other)
+    {
+        if (!other.Resolved || !value.Resolved)
+        {
+            return false;
+        }
+
+        if (value.Value is null)
+        {
+            return other.Value is null;
+        }
+
+        return value.Value.Equals(other.Value);
+    }
+
+    /// <summary>
+    /// Ensures that the value list contains all elements from the other list.
+    /// </summary>
+    public static bool IsSubsetList<T>(IEnumerable<T> value, IEnumerable<T> other)
+    {
+        var hashSet = new HashSet<T>(value);
+        return other.All(otherValue => hashSet.Contains(otherValue));
+    }
+
+    /// <summary>
+    /// Ensures that the value dictionary contains all elements from the other dictionary.
+    /// </summary>
+    public static bool IsSubsetDictionary<TKey, TValue>(
+        IReadOnlyDictionary<TKey, TValue> value,
+        IReadOnlyDictionary<TKey, TValue> other
+    ) where TKey : notnull
+    {
+        foreach (var pair in other)
+        {
+            if (!value.TryGetValue(pair.Key, out var storedValue))
+            {
+                return false;
+            }
+
+            if (storedValue == null)
+            {
+                if (pair.Value != null)
+                {
+                    return false;
+                }
+
+                continue;
+            }
+
+            if (!storedValue.Equals(pair.Value))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

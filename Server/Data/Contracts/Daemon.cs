@@ -31,7 +31,7 @@ public record Daemon(
     {
         return MergeCommon(this, other, out var contract) with
         {
-            DaemonName = OnlyOne(DaemonName, contract.DaemonName),
+            DaemonName = MergeValue(DaemonName, contract.DaemonName),
             Command = Command.Merge(contract.Command),
             PreCommands = PreCommands.Merge(contract.PreCommands)
         };

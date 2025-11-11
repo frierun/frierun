@@ -20,7 +20,7 @@ public class MergerTests : BaseTests
             [name] = new(value)
         };
         
-        var result = Merger.MergeDictionaries(dictionary1, dictionary2);
+        var result = Merger.MergeDictionary(dictionary1, dictionary2);
         
         Assert.Single(result);
         Assert.Equal(value, result[name].Value);
@@ -41,7 +41,7 @@ public class MergerTests : BaseTests
             [name] = new(value + "_another")
         };
         
-        Assert.Throws<MergeException>(() => Merger.MergeDictionaries(dictionary1, dictionary2));
+        Assert.Throws<MergeException>(() => Merger.MergeDictionary(dictionary1, dictionary2));
     }
     
     [Fact]
@@ -49,15 +49,15 @@ public class MergerTests : BaseTests
     {
         var value = Resolve<Faker>().Lorem.Word();
         
-        Assert.Equal(value, Merger.OnlyOne(value, null));
-        Assert.Equal(value, Merger.OnlyOne(null, value));
-        Assert.Equal(value, Merger.OnlyOne(value, value));
+        Assert.Equal(value, Merger.MergeValue(value, null));
+        Assert.Equal(value, Merger.MergeValue(null, value));
+        Assert.Equal(value, Merger.MergeValue(value, value));
     }
     
     [Fact]
     public void OnlyOne_DifferentStrings_ThrowsException()
     {
-        Assert.Throws<MergeException>(() => Merger.OnlyOne("value1", "value2"));
+        Assert.Throws<MergeException>(() => Merger.MergeValue("value1", "value2"));
     }
 
     [Fact]
@@ -69,14 +69,14 @@ public class MergerTests : BaseTests
             value = 1;
         }
         
-        Assert.Equal(value, Merger.OnlyOne(value, 0));
-        Assert.Equal(value, Merger.OnlyOne(0, value));
-        Assert.Equal(value, Merger.OnlyOne(value, value));
+        Assert.Equal(value, Merger.MergeValue(value, 0));
+        Assert.Equal(value, Merger.MergeValue(0, value));
+        Assert.Equal(value, Merger.MergeValue(value, value));
     }
     
     [Fact]
     public void OnlyOne_DifferentNumbers_ThrowsException()
     {
-        Assert.Throws<MergeException>(() => Merger.OnlyOne(1, 2));
+        Assert.Throws<MergeException>(() => Merger.MergeValue(1, 2));
     }
 }

@@ -24,10 +24,10 @@ public record PortEndpoint(
     {
         return MergeCommon(this, other, out var contract) with
         {
-            Port = OnlyOne(Port, contract.Port, port => port == 0),
-            Container = OnlyOne(Container, contract.Container),
-            ExternalPort = OnlyOne(ExternalPort, contract.ExternalPort, port => port == 0),
-            ExternalIp = OnlyOne(ExternalIp, contract.ExternalIp),
+            Port = MergeValue(Port, contract.Port, port => port == 0),
+            Container = MergeValue(Container, contract.Container),
+            ExternalPort = MergeValue(ExternalPort, contract.ExternalPort, port => port == 0),
+            ExternalIp = MergeValue(ExternalIp, contract.ExternalIp),
         };
     }
 }

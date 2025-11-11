@@ -30,7 +30,7 @@ public class DiscoverService(
                 {
                     if (state.Contracts.Values
                         .Where(installedContract => installedContract.Handler == handler)
-                        .Any(installedContract => installedContract.IsFulfilling(contract))
+                        .Any(installedContract => installedContract.IsSubset(contract))
                        )
                     {
                         continue;
