@@ -5,7 +5,9 @@ namespace Frierun.Server;
 public class UninstallService(
     State state,
     StateSerializer stateSerializer,
-    StateManager stateManager)
+    StateManager stateManager,
+    HandlerRegistry handlerRegistry
+)
 {
     public void Handle(Application application)
     {
@@ -24,6 +26,13 @@ public class UninstallService(
                 }
             }
 
+            foreach (var handler in handlerRegistry.GetHandlers(application))
+            {
+                state.Contracts.Values
+                    .Where(c => c.Handler == handler)
+                    .ToList()
+                    .ForEach(state.RemoveContract);
+            }
             state.RemoveContract(application);
             UninstallContracts(application);
 
@@ -47,7 +56,7 @@ public class UninstallService(
             {
                 break;
             }
-            
+
             var contract = state.GetContract(guid);
             contract.Uninstall();
             state.RemoveContract(contract);
