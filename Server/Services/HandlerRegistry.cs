@@ -65,7 +65,7 @@ public class HandlerRegistry : IDisposable
             {
                 if (applicationName != null && applicationName != application.Name)
                     continue;
-                
+
                 AddApplication(application);
             }
         }
@@ -226,7 +226,7 @@ public class HandlerRegistry : IDisposable
         lock (_lock)
         {
             LoadApplication(application.Name);
-            return _handlerPerApplication[application];
+            return _handlerPerApplication.TryGetValue(application, out var handlers) ? handlers : [];
         }
     }
 
@@ -254,7 +254,7 @@ public class HandlerRegistry : IDisposable
         lock (_lock)
         {
             LoadApplication();
-            
+
             return _handlers.Values;
         }
     }
