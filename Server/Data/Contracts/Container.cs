@@ -91,9 +91,13 @@ public record Container(
     /// <summary>
     /// Attaches the container to a network.
     /// </summary>
-    public void AttachNetwork(string networkName)
+    public void AttachNetwork(Network network)
     {
+        Debug.Assert(network.Installed);
+        Debug.Assert(Installed);
         Debug.Assert(Handler != null);
+        
+        var networkName = network.NetworkName;
         if (networkName == NetworkName)
         {
             return;

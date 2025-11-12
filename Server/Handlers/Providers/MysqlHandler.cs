@@ -79,7 +79,7 @@ public class MysqlHandler(State state, Application application)
             throw new Exception("NetworkName cannot be set");
         }
 
-        _container.AttachNetwork(network.NetworkName);
+        _container.AttachNetwork(network);
 
         if (contract.Admin)
         {

@@ -35,7 +35,7 @@ public class NetworkHandler(State state, Application application, DockerService 
             }
             else
             {
-                yield return new ContractList { [context] = new Volume { Handler = this } };
+                yield return new ContractList { [context] = new Network { Handler = this } };
             }
 
             yield break;
@@ -43,7 +43,7 @@ public class NetworkHandler(State state, Application application, DockerService 
 
         var defaultName = context.Prefix + (context.Name == "" ? "" : $"-{context.Name}");
         var defaultNetwork = State.GetContracts<Network>()
-            .FirstOrDefault(contract => contract.NetworkName == defaultName && contract.Handler == this);
+            .FirstOrDefault(network => network.NetworkName == defaultName && network.Handler == this);
 
         // return the same network if it exists first
         if (defaultNetwork != null)

@@ -78,7 +78,7 @@ public class PostgresqlHandler(State state, Application application, ILogger<Pos
             throw new Exception("NetworkName cannot be set");
         }
 
-        _container.AttachNetwork(network.NetworkName);
+        _container.AttachNetwork(network);
 
         if (contract.Admin)
         {

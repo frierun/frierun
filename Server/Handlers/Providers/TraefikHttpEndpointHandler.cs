@@ -67,7 +67,7 @@ public class TraefikHttpEndpointHandler(State state, Application application)
         var network = plan.GetContract(container.Network);
         Debug.Assert(network.Installed);
 
-        _container.AttachNetwork(network.NetworkName);
+        _container.AttachNetwork(network);
 
         return contract with
         {

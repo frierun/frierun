@@ -111,7 +111,7 @@ public class CloudflareHttpEndpointHandler(State state, Application application,
             }
         );
 
-        _container.AttachNetwork(network.NetworkName);
+        _container.AttachNetwork(network);
         return contract with
         {
             NetworkName = network.NetworkName
