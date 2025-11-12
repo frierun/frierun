@@ -121,16 +121,8 @@ public class ExecutionPlan(
         );
 
         var application = CreateApplication();
-        foreach (var (_, contract) in contracts)
-        {
-            if (contract is Application)
-            {
-                state.AddContract(application);
-                continue;
-            }
-
-            state.AddContract(contract);
-        }
+        contracts.Values.Where(contract => contract is not Application).ToList().ForEach(state.AddContract);
+        state.AddContract(application);
 
         return application;
     }
