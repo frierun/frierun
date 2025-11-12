@@ -15,7 +15,7 @@ public class NetworkHandler(State state, Application application, DockerService 
             }
         );
     }
-    
+
     public override IEnumerable<ContractList> Initialize(Network contract, ApplicationContext context)
     {
         // contract is set
@@ -24,18 +24,56 @@ public class NetworkHandler(State state, Application application, DockerService 
             yield return new ContractList { [context] = State.GetContract(contract.Id) };
             yield break;
         }
-        
+
+        if (contract.NetworkName != null)
+        {
+            var installedContract = State.GetContracts<Network>()
+                .FirstOrDefault(network => network.NetworkName == contract.NetworkName && network.Handler == this);
+            if (installedContract != null)
+            {
+                yield return new ContractList { [context] = installedContract };
+            }
+            else
+            {
+                yield return new ContractList { [context] = new Volume { Handler = this } };
+            }
+
+            yield break;
+        }
+
+        var defaultName = context.Prefix + (context.Name == "" ? "" : $"-{context.Name}");
+        var defaultNetwork = State.GetContracts<Network>()
+            .FirstOrDefault(contract => contract.NetworkName == defaultName && contract.Handler == this);
+
+        // return the same network if it exists first
+        if (defaultNetwork != null)
+        {
+            yield return new ContractList { [context] = defaultNetwork };
+        }
+
+        // return a new network
         yield return new ContractList
         {
             [context] = contract with
             {
                 Handler = this,
-                NetworkName = contract.NetworkName ?? FindUniqueName(
+                NetworkName = FindUniqueName(
                     context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     c => c.NetworkName
                 )
             }
         };
+
+        // return all other installed networks
+        foreach (var installedContract in State.GetContracts<Network>().Where(network => network.Handler == this))
+        {
+            if (installedContract.NetworkName == defaultName)
+            {
+                continue;
+            }
+
+            yield return new ContractList { [context] = installedContract };
+        }
     }
 
     public override Network Install(Network contract, ExecutionPlan plan)

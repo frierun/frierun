@@ -32,11 +32,11 @@ public class VolumeHandler(State state, Application application, DockerService d
         // volume name is set
         if (contract.VolumeName != null)
         {
-            var installedVolume = State.GetContracts<Volume>()
+            var installedContract = State.GetContracts<Volume>()
                 .FirstOrDefault(volume => volume.VolumeName == contract.VolumeName && volume.Handler == this);
-            if (installedVolume != null)
+            if (installedContract != null)
             {
-                yield return new ContractList { [context] = installedVolume };
+                yield return new ContractList { [context] = installedContract };
             }
             else
             {
@@ -62,22 +62,22 @@ public class VolumeHandler(State state, Application application, DockerService d
             [context] = contract with
             {
                 Handler = this,
-                VolumeName = contract.VolumeName ?? FindUniqueName(
-                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
+                VolumeName = FindUniqueName(
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"), 
                     volume => volume.VolumeName
                 )
             }
         };
 
         // return all other installed volumes
-        foreach (var installedVolume in State.GetContracts<Volume>().Where(volume => volume.Handler == this))
+        foreach (var installedContract in State.GetContracts<Volume>().Where(volume => volume.Handler == this))
         {
-            if (installedVolume.VolumeName == defaultName)
+            if (installedContract.VolumeName == defaultName)
             {
                 continue;
             }
 
-            yield return new ContractList { [context] = installedVolume };
+            yield return new ContractList { [context] = installedContract };
         }
     }
 
