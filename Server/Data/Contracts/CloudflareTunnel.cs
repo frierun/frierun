@@ -16,7 +16,7 @@ public record CloudflareTunnel(
     public override bool Installed => Id != Guid.Empty;
 
     public ContractId<CloudflareApiConnection> CloudflareApiConnection { get; init; } =
-        CloudflareApiConnection ?? new ContractId<CloudflareApiConnection>("");
+        CloudflareApiConnection ?? new ContractId<CloudflareApiConnection>();
 
     public ContractRef<Container> Container { get; init; } = Container ?? new ContractRef<Container>("");
 

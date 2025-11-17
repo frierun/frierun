@@ -22,13 +22,6 @@ public class VolumeHandler(State state, Application application, DockerService d
             yield break;
         }
 
-        // contract is set
-        if (contract.Installed)
-        {
-            yield return new ContractList { [context] = State.GetContract(contract.Id) };
-            yield break;
-        }
-
         // volume name is set
         if (contract.VolumeName != null)
         {

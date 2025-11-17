@@ -88,7 +88,7 @@ public class ContractList : IReadOnlyDictionary<ContractRef, Contract>
                 .GroupBy(c => c.Key)
                 .Select(group =>
                     group.Aggregate((a, b) =>
-                        new KeyValuePair<ContractRef, Contract>(a.Key, Merger.Merge(a.Value, b.Value))
+                        new KeyValuePair<ContractRef, Contract>(a.Key, a.Value.Merge(b.Value))
                     )
                 )
         );

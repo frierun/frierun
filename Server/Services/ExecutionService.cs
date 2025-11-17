@@ -133,6 +133,17 @@ public class ExecutionService(
             prefix ?? ""
         );
 
+        if (contract.Id != Guid.Empty)
+        {
+            var installedContract = state.GetContract(contract.Id);
+            if (!installedContract.IsSubset(contract))
+            {
+                return [];
+            }
+
+            return [new ContractList { [context] = installedContract }];
+        }
+
         if (contract.Handler != null)
         {
             return contract.Handler.Initialize(contract, context);

@@ -26,14 +26,14 @@ public class ContractIdConverter : JsonConverter<ContractId>
         {
             return null;
         }
-        return new ContractId(contractRef);
+        return new ContractId(Guid.Empty, contractRef);
     }
 
     public override void Write(Utf8JsonWriter writer, ContractId value, JsonSerializerOptions options)
     {
-        if (value.Guid != null)
+        if (value.Guid != Guid.Empty)
         {
-            writer.WriteStringValue(value.Guid.Value.ToString());
+            writer.WriteStringValue(value.Guid.ToString());
             return;
         }
         

@@ -49,14 +49,14 @@ public class ContractIdOfTConverter : JsonConverterFactory
                 return new ContractId<TContract>(guid);
             }
 
-            return new ContractId<TContract>(value);
+            return new ContractId<TContract>(Guid.Empty, value);
         }
 
         public override void Write(Utf8JsonWriter writer, ContractId<TContract> value, JsonSerializerOptions options)
         {
-            if (value.Guid != null)
+            if (value.Guid != Guid.Empty)
             {
-                writer.WriteStringValue(value.Guid.Value.ToString());
+                writer.WriteStringValue(value.Guid.ToString());
                 return;
             }
 

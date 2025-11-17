@@ -27,7 +27,7 @@ public class ContractIdConverterTests : BaseTests
         var result = JsonSerializer.Deserialize<ContractId>($"\"{guid}\"", CreateOptions());
         
         Assert.NotNull(result);
-        Assert.NotNull(result.Guid);
+        Assert.NotEqual(Guid.Empty, result.Guid);
         Assert.Null(result.Ref);
         Assert.Equal(guid, result.Guid);
     }
@@ -40,7 +40,7 @@ public class ContractIdConverterTests : BaseTests
         var result = JsonSerializer.Deserialize<ContractId>($"\"{nameof(Container)}:{name}\"", CreateOptions());
 
         Assert.NotNull(result);
-        Assert.Null(result.Guid);
+        Assert.Equal(Guid.Empty, result.Guid);
         Assert.NotNull(result.Ref);
         Assert.Equal(nameof(Container), result.Ref.TypeName);
         Assert.Equal(name, result.Ref.Name);
@@ -52,7 +52,7 @@ public class ContractIdConverterTests : BaseTests
         var result = JsonSerializer.Deserialize<ContractId>($"\"{nameof(Container)}\"", CreateOptions());
 
         Assert.NotNull(result);
-        Assert.Null(result.Guid);
+        Assert.Equal(Guid.Empty, result.Guid);
         Assert.NotNull(result.Ref);
         Assert.Equal(nameof(Container), result.Ref.TypeName);
         Assert.Equal("", result.Ref.Name);
@@ -73,7 +73,7 @@ public class ContractIdConverterTests : BaseTests
     public void Write_ContainerWithName_ReturnsExpectedValue()
     {
         var name = Resolve<Faker>().Lorem.Word();
-        var contractId = new ContractId(new ContractRef(nameof(Container), name));
+        var contractId = new ContractId(Guid.Empty, new ContractRef(nameof(Container), name));
         
         var result = JsonSerializer.Serialize(contractId, CreateOptions());
         
@@ -83,7 +83,7 @@ public class ContractIdConverterTests : BaseTests
     [Fact]
     public void Write_ContainerWithoutName_ReturnsExpectedValue()
     {
-        var contractId = new ContractId(new ContractRef(nameof(Container), ""));
+        var contractId = new ContractId(Guid.Empty, new ContractRef(nameof(Container), ""));
         
         var result = JsonSerializer.Serialize(contractId, CreateOptions());
         

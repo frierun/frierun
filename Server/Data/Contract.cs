@@ -71,7 +71,7 @@ public abstract record Contract
     public abstract Contract Merge(Contract other);
 
     /// <summary>
-    /// Checks if the installed contract is fulfilling the other contract.
+    /// Checks if this installed contract is fulfilling the other contract.
     /// </summary>
     public virtual bool IsSubset(Contract other)
     {

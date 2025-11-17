@@ -84,7 +84,7 @@ public class DiscoveryGraph
                     continue;
                 }
                 
-                Contracts[contractRef] = Merger.Merge(contract, oldContract);
+                Contracts[contractRef] = contract.Merge(oldContract);
             }
         }
         catch (MergeException)

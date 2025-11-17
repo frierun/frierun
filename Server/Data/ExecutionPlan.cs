@@ -69,7 +69,7 @@ public class ExecutionPlan(
     public Contract GetContract(ContractId contractId)
     {
         var guid = contractId.Guid;
-        if (guid != null)
+        if (guid != Guid.Empty)
         {
             return contracts.Values.First(contract => contract.Id == guid);
         }

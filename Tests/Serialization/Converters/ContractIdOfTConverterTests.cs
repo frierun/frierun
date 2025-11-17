@@ -27,7 +27,7 @@ public class ContractIdOfTConverterTests : BaseTests
         var result = JsonSerializer.Deserialize<ContractId<Container>>($"\"{guid}\"", CreateOptions());
         
         Assert.NotNull(result);
-        Assert.NotNull(result.Guid);
+        Assert.NotEqual(Guid.Empty, result.Guid);
         Assert.Null(result.Ref);
         Assert.Equal(guid, result.Guid);
     }
@@ -40,7 +40,7 @@ public class ContractIdOfTConverterTests : BaseTests
         var result = JsonSerializer.Deserialize<ContractId<Container>>($"\"{name}\"", CreateOptions());
         
         Assert.NotNull(result);
-        Assert.Null(result.Guid);
+        Assert.Equal(Guid.Empty, result.Guid);
         Assert.NotNull(result.Ref);
         Assert.Equal(name, result.Ref.Name);
         Assert.Equal(nameof(Container), result.Ref.TypeName);
@@ -61,7 +61,7 @@ public class ContractIdOfTConverterTests : BaseTests
     public void Write_Name_ReturnsExpectedValue()
     {
         var name = Resolve<Faker>().Lorem.Word();
-        var contractId = new ContractId<Container>(name);
+        var contractId = new ContractId<Container>(Guid.Empty, name);
         
         var result = JsonSerializer.Serialize(contractId, CreateOptions());
         

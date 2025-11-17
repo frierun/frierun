@@ -18,13 +18,6 @@ public class NetworkHandler(State state, Application application, DockerService 
 
     public override IEnumerable<ContractList> Initialize(Network contract, ApplicationContext context)
     {
-        // contract is set
-        if (contract.Installed)
-        {
-            yield return new ContractList { [context] = State.GetContract(contract.Id) };
-            yield break;
-        }
-
         if (contract.NetworkName != null)
         {
             var installedContract = State.GetContracts<Network>()

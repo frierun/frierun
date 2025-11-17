@@ -107,8 +107,7 @@ public class CloudflareTunnelHandler(State state) : Handler<CloudflareTunnel>(st
     public override void Uninstall(CloudflareTunnel contract)
     {
         Debug.Assert(contract.Installed);
-        Debug.Assert(contract.CloudflareApiConnection.Guid != null);
-        var cloudflareApiConnection = State.GetContract<CloudflareApiConnection>((Guid)contract.CloudflareApiConnection.Guid);
+        var cloudflareApiConnection = State.GetContract<CloudflareApiConnection>(contract.CloudflareApiConnection.Guid);
 
         var client = cloudflareApiConnection.CreateClient();
         try

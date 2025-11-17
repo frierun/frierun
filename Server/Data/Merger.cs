@@ -3,24 +3,6 @@
 public static class Merger
 {
     /// <summary>
-    /// Merges two contracts. If any of them is installed, it is returned.
-    /// </summary>
-    public static Contract Merge(Contract contract, Contract other)
-    {
-        if (contract.Installed && contract.IsSubset(other))
-        {
-            return contract;
-        }
-
-        if (other.Installed && other.IsSubset(contract))
-        {
-            return other;
-        }
-
-        return contract.Merge(other);
-    }
-
-    /// <summary>
     /// Merges common part of the contract.
     /// </summary>
     public static TContract MergeCommon<TContract>(TContract contract, Contract other, out TContract castOther)
@@ -33,13 +15,9 @@ public static class Merger
 
         castOther = cast;
 
-        if (contract.Installed || other.Installed)
-        {
-            throw new MergeException("Can't merge installed contracts");
-        }
-
         var result = contract with
         {
+            Id = MergeValue(contract.Id, other.Id),
             Handler = MergeValue(contract.Handler, other.Handler),
             HandlerApplication = MergeValue(contract.HandlerApplication, other.HandlerApplication),
             DependsOn = contract.DependsOn.Concat(other.DependsOn).Distinct()

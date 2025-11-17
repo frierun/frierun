@@ -9,63 +9,62 @@ public class ContractId<TContract> : ContractId where TContract : Contract
 {
     public new ContractRef<TContract>? Ref => base.Ref != null ? new ContractRef<TContract>(base.Ref) : null;
 
-    public ContractId(string name) : base(new ContractRef<TContract>(name))
+    public ContractId(Guid guid = default, string? name = null) :
+        base(guid, name != null ? new ContractRef<TContract>(name) : null)
     {
     }
 
-    public ContractId(Guid guid) : base(guid)
+    public override void Resolve(ExecutionPlan plan)
     {
+        if (Ref == null && Guid == Guid.Empty)
+        {
+            base.Ref = new ContractRef<TContract>("");
+        }
+
+        base.Resolve(plan);
     }
 
     public override object Merge(object other)
     {
         var contractId = (ContractId<TContract>)other;
-        var guid = Merger.MergeValue(Guid, contractId.Guid);
-        if (guid != null)
-        {
-            return new ContractId((Guid)guid);
-        }
-
-        var refId = Merger.MergeValue(Ref, contractId.Ref);
-        Debug.Assert(refId != null, "Contract ID must have either a GUID or a ContractRef");
-        return new ContractId<TContract>(refId.Name);
+        return new ContractId<TContract>(
+            Merger.MergeValue(Guid, contractId.Guid),
+            Merger.MergeValue(Ref, contractId.Ref)?.Name
+        );
     }
 }
 
-public class ContractId : IArgument, IEquatable<ContractId>
+public class ContractId(Guid guid = default, ContractRef? refId = null) : IArgument, IEquatable<ContractId>
 {
-    public ContractRef? Ref { get; private set; }
-    public Guid? Guid { get; private set; }
+    public ContractRef? Ref { get; protected set; } = refId;
+    public Guid Guid { get; protected set; } = guid;
 
-    public static implicit operator ContractId(ContractRef refId) => new(refId);
+    public static implicit operator ContractId(ContractRef refId) => new(Guid.Empty, refId);
     public static implicit operator ContractId(Guid guid) => new(guid);
 
-    public ContractId(ContractRef refId)
+    public virtual void Resolve(ExecutionPlan plan)
     {
-        Ref = refId;
-    }
-
-    public ContractId(Guid guid)
-    {
-        Guid = guid;
-    }
-
-    public void Resolve(ExecutionPlan plan)
-    {
-        if (Guid != null)
+        if (Ref == null)
         {
+            Debug.Assert(Guid != Guid.Empty, "Contract ID must have either a GUID or a ContractRef");
             return;
         }
-
-        Debug.Assert(Ref != null, "Contract ID must have either a GUID or a ContractRef");
 
         var contract = plan.GetContract(Ref);
         if (!contract.Installed)
         {
             return;
         }
-        
-        Guid = contract.Id;
+
+        if (Guid != Guid.Empty)
+        {
+            Debug.Assert(contract.Id == Guid, "Contract ID must match the GUID of the installed contract");
+        }
+        else
+        {
+            Guid = contract.Id;
+        }
+
         Ref = null;
     }
 
@@ -74,15 +73,7 @@ public class ContractId : IArgument, IEquatable<ContractId>
     public virtual object Merge(object other)
     {
         var contractId = (ContractId)other;
-        var guid = Merger.MergeValue(Guid, contractId.Guid);
-        if (guid != null)
-        {
-            return new ContractId((Guid)guid);
-        }
-
-        var refId = Merger.MergeValue(Ref, contractId.Ref);
-        Debug.Assert(refId != null, "Contract ID must have either a GUID or a ContractRef");
-        return new ContractId(refId);
+        return new ContractId(Merger.MergeValue(Guid, contractId.Guid), Merger.MergeValue(Ref, contractId.Ref));
     }
 
     public bool Equals(ContractId? other)
@@ -97,7 +88,7 @@ public class ContractId : IArgument, IEquatable<ContractId>
             return true;
         }
 
-        if (Guid != null)
+        if (Guid != Guid.Empty)
         {
             return Equals(Guid, other.Guid);
         }

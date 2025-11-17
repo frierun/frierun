@@ -29,13 +29,6 @@ public class ContainerHandler(State state, Application application, DockerServic
 
     public override IEnumerable<ContractList> Initialize(Container contract, ApplicationContext context)
     {
-        // contract is set
-        if (contract.Installed)
-        {
-            yield return new ContractList { [context] = State.GetContract(contract.Id) };
-            yield break;
-        }
-        
         yield return new ContractList(
             contract.Mounts.Values.Select(mount => new KeyValuePair<ContractRef, Contract>(
                     mount.Volume,
