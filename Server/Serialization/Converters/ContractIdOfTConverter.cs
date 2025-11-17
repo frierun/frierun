@@ -60,9 +60,9 @@ public class ContractIdOfTConverter : JsonConverterFactory
                 return;
             }
 
-            Debug.Assert(value.Ref != null, "Contract ID must have either a GUID or a ContractRef");
+            var contractRef = value.Ref ?? new ContractRef<TContract>();
             var contractRefConverter = (JsonConverter<ContractRef<TContract>>)options.GetConverter(typeof(ContractRef<TContract>));
-            contractRefConverter.Write(writer, value.Ref, options);
+            contractRefConverter.Write(writer, contractRef, options);
         }
     }
 }
