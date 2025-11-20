@@ -141,7 +141,21 @@ public class ExecutionService(
                 return [];
             }
 
-            return [new ContractList { [context] = installedContract }];
+            ContractList contractList =
+            [
+                new KeyValuePair<ContractRef, Contract>(contractRef, installedContract),
+                ..installedContract.Merge(contract)
+                    .GetArguments()
+                    .OfType<ContractId>()
+                    .Where(contractId => contractId.Ref != null && contractId.Guid != Guid.Empty)
+                    .Select(contractId => new KeyValuePair<ContractRef, Contract>(
+                            contractId.Ref!,
+                            contractRegistry.CreateContract(contractId.Ref!) with { Id = contractId.Guid }
+                        )
+                    )
+            ];
+
+            return [contractList];
         }
 
         if (contract.Handler != null)
