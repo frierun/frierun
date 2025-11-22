@@ -11,7 +11,7 @@ public record Container(
     string? NetworkName = null,
     Argument<string>? ImageName = null,
     bool? MountDockerSocket = null,
-    ContractRef<Network>? Network = null,
+    ContractId<Network>? Network = null,
     IEnumerable<ContainerPort>? Ports = null,
     Argument<IEnumerable<string>>? Command = null,
     IEnumerable<string>? NetworkAliases = null,
@@ -28,7 +28,7 @@ public record Container(
     public IReadOnlyDictionary<string, Argument<string>> Labels { get; init; } = Labels ?? new Dictionary<string, Argument<string>>();
     public IReadOnlyDictionary<string, ContainerMount> Mounts { get; init; } = Mounts ?? new Dictionary<string, ContainerMount>();
     public IEnumerable<ContainerPort> Ports { get; init; } = Ports ?? [];
-    public ContractRef<Network> Network { get; init; } = Network ?? new ContractRef<Network>("");
+    public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>();
     public IEnumerable<string> NetworkAliases { get; init; } = NetworkAliases ?? [];
     public Argument<string> ImageName { get; init; } = ImageName ?? new Argument<string>();
    
@@ -40,6 +40,7 @@ public record Container(
     {
         yield return ImageName;
         yield return Command;
+        yield return Network;
         foreach (var pair in Env)
         {
             yield return pair.Value;
@@ -53,7 +54,12 @@ public record Container(
             yield return argument;
         }
     }
-    
+
+    public override IEnumerable<ContractId> GetDependencies()
+    {
+        return base.GetDependencies().Append(Network);
+    }
+
     public override Contract Merge(Contract other)
     {
         return MergeCommon(this, other, out var contract) with
@@ -62,7 +68,7 @@ public record Container(
             NetworkName = MergeValue(NetworkName, contract.NetworkName),
             ImageName = ImageName.Merge(contract.ImageName),
             MountDockerSocket = MergeValue(MountDockerSocket, contract.MountDockerSocket),
-            Network = MergeValue(Network, contract.Network),
+            Network = MergeContractId(Network, contract.Network),
             Ports = Ports.Concat(contract.Ports).Distinct(),
             Command = Command.Merge(contract.Command),
             NetworkAliases = NetworkAliases.Concat(contract.NetworkAliases).Distinct(),

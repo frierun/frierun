@@ -64,6 +64,7 @@ public abstract record Contract
 
 
     public virtual IEnumerable<IArgument> GetArguments() => DependsOn;
+    public virtual IEnumerable<ContractId> GetDependencies() => DependsOn;
 
     /// <summary>
     /// Merges contracts restrictions of the same type 

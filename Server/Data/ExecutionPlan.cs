@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Frierun.Server.Data;
+﻿namespace Frierun.Server.Data;
 
 public class ExecutionPlan(
     Dictionary<ContractRef, Contract> contracts,
@@ -31,14 +29,9 @@ public class ExecutionPlan(
 
         foreach (var (contractRef, contract) in contracts)
         {
-            foreach (var dependency in contract.DependsOn)
+            foreach (var dependency in contract.GetDependencies())
             {
-                var dependencyRef = dependency.Ref;
-                if (dependencyRef == null)
-                {
-                    continue;
-                }
-
+                var dependencyRef = dependency.Ref ?? dependency.DefaultRef;
                 graph.AddEdge(dependencyRef, contractRef);
             }
         }
@@ -64,42 +57,31 @@ public class ExecutionPlan(
     }
 
     /// <summary>
-    /// Get contract by ref.
-    /// </summary>
-    public Contract GetContract(ContractId contractId)
-    {
-        var guid = contractId.Guid;
-        if (guid != Guid.Empty)
-        {
-            return contracts.Values.First(contract => contract.Id == guid);
-        }
-
-        Debug.Assert(contractId.Ref != null, "Contract ID must have either a GUID or a ContractRef");
-        ;
-        return contracts[contractId.Ref];
-    }
-
-    /// <summary>
     /// Get contract by id.
     /// </summary>
     public T GetContract<T>(ContractId<T> contractId)
         where T : Contract
     {
-        return (T)GetContract((ContractId)contractId);
+        if (contractId.Guid != Guid.Empty)
+        {
+            return contracts.Values.OfType<T>().First(contract => contract.Id == contractId.Guid);
+        }
+
+        var contractRef = contractId.TypedRef;
+        return (T)contracts[contractRef];
     }
 
 
     /// <summary>
     /// Installs all contracts in the execution plan.
     /// </summary>
-    /// <param name="state"></param>
     public Application Install(State state)
     {
         var graph = BuildGraph();
         graph.RunDfs(contractRef =>
             {
-                var contract = GetContract(contractRef);
-
+                var contract = contracts[contractRef];
+        
                 foreach (var argument in contract.GetArguments())
                 {
                     argument.Resolve(this);

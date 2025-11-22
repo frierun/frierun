@@ -18,7 +18,7 @@ public class CloudflareTunnelHandler(State state) : Handler<CloudflareTunnel>(st
                 ),
                 DependsOn = [contract.CloudflareApiConnection],
             },
-            [contract.Container] = new Container
+            [contract.Container.TypedRef] = new Container
             {
                 ImageName = "cloudflare/cloudflared:latest",
                 Command = new Argument<IEnumerable<string>>(plan =>

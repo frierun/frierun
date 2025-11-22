@@ -60,9 +60,8 @@ public class ContractIdOfTConverter : JsonConverterFactory
                 return;
             }
 
-            var contractRef = value.Ref ?? new ContractRef<TContract>();
             var contractRefConverter = (JsonConverter<ContractRef<TContract>>)options.GetConverter(typeof(ContractRef<TContract>));
-            contractRefConverter.Write(writer, contractRef, options);
+            contractRefConverter.Write(writer, value.TypedRef, options);
         }
     }
 }

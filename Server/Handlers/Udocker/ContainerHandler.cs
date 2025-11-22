@@ -33,7 +33,6 @@ public class ContainerHandler(State state, Application application)
                 Handler = this,
                 DependsOn =
                 [
-                    contract.Network,
                     new ContractRef<Daemon>(context.Name),
                     ..contract.Mounts.Values.Select(mount => mount.Volume)
                 ]
@@ -55,7 +54,7 @@ public class ContainerHandler(State state, Application application)
                 ),
                 DependsOn = [..contract.Mounts.Values.Select(mount => mount.Volume)]
             },
-            [contract.Network] = new Network { HandlerApplication = Application?.Name }
+            [contract.Network.TypedRef] = new Network { HandlerApplication = Application?.Name }
         };
     }
 
@@ -128,7 +127,7 @@ public class ContainerHandler(State state, Application application)
         );
 
         // mounts
-        foreach (var (path, mount) in contract.Mounts)
+        foreach (var (_, mount) in contract.Mounts)
         {
             var volume = plan.GetContract(mount.Volume);
             Debug.Assert(volume.Installed);

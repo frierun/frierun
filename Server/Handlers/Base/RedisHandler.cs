@@ -26,7 +26,7 @@ public class RedisHandler(State state) : Handler<Redis>(state)
             },
             [containerId] = new Container(
                 ImageName: "redis:7",
-                Network: contract.Network,
+                Network: new ContractId<Network>(Guid.Empty, contract.Network.Name),
                 ContainerName: contract.Host,
                 Mounts: new Dictionary<string, ContainerMount> { { "/data", new ContainerMount(Volume: volume) } }
             )

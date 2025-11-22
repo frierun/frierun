@@ -7,36 +7,32 @@ namespace Frierun.Server.Data;
 /// </summary>
 public class ContractId<TContract> : ContractId where TContract : Contract
 {
-    public new ContractRef<TContract>? Ref => base.Ref != null ? new ContractRef<TContract>(base.Ref) : null;
+    public ContractRef<TContract> TypedRef => new(Ref ?? DefaultRef);
+    public override ContractRef DefaultRef => new ContractRef<TContract>();
 
     public ContractId(Guid guid = default, string? name = null) :
         base(guid, name != null ? new ContractRef<TContract>(name) : null)
     {
     }
-
-    public override void Resolve(ExecutionPlan plan)
-    {
-        if (Ref == null && Guid == Guid.Empty)
-        {
-            base.Ref = new ContractRef<TContract>("");
-        }
-
-        base.Resolve(plan);
-    }
-
+    
     public override object Merge(object other)
     {
         var contractId = (ContractId<TContract>)other;
+        var contractRef = Merger.MergeValue(Ref, contractId.Ref);
         return new ContractId<TContract>(
             Merger.MergeValue(Guid, contractId.Guid),
-            Merger.MergeValue(Ref, contractId.Ref)?.Name
+            contractRef?.Name
         );
     }
 }
 
 public class ContractId(Guid guid = default, ContractRef? refId = null) : IArgument, IEquatable<ContractId>
 {
-    public ContractRef? Ref { get; protected set; } = refId;
+    public ContractRef? Ref { get; } = refId;
+
+    public virtual ContractRef DefaultRef =>
+        throw new InvalidOperationException("Can't get default ref for untyped contract ID");
+
     public Guid Guid { get; protected set; } = guid;
 
     public static implicit operator ContractId(ContractRef refId) => new(Guid.Empty, refId);
@@ -44,13 +40,7 @@ public class ContractId(Guid guid = default, ContractRef? refId = null) : IArgum
 
     public virtual void Resolve(ExecutionPlan plan)
     {
-        if (Ref == null)
-        {
-            Debug.Assert(Guid != Guid.Empty, "Contract ID must have either a GUID or a ContractRef");
-            return;
-        }
-
-        var contract = plan.GetContract(Ref);
+        var contract = plan.GetContract(Ref ?? DefaultRef);
         if (!contract.Installed)
         {
             return;
@@ -64,8 +54,6 @@ public class ContractId(Guid guid = default, ContractRef? refId = null) : IArgum
         {
             Guid = contract.Id;
         }
-
-        Ref = null;
     }
 
     public IEnumerable<ContractRef> RequiredContracts => Ref != null ? [Ref] : [];
@@ -88,11 +76,53 @@ public class ContractId(Guid guid = default, ContractRef? refId = null) : IArgum
             return true;
         }
 
-        if (Guid != Guid.Empty)
+        if (Guid != Guid.Empty || other.Guid != Guid.Empty)
         {
             return Equals(Guid, other.Guid);
         }
 
         return Equals(Ref, other.Ref);
+    }
+    
+    public override bool Equals(object? obj)
+    {
+        if (obj is null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, obj))
+        {
+            return true;
+        }
+
+        if (obj is not ContractId other)
+        {
+            return false;
+        }
+
+        return Equals(other);
+    }
+    
+    public static bool operator ==(ContractId? left, ContractId? right)
+    {
+        return Equals(left, right);
+    }
+
+    public static bool operator !=(ContractId? left, ContractId? right)
+    {
+        return !(left == right);
+    }
+    
+    public override int GetHashCode()
+    {
+        // ReSharper disable once NonReadonlyMemberInGetHashCode
+        if (Guid != Guid.Empty)
+        {
+            // ReSharper disable once NonReadonlyMemberInGetHashCode
+            return Guid.GetHashCode();
+        }
+            
+        return Ref != null ? Ref.GetHashCode() : DefaultRef.GetHashCode();
     }
 }

@@ -57,6 +57,17 @@ public static class Merger
         throw new MergeException("Can't merge two different values");
     }
 
+    /// <summary>
+    /// Merges two typed contract ids
+    /// </summary>
+    public static ContractId<T> MergeContractId<T>(ContractId<T> value1, ContractId<T> value2) where T : Contract
+    {
+        return (ContractId<T>)value1.Merge(value2);
+    }
+
+    /// <summary>
+    /// Merges two dictionaries.
+    /// </summary>
     public static Dictionary<TKey, TValue> MergeDictionary<TKey, TValue>(
         IEnumerable<KeyValuePair<TKey, TValue>> dict1,
         IEnumerable<KeyValuePair<TKey, TValue>> dict2

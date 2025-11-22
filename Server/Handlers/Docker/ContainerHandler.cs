@@ -52,11 +52,10 @@ public class ContainerHandler(State state, Application application, DockerServic
                 Handler = this,
                 DependsOn =
                 [
-                    contract.Network,
                     ..contract.Mounts.Values.Select(mount => mount.Volume)
                 ]
             },
-            [contract.Network] = new Network { HandlerApplication = Application?.Name }
+            [contract.Network.TypedRef] = new Network { HandlerApplication = Application?.Name }
         };
     }
 
