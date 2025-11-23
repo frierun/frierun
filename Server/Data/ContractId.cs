@@ -41,10 +41,7 @@ public class ContractId(Guid guid = default, ContractRef? refId = null) : IArgum
     public virtual void Resolve(ExecutionPlan plan)
     {
         var contract = plan.GetContract(Ref ?? DefaultRef);
-        if (!contract.Installed)
-        {
-            return;
-        }
+        Debug.Assert(contract.Installed, "Contract must be installed");
 
         if (Guid != Guid.Empty)
         {

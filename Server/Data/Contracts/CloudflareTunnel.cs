@@ -9,7 +9,7 @@ public record CloudflareTunnel(
     string? TunnelId = null,
     string? Token = null,
     ContractId<CloudflareApiConnection>? CloudflareApiConnection = null,
-    ContractId<Container>? Container = null
+    ContractRef<Container>? Container = null
 ) : Contract
 {
     [MemberNotNullWhen(true, nameof(TunnelId), nameof(Token), nameof(AccountId))]
@@ -18,12 +18,9 @@ public record CloudflareTunnel(
     public ContractId<CloudflareApiConnection> CloudflareApiConnection { get; init; } =
         CloudflareApiConnection ?? new ContractId<CloudflareApiConnection>();
 
-    public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>();
-
     public override IEnumerable<IArgument> GetArguments()
     {
         yield return CloudflareApiConnection;
-        yield return Container;
         foreach (var argument in base.GetArguments())
         {
             yield return argument;
@@ -36,7 +33,7 @@ public record CloudflareTunnel(
         {
             AccountId = MergeValue(AccountId, contract.AccountId),
             CloudflareApiConnection = MergeContractId(CloudflareApiConnection, contract.CloudflareApiConnection),
-            Container = MergeContractId(Container, contract.Container),
+            Container = MergeValue(Container, contract.Container),
             TunnelId = MergeValue(TunnelId, contract.TunnelId),
             TunnelName = MergeValue(TunnelName, contract.TunnelName),
             Token = MergeValue(Token, contract.Token)

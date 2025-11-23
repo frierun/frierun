@@ -7,6 +7,11 @@ public class CloudflareTunnelHandler(State state) : Handler<CloudflareTunnel>(st
 {
     public override IEnumerable<ContractList> Initialize(CloudflareTunnel contract, ApplicationContext context)
     {
+        if (contract.Container == null)
+        {
+            contract = contract with { Container = new ContractRef<Container>() };
+        }
+        
         yield return new ContractList
         {
             [context] = contract with
@@ -18,7 +23,7 @@ public class CloudflareTunnelHandler(State state) : Handler<CloudflareTunnel>(st
                 ),
                 DependsOn = [contract.CloudflareApiConnection],
             },
-            [contract.Container.TypedRef] = new Container
+            [contract.Container] = new Container
             {
                 ImageName = "cloudflare/cloudflared:latest",
                 Command = new Argument<IEnumerable<string>>(plan =>

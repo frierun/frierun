@@ -52,7 +52,9 @@ public class ContainerHandler(State state, Application application)
                         GetPreCommands
                     )
                 ),
-                DependsOn = [..contract.Mounts.Values.Select(mount => mount.Volume)]
+                DependsOn = [
+                    ..contract.Mounts.Values.Select(mount => mount.Volume)
+                ]
             },
             [contract.Network.TypedRef] = new Network { HandlerApplication = Application?.Name }
         };
@@ -64,11 +66,6 @@ public class ContainerHandler(State state, Application application)
     private static IEnumerable<string> GetCommands(ContractRef<Container> contractRef, ExecutionPlan plan)
     {
         var contract = plan.GetContract(contractRef);
-        foreach (var argument in contract.GetArguments())
-        {
-            argument.Resolve(plan);
-        }
-
         Debug.Assert(contract.ContainerName != null);
 
         var command = new List<string>();
@@ -94,6 +91,7 @@ public class ContainerHandler(State state, Application application)
         // envs
         foreach (var pair in contract.Env)
         {
+            pair.Value.Resolve(plan);
             command.Add($"--env={pair.Key}={pair.Value.Value}");
         }
 
@@ -108,11 +106,8 @@ public class ContainerHandler(State state, Application application)
     private static IEnumerable<IEnumerable<string>> GetPreCommands(ContractRef<Container> contractRef, ExecutionPlan plan)
     {
         var contract = plan.GetContract(contractRef);
-        foreach (var argument in contract.GetArguments())
-        {
-            argument.Resolve(plan);
-        }
 
+        contract.ImageName.Resolve(plan);
         var imageName = contract.ImageName.Value;
         Debug.Assert(contract.ContainerName != null);
         Debug.Assert(imageName != null);

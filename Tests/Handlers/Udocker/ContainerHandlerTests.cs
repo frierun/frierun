@@ -26,7 +26,7 @@ public class ContainerHandlerTests : BaseTests
     }
 
     [Fact]
-    public void GetCommands_Container_ResolvesAllContainerArguments()
+    public void GetCommands_Container_ResolvesEnvArguments()
     {
         var parameter = Contract<Parameter>().Generate();
         var container = Contract<Container>()
@@ -48,17 +48,15 @@ public class ContainerHandlerTests : BaseTests
             []
         );
 
-        Assert.False(container.Contract.ImageName.Resolved);
         Assert.False(container.Contract.Env.Values.Single().Resolved);
 
         daemon.Command.Resolve(plan);
 
-        Assert.True(container.Contract.ImageName.Resolved);
         Assert.True(container.Contract.Env.Values.Single().Resolved);
     }
 
     [Fact]
-    public void GetPreCommands_Container_ResolvesAllContainerArguments()
+    public void GetPreCommands_Container_ResolvesImageNameArgument()
     {
         var parameter = Contract<Parameter>().Generate();
         var container = Contract<Container>()
@@ -81,12 +79,10 @@ public class ContainerHandlerTests : BaseTests
         );
 
         Assert.False(container.Contract.ImageName.Resolved);
-        Assert.False(container.Contract.Env.Values.Single().Resolved);
 
         daemon.PreCommands.Resolve(plan);
 
         Assert.True(container.Contract.ImageName.Resolved);
-        Assert.True(container.Contract.Env.Values.Single().Resolved);
     }
 
 

@@ -29,7 +29,7 @@ public class CloudflareApiConnectionHandler(State state) : Handler<CloudflareApi
 
     public ICloudflareClient CreateClient(CloudflareApiConnection contract)
     {
-        Debug.Assert(contract.Installed);
+        Debug.Assert(contract.Token != null);
         
         return new CloudflareClient(contract.Token);
     }
