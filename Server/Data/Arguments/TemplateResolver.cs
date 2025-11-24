@@ -81,19 +81,13 @@ public class TemplateResolver : IArgumentResolver<string>
             throw new Exception($"Property not found: {propertyName} in {contractRef}");
         }
 
-        if (propertyInfo.PropertyType.IsAssignableTo(typeof(IArgument)))
+        if (!propertyInfo.PropertyType.IsAssignableTo(typeof(IArgument)))
         {
-            var argument = (IArgument)propertyInfo.GetValue(contract)!;
-            argument.Resolve(plan);
-            return argument.ToString();
+            return propertyInfo.GetValue(contract)?.ToString();
         }
 
-        // resolve all contract arguments because our property might depend on any of them
-        foreach (var argument in contract.GetArguments())
-        {
-            argument.Resolve(plan);
-        }
-
-        return propertyInfo.GetValue(contract)?.ToString();
+        var argument = (IArgument)propertyInfo.GetValue(contract)!;
+        argument.Resolve(plan);
+        return argument.ToString();
     }
 }

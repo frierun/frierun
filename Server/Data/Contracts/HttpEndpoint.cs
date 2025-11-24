@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using static Frierun.Server.Data.Merger;
 
 namespace Frierun.Server.Data;
@@ -46,5 +45,5 @@ public record HttpEndpoint(
         };
     }
 
-    [JsonIgnore] public Uri Url => new($"http{(ResultSsl == true ? "s" : "")}://{ResultHost}:{ResultPort}");
+    [JsonIgnore] public UriArgument Url => new(ResultSsl, ResultHost, ResultPort);
 }

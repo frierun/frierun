@@ -9,6 +9,7 @@ public class RedisHandler(State state) : Handler<Redis>(state)
         var name = "redis" + (string.IsNullOrEmpty(context.Name) ? "" : $"-{context.Name}");
         var containerId = contract.Container ?? new ContractRef<Container>(name);
 
+        var volumeName = contract.Volume?.Name ?? name + "-data";
         var volume = contract.Volume ?? new ContractRef<Volume>(name + "-data");
 
         if (contract.Host.Empty)

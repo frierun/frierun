@@ -5,5 +5,5 @@ public record ContainerMount(
     bool ReadOnly = false
 )
 {
-    public ContractRef<Volume> Volume { get; init; } = Volume ?? new ContractRef<Volume>("");
+    public ContractRef<Volume> Volume { get; init; } = Volume ?? new ContractRef<Volume>();
 }

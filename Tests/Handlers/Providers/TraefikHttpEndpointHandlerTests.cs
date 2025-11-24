@@ -41,8 +41,8 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
 
         var installedHttpEndpoint = State.GetContract(application, httpEndpoint.Ref);
         Assert.True(installedHttpEndpoint.Installed);
-        Assert.Equal(80, installedHttpEndpoint.Url.Port);
-        Assert.Equal("http", installedHttpEndpoint.Url.Scheme);
+        Assert.Equal(80, installedHttpEndpoint.Url.Value.Port);
+        Assert.Equal("http", installedHttpEndpoint.Url.Value.Scheme);
         Assert.StartsWith("http://", installedHttpEndpoint.Url.ToString());
     }
 
@@ -61,8 +61,8 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
 
         var installedHttpEndpoint = State.GetContract(application, httpEndpoint.Ref);
         Assert.True(installedHttpEndpoint.Installed);
-        Assert.Equal(443, installedHttpEndpoint.Url.Port);
-        Assert.Equal("https", installedHttpEndpoint.Url.Scheme);
+        Assert.Equal(443, installedHttpEndpoint.Url.Value.Port);
+        Assert.Equal("https", installedHttpEndpoint.Url.Value.Scheme);
         Assert.StartsWith("https://", installedHttpEndpoint.Url.ToString());
     }
 
@@ -91,8 +91,8 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
 
         var installedHttpEndpoint = State.GetContract(application, httpEndpoint.Ref);
         Assert.True(installedHttpEndpoint.Installed);
-        Assert.Equal(81, installedHttpEndpoint.Url.Port);
-        Assert.Equal("http", installedHttpEndpoint.Url.Scheme);
+        Assert.Equal(81, installedHttpEndpoint.Url.Value.Port);
+        Assert.Equal("http", installedHttpEndpoint.Url.Value.Scheme);
         Assert.StartsWith("http://", installedHttpEndpoint.Url.ToString());
     }
 

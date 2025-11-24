@@ -47,7 +47,7 @@ public abstract record Contract
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Guid Id { get; init; } = Guid.Empty;
 
-    [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = [];
+    public IEnumerable<ContractId> DependsOn { get; init; } = [];
 
     [JsonPropertyName("handler")]
     [JsonInclude]
