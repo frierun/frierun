@@ -37,8 +37,8 @@ public class ContractIdConverter : JsonConverter<ContractId>
             return;
         }
         
-        Debug.Assert(value.Ref != null, "Contract ID must have either a GUID or a ContractRef");
+        var contractRef = value.Ref ?? value.DefaultRef;
         var contractRefConverter = (JsonConverter<ContractRef>)options.GetConverter(typeof(ContractRef));
-        contractRefConverter.Write(writer, value.Ref, options);
+        contractRefConverter.Write(writer, contractRef, options);
     }
 }
