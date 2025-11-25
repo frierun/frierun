@@ -14,15 +14,15 @@ public record File(
     public ContractRef<Volume> Volume { get; init; } = Volume ?? new ContractRef<Volume>("");
     public Argument<string> Text { get; init; } = Text ?? new Argument<string>();
 
-    public override IEnumerable<IArgument> GetArguments()
+    public override File Transform(IArgumentTransformer transformer)
     {
-        yield return Text;
-        foreach (var argument in base.GetArguments())
+        return this with
         {
-            yield return argument;
-        }
+            Text = transformer.Transform(Text),
+            DependsOn = DependsOn.Select(transformer.Transform)
+        };
     }
-
+    
     public override Contract Merge(Contract other)
     {
         return MergeCommon(this, other, out var contract) with

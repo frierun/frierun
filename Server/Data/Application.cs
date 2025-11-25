@@ -18,16 +18,16 @@ public record Application(
     public IReadOnlyDictionary<ContractRef, Guid> ContractRefs { get; init; } =
         ContractRefs ?? new Dictionary<ContractRef, Guid>();
 
-    public override IEnumerable<IArgument> GetArguments()
+    public override Application Transform(IArgumentTransformer transformer)
     {
-        yield return Url;
-        yield return Description;
-        foreach (var argument in base.GetArguments())
+        return this with
         {
-            yield return argument;
-        }
+            Url = transformer.Transform(Url),
+            Description = transformer.Transform(Description),
+            DependsOn = DependsOn.Select(transformer.Transform).ToArray()
+        };
     }
-
+    
     public override Application Merge(Contract other)
     {
         return MergeCommon(this, other, out var contract) with

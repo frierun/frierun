@@ -145,8 +145,7 @@ public class ExecutionService(
             [
                 new KeyValuePair<ContractRef, Contract>(contractRef, installedContract),
                 ..installedContract.Merge(contract)
-                    .GetArguments()
-                    .OfType<ContractId>()
+                    .GetDependencies()
                     .Where(contractId => contractId.Ref != null && contractId.Guid != Guid.Empty)
                     .Select(contractId => new KeyValuePair<ContractRef, Contract>(
                             contractId.Ref!,

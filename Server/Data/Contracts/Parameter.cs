@@ -13,15 +13,15 @@ public record Parameter(
 
     public Argument<string> Value { get; init; } = Value ?? new Argument<string>();
 
-    public override IEnumerable<IArgument> GetArguments()
+    public override Parameter Transform(IArgumentTransformer transformer)
     {
-        yield return Value;
-        foreach (var argument in base.GetArguments())
+        return this with
         {
-            yield return argument;
-        }
+            Value = transformer.Transform(Value),
+            DependsOn = DependsOn.Select(transformer.Transform).ToArray()
+        };
     }
-
+    
     public override Contract Merge(Contract other)
     {
         return MergeCommon(this, other, out var contract) with

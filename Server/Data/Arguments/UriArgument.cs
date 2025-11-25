@@ -11,7 +11,7 @@ public class UriArgument(Argument<bool?> ssl, Argument<string> host, Argument<in
         port.Resolve(plan);
     }
 
-    public IEnumerable<ContractRef> RequiredContracts => [];
+    public IEnumerable<ContractId> RequiredContracts => [];
 
     public object Merge(object other)
     {

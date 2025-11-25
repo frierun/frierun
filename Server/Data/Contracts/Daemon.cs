@@ -17,16 +17,16 @@ public record Daemon(
     public Argument<IEnumerable<IEnumerable<string>>> PreCommands { get; init; } = PreCommands
         ?? new Argument<IEnumerable<IEnumerable<string>>>();
 
-    public override IEnumerable<IArgument> GetArguments()
+    public override Daemon Transform(IArgumentTransformer transformer)
     {
-        yield return Command;
-        yield return PreCommands;
-        foreach (var argument in base.GetArguments())
+        return this with
         {
-            yield return argument;
-        }
+            Command = transformer.Transform(Command),
+            PreCommands = transformer.Transform(PreCommands),
+            DependsOn = DependsOn.Select(transformer.Transform).ToArray()
+        };
     }
-
+    
     public override Contract Merge(Contract other)
     {
         return MergeCommon(this, other, out var contract) with

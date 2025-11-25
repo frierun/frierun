@@ -43,7 +43,7 @@ public abstract record Contract
 {
     [MemberNotNullWhen(true, nameof(Id), nameof(Handler))]
     public virtual bool Installed => Id != Guid.Empty;
-    
+
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Guid Id { get; init; } = Guid.Empty;
 
@@ -63,8 +63,41 @@ public abstract record Contract
     [JsonIgnore] public string? HandlerApplication { get; init; }
 
 
-    public virtual IEnumerable<IArgument> GetArguments() => DependsOn;
-    public virtual IEnumerable<ContractId> GetDependencies() => DependsOn;
+    /// <summary>
+    /// Transforms all arguments using the transformer.
+    /// </summary>
+    public virtual Contract Transform(IArgumentTransformer transformer)
+    {
+        return this with
+        {
+            DependsOn = DependsOn.Select(transformer.Transform).ToArray()
+        };
+    }
+
+    /// <summary>
+    /// Resolves all arguments and returns resolved contract
+    /// </summary>
+    public Contract ResolveArguments(ExecutionPlan plan)
+    {
+        return Transform(new ContractResolver(plan));
+    }
+
+    /// <summary>
+    /// Gets all arguments used by the contract.
+    /// </summary>
+    public IEnumerable<IArgument> GetArguments()
+    {
+        var counter = new ArgumentCounter();
+        Transform(counter);
+        return counter.Arguments;
+    }
+
+    public IEnumerable<ContractId> GetDependencies()
+    {
+        return GetArguments()
+            .SelectMany(argument => argument.RequiredContracts)
+            .Distinct();
+    }
 
     /// <summary>
     /// Merges contracts restrictions of the same type 

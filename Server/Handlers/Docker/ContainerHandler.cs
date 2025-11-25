@@ -20,7 +20,7 @@ public class ContainerHandler(State state, Application application, DockerServic
                 NetworkName = container.NetworkSettings.Networks.First().Key,
                 ImageName = container.Image,
                 MountDockerSocket = false,
-                
+
             }
         );
         */
@@ -31,7 +31,7 @@ public class ContainerHandler(State state, Application application, DockerServic
     {
         yield return new ContractList(
             contract.Mounts.Values.Select(mount => new KeyValuePair<ContractRef, Contract>(
-                    mount.Volume,
+                    mount.Volume.TypedRef,
                     new Volume { HandlerApplication = Application?.Name }
                 )
             )
@@ -50,10 +50,6 @@ public class ContainerHandler(State state, Application application, DockerServic
                 },
                 NetworkAliases = context.Name == "" ? [] : [context.Name],
                 Handler = this,
-                DependsOn =
-                [
-                    ..contract.Mounts.Values.Select(mount => mount.Volume)
-                ]
             },
             [contract.Network.TypedRef] = new Network { HandlerApplication = Application?.Name }
         };

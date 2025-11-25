@@ -15,6 +15,7 @@ public class ContractId<TContract> : ContractId where TContract : Contract
     {
     }
     
+    
     public override object Merge(object other)
     {
         var contractId = (ContractId<TContract>)other;
@@ -53,7 +54,7 @@ public class ContractId(Guid guid = default, ContractRef? refId = null) : IArgum
         }
     }
 
-    public IEnumerable<ContractRef> RequiredContracts => Ref != null ? [Ref] : [];
+    public virtual IEnumerable<ContractId> RequiredContracts => [this];
 
     public virtual object Merge(object other)
     {

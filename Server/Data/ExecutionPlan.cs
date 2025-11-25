@@ -81,11 +81,8 @@ public class ExecutionPlan(
         graph.RunDfs(contractRef =>
             {
                 var contract = contracts[contractRef];
-        
-                foreach (var argument in contract.GetArguments())
-                {
-                    argument.Resolve(this);
-                }
+                contract = contract.ResolveArguments(this);
+                contracts[contractRef] = contract;
 
                 if (!contract.Installed)
                 {

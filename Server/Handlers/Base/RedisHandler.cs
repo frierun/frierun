@@ -10,7 +10,6 @@ public class RedisHandler(State state) : Handler<Redis>(state)
         var containerId = contract.Container ?? new ContractRef<Container>(name);
 
         var volumeName = contract.Volume?.Name ?? name + "-data";
-        var volume = contract.Volume ?? new ContractRef<Volume>(name + "-data");
 
         if (contract.Host.Empty)
         {
@@ -29,7 +28,7 @@ public class RedisHandler(State state) : Handler<Redis>(state)
                 ImageName: "redis:7",
                 Network: new ContractId<Network>(Guid.Empty, contract.Network.Name),
                 ContainerName: contract.Host,
-                Mounts: new Dictionary<string, ContainerMount> { { "/data", new ContainerMount(Volume: volume) } }
+                Mounts: new Dictionary<string, ContainerMount> { { "/data", new ContainerMount(Volume: new ContractId<Volume>(Guid.Empty, volumeName)) } }
             )
         };
     }

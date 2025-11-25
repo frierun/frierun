@@ -19,17 +19,17 @@ public record HttpEndpoint(
     public Argument<string> ResultHost { get; init; } = ResultHost ?? new Argument<string>();
     public Argument<int> ResultPort { get; init; } = ResultPort ?? new Argument<int>();
 
-    public override IEnumerable<IArgument> GetArguments()
+    public override HttpEndpoint Transform(IArgumentTransformer transformer)
     {
-        yield return ResultSsl;
-        yield return ResultHost;
-        yield return ResultPort;
-        foreach (var argument in base.GetArguments())
+        return this with
         {
-            yield return argument;
-        }
+            ResultSsl = transformer.Transform(ResultSsl),
+            ResultHost = transformer.Transform(ResultHost),
+            ResultPort = transformer.Transform(ResultPort),
+            DependsOn = DependsOn.Select(transformer.Transform).ToArray()
+        };
     }
-
+    
     public override Contract Merge(Contract other)
     {
         return MergeCommon(this, other, out var contract) with

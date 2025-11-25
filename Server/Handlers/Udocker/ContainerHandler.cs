@@ -18,7 +18,7 @@ public class ContainerHandler(State state, Application application)
         var containerRef = new ContractRef<Container>(context.Name);
         yield return new ContractList(
             contract.Mounts.Values.Select(mount => new KeyValuePair<ContractRef, Contract>(
-                    mount.Volume,
+                    mount.Volume.TypedRef,
                     new Volume { HandlerApplication = Application?.Name }
                 )
             )
@@ -33,8 +33,7 @@ public class ContainerHandler(State state, Application application)
                 Handler = this,
                 DependsOn =
                 [
-                    new ContractRef<Daemon>(context.Name),
-                    ..contract.Mounts.Values.Select(mount => mount.Volume)
+                    new ContractRef<Daemon>(context.Name)
                 ]
             },
             [context.Name] = new Daemon(context.Name)

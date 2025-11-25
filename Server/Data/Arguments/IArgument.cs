@@ -3,6 +3,6 @@
 public interface IArgument
 {
     void Resolve(ExecutionPlan plan);
-    IEnumerable<ContractRef> RequiredContracts { get; }
+    IEnumerable<ContractId> RequiredContracts { get; }
     object Merge(object other);
 }

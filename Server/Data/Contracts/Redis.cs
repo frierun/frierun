@@ -17,15 +17,15 @@ public record Redis(
     public ContractRef<Network> Network { get; init; } = Network ?? new ContractRef<Network>("");
     public Argument<string> Host { get; init; } = Host ?? new Argument<string>();
 
-    public override IEnumerable<IArgument> GetArguments()
+    public override Redis Transform(IArgumentTransformer transformer)
     {
-        yield return Host;
-        foreach (var argument in base.GetArguments())
+        return this with
         {
-            yield return argument;
-        }
-    }
-
+            Host = transformer.Transform(Host),
+            DependsOn = DependsOn.Select(transformer.Transform).ToArray()
+        };
+    }    
+    
     public override Contract Merge(Contract other)
     {
         return MergeCommon(this, other, out var contract) with

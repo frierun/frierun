@@ -102,17 +102,6 @@ public class DiscoveryGraph
             }
         }
 
-        foreach (var argument in initializedContract.GetArguments())
-        {
-            foreach (var contractRef in argument.RequiredContracts)
-            {
-                if (!Contracts.ContainsKey(contractRef))
-                {
-                    _emptyContracts.Add(contractRef);
-                }
-            }
-        }
-
         return true;
     }
 }

@@ -18,15 +18,15 @@ public record CloudflareTunnel(
     public ContractId<CloudflareApiConnection> CloudflareApiConnection { get; init; } =
         CloudflareApiConnection ?? new ContractId<CloudflareApiConnection>();
 
-    public override IEnumerable<IArgument> GetArguments()
+    public override CloudflareTunnel Transform(IArgumentTransformer transformer)
     {
-        yield return CloudflareApiConnection;
-        foreach (var argument in base.GetArguments())
+        return this with
         {
-            yield return argument;
-        }
+            CloudflareApiConnection = transformer.Transform(CloudflareApiConnection),
+            DependsOn = DependsOn.Select(transformer.Transform).ToArray()
+        };
     }
-
+    
     public override Contract Merge(Contract other)
     {
         return MergeCommon(this, other, out var contract) with

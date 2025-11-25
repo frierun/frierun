@@ -14,6 +14,7 @@ public class ContractListConverterTests : BaseTests
             Converters =
             {
                 new ContractRefConverter(),
+                new ContractIdConverter(),
                 new ContractListConverter(Resolve<ContractRegistry>())
             }
         };

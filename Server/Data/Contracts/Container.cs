@@ -22,42 +22,44 @@ public record Container(
 {
     [MemberNotNullWhen(true, nameof(ContainerName), nameof(NetworkName))]
     public override bool Installed => Id != Guid.Empty;
-    
+
     public Argument<IEnumerable<string>> Command { get; init; } = Command ?? new Argument<IEnumerable<string>>();
-    public IReadOnlyDictionary<string, Argument<string>> Env { get; init; } = Env ?? new Dictionary<string, Argument<string>>();
-    public IReadOnlyDictionary<string, Argument<string>> Labels { get; init; } = Labels ?? new Dictionary<string, Argument<string>>();
-    public IReadOnlyDictionary<string, ContainerMount> Mounts { get; init; } = Mounts ?? new Dictionary<string, ContainerMount>();
+
+    public IReadOnlyDictionary<string, Argument<string>> Env { get; init; } =
+        Env ?? new Dictionary<string, Argument<string>>();
+
+    public IReadOnlyDictionary<string, Argument<string>> Labels { get; init; } =
+        Labels ?? new Dictionary<string, Argument<string>>();
+
+    public IReadOnlyDictionary<string, ContainerMount> Mounts { get; init; } =
+        Mounts ?? new Dictionary<string, ContainerMount>();
+
     public IEnumerable<ContainerPort> Ports { get; init; } = Ports ?? [];
     public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>();
     public IEnumerable<string> NetworkAliases { get; init; } = NetworkAliases ?? [];
     public Argument<string> ImageName { get; init; } = ImageName ?? new Argument<string>();
-   
-    
-    [JsonInclude]
-    private IDictionary<string, int> ConnectedNetworks { get; init; } = new Dictionary<string, int>();
 
-    public override IEnumerable<IArgument> GetArguments()
-    {
-        yield return ImageName;
-        yield return Command;
-        yield return Network;
-        foreach (var pair in Env)
-        {
-            yield return pair.Value;
-        }
-        foreach (var pair in Labels)
-        {
-            yield return pair.Value;
-        }
-        foreach (var argument in base.GetArguments())
-        {
-            yield return argument;
-        }
-    }
 
-    public override IEnumerable<ContractId> GetDependencies()
+    [JsonInclude] private IDictionary<string, int> ConnectedNetworks { get; init; } = new Dictionary<string, int>();
+
+    public override Container Transform(IArgumentTransformer transformer)
     {
-        return base.GetDependencies().Append(Network);
+        return this with
+        {
+            ImageName = transformer.Transform(ImageName),
+            Command = transformer.Transform(Command),
+            Network = transformer.Transform(Network),
+            Mounts = Mounts.ToDictionary(
+                pair => pair.Key,
+                pair => pair.Value with
+                {
+                    Volume = transformer.Transform(pair.Value.Volume)
+                }
+            ),
+            Env = Env.ToDictionary(pair => pair.Key, pair => transformer.Transform(pair.Value)),
+            Labels = Labels.ToDictionary(pair => pair.Key, pair => transformer.Transform(pair.Value)),
+            DependsOn = DependsOn.Select(transformer.Transform).ToArray()
+        };
     }
 
     public override Contract Merge(Contract other)
@@ -81,17 +83,17 @@ public record Container(
     public override bool IsSubset(Contract other)
     {
         return IsSubsetContract(this, other, out var contract)
-            && IsSubsetValue(ContainerName, contract.ContainerName)
-            && IsSubsetValue(NetworkName, contract.NetworkName)
-            && IsSubsetArgument(ImageName, contract.ImageName)
-            && IsSubsetValue(MountDockerSocket, contract.MountDockerSocket)
-            && IsSubsetValue(Network, contract.Network)
-            && IsSubsetList(Ports, contract.Ports)
-            && IsSubsetArgument(Command, contract.Command)
-            && IsSubsetList(NetworkAliases, contract.NetworkAliases)
-            && IsSubsetDictionary(Env, contract.Env)
-            && IsSubsetDictionary(Labels, contract.Labels)
-            && IsSubsetDictionary(Mounts, contract.Mounts);
+               && IsSubsetValue(ContainerName, contract.ContainerName)
+               && IsSubsetValue(NetworkName, contract.NetworkName)
+               && IsSubsetArgument(ImageName, contract.ImageName)
+               && IsSubsetValue(MountDockerSocket, contract.MountDockerSocket)
+               && IsSubsetValue(Network, contract.Network)
+               && IsSubsetList(Ports, contract.Ports)
+               && IsSubsetArgument(Command, contract.Command)
+               && IsSubsetList(NetworkAliases, contract.NetworkAliases)
+               && IsSubsetDictionary(Env, contract.Env)
+               && IsSubsetDictionary(Labels, contract.Labels)
+               && IsSubsetDictionary(Mounts, contract.Mounts);
     }
 
     /// <summary>
@@ -102,13 +104,13 @@ public record Container(
         Debug.Assert(network.Installed);
         Debug.Assert(Installed);
         Debug.Assert(Handler != null);
-        
+
         var networkName = network.NetworkName;
         if (networkName == NetworkName)
         {
             return;
         }
-        
+
         if (ConnectedNetworks.TryGetValue(networkName, out var count))
         {
             ConnectedNetworks[networkName] = count + 1;
@@ -119,7 +121,7 @@ public record Container(
             Handler.AttachNetwork(this, networkName);
         }
     }
-    
+
     /// <summary>
     /// Detaches container from a network.
     /// </summary>
@@ -130,7 +132,7 @@ public record Container(
         {
             return;
         }
-        
+
         if (ConnectedNetworks.TryGetValue(networkName, out var count))
         {
             if (count > 1)
@@ -144,7 +146,7 @@ public record Container(
 
         Handler.DetachNetwork(this, networkName);
     }
-    
+
     /// <summary>
     /// Executes a command in the container.
     /// </summary>
