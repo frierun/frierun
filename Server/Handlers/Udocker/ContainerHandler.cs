@@ -90,8 +90,7 @@ public class ContainerHandler(State state, Application application)
         // envs
         foreach (var pair in contract.Env)
         {
-            pair.Value.Resolve(plan);
-            command.Add($"--env={pair.Key}={pair.Value.Value}");
+            command.Add($"--env={pair.Key}={pair.Value.Resolve(plan).Value}");
         }
 
         command.Add(contract.ContainerName);
@@ -106,8 +105,7 @@ public class ContainerHandler(State state, Application application)
     {
         var contract = plan.GetContract(contractRef);
 
-        contract.ImageName.Resolve(plan);
-        var imageName = contract.ImageName.Value;
+        var imageName = contract.ImageName.Resolve(plan).Value;
         Debug.Assert(contract.ContainerName != null);
         Debug.Assert(imageName != null);
 

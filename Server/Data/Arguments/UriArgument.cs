@@ -1,14 +1,12 @@
 ﻿namespace Frierun.Server.Data;
 
-public class UriArgument(Argument<bool?> ssl, Argument<string> host, Argument<int> port) : IArgument
+public class UriArgument(Argument<bool?> ssl, Argument<string> host, Argument<int> port) : IArgument<UriArgument>
 {
     public Uri Value => new($"http{(ssl == true ? "s" : "")}://{host}:{port}");
 
-    public void Resolve(ExecutionPlan plan)
+    public UriArgument Resolve(ExecutionPlan plan)
     {
-        ssl.Resolve(plan);
-        host.Resolve(plan);
-        port.Resolve(plan);
+        return new UriArgument(ssl.Resolve(plan), host.Resolve(plan), port.Resolve(plan));
     }
 
     public IEnumerable<ContractId> RequiredContracts => [];

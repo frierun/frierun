@@ -154,10 +154,13 @@ public class ArgumentTests : BaseTests
         );
         Assert.False(parameter.Contract.Value.Resolved);
 
-        arg.Resolve(plan);
+        arg = arg.Resolve(plan);
 
-        Assert.True(parameter.Contract.Value.Resolved);
+        Assert.False(parameter.Contract.Value.Resolved);
         Assert.Equal(value, arg.Value);
+
+        var parameterContract = (Parameter)parameter.Contract.ResolveArguments(plan);
+        Assert.True(parameterContract.Value.Resolved);
     }
 
     [Fact]
@@ -180,12 +183,13 @@ public class ArgumentTests : BaseTests
         Assert.False(httpEndpoint.Contract.ResultHost.Resolved);
         Assert.False(httpEndpoint.Contract.ResultPort.Resolved);
 
-        arg.Resolve(plan);
-
-        Assert.True(httpEndpoint.Contract.ResultSsl.Resolved);
-        Assert.True(httpEndpoint.Contract.ResultHost.Resolved);
-        Assert.True(httpEndpoint.Contract.ResultPort.Resolved);
+        arg = arg.Resolve(plan);
         Assert.Equal("https://test.tld:444/", arg.Value);
+
+        var httpEndpointContract = (HttpEndpoint)httpEndpoint.Contract.ResolveArguments(plan);
+        Assert.True(httpEndpointContract.ResultSsl.Resolved);
+        Assert.True(httpEndpointContract.ResultHost.Resolved);
+        Assert.True(httpEndpointContract.ResultPort.Resolved);
     }
 
     [Fact]

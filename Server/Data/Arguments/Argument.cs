@@ -2,7 +2,7 @@
 
 namespace Frierun.Server.Data;
 
-public class Argument<T> : IEquatable<Argument<T>>, IArgument
+public class Argument<T> : IEquatable<Argument<T>>, IArgument<Argument<T>>
 {
     private bool _resolving;
 
@@ -13,7 +13,12 @@ public class Argument<T> : IEquatable<Argument<T>>, IArgument
 
     public Argument(T? value)
     {
-        if (value == null || value is not string || !ApplyTemplate(value.ToString() ?? ""))
+        if (value != null && value is string str)
+        {
+            Resolver = (IArgumentResolver<T>?)TemplateResolver.Create(str);
+        }
+        
+        if (Resolver == null)
         {
             Value = value;
         }
@@ -36,12 +41,12 @@ public class Argument<T> : IEquatable<Argument<T>>, IArgument
     /// <summary>
     /// Resolved value of argument. Maybe default if not resolved yet.
     /// </summary>
-    public T? Value { get; private set; }
+    public T? Value { get; private init; }
 
     /// <summary>
     /// Function to resolve argument
     /// </summary>
-    public IArgumentResolver<T>? Resolver { get; private set; }
+    public IArgumentResolver<T>? Resolver { get; private init; }
 
     /// <summary>
     /// List of contracts which are required to resolve value
@@ -57,25 +62,15 @@ public class Argument<T> : IEquatable<Argument<T>>, IArgument
     /// Checks if the argument is empty, that is it has neither value, nor resolver
     /// </summary>
     public bool Empty => !Resolved && Resolver == null;
-
-    /// <summary>
-    /// Creates a resolver to all variables in templates in form {{Contract:Name:Argument}} 
-    /// </summary>
-    /// <returns>True if the resolver is set, false if it is not required</returns>
-    private bool ApplyTemplate(string value)
-    {
-        Resolver = (IArgumentResolver<T>?)TemplateResolver.Create(value);
-        return Resolver != null;
-    }
-
+    
     /// <summary>
     /// Resolves the real value of argument
     /// </summary>
-    public void Resolve(ExecutionPlan plan)
+    public Argument<T> Resolve(ExecutionPlan plan)
     {
         if (Resolver == null)
         {
-            return;
+            return this;
         }
 
         Debug.Assert(!Resolved, "Can't resolve already resolved argument");
@@ -86,9 +81,9 @@ public class Argument<T> : IEquatable<Argument<T>>, IArgument
         }
 
         _resolving = true;
-        Value = Resolver.Resolve(plan);
+        var newValue = Resolver.Resolve(plan);
         _resolving = false;
-        Resolver = null;
+        return new Argument<T>(newValue);
     }
 
     /// <summary>

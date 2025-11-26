@@ -88,7 +88,6 @@ public class TemplateResolver : IArgumentResolver<string>
         }
 
         var argument = (IArgument)propertyInfo.GetValue(contract)!;
-        argument.Resolve(plan);
-        return argument.ToString();
+        return argument.Resolve(plan).ToString();
     }
 }

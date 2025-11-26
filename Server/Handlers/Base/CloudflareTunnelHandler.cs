@@ -20,8 +20,7 @@ public class CloudflareTunnelHandler(State state) : Handler<CloudflareTunnel>(st
                 TunnelName = contract.TunnelName ?? FindUniqueName(
                     context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     tunnel => tunnel.TunnelName
-                ),
-                DependsOn = [contract.CloudflareApiConnection],
+                )
             },
             [contract.Container] = new Container
             {

@@ -28,7 +28,8 @@ public class ContainerHandlerTests : BaseTests
     [Fact]
     public void GetCommands_Container_ResolvesEnvArguments()
     {
-        var parameter = Contract<Parameter>().Generate();
+        var value = Resolve<Faker>().Lorem.Word();
+        var parameter = Contract<Parameter>().Set(p => p.Value, value).Generate();
         var container = Contract<Container>()
             .Set(p => p.ImageName, $"{{{{{parameter.Ref}:Value}}}}")
             .Set(p => p.Env, new Dictionary<string, Argument<string>> { ["Test"] = $"{{{{{parameter.Ref}:Value}}}}" })
@@ -49,16 +50,19 @@ public class ContainerHandlerTests : BaseTests
         );
 
         Assert.False(container.Contract.Env.Values.Single().Resolved);
+        
+        var command = daemon.Command.Resolve(plan);
 
-        daemon.Command.Resolve(plan);
-
-        Assert.True(container.Contract.Env.Values.Single().Resolved);
+        Assert.True(command.Resolved);
+        Assert.NotNull(command.Value);
+        Assert.Contains($"--env=Test={value}", command.Value);
     }
 
     [Fact]
     public void GetPreCommands_Container_ResolvesImageNameArgument()
     {
-        var parameter = Contract<Parameter>().Generate();
+        var value = Resolve<Faker>().Lorem.Word();
+        var parameter = Contract<Parameter>().Set(p => p.Value, value).Generate();
         var container = Contract<Container>()
             .Set(p => p.ImageName, $"{{{{{parameter.Ref}:Value}}}}")
             .Set(p => p.Env, new Dictionary<string, Argument<string>> { ["Test"] = $"{{{{{parameter.Ref}:Value}}}}" })
@@ -80,9 +84,11 @@ public class ContainerHandlerTests : BaseTests
 
         Assert.False(container.Contract.ImageName.Resolved);
 
-        daemon.PreCommands.Resolve(plan);
+        var preCommands = daemon.PreCommands.Resolve(plan);
 
-        Assert.True(container.Contract.ImageName.Resolved);
+        Assert.True(preCommands.Resolved);
+        Assert.NotNull(preCommands.Value);
+        Assert.Contains(value, preCommands.Value.SelectMany(command => command));
     }
 
 

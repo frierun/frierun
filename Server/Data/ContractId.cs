@@ -5,7 +5,8 @@ namespace Frierun.Server.Data;
 /// <summary>
 /// Represents a contract ID - either a GUID for an installed contract or ContractRef for an uninstalled contract.
 /// </summary>
-public class ContractId<TContract> : ContractId where TContract : Contract
+public class ContractId<TContract> : ContractId
+    where TContract : Contract
 {
     public ContractRef<TContract> TypedRef => new(Ref ?? DefaultRef);
     public override ContractRef DefaultRef => new ContractRef<TContract>();
@@ -15,7 +16,18 @@ public class ContractId<TContract> : ContractId where TContract : Contract
     {
     }
     
-    
+    public override ContractId<TContract> Resolve(ExecutionPlan plan)
+    {
+        var contract = plan.GetContract(Ref ?? DefaultRef);
+        Debug.Assert(contract.Installed, "Contract must be installed");
+
+        if (Guid != Guid.Empty)
+        {
+            Debug.Assert(contract.Id == Guid, "Contract ID must match the GUID of the installed contract");
+        }
+        return new ContractId<TContract>(contract.Id, Ref?.Name);
+    }
+
     public override object Merge(object other)
     {
         var contractId = (ContractId<TContract>)other;
@@ -27,19 +39,19 @@ public class ContractId<TContract> : ContractId where TContract : Contract
     }
 }
 
-public class ContractId(Guid guid = default, ContractRef? refId = null) : IArgument, IEquatable<ContractId>
+public class ContractId(Guid guid = default, ContractRef? refId = null) : IArgument<ContractId>, IEquatable<ContractId>
 {
     public ContractRef? Ref { get; } = refId;
 
     public virtual ContractRef DefaultRef =>
         throw new InvalidOperationException("Can't get default ref for untyped contract ID");
 
-    public Guid Guid { get; protected set; } = guid;
+    public Guid Guid { get; } = guid;
 
     public static implicit operator ContractId(ContractRef refId) => new(Guid.Empty, refId);
     public static implicit operator ContractId(Guid guid) => new(guid);
 
-    public virtual void Resolve(ExecutionPlan plan)
+    public virtual ContractId Resolve(ExecutionPlan plan)
     {
         var contract = plan.GetContract(Ref ?? DefaultRef);
         Debug.Assert(contract.Installed, "Contract must be installed");
@@ -48,10 +60,7 @@ public class ContractId(Guid guid = default, ContractRef? refId = null) : IArgum
         {
             Debug.Assert(contract.Id == Guid, "Contract ID must match the GUID of the installed contract");
         }
-        else
-        {
-            Guid = contract.Id;
-        }
+        return new ContractId(contract.Id, Ref);
     }
 
     public virtual IEnumerable<ContractId> RequiredContracts => [this];

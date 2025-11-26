@@ -38,7 +38,7 @@ public class PortHttpEndpointHandlerTests : BaseTests
 
         Assert.Contains( 
             State.GetContract<PortEndpoint>(application, httpEndpoint.Ref.Name).Id,
-            State.GetContract(application, httpEndpoint.Ref).DependsOn
+            State.GetContract(application, httpEndpoint.Ref).GetDependencies()
         );
     }
 }
