@@ -2,6 +2,13 @@
 
 public interface IArgumentResolver<out TResult>
 {
+    /// <summary>
+    /// Resolves the argument using ExecutionPlan.
+    /// </summary>
     TResult? Resolve(ExecutionPlan plan);
-    IEnumerable<ContractId> RequiredContracts { get; }
+    
+    /// <summary>
+    /// List of Contracts that must exist for this argument to be resolved.
+    /// </summary>
+    IEnumerable<ContractRef> RequiredContracts { get; }
 }

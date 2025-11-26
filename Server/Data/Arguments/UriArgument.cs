@@ -9,7 +9,7 @@ public class UriArgument(Argument<bool?> ssl, Argument<string> host, Argument<in
         return new UriArgument(ssl.Resolve(plan), host.Resolve(plan), port.Resolve(plan));
     }
 
-    public IEnumerable<ContractId> RequiredContracts => [];
+    public IEnumerable<ContractRef> RequiredContracts => [];
 
     public object Merge(object other)
     {

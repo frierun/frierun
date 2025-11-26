@@ -12,7 +12,18 @@ public interface IArgument<TSelf> : IArgument where TSelf : IArgument<TSelf>
 
 public interface IArgument
 {
+    /// <summary>
+    /// Resolves the argument using ExecutionPlan.
+    /// </summary>
     IArgument Resolve(ExecutionPlan plan);
-    IEnumerable<ContractId> RequiredContracts { get; }
+    
+    /// <summary>
+    /// List of Contracts that must exist for this argument to be resolved.
+    /// </summary>
+    IEnumerable<ContractRef> RequiredContracts { get; }
+    
+    /// <summary>
+    /// Merges two arguments.
+    /// </summary>
     object Merge(object other);
 }

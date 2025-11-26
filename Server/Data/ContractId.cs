@@ -16,6 +16,8 @@ public class ContractId<TContract> : ContractId
     {
     }
     
+    public override IEnumerable<ContractRef> RequiredContracts => [Ref ?? DefaultRef];
+    
     public override ContractId<TContract> Resolve(ExecutionPlan plan)
     {
         var contract = plan.GetContract(Ref ?? DefaultRef);
@@ -63,7 +65,7 @@ public class ContractId(Guid guid = default, ContractRef? refId = null) : IArgum
         return new ContractId(contract.Id, Ref);
     }
 
-    public virtual IEnumerable<ContractId> RequiredContracts => [this];
+    public virtual IEnumerable<ContractRef> RequiredContracts => Ref != null ? [Ref] : [];
 
     public virtual object Merge(object other)
     {

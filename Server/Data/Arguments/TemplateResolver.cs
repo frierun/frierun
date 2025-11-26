@@ -31,8 +31,7 @@ public class TemplateResolver : IArgumentResolver<string>
                         throw new Exception($"Invalid insertion format: {insertion}");
                     }
 
-                    var contractRef = new ContractRef(match.Groups[1].Value, match.Groups[2].Value); 
-                    return new ContractId(Guid.Empty, contractRef);
+                    return new ContractRef(match.Groups[1].Value, match.Groups[2].Value);
                 }
             )
             .ToList();
@@ -55,7 +54,7 @@ public class TemplateResolver : IArgumentResolver<string>
         return _resolver.Invoke(plan);
     }
 
-    public IEnumerable<ContractId> RequiredContracts { get; }
+    public IEnumerable<ContractRef> RequiredContracts { get; }
     
     /// <summary>
     /// Resolves insertion value.

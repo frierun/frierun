@@ -51,7 +51,7 @@ public class Argument<T> : IEquatable<Argument<T>>, IArgument<Argument<T>>
     /// <summary>
     /// List of contracts which are required to resolve value
     /// </summary>
-    public IEnumerable<ContractId> RequiredContracts => Resolver?.RequiredContracts ?? [];
+    public IEnumerable<ContractRef> RequiredContracts => Resolver?.RequiredContracts ?? [];
 
     /// <summary>
     /// Checks if the argument is resolved

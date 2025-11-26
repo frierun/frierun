@@ -75,7 +75,7 @@ public abstract record Contract
     }
 
     /// <summary>
-    /// Resolves all arguments and returns resolved contract
+    /// Resolves all arguments and returns the contract
     /// </summary>
     public Contract ResolveArguments(ExecutionPlan plan)
     {
@@ -92,10 +92,23 @@ public abstract record Contract
         return counter.Arguments;
     }
 
-    public IEnumerable<ContractId> GetDependencies()
+    /// <summary>
+    /// List of contracts which must exist.
+    /// </summary>
+    public IEnumerable<ContractRef> GetRequiredContracts()
     {
         return GetArguments()
             .SelectMany(argument => argument.RequiredContracts)
+            .Distinct();
+    }
+
+    /// <summary>
+    /// List of contracts which must be installed before this contract.
+    /// </summary>
+    public IEnumerable<ContractId> GetDependencies()
+    {
+        return GetArguments()
+            .OfType<ContractId>()
             .Distinct();
     }
 
