@@ -70,21 +70,11 @@ public class MysqlHandler(State state, Application application)
         Debug.Assert(contract.Password != null);
 
         var network = plan.GetContract(contract.Network);
-        Debug.Assert(network.Installed);
-
-        if (contract.NetworkName != null && contract.NetworkName != network.NetworkName)
-        {
-            throw new Exception("NetworkName cannot be set");
-        }
-
         _container.AttachNetwork(network);
 
         if (contract.Admin)
         {
-            return contract with
-            {
-                NetworkName = network.NetworkName
-            };
+            return contract;
         }
 
         Debug.Assert(contract.Database != null);
@@ -98,10 +88,7 @@ public class MysqlHandler(State state, Application application)
              """
         );
 
-        return contract with
-        {
-            NetworkName = network.NetworkName
-        };
+        return contract;
     }
 
     public override void Uninstall(Mysql contract)
@@ -118,7 +105,8 @@ public class MysqlHandler(State state, Application application)
             );
         }
 
-        _container.DetachNetwork(contract.NetworkName);
+        var network = State.GetContract(contract.Network);
+        _container.DetachNetwork(network);
     }
 
     /// <summary>

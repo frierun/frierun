@@ -112,11 +112,16 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
         var application = InstallPackage(package);
 
         var installedHttpEndpoint1 = State.GetContract(application, httpEndpoint1.Ref);
+        var installedContainer1 = State.GetContract(installedHttpEndpoint1.Container);
+        var installedNetwork1 = State.GetContract(installedContainer1.Network);
         var installedHttpEndpoint2 = State.GetContract(application, httpEndpoint2.Ref);
+        var installedContainer2 = State.GetContract(installedHttpEndpoint2.Container);
+        var installedNetwork2 = State.GetContract(installedContainer2.Network);
+        
         Assert.True(installedHttpEndpoint1.Installed);
         Assert.True(installedHttpEndpoint2.Installed);
-        Assert.Equal(application.Name, installedHttpEndpoint1.NetworkName);
-        Assert.Equal(application.Name, installedHttpEndpoint2.NetworkName);
+        Assert.Equal(application.Name, installedNetwork1.NetworkName);
+        Assert.Equal(application.Name, installedNetwork2.NetworkName);
 
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
             application.Name,

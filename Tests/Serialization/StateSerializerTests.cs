@@ -89,8 +89,8 @@ public class StateSerializerTests : BaseTests
 
         Assert.NotEmpty(loadedState.Applications);
         Assert.Equal(
-            state.GetContracts<HttpEndpoint>().Single().NetworkName,
-            loadedState.GetContracts<HttpEndpoint>().Single().NetworkName
+            state.GetContracts<HttpEndpoint>().Single().TraefikRouterName,
+            loadedState.GetContracts<HttpEndpoint>().Single().TraefikRouterName
         );
     }
 

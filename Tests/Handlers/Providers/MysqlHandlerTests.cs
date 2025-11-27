@@ -28,9 +28,11 @@ public class MysqlHandlerTests : BaseTests
         Assert.StartsWith(package.Name, database.Username);
         Assert.StartsWith(package.Name, database.Database);
         Assert.Contains(_providerApplication.Name, application.RequiredApplications);
-        Assert.Equal(application.Name, database.NetworkName);
+
+        var network = State.GetContract(database.Network);
+        Assert.Equal(application.Name, network.NetworkName);
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
-            database.NetworkName,
+            network.NetworkName,
             Arg.Any<NetworkConnectParameters>()
         );
     }

@@ -125,9 +125,13 @@ public record Container(
     /// <summary>
     /// Detaches container from a network.
     /// </summary>
-    public void DetachNetwork(string networkName)
+    public void DetachNetwork(Network network)
     {
+        Debug.Assert(network.Installed);
         Debug.Assert(Handler != null);
+        
+        var networkName = network.NetworkName;
+        
         if (networkName == NetworkName)
         {
             return;

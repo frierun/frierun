@@ -21,7 +21,9 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
 
         var httpEndpoint = State.GetContract<HttpEndpoint>(application);
         Assert.NotNull(httpEndpoint.CloudflareZoneId);
-        Assert.NotNull(httpEndpoint.NetworkName);
+
+        var container = State.GetContract(httpEndpoint.Container);
+        var network = State.GetContract(container.Network);
 
         CloudflareClient.Received(1)
             .UpdateTunnelConfiguration(tunnel.AccountId, tunnel.TunnelId, Arg.Any<JsonObject>());
@@ -36,7 +38,7 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
         );
 
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
-            httpEndpoint.NetworkName,
+            network.NetworkName,
             Arg.Is<NetworkConnectParameters>(arg => arg.Container == "cloudflare-tunnel")
         );
     }
@@ -54,12 +56,14 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
 
         var httpEndpoint = State.GetContract<HttpEndpoint>(application);
         Assert.NotNull(httpEndpoint.CloudflareZoneId);
-        Assert.NotNull(httpEndpoint.NetworkName);
+        
+        var container = State.GetContract(httpEndpoint.Container);
+        var network = State.GetContract(container.Network);
 
         UninstallApplication(application);
 
         DockerClient.Networks.Received(1).DisconnectNetworkAsync(
-            httpEndpoint.NetworkName,
+            network.NetworkName,
             Arg.Is<NetworkDisconnectParameters>(arg => arg.Container == "cloudflare-tunnel")
         );
     }

@@ -64,22 +64,16 @@ public class TraefikHttpEndpointHandler(State state, Application application)
     {
         var container = plan.GetContract(contract.Container);
         var network = plan.GetContract(container.Network);
-        Debug.Assert(network.Installed);
-
         _container.AttachNetwork(network);
 
-        return contract with
-        {
-            NetworkName = network.NetworkName,
-        };
+        return contract;
     }
 
     public override void Uninstall(HttpEndpoint contract)
     {
-        Debug.Assert(contract.Installed);
-        Debug.Assert(contract.NetworkName != null);
-
-        _container.DetachNetwork(contract.NetworkName);
+        var container = State.GetContract(contract.Container);
+        var network = State.GetContract(container.Network);
+        _container.DetachNetwork(network);
     }
 
     /// <summary>

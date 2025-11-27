@@ -10,7 +10,6 @@ public record HttpEndpoint(
     Argument<string>? ResultHost = null,
     Argument<int>? ResultPort = null,
     string? TraefikRouterName = null, // for Traefik endpoints
-    string? NetworkName = null, // for Traefik endpoints
     string? CloudflareZoneId = null // for Cloudflare endpoints
 ) : Contract
 {
@@ -41,7 +40,6 @@ public record HttpEndpoint(
             ResultHost = MergeValue(ResultHost, contract.ResultHost),
             ResultPort = MergeValue(ResultPort, contract.ResultPort),
             TraefikRouterName = MergeValue(TraefikRouterName, contract.TraefikRouterName),
-            NetworkName = MergeValue(NetworkName, contract.NetworkName),
             CloudflareZoneId = MergeValue(CloudflareZoneId, contract.CloudflareZoneId)
         };
     }

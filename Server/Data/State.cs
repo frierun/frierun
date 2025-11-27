@@ -6,12 +6,11 @@ namespace Frierun.Server.Data;
 public class State
 {
     private readonly Dictionary<Guid, Contract> _contracts = new();
-    
+
     public event Action<Application> ApplicationAdded = _ => { };
     public event Action<Application> ApplicationRemoved = _ => { };
-    
-    [JsonIgnore]
-    public IEnumerable<Application> Applications => GetContracts<Application>();
+
+    [JsonIgnore] public IEnumerable<Application> Applications => GetContracts<Application>();
 
     /// <summary>
     /// Lists all installed contracts
@@ -26,6 +25,10 @@ public class State
     /// Gets contract by Guid.
     /// </summary>
     public TContract GetContract<TContract>(Guid id) where TContract : Contract => (TContract)_contracts[id];
+
+    public TContract GetContract<TContract>(ContractId<TContract> contractId) where TContract : Contract =>
+        (TContract)_contracts[contractId.Guid];
+
     public Contract GetContract(Guid id) => _contracts[id];
 
     /// <summary>
@@ -36,7 +39,7 @@ public class State
     {
         return GetContract(app, new ContractRef<TContract>(name));
     }
-    
+
     /// <summary>
     /// Gets contract from the application by name.
     /// </summary>
@@ -54,7 +57,7 @@ public class State
     {
         return _contracts.Values.OfType<TContract>();
     }
-    
+
     /// <summary>
     /// Adds a newly installed contract to the state.
     /// </summary>
@@ -68,7 +71,7 @@ public class State
             ApplicationAdded(application);
         }
     }
-    
+
     /// <summary>
     /// Removes a contract from the state.
     /// </summary>
@@ -76,10 +79,10 @@ public class State
     {
         Debug.Assert(contract.Id != Guid.Empty);
         _contracts.Remove(contract.Id);
-        
+
         if (contract is Application application)
         {
             ApplicationRemoved(application);
         }
-    }    
+    }
 }

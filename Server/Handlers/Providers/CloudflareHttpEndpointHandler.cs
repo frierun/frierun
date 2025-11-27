@@ -67,8 +67,6 @@ public class CloudflareHttpEndpointHandler(State state, Application application,
     public override HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
     {
         var container = plan.GetContract(contract.Container);
-        var network = plan.GetContract(container.Network);
-        Debug.Assert(network.Installed);
         Debug.Assert(_tunnel.Installed);
         Debug.Assert(contract.CloudflareZoneId != null);
 
@@ -111,11 +109,10 @@ public class CloudflareHttpEndpointHandler(State state, Application application,
             }
         );
 
+        var network = plan.GetContract(container.Network);        
         _container.AttachNetwork(network);
-        return contract with
-        {
-            NetworkName = network.NetworkName
-        };
+        
+        return contract;
     }
 
     private void DeleteOldDnsRecords(string cloudflareZoneId, string? resultHost)
@@ -145,11 +142,12 @@ public class CloudflareHttpEndpointHandler(State state, Application application,
     public override void Uninstall(HttpEndpoint contract)
     {
         Debug.Assert(contract.Installed);
-        Debug.Assert(contract.NetworkName != null);
         Debug.Assert(contract.CloudflareZoneId != null);
         Debug.Assert(_tunnel.Installed);
 
-        _container.DetachNetwork(contract.NetworkName);
+        var container = State.GetContract(contract.Container);
+        var network = State.GetContract(container.Network);
+        _container.DetachNetwork(network);
 
         var config = client.GetTunnelConfiguration(_tunnel.AccountId, _tunnel.TunnelId);
         if (config["ingress"] is JsonArray ingress)

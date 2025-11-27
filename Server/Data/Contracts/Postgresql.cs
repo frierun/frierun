@@ -9,11 +9,10 @@ public record Postgresql(
     string? Password = null,
     string? Host = null,
     string? Database = null,
-    string? NetworkName = null,
     bool Admin = false
 ) : Contract
 {
-    [MemberNotNullWhen(true, nameof(Username), nameof(Password), nameof(Host), nameof(NetworkName))]
+    [MemberNotNullWhen(true, nameof(Username), nameof(Password), nameof(Host))]
     public override bool Installed => Id != Guid.Empty;
     
     public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>();
@@ -36,7 +35,6 @@ public record Postgresql(
             Password = MergeValue(Password, contract.Password),
             Host = MergeValue(Host, contract.Host),
             Database = MergeValue(Database, contract.Database),
-            NetworkName = MergeValue(NetworkName, contract.NetworkName),
             Admin = Admin || contract.Admin
         };
     }
