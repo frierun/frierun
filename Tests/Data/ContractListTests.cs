@@ -16,7 +16,7 @@ public class ContractListTests : BaseTests
         var resultContainer = result[container.Ref] as Container;
         Assert.NotNull(resultContainer);
         Assert.Equal(container.Contract.ImageName, resultContainer.ImageName);
-        Assert.Equal(container.Contract.NetworkName, resultContainer.NetworkName);
+        Assert.Equal(container.Contract.Network, resultContainer.Network);
         Assert.Equal(container.Contract.ContainerName, resultContainer.ContainerName);
         Assert.Equal(container.Contract.Command, resultContainer.Command);
         Assert.Equal(container.Contract.Network, resultContainer.Network);
@@ -34,7 +34,7 @@ public class ContractListTests : BaseTests
         var resultContainer = result[container.Ref] as Container;
         Assert.NotNull(resultContainer);
         Assert.Equal(container.Contract.ImageName, resultContainer.ImageName);
-        Assert.Equal(container.Contract.NetworkName, resultContainer.NetworkName);
+        Assert.Equal(container.Contract.Network, resultContainer.Network);
         Assert.Equal(container.Contract.ContainerName, resultContainer.ContainerName);
         Assert.Equal(container.Contract.Command, resultContainer.Command);
         Assert.Equal(container.Contract.Network, resultContainer.Network);

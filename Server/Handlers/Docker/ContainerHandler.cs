@@ -158,7 +158,7 @@ public class ContainerHandler(State state, Application application, DockerServic
             throw new Exception("Failed to start container");
         }
 
-        return contract with { NetworkName = network.NetworkName };
+        return contract;
     }
 
     public override void Uninstall(Container container)

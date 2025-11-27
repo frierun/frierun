@@ -53,15 +53,16 @@ public class ContractListConverterTests : BaseTests
     [Fact]
     public void Read_ObjectWithMultipleEntries_ReturnsContractList()
     {
-        var containerName1 = Resolve<Faker>().Lorem.Word();
-        var containerName2 = Resolve<Faker>().Lorem.Word();
+        var container1 = Contract<Container>().Generate();
+        var container2 = Contract<Container>().Generate();
+        
         var json = $$"""
                      {
-                         "Container:{{containerName1}}": {
-                             "Name": "{{containerName1}}"
+                         "{{container1.Ref}}": {
+                             "Name": "{{container1.Contract.ContainerName}}"
                          },
-                         "Container:{{containerName2}}": {
-                             "Name": "{{containerName2}}"
+                         "{{container2.Ref}}": {
+                             "Name": "{{container1.Contract.ContainerName}}"
                          }
                      }
                      """;
@@ -70,10 +71,8 @@ public class ContractListConverterTests : BaseTests
 
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
-        var contractRef1 = new ContractRef(nameof(Container), containerName1);
-        var contractRef2 = new ContractRef(nameof(Container), containerName2);
-        Assert.True(result.ContainsKey(contractRef1));
-        Assert.True(result.ContainsKey(contractRef2));
+        Assert.True(result.ContainsKey(container1.Ref));
+        Assert.True(result.ContainsKey(container2.Ref));
     }
 
     [Fact]

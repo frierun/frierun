@@ -12,7 +12,7 @@ public class ContainerTests : BaseTests
         var result = (Container)new Container().Merge(container);
 
         Assert.Equal(container.ImageName, result.ImageName);
-        Assert.Equal(container.NetworkName, result.NetworkName);
+        Assert.Equal(container.Network, result.Network);
         Assert.Equal(container.ContainerName, result.ContainerName);
         Assert.Equal(container.Command, result.Command);
         Assert.Equal(container.Network, result.Network);
@@ -26,7 +26,7 @@ public class ContainerTests : BaseTests
 
         var result = (Container)container.Merge(container2);
         Assert.Null(result.ImageName.Value);
-        Assert.Null(result.NetworkName);
+        Assert.Null(result.Network.Ref);
         Assert.Null(result.ContainerName);
         Assert.Null(result.Command.Value);
         Assert.Empty(result.Env);

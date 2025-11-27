@@ -8,7 +8,6 @@ namespace Frierun.Server.Data;
 
 public record Container(
     string? ContainerName = null,
-    string? NetworkName = null,
     Argument<string>? ImageName = null,
     bool? MountDockerSocket = null,
     ContractId<Network>? Network = null,
@@ -20,7 +19,7 @@ public record Container(
     IReadOnlyDictionary<string, ContainerMount>? Mounts = null
 ) : Contract<IContainerHandler>
 {
-    [MemberNotNullWhen(true, nameof(ContainerName), nameof(NetworkName))]
+    [MemberNotNullWhen(true, nameof(ContainerName))]
     public override bool Installed => Id != Guid.Empty;
 
     public Argument<IEnumerable<string>> Command { get; init; } = Command ?? new Argument<IEnumerable<string>>();
@@ -67,7 +66,6 @@ public record Container(
         return MergeCommon(this, other, out var contract) with
         {
             ContainerName = MergeValue(ContainerName, contract.ContainerName),
-            NetworkName = MergeValue(NetworkName, contract.NetworkName),
             ImageName = MergeValue(ImageName, contract.ImageName),
             MountDockerSocket = MergeValue(MountDockerSocket, contract.MountDockerSocket),
             Network = MergeValue(Network, contract.Network),
@@ -84,7 +82,6 @@ public record Container(
     {
         return IsSubsetContract(this, other, out var contract)
                && IsSubsetValue(ContainerName, contract.ContainerName)
-               && IsSubsetValue(NetworkName, contract.NetworkName)
                && IsSubsetArgument(ImageName, contract.ImageName)
                && IsSubsetValue(MountDockerSocket, contract.MountDockerSocket)
                && IsSubsetValue(Network, contract.Network)

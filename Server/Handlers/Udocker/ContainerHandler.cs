@@ -130,12 +130,7 @@ public class ContainerHandler(State state, Application application)
 
         return preCommands;
     }
-
-    public override Container Install(Container contract, ExecutionPlan plan)
-    {
-        return contract with { NetworkName = "udocker" };
-    }
-
+    
     public void AttachNetwork(Container container, Network network)
     {
         throw new InvalidOperationException("Cannot attach to network");
