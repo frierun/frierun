@@ -56,9 +56,8 @@ public class PortEndpointHandler(State state, Application application) : Handler
             {
                 ExternalIp = _connection.Host,
                 Handler = this,
-                DependsOn = [contract.Container]
             },
-            [contract.Container] = new Container
+            [contract.Container.TypedRef] = new Container
             {
                 Ports =
                 [

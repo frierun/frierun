@@ -19,7 +19,6 @@ public class PortHttpEndpointHandler(State state) : Handler<HttpEndpoint>(state)
                 DependsOn =
                 [
                     portEndpointId,
-                    contract.Container
                 ]
             },
             [portEndpointId] = portEndpoint

@@ -166,16 +166,19 @@ public class ArgumentTests : BaseTests
     [Fact]
     public void Resolve_DependsOnProperty_ResolvesAllArguments()
     {
+        var container = Contract<Container>().Generate("installed");
         var httpEndpoint = Contract<HttpEndpoint>()
             .Set(p => p.ResultSsl, new Argument<bool?>(_ => true))
             .Set(p => p.ResultHost, new Argument<string>(_ => "test.tld"))
             .Set(p => p.ResultPort, new Argument<int>(_ => 444))
+            .Set(p => p.Container, container.Id)
             .Generate();
         var arg = new Argument<string>($"{{{{{httpEndpoint.Ref}:Url}}}}");
         var plan = new ExecutionPlan(
             new Dictionary<ContractRef, Contract>
             {
-                [httpEndpoint.Ref] = httpEndpoint.Contract
+                [httpEndpoint.Ref] = httpEndpoint.Contract,
+                [container.Ref] = container.Contract
             },
             []
         );

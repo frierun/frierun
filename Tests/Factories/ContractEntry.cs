@@ -10,6 +10,8 @@ public record ContractEntry<TContract>(ContractRef<TContract> Ref, TContract Con
         
     }
     
+    public ContractId<TContract> Id => new ContractId<TContract>(Guid.Empty, Ref.Name);
+    
     public ContractEntry<TContract> With(Func<TContract, TContract> customizer) => new(Ref, customizer(Contract));
 
     public static implicit operator KeyValuePair<ContractRef, Contract>(ContractEntry<TContract> entry) =>

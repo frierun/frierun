@@ -33,7 +33,6 @@ public class MysqlHandler(State state, Application application)
                     Username = "root",
                     Password = _rootPassword,
                     Host = _container.ContainerName,
-                    DependsOn = contract.DependsOn.Append(contract.Network)
                 }
             };
         }
@@ -60,7 +59,6 @@ public class MysqlHandler(State state, Application application)
                     16
                 ),
                 Host = _container.ContainerName,
-                DependsOn = contract.DependsOn.Append(contract.Network)
             }
         };
     }

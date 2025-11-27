@@ -130,7 +130,7 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
         var application = InstallPackage(package);
 
         var installedHttpEndpoint = State.GetContract(application, httpEndpoint.Ref);
-        var container = State.GetContract(application, httpEndpoint.Contract.Container);
+        var container = State.GetContract(application, httpEndpoint.Contract.Container.TypedRef);
         var host = $"http://{container.ContainerName}:{installedHttpEndpoint.Port}";
         CloudflareClient.UpdateTunnelConfiguration(
             Arg.Any<string>(), Arg.Any<string>(), Arg.Is<JsonObject>(config =>
@@ -171,7 +171,7 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
         var application = InstallPackage(package);
 
         var installedHttpEndpoint = State.GetContract(application, httpEndpoint.Ref);
-        var container = State.GetContract(application, httpEndpoint.Contract.Container);
+        var container = State.GetContract(application, httpEndpoint.Contract.Container.TypedRef);
         var host = $"http://{container.ContainerName}:{installedHttpEndpoint.Port}";
         CloudflareClient.UpdateTunnelConfiguration(
             Arg.Any<string>(), Arg.Any<string>(), Arg.Is<JsonObject>(config =>

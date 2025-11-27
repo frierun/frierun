@@ -6,12 +6,12 @@ namespace Frierun.Server.Data;
 public record File(
     string Path,
     Argument<string>? Text = null,
-    ContractRef<Volume>? Volume = null,
+    ContractId<Volume>? Volume = null,
     int? Owner = null,
     int? Group = null
 ) : Contract
 {
-    public ContractRef<Volume> Volume { get; init; } = Volume ?? new ContractRef<Volume>("");
+    public ContractId<Volume> Volume { get; init; } = Volume ?? new ContractId<Volume>();
     public Argument<string> Text { get; init; } = Text ?? new Argument<string>();
 
     public override File Transform(IArgumentTransformer transformer)
@@ -19,6 +19,7 @@ public record File(
         return this with
         {
             Text = transformer.Transform(Text),
+            Volume = transformer.Transform(Volume),
             DependsOn = DependsOn.Select(transformer.Transform)
         };
     }
@@ -29,7 +30,7 @@ public record File(
         {
             Path = MergeValue(Path, contract.Path),
             Text = Text.Merge(contract.Text),
-            Volume = MergeValue(Volume, contract.Volume),
+            Volume = MergeContractId(Volume, contract.Volume),
             Owner = MergeValue(Owner, contract.Owner),
             Group = MergeValue(Group, contract.Group)       
         };

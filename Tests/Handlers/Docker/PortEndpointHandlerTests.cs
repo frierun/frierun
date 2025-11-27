@@ -11,7 +11,7 @@ public class PortEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         var container = Contract<Container>().Generate();
-        var portEndpoint = Contract<PortEndpoint>().Set(p => p.Container, container.Ref).Generate();
+        var portEndpoint = Contract<PortEndpoint>().Set(p => p.Container, container.Id).Generate();
         var package = Factory<Package>().Generate() with
         {
             Contracts = [container, portEndpoint]
@@ -22,7 +22,7 @@ public class PortEndpointHandlerTests : BaseTests
 
         Assert.Contains(
             State.GetContract(application, container.Ref).Id, 
-            State.GetContract(application, portEndpoint.Ref).DependsOn
+            State.GetContract(application, portEndpoint.Ref).GetDependencies()
         );
     }
 
@@ -31,7 +31,7 @@ public class PortEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         var container = Contract<Container>().Generate();
-        var port = Contract<PortEndpoint>().Set(p => p.Container, container.Ref).Generate();
+        var port = Contract<PortEndpoint>().Set(p => p.Container, container.Id).Generate();
         var package = Factory<Package>().Generate() with
         {
             Contracts = [container, port]

@@ -145,7 +145,7 @@ public class ContainerHandlerTests : BaseTests
         var container = Contract<Container>().Generate("udocker");
         var portEndpoint = Contract<PortEndpoint>()
             .Set(p => p.Protocol, Protocol.Tcp)
-            .Set(p => p.Container, container.Ref)
+            .Set(p => p.Container, container.Id)
             .Generate();
         var package = Factory<Package>().Generate() with { Contracts = [container, portEndpoint] };
 
@@ -295,7 +295,7 @@ public class ContainerHandlerTests : BaseTests
         var udocker1 = InstallPackage("termux-udocker");
         var udocker2 = InstallPackage("termux-udocker");
         var container = Contract<Container>().Generate("udocker");
-        var portEndpoint = Contract<PortEndpoint>().Set(p => p.Container, container.Ref).Generate("udocker");
+        var portEndpoint = Contract<PortEndpoint>().Set(p => p.Container, container.Id).Generate("udocker");
 
         var application1 = InstallPackage(
             Factory<Package>().Generate() with

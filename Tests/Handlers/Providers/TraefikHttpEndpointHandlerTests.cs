@@ -19,14 +19,15 @@ public class TraefikHttpEndpointHandlerTests : BaseTests
         InstallPackage("traefik");
 
         var container = Contract<Container>().Generate();
-        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.Container, container.Ref).Generate();
+        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.Container, container.Id).Generate();
         var package = Factory<Package>().Generate() with { Contracts = [container, httpEndpoint] };
 
         var application = InstallPackage(package);
 
         Assert.Contains(
             State.GetContract(application, container.Ref).Id,
-            State.GetContract(application, httpEndpoint.Ref).DependsOn);
+            State.GetContract(application, httpEndpoint.Ref).GetDependencies()
+        );
     }
 
     [Fact]

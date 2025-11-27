@@ -34,11 +34,10 @@ public class TraefikHttpEndpointHandler(State state, Application application)
                 Handler = this,
                 DependsOn =
                 [
-                    contract.Container,
                     domainId
                 ]
             },
-            [contract.Container] = new Container
+            [contract.Container.TypedRef] = new Container
             {
                 Labels = new Dictionary<string, Argument<string>>
                 {

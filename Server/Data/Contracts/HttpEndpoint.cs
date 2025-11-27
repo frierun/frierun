@@ -5,7 +5,7 @@ namespace Frierun.Server.Data;
 
 public record HttpEndpoint(
     int Port = 0,
-    ContractRef<Container>? Container = null,
+    ContractId<Container>? Container = null,
     Argument<bool?>? ResultSsl = null,
     Argument<string>? ResultHost = null,
     Argument<int>? ResultPort = null,
@@ -14,7 +14,7 @@ public record HttpEndpoint(
     string? CloudflareZoneId = null // for Cloudflare endpoints
 ) : Contract
 {
-    public ContractRef<Container> Container { get; init; } = Container ?? new ContractRef<Container>("");
+    public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>();
     public Argument<bool?> ResultSsl { get; init; } = ResultSsl ?? new Argument<bool?>();
     public Argument<string> ResultHost { get; init; } = ResultHost ?? new Argument<string>();
     public Argument<int> ResultPort { get; init; } = ResultPort ?? new Argument<int>();
@@ -23,6 +23,7 @@ public record HttpEndpoint(
     {
         return this with
         {
+            Container = transformer.Transform(Container),
             ResultSsl = transformer.Transform(ResultSsl),
             ResultHost = transformer.Transform(ResultHost),
             ResultPort = transformer.Transform(ResultPort),
@@ -35,7 +36,7 @@ public record HttpEndpoint(
         return MergeCommon(this, other, out var contract) with
         {
             Port = MergeValue(Port, contract.Port, port => port == 0),
-            Container = MergeValue(Container, contract.Container),
+            Container = MergeContractId(Container, contract.Container),
             ResultSsl = ResultSsl.Merge(contract.ResultSsl),
             ResultHost = ResultHost.Merge(contract.ResultHost),
             ResultPort = ResultPort.Merge(contract.ResultPort),

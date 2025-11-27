@@ -12,7 +12,7 @@ public class PortEndpointHandlerTests : BaseTests
         var container = Contract<Container>().Generate("udocker");
         var portEndpoint = Contract<PortEndpoint>()
             .Set(p => p.Port, 80)
-            .Set(p => p.Container, container.Ref)
+            .Set(p => p.Container, container.Id)
             .Generate("udocker");
         var package = Factory<Package>().Generate() with { Contracts = [portEndpoint, container] };
 
@@ -31,7 +31,7 @@ public class PortEndpointHandlerTests : BaseTests
         var portEndpoint = Contract<PortEndpoint>()
             .Set(p => p.Port, 80)
             .Set(p => p.ExternalPort, 80)
-            .Set(p => p.Container, container.Ref)
+            .Set(p => p.Container, container.Id)
             .Generate("udocker");
         var package = Factory<Package>().Generate() with { Contracts = [portEndpoint, container] };
 
@@ -46,7 +46,7 @@ public class PortEndpointHandlerTests : BaseTests
         var portEndpoint = Contract<PortEndpoint>()
             .Set(p => p.Port, 80)
             .Set(p => p.ExternalPort, 80)
-            .Set(p => p.Container, container.Ref)
+            .Set(p => p.Container, container.Id)
             .Set(p => p.Protocol, Protocol.Udp)
             .Generate("udocker");
         var package = Factory<Package>().Generate() with { Contracts = [portEndpoint, container] };

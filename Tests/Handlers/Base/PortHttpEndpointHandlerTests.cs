@@ -9,7 +9,7 @@ public class PortHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         var container = Contract<Container>().Generate();
-        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.Container, container.Ref).Generate();
+        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.Container, container.Id).Generate();
         var package = Factory<Package>().Generate() with
         {
             Contracts = [container, httpEndpoint]
@@ -28,7 +28,7 @@ public class PortHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         var container = Contract<Container>().Generate();
-        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.Container, container.Ref).Generate();
+        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.Container, container.Id).Generate();
         var package = Factory<Package>().Generate() with
         {
             Contracts = [container, httpEndpoint]

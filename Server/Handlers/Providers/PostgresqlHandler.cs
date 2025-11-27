@@ -34,7 +34,6 @@ public class PostgresqlHandler(State state, Application application, ILogger<Pos
                     Username = "postgres",
                     Password = _rootPassword,
                     Host = _container.ContainerName,
-                    DependsOn = contract.DependsOn.Append(contract.Network)
                 }
             };
         }
@@ -59,7 +58,6 @@ public class PostgresqlHandler(State state, Application application, ILogger<Pos
                     16
                 ),
                 Host = _container.ContainerName,
-                DependsOn = contract.DependsOn.Append(contract.Network)
             }
         };
     }
