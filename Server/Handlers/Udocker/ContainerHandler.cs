@@ -136,16 +136,14 @@ public class ContainerHandler(State state, Application application)
         return contract with { NetworkName = "udocker" };
     }
 
-    public void AttachNetwork(Container container, string networkName)
+    public void AttachNetwork(Container container, Network network)
     {
-        if (container.NetworkName != networkName)
-        {
-            throw new InvalidOperationException("Cannot attach to network");
-        }
+        throw new InvalidOperationException("Cannot attach to network");
     }
 
-    public void DetachNetwork(Container container, string networkName)
+    public void DetachNetwork(Container container, Network network)
     {
+        throw new InvalidOperationException("Cannot detach to network");
     }
 
     public (string stdout, string stderr) ExecInContainer(Container container, IList<string> command)

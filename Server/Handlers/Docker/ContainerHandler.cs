@@ -167,16 +167,18 @@ public class ContainerHandler(State state, Application application, DockerServic
         dockerService.RemoveContainer(container.ContainerName).Wait();
     }
 
-    public void AttachNetwork(Container container, string networkName)
+    public void AttachNetwork(Container container, Network network)
     {
         Debug.Assert(container.Installed);
-        dockerService.AttachNetwork(networkName, container.ContainerName).Wait();
+        Debug.Assert(network.Installed);
+        dockerService.AttachNetwork(network.NetworkName, container.ContainerName).Wait();
     }
 
-    public void DetachNetwork(Container container, string networkName)
+    public void DetachNetwork(Container container, Network network)
     {
         Debug.Assert(container.Installed);
-        dockerService.DetachNetwork(networkName, container.ContainerName).Wait();
+        Debug.Assert(network.Installed);
+        dockerService.DetachNetwork(network.NetworkName, container.ContainerName).Wait();
     }
 
     public (string stdout, string stderr) ExecInContainer(Container container, IList<string> command)

@@ -40,7 +40,7 @@ public record Container(
     public Argument<string> ImageName { get; init; } = ImageName ?? new Argument<string>();
 
 
-    [JsonInclude] private IDictionary<string, int> ConnectedNetworks { get; init; } = new Dictionary<string, int>();
+    [JsonInclude] private IDictionary<Guid, int> ConnectedNetworks { get; init; } = new Dictionary<Guid, int>();
 
     public override Container Transform(IArgumentTransformer transformer)
     {
@@ -101,24 +101,25 @@ public record Container(
     /// </summary>
     public void AttachNetwork(Network network)
     {
-        Debug.Assert(network.Installed);
         Debug.Assert(Installed);
         Debug.Assert(Handler != null);
 
-        var networkName = network.NetworkName;
-        if (networkName == NetworkName)
+        var networkId = network.Id;
+        Debug.Assert(network.Installed);
+
+        if (network.Id == Network)
         {
             return;
         }
 
-        if (ConnectedNetworks.TryGetValue(networkName, out var count))
+        if (ConnectedNetworks.TryGetValue(networkId, out var count))
         {
-            ConnectedNetworks[networkName] = count + 1;
+            ConnectedNetworks[networkId] = count + 1;
         }
         else
         {
-            ConnectedNetworks[networkName] = 1;
-            Handler.AttachNetwork(this, networkName);
+            ConnectedNetworks[networkId] = 1;
+            Handler.AttachNetwork(this, network);
         }
     }
 
@@ -130,25 +131,26 @@ public record Container(
         Debug.Assert(network.Installed);
         Debug.Assert(Handler != null);
         
-        var networkName = network.NetworkName;
-        
-        if (networkName == NetworkName)
+        var networkId = network.Id;
+        Debug.Assert(network.Installed);
+
+        if (networkId == Network)
         {
             return;
         }
 
-        if (ConnectedNetworks.TryGetValue(networkName, out var count))
+        if (ConnectedNetworks.TryGetValue(networkId, out var count))
         {
             if (count > 1)
             {
-                ConnectedNetworks[networkName] = count - 1;
+                ConnectedNetworks[networkId] = count - 1;
                 return;
             }
 
-            ConnectedNetworks.Remove(networkName);
+            ConnectedNetworks.Remove(networkId);
         }
 
-        Handler.DetachNetwork(this, networkName);
+        Handler.DetachNetwork(this, network);
     }
 
     /// <summary>
