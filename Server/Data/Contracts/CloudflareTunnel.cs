@@ -32,7 +32,7 @@ public record CloudflareTunnel(
         return MergeCommon(this, other, out var contract) with
         {
             AccountId = MergeValue(AccountId, contract.AccountId),
-            CloudflareApiConnection = MergeContractId(CloudflareApiConnection, contract.CloudflareApiConnection),
+            CloudflareApiConnection = MergeValue(CloudflareApiConnection, contract.CloudflareApiConnection),
             Container = MergeValue(Container, contract.Container),
             TunnelId = MergeValue(TunnelId, contract.TunnelId),
             TunnelName = MergeValue(TunnelName, contract.TunnelName),

@@ -36,10 +36,10 @@ public record HttpEndpoint(
         return MergeCommon(this, other, out var contract) with
         {
             Port = MergeValue(Port, contract.Port, port => port == 0),
-            Container = MergeContractId(Container, contract.Container),
-            ResultSsl = ResultSsl.Merge(contract.ResultSsl),
-            ResultHost = ResultHost.Merge(contract.ResultHost),
-            ResultPort = ResultPort.Merge(contract.ResultPort),
+            Container = MergeValue(Container, contract.Container),
+            ResultSsl = MergeValue(ResultSsl, contract.ResultSsl),
+            ResultHost = MergeValue(ResultHost, contract.ResultHost),
+            ResultPort = MergeValue(ResultPort, contract.ResultPort),
             TraefikRouterName = MergeValue(TraefikRouterName, contract.TraefikRouterName),
             NetworkName = MergeValue(NetworkName, contract.NetworkName),
             CloudflareZoneId = MergeValue(CloudflareZoneId, contract.CloudflareZoneId)

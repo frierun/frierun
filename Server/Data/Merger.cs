@@ -48,21 +48,19 @@ public static class Merger
         {
             return value1;
         }
-
+        
+        // Special handling for IArgument: delegate to its Merge method
+        if (value1 is IArgument argument1 && value2 is IArgument argument2)
+        {
+            return (T)argument1.Merge(argument2);
+        }
+        
         if (value1?.Equals(value2) == true)
         {
             return value1;
         }
 
         throw new MergeException("Can't merge two different values");
-    }
-
-    /// <summary>
-    /// Merges two typed contract ids
-    /// </summary>
-    public static ContractId<T> MergeContractId<T>(ContractId<T> value1, ContractId<T> value2) where T : Contract
-    {
-        return (ContractId<T>)value1.Merge(value2);
     }
 
     /// <summary>

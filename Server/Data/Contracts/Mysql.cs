@@ -31,7 +31,7 @@ public record Mysql(
     {
         return MergeCommon(this, other, out var contract) with
         {
-            Network = MergeContractId(Network, contract.Network),
+            Network = MergeValue(Network, contract.Network),
             Username = MergeValue(Username, contract.Username),
             Password = MergeValue(Password, contract.Password),
             Host = MergeValue(Host, contract.Host),

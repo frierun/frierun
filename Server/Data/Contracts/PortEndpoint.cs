@@ -34,7 +34,7 @@ public record PortEndpoint(
         return MergeCommon(this, other, out var contract) with
         {
             Port = MergeValue(Port, contract.Port, port => port == 0),
-            Container = MergeContractId(Container, contract.Container),
+            Container = MergeValue(Container, contract.Container),
             ExternalPort = MergeValue(ExternalPort, contract.ExternalPort, port => port == 0),
             ExternalIp = MergeValue(ExternalIp, contract.ExternalIp),
         };

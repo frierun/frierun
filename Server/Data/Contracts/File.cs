@@ -29,8 +29,8 @@ public record File(
         return MergeCommon(this, other, out var contract) with
         {
             Path = MergeValue(Path, contract.Path),
-            Text = Text.Merge(contract.Text),
-            Volume = MergeContractId(Volume, contract.Volume),
+            Text = MergeValue(Text, contract.Text),
+            Volume = MergeValue(Volume, contract.Volume),
             Owner = MergeValue(Owner, contract.Owner),
             Group = MergeValue(Group, contract.Group)       
         };
