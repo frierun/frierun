@@ -9,11 +9,13 @@ public class NetworkHandler(State state, Application application, DockerService 
 {
     public override IEnumerable<Network> Discover()
     {
-        return dockerService.ListNetworks().Result.Select(network => new Network()
-            {
-                NetworkName = network.Name
-            }
-        );
+        return dockerService.ListNetworks().Result
+            .Where(network => network.Driver == "bridge")
+            .Select(network => new Network()
+                {
+                    NetworkName = network.Name
+                }
+            );
     }
 
     public override IEnumerable<ContractList> Initialize(Network contract, ApplicationContext context)

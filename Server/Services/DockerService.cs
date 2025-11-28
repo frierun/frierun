@@ -149,6 +149,22 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
         }
     }
     
+    /// <summary>
+    /// Get container information
+    /// </summary>
+    public async Task<ContainerInspectResponse?> InspectContainer(string containerId)
+    {
+        try
+        {
+            return await client.Containers.InspectContainerAsync(containerId);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to inspect container {containerId}", containerId);
+            return null;
+        }
+    }    
+    
 
     /// <summary>
     /// Creates volume by name

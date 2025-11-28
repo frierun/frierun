@@ -157,8 +157,13 @@ public static class Merger
     /// <summary>
     /// Ensures that other value is not set or equal to the value. 
     /// </summary>
-    public static bool IsSubsetArgument<T>(Argument<T> value, Argument<T> other)
+    public static bool IsSubsetArgument<T>(Argument<T> value, Argument<T>? other, Func<T, T?, bool>? isSubset = null)
     {
+        if (other is null)
+        {
+            return true;
+        }
+        
         if (!other.Resolved || !value.Resolved)
         {
             return false;
@@ -169,7 +174,8 @@ public static class Merger
             return other.Value is null;
         }
 
-        return value.Value.Equals(other.Value);
+        isSubset ??= (v1, v2) => Equals(v1, v2);
+        return isSubset(value.Value, other.Value);
     }
 
     /// <summary>
@@ -186,9 +192,12 @@ public static class Merger
     /// </summary>
     public static bool IsSubsetDictionary<TKey, TValue>(
         IReadOnlyDictionary<TKey, TValue> value,
-        IReadOnlyDictionary<TKey, TValue> other
+        IReadOnlyDictionary<TKey, TValue> other,
+        Func<TValue, TValue?, bool>? isSubset = null
     ) where TKey : notnull
     {
+        isSubset ??= (v1, v2) => Equals(v1, v2);
+        
         foreach (var pair in other)
         {
             if (!value.TryGetValue(pair.Key, out var storedValue))
@@ -206,7 +215,7 @@ public static class Merger
                 continue;
             }
 
-            if (!storedValue.Equals(pair.Value))
+            if (!isSubset(storedValue, pair.Value))
             {
                 return false;
             }

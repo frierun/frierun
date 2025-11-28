@@ -86,10 +86,10 @@ public record Container(
                && IsSubsetValue(MountDockerSocket, contract.MountDockerSocket)
                && IsSubsetValue(Network, contract.Network)
                && IsSubsetList(Ports, contract.Ports)
-               && IsSubsetArgument(Command, contract.Command)
+               && IsSubsetArgument(Command, contract.Command, (value1, value2) => value1.SequenceEqual(value2 ?? []))
                && IsSubsetList(NetworkAliases, contract.NetworkAliases)
-               && IsSubsetDictionary(Env, contract.Env)
-               && IsSubsetDictionary(Labels, contract.Labels)
+               && IsSubsetDictionary(Env, contract.Env, (value1, value2) => IsSubsetArgument(value1, value2))
+               && IsSubsetDictionary(Labels, contract.Labels, (value1, value2) => IsSubsetArgument(value1, value2))
                && IsSubsetDictionary(Mounts, contract.Mounts);
     }
 

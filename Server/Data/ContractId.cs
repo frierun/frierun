@@ -11,6 +11,9 @@ public class ContractId<TContract> : ContractId
     public ContractRef<TContract> TypedRef => new(Ref ?? DefaultRef);
     public override ContractRef DefaultRef => new ContractRef<TContract>();
 
+    public static implicit operator ContractId<TContract>(ContractRef<TContract> refId) => new(Guid.Empty, refId.Name);
+    public static implicit operator ContractId<TContract>(Guid guid) => new(guid);
+    
     public ContractId(Guid guid = default, string? name = null) :
         base(guid, name != null ? new ContractRef<TContract>(name) : null)
     {

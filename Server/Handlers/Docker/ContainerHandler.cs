@@ -6,25 +6,74 @@ using Network = Frierun.Server.Data.Network;
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class ContainerHandler(State state, Application application, DockerService dockerService)
-    : Handler<Container>(state, application), IContainerHandler
+public class ContainerHandler(
+    State state,
+    Application application,
+    DockerService dockerService
+) : Handler<Container>(state, application), IContainerHandler
 {
     private readonly DockerApiConnection _dockerApiConnection = state.GetContract<DockerApiConnection>(application);
 
     public override IEnumerable<Container> Discover()
     {
-        /*
-        return dockerService.ListContainers().Result.Select(container => new Container
-            {
-                ContainerName = container.Names[0],
-                NetworkName = container.NetworkSettings.Networks.First().Key,
-                ImageName = container.Image,
-                MountDockerSocket = false,
+        return dockerService.ListContainers().Result
+            .Select(container => dockerService.InspectContainer(container.ID).Result)
+            .OfType<ContainerInspectResponse>()
+            .Select(ConvertToContract)
+            .OfType<Container>();
+    }
 
-            }
+    /// <summary>
+    /// Converts docker API response to contract.
+    /// </summary>
+    private Container? ConvertToContract(ContainerInspectResponse container)
+    {
+        var networkName = container.NetworkSettings.Networks.First().Key;
+        var network = State.GetContracts<Network>().FirstOrDefault(network =>
+            network.NetworkName == networkName && network.Handler?.Application == Application
         );
-        */
-        return [];
+
+        if (network == null)
+        {
+            return null;
+        }
+
+        var mounts = new Dictionary<string, ContainerMount>();
+        foreach (var mount in container.Mounts)
+        {
+            if (mount.Type != "volume")
+            {
+                continue;
+            }
+
+            var volume = State.GetContracts<Volume>().FirstOrDefault(volume =>
+                volume.VolumeName == mount.Name && volume.Handler?.Application == Application
+            );
+
+            if (volume == null)
+            {
+                return null;
+            }
+
+            mounts[mount.Destination] = new ContainerMount(volume.Id, !mount.RW);
+        }
+
+        return new Container
+        {
+            ContainerName = container.Name.Trim('/'),
+            Network = network.Id,
+            ImageName = container.Config.Image,
+            MountDockerSocket = false,
+            Mounts = mounts,
+            Labels = container.Config.Labels.ToDictionary(pair => pair.Key, pair => new Argument<string>(pair.Value)),
+            Env = container.Config.Env
+                .Select(env => env.Split('=', 2))
+                .ToDictionary(
+                    pair => pair[0],
+                    pair => new Argument<string>(pair[1])
+                ),
+            Command = new Argument<IEnumerable<string>>(container.Config.Cmd),
+        };
     }
 
     public override IEnumerable<ContractList> Initialize(Container contract, ApplicationContext context)
