@@ -1,64 +1,71 @@
 using System.Diagnostics;
 using Frierun.Server.Data;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
 
 namespace Frierun.Server.Handlers.Udocker;
 
-public class ContainerHandler(Application application)
-    : Handler<Container>(application), IContainerHandler
+public class ContainerHandler(State state, Application application)
+    : Handler<Container>(state, application), IContainerHandler
 {
-    private readonly SshConnection _connection = application.Contracts.OfType<SshConnection>().Single();
+    private readonly SshConnection _connection = state.GetContract<SshConnection>(application);
 
-    public override IEnumerable<ContractInitializeResult> Initialize(Container contract, string prefix)
+    public override IEnumerable<ContractList> Initialize(Container contract, ApplicationContext context)
     {
-        if (contract.MountDockerSocket)
+        if (contract.MountDockerSocket == true)
         {
             yield break;
         }
 
-        yield return new ContractInitializeResult(
-            contract with
+        var containerRef = new ContractRef<Container>(context.Name);
+        yield return new ContractList(
+            contract.Mounts.Values.Select(mount => new KeyValuePair<ContractRef, Contract>(
+                    mount.Volume.TypedRef,
+                    new Volume { HandlerApplication = Application?.Name }
+                )
+            )
+        )
+        {
+            [context] = contract with
             {
                 ContainerName = contract.ContainerName ?? FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     c => c.ContainerName
                 ),
-                Handler = this
+                Handler = this,
+                DependsOn =
+                [
+                    new ContractRef<Daemon>(context.Name)
+                ]
             },
-            [
-                new Daemon(contract.Name)
-                {
-                    HandlerApplication = Application?.Name,
-                    DependsOn = [contract]
-                },
-                new Network(contract.Network.Name)
-                {
-                    HandlerApplication = Application?.Name,
-                    DependencyOf = [contract]
-                },
-                ..contract.Mounts.Values.Select(mount => new Volume(mount.Volume.Name)
-                    {
-                        HandlerApplication = Application?.Name,
-                        DependencyOf = [contract]
-                    }
-                )
-            ]
-        );
+            [context.Name] = new Daemon(context.Name)
+            {
+                HandlerApplication = Application?.Name,
+                Command = new Argument<IEnumerable<string>>(
+                    new ArgumentResolver<ContractRef<Container>, IEnumerable<string>>(
+                        containerRef,
+                        GetCommands
+                    )
+                ),
+                PreCommands = new Argument<IEnumerable<IEnumerable<string>>>(
+                    new ArgumentResolver<ContractRef<Container>, IEnumerable<IEnumerable<string>>>(
+                        containerRef,
+                        GetPreCommands
+                    )
+                ),
+                DependsOn = [
+                    ..contract.Mounts.Values.Select(mount => mount.Volume)
+                ]
+            },
+            [contract.Network.TypedRef] = new Network { HandlerApplication = Application?.Name }
+        };
     }
 
-    public override Container Install(Container contract, ExecutionPlan plan)
+    /// <summary>
+    /// Gets udocker commands for the daemon
+    /// </summary>
+    private static IEnumerable<string> GetCommands(ContractRef<Container> contractRef, ExecutionPlan plan)
     {
+        var contract = plan.GetContract(contractRef);
         Debug.Assert(contract.ContainerName != null);
-        Debug.Assert(contract.ImageName != null);
-
-        var preCommands = new List<IReadOnlyList<string>>();
-        preCommands.Add(new List<string> { "udocker", "rm", contract.ContainerName });
-        preCommands.Add(new List<string> { "udocker", "pull", contract.ImageName });
-
-        // create container explicitly, otherwise it would spawn dangling containers
-        preCommands.Add(
-            new List<string> { "udocker", "create", $"--name={contract.ContainerName}", contract.ImageName }
-        );
 
         var command = new List<string>();
         command.Add("udocker");
@@ -72,48 +79,66 @@ public class ContainerHandler(Application application)
             Debug.Assert(volume.LocalPath != null);
 
             command.Add($"--volume={volume.LocalPath}:{path}");
-            preCommands.Add(new List<string> { "mkdir", "-p", volume.LocalPath });
         }
 
         // exposes ports
-        var endpoints = plan.Contracts.OfType<PortEndpoint>().Where(ep => ep.Container == contract);
-        foreach (var endpoint in endpoints)
+        foreach (var port in contract.Ports)
         {
-            Debug.Assert(endpoint.Installed);
-
-            command.Add($"--publish={endpoint.ExternalPort}:{endpoint.Port}");
+            command.Add($"--publish={port.ExternalPort}:{port.InternalPort}");
         }
 
         // envs
         foreach (var pair in contract.Env)
         {
-            command.Add($"--env={pair.Key}={pair.Value}");
+            command.Add($"--env={pair.Key}={pair.Value.Resolve(plan).Value}");
         }
 
         command.Add(contract.ContainerName);
 
-        var daemon = plan.GetContract(new ContractId<Daemon>(contract.Name));
-        plan.ReplaceContract(
-            daemon with
-            {
-                Command = command,
-                PreCommands = preCommands
-            }
+        return command;
+    }
+
+    /// <summary>
+    /// Gets preparation commands to run udocker via daemon
+    /// </summary>
+    private static IEnumerable<IEnumerable<string>> GetPreCommands(ContractRef<Container> contractRef, ExecutionPlan plan)
+    {
+        var contract = plan.GetContract(contractRef);
+
+        var imageName = contract.ImageName.Resolve(plan).Value;
+        Debug.Assert(contract.ContainerName != null);
+        Debug.Assert(imageName != null);
+
+        var preCommands = new List<IEnumerable<string>>();
+        preCommands.Add(["udocker", "rm", contract.ContainerName]);
+        preCommands.Add(["udocker", "pull", imageName]);
+
+        // create a container explicitly, otherwise it would spawn dangling containers
+        preCommands.Add(
+            ["udocker", "create", $"--name={contract.ContainerName}", imageName]
         );
 
-        return contract with { NetworkName = "udocker" };
-    }
-
-    public void AttachNetwork(Container container, string networkName)
-    {
-        if (container.NetworkName != networkName)
+        // mounts
+        foreach (var (_, mount) in contract.Mounts)
         {
-            throw new InvalidOperationException("Cannot attach to network");
+            var volume = plan.GetContract(mount.Volume);
+            Debug.Assert(volume.Installed);
+            Debug.Assert(volume.LocalPath != null);
+
+            preCommands.Add(["mkdir", "-p", volume.LocalPath]);
         }
+
+        return preCommands;
+    }
+    
+    public void AttachNetwork(Container container, Network network)
+    {
+        throw new InvalidOperationException("Cannot attach to network");
     }
 
-    public void DetachNetwork(Container container, string networkName)
+    public void DetachNetwork(Container container, Network network)
     {
+        throw new InvalidOperationException("Cannot detach to network");
     }
 
     public (string stdout, string stderr) ExecInContainer(Container container, IList<string> command)

@@ -1,12 +1,13 @@
-﻿using System.Diagnostics;
-using Frierun.Server.Data;
+﻿using Frierun.Server.Data;
 
 namespace Frierun.Server;
 
 public class UninstallService(
     State state,
     StateSerializer stateSerializer,
-    StateManager stateManager)
+    StateManager stateManager,
+    HandlerRegistry handlerRegistry
+)
 {
     public void Handle(Application application)
     {
@@ -24,21 +25,42 @@ public class UninstallService(
                     throw new Exception($"Cannot uninstall {application.Name} because it is required by {other.Name}");
                 }
             }
-            
-            foreach (var contract in application.Contracts.Reverse())
-            {
-                Debug.Assert(contract is not Package);
-                
-                contract.Uninstall();
-            }
 
-            state.RemoveApplication(application);
-            
+            foreach (var handler in handlerRegistry.GetHandlers(application))
+            {
+                state.Contracts.Values
+                    .Where(c => c.Handler == handler)
+                    .ToList()
+                    .ForEach(state.RemoveContract);
+            }
+            state.RemoveContract(application);
+            UninstallContracts(application);
+
             stateSerializer.Save(state);
         }
         finally
         {
             stateManager.FinishTask();
+        }
+    }
+
+    private void UninstallContracts(Application application)
+    {
+        var contractRefs = new HashSet<Guid>(application.ContractRefs.Values);
+        while (contractRefs.Count > 0)
+        {
+            var guid = contractRefs
+                .FirstOrDefault(guid => state.Contracts.Values.All(depend => !depend.GetDependencies().Contains(guid)));
+
+            if (guid == Guid.Empty)
+            {
+                break;
+            }
+
+            var contract = state.GetContract(guid);
+            contract.Uninstall();
+            state.RemoveContract(contract);
+            contractRefs.Remove(guid);
         }
     }
 }

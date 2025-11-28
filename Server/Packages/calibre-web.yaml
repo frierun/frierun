@@ -5,7 +5,7 @@ shortDescription: "Browsing/downloading eBooks"
 fullDescription: "Web app providing a clean interface for browsing, reading and downloading eBooks using an existing Calibre database."
 tags: [ "storage" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "lscr.io/linuxserver/calibre-web:latest"
     env:
       PUID: "1000"
@@ -16,5 +16,5 @@ contracts:
       /books: "books"
       /config: "config"
       
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 8083

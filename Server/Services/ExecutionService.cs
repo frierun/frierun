@@ -9,50 +9,58 @@ public class ExecutionService(
     State state
 )
 {
+    private record StackItem(DiscoveryGraph Graph, ContractRef ContractRef, Queue<ContractList> Queue);
+
     /// <summary>
-    /// Creates an execution plan for the given package.
+    /// Creates an execution plan for the given application.
     /// </summary>
     /// <exception cref="HandlerException"></exception>
-    public ExecutionPlan Create(Package package)
+    public ExecutionPlan Create(Application application)
     {
-        var branchesStack = new Stack<(DiscoveryGraph graph, Queue<ContractInitializeResult> queue)>();
-        DiscoveryGraph? currentGraph = new DiscoveryGraph();
-        var applicationName = GetApplicationName(package);
+        var branchesStack = new Stack<StackItem>();
+        var currentGraph = new DiscoveryGraph();
+        var applicationName = GetApplicationName(application);
 
-        ContractId? nextId = package.Id;
-        Contract? nextContract = package;
+        ContractRef? nextId = new ContractRef<Application>(applicationName);
+        Contract? nextContract = application with { Name = applicationName };
 
         while (nextId != null)
         {
             nextContract ??= contractRegistry.CreateContract(nextId);
 
-            var branches = new Queue<ContractInitializeResult>(DiscoverContract(nextContract, applicationName));
+            var contractLists = DiscoverContract(nextId, nextContract, applicationName);
+            var branches = new Queue<ContractList>(contractLists);
             if (branches.Count != 0)
             {
-                branchesStack.Push((currentGraph, branches));
+                branchesStack.Push(new StackItem(currentGraph, nextId, branches));
             }
 
             while (true)
             {
-                (currentGraph, var branch) = PopNextBranch(branchesStack);
-                if (branch == null || currentGraph == null)
+                var (item, branch) = PopNextBranch(branchesStack);
+                if (branch == null || item == null)
                 {
-                    throw new HandlerNotFoundException(nextContract);
+                    throw new HandlerNotFoundException(nextId, nextContract);
                 }
 
-                if (currentGraph.Apply(branch))
+                currentGraph = item.Graph;
+
+                if (currentGraph.Apply(item.ContractRef, branch))
                 {
                     break;
                 }
             }
+
             (nextId, nextContract) = currentGraph.Next();
         }
 
         var alternatives = branchesStack
-            .SelectMany(pair => pair.queue)
-            .Select(result => result.Contract)
+            .SelectMany(item => item.Queue.Select(contracts =>
+                    new ExecutionPlan.Alternative(item.ContractRef, contracts[item.ContractRef])
+                )
+            )
             .ToList();
-        
+
         return new ExecutionPlan(currentGraph.Contracts, alternatives);
     }
 
@@ -60,7 +68,7 @@ public class ExecutionService(
     /// Pops the next branch from the stack.
     /// </summary>
     /// <returns>nulls if no more branches found</returns>
-    private (DiscoveryGraph? graph, ContractInitializeResult? branch) PopNextBranch(Stack<(DiscoveryGraph graph, Queue<ContractInitializeResult> queue)> branchesStack)
+    private (StackItem? item, ContractList? branch) PopNextBranch(Stack<StackItem> branchesStack)
     {
         // no variants found for that contract, rollback to the previous branching point
         if (branchesStack.Count == 0)
@@ -68,39 +76,44 @@ public class ExecutionService(
             return (null, null);
         }
 
-        var (graph, branches) = branchesStack.Pop();
+        var item = branchesStack.Pop();
 
-        var branch = branches.Dequeue();
+        var branch = item.Queue.Dequeue();
 
-        if (branches.Count > 0)
+        if (item.Queue.Count > 0)
         {
-            branchesStack.Push((new DiscoveryGraph(graph), branches));
+            branchesStack.Push(item with { Graph = new DiscoveryGraph(item.Graph) });
         }
 
-        return (graph, branch);
+        return (item, branch);
     }
-    
+
     /// <summary>
     /// Gets the application name from the package.
     /// </summary>
-    private string GetApplicationName(Package package)
+    private string GetApplicationName(Application application)
     {
-        if (package.Prefix != null)
+        if (application.Name != "")
         {
-            if (state.Applications.Any(application => application.Name == package.Prefix))
+            if (state.Applications.Any(app => app.Name == application.Name))
             {
-                throw new Exception("Application with the same name already exists");
+                throw new HandlerException(
+                    "Application with the same name already exists",
+                    "Choose a different name for the application or remove it",
+                    application
+                );
             }
 
-            return package.Prefix;
+            return application.Name;
         }
 
         var count = 1;
-        var applicationName = package.Name;
-        while (state.Applications.Any(application => application.Name == applicationName))
+        var packageName = application.Package?.Name ?? throw new Exception("Package not found");
+        var applicationName = packageName;
+        while (state.Applications.Any(app => app.Name == applicationName))
         {
             count++;
-            applicationName = $"{package.Name}{count}";
+            applicationName = $"{packageName}{count}";
         }
 
         return applicationName;
@@ -109,16 +122,51 @@ public class ExecutionService(
     /// <summary>
     /// Discovers all possible dependent contracts for the given contract.
     /// </summary>
-    private IEnumerable<ContractInitializeResult> DiscoverContract(Contract contract, string? prefix = null)
+    private IEnumerable<ContractList> DiscoverContract(
+        ContractRef contractRef,
+        Contract contract,
+        string? prefix = null
+    )
     {
+        var context = new ApplicationContext(
+            contractRef.Name,
+            prefix ?? ""
+        );
+
+        if (contract.Id != Guid.Empty)
+        {
+            var installedContract = state.GetContract(contract.Id);
+            if (!installedContract.IsSubset(contract))
+            {
+                return [];
+            }
+
+            ContractList contractList =
+            [
+                new KeyValuePair<ContractRef, Contract>(contractRef, installedContract),
+                ..installedContract.Merge(contract)
+                    .GetDependencies()
+                    .Where(contractId => contractId.Ref != null && contractId.Guid != Guid.Empty)
+                    .Select(contractId => new KeyValuePair<ContractRef, Contract>(
+                            contractId.Ref!,
+                            contractRegistry.CreateContract(contractId.Ref!) with { Id = contractId.Guid }
+                        )
+                    )
+            ];
+
+            return [contractList];
+        }
+
         if (contract.Handler != null)
         {
-            return contract.Handler.Initialize(contract, prefix ?? "");
+            return contract.Handler.Initialize(contract, context);
         }
-        
+
         return handlerRegistry
             .GetHandlers(contract.GetType())
-            .Where(handler => contract.HandlerApplication == null || handler.Application?.Name == contract.HandlerApplication)
-            .SelectMany(handler => handler.Initialize(contract, prefix ?? ""));
+            .Where(handler =>
+                contract.HandlerApplication == null || handler.Application?.Name == contract.HandlerApplication
+            )
+            .SelectMany(handler => handler.Initialize(contract, context));
     }
 }

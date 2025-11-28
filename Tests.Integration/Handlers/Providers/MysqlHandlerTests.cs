@@ -11,7 +11,7 @@ public class MysqlHandlerTests : TestWithDocker
     [InlineData("mariadb")]
     public async Task Install_MysqlContract_CredentialsAreCorrect(string packageName)
     {
-        var dbPackage = Services.GetRequiredService<PackageRegistry>().Find(packageName);
+        var dbPackage = Resolve<PackageRegistry>().Find(packageName);
         Assert.NotNull(dbPackage);
 
         var dbApplication = InstallPackage(dbPackage);
@@ -22,13 +22,13 @@ public class MysqlHandlerTests : TestWithDocker
         var package = dbPackage with
         {
             Name = "db-client",
-            Contracts = dbPackage.Contracts.Append(new Mysql())
+            Contracts = new ContractList(dbPackage.Contracts) { [""] = new Mysql() }
         };
         var application = InstallPackage(package);
 
-        var container = application.Contracts.OfType<Container>().Single();
+        var container = Resolve<State>().GetContract<Container>(application);
         Assert.True(container.Installed);
-        var database = application.Contracts.OfType<Mysql>().Single();
+        var database = Resolve<State>().GetContract<Mysql>(application);
         Assert.True(database.Installed);
         Assert.Equal("db-client", database.Username);
         Assert.Equal("db-client", database.Database);
@@ -63,7 +63,7 @@ public class MysqlHandlerTests : TestWithDocker
     [InlineData("mariadb")]
     public async Task Install_MysqlAdminContract_CredentialsAreCorrect(string packageName)
     {
-        var dbPackage = Services.GetRequiredService<PackageRegistry>().Find(packageName);
+        var dbPackage = Resolve<PackageRegistry>().Find(packageName);
         Assert.NotNull(dbPackage);
 
         var dbApplication = InstallPackage(dbPackage);
@@ -74,13 +74,13 @@ public class MysqlHandlerTests : TestWithDocker
         var package = dbPackage with
         {
             Name = "db-client",
-            Contracts = dbPackage.Contracts.Append(new Mysql(Admin: true))
+            Contracts = new ContractList(dbPackage.Contracts) { [""] = new Mysql(Admin: true) }
         };
         var application = InstallPackage(package);
 
-        var container = application.Contracts.OfType<Container>().Single();
+        var container = Resolve<State>().GetContract<Container>(application);
         Assert.True(container.Installed);
-        var database = application.Contracts.OfType<Mysql>().Single();
+        var database = Resolve<State>().GetContract<Mysql>(application);
         Assert.True(database.Installed);
         Assert.Equal("root", database.Username);
         Assert.Null(database.Database);

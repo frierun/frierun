@@ -13,29 +13,32 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         var tunnelApplication = InstallPackage("cloudflare-tunnel");
-        var tunnel = tunnelApplication.Contracts.OfType<CloudflareTunnel>().Single();
+        var tunnel = State.GetContract<CloudflareTunnel>(tunnelApplication);
         Assert.NotNull(tunnel.TunnelId);
         Assert.NotNull(tunnel.AccountId);
 
         var application = InstallPackage("frierun");
 
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
+        var httpEndpoint = State.GetContract<HttpEndpoint>(application);
         Assert.NotNull(httpEndpoint.CloudflareZoneId);
-        Assert.NotNull(httpEndpoint.NetworkName);
+
+        var container = State.GetContract(httpEndpoint.Container);
+        var network = State.GetContract(container.Network);
 
         CloudflareClient.Received(1)
             .UpdateTunnelConfiguration(tunnel.AccountId, tunnel.TunnelId, Arg.Any<JsonObject>());
 
         CloudflareClient.Received(1).CreateDnsRecord(
-            httpEndpoint.CloudflareZoneId, Arg.Is<JsonObject>(
-                arg => arg["type"]!.GetValue<string>() == "CNAME" &&
-                       arg["name"]!.GetValue<string>() == httpEndpoint.ResultHost &&
-                       arg["content"]!.GetValue<string>() == $"{tunnel.TunnelId}.cfargotunnel.com"
+            httpEndpoint.CloudflareZoneId,
+            Arg.Is<JsonObject>(arg =>
+                arg["type"]!.GetValue<string>() == "CNAME"
+                && arg["name"]!.GetValue<string>() == httpEndpoint.ResultHost
+                && arg["content"]!.GetValue<string>() == $"{tunnel.TunnelId}.cfargotunnel.com"
             )
         );
 
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
-            httpEndpoint.NetworkName,
+            network.NetworkName,
             Arg.Is<NetworkConnectParameters>(arg => arg.Container == "cloudflare-tunnel")
         );
     }
@@ -45,20 +48,22 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         var tunnelApplication = InstallPackage("cloudflare-tunnel");
-        var tunnel = tunnelApplication.Contracts.OfType<CloudflareTunnel>().Single();
+        var tunnel = State.GetContract<CloudflareTunnel>(tunnelApplication);
         Assert.NotNull(tunnel.TunnelId);
         Assert.NotNull(tunnel.AccountId);
 
         var application = InstallPackage("frierun");
 
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
+        var httpEndpoint = State.GetContract<HttpEndpoint>(application);
         Assert.NotNull(httpEndpoint.CloudflareZoneId);
-        Assert.NotNull(httpEndpoint.NetworkName);
+        
+        var container = State.GetContract(httpEndpoint.Container);
+        var network = State.GetContract(container.Network);
 
         UninstallApplication(application);
 
         DockerClient.Networks.Received(1).DisconnectNetworkAsync(
-            httpEndpoint.NetworkName,
+            network.NetworkName,
             Arg.Is<NetworkDisconnectParameters>(arg => arg.Container == "cloudflare-tunnel")
         );
     }
@@ -68,22 +73,12 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         InstallPackage("cloudflare-tunnel");
-
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts =
-            [
-                new HttpEndpoint
-                {
-                    ResultHost = "subdomain.domain2.zone2"
-                }
-            ]
-        };
+        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.ResultHost, "subdomain.domain2.zone2").Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
 
         var application = InstallPackage(package);
 
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
-        Assert.Equal("zoneId2", httpEndpoint.CloudflareZoneId);
+        Assert.Equal("zoneId2", State.GetContract(application, httpEndpoint.Ref).CloudflareZoneId);
     }
 
     [Fact]
@@ -91,22 +86,12 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         InstallPackage("cloudflare-tunnel");
-
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts =
-            [
-                new HttpEndpoint
-                {
-                    ResultHost = "domain2.zone2"
-                }
-            ]
-        };
+        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.ResultHost, "domain2.zone2").Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
 
         var application = InstallPackage(package);
 
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
-        Assert.Equal("zoneId2", httpEndpoint.CloudflareZoneId);
+        Assert.Equal("zoneId2", State.GetContract(application, httpEndpoint.Ref).CloudflareZoneId);
     }
 
     [Fact]
@@ -114,19 +99,13 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         InstallPackage("cloudflare-tunnel");
-        CloudflareClient.GetZones().Returns(Array.Empty<(string id, string name)>());
-
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts = [new HttpEndpoint()]
-        };
+        CloudflareClient.GetZones().Returns([]);
+        var httpEndpoint = Contract<HttpEndpoint>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
 
         var exception = Assert.Throws<HandlerException>(() => InstallPackage(package));
 
-        Assert.Equal(
-            "No DNS zones found in Cloudflare.",
-            exception.Message
-        );
+        Assert.Equal("No DNS zones found in Cloudflare.", exception.Message);
     }
 
     [Fact]
@@ -134,24 +113,12 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         InstallPackage("cloudflare-tunnel");
-
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts =
-            [
-                new HttpEndpoint
-                {
-                    ResultHost = "subdomain.unknown.zone"
-                }
-            ]
-        };
+        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.ResultHost, "subdomain.unknown.zone").Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
 
         var exception = Assert.Throws<HandlerException>(() => InstallPackage(package));
 
-        Assert.Equal(
-            "No DNS zone found for subdomain.unknown.zone in Cloudflare.",
-            exception.Message
-        );
+        Assert.Equal("No DNS zone found for subdomain.unknown.zone in Cloudflare.", exception.Message);
     }
 
     [Fact]
@@ -161,24 +128,20 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
         InstallPackage("cloudflare-tunnel");
         CloudflareClient.GetTunnelConfiguration(Arg.Any<string>(), Arg.Any<string>())
             .ReturnsForAnyArgs(new JsonObject());
+        var httpEndpoint = Contract<HttpEndpoint>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
 
-        var application = InstallPackage(
-            Factory<Package>().Generate() with
-            {
-                Contracts = [new HttpEndpoint()]
-            }
-        );
+        var application = InstallPackage(package);
 
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
-        var container = application.Contracts.OfType<Container>().Single();
-        var host = $"http://{container.ContainerName}:{httpEndpoint.Port}";
+        var installedHttpEndpoint = State.GetContract(application, httpEndpoint.Ref);
+        var container = State.GetContract(application, httpEndpoint.Contract.Container.TypedRef);
+        var host = $"http://{container.ContainerName}:{installedHttpEndpoint.Port}";
         CloudflareClient.UpdateTunnelConfiguration(
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Is<JsonObject>(
-                config =>
-                    config["ingress"]!.AsArray().Count == 2
-                    && config["ingress"]!.AsArray()[0]!["hostname"]!.GetValue<string>() == httpEndpoint.ResultHost
-                    && config["ingress"]!.AsArray()[0]!["service"]!.GetValue<string>() == host
-                    && config["ingress"]!.AsArray()[1]!["service"]!.GetValue<string>() == "http_status:404"
+            Arg.Any<string>(), Arg.Any<string>(), Arg.Is<JsonObject>(config =>
+                config["ingress"]!.AsArray().Count == 2
+                && config["ingress"]!.AsArray()[0]!["hostname"]!.GetValue<string>() == installedHttpEndpoint.ResultHost
+                && config["ingress"]!.AsArray()[0]!["service"]!.GetValue<string>() == host
+                && config["ingress"]!.AsArray()[1]!["service"]!.GetValue<string>() == "http_status:404"
             )
         );
     }
@@ -206,26 +169,22 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
                     }
                 }
             );
+        var httpEndpoint = Contract<HttpEndpoint>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
 
-        var application = InstallPackage(
-            Factory<Package>().Generate() with
-            {
-                Contracts = [new HttpEndpoint()]
-            }
-        );
+        var application = InstallPackage(package);
 
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
-        var container = application.Contracts.OfType<Container>().Single();
-        var host = $"http://{container.ContainerName}:{httpEndpoint.Port}";
+        var installedHttpEndpoint = State.GetContract(application, httpEndpoint.Ref);
+        var container = State.GetContract(application, httpEndpoint.Contract.Container.TypedRef);
+        var host = $"http://{container.ContainerName}:{installedHttpEndpoint.Port}";
         CloudflareClient.UpdateTunnelConfiguration(
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Is<JsonObject>(
-                config =>
-                    config["ingress"]!.AsArray().Count == 3
-                    && config["ingress"]!.AsArray()[0]!["hostname"]!.GetValue<string>() == httpEndpoint.ResultHost
-                    && config["ingress"]!.AsArray()[0]!["service"]!.GetValue<string>() == host
-                    && config["ingress"]!.AsArray()[1]!["hostname"]!.GetValue<string>() == "existing.domain"
-                    && config["ingress"]!.AsArray()[1]!["service"]!.GetValue<string>() == "http://existing.service:80"
-                    && config["ingress"]!.AsArray()[2]!["service"]!.GetValue<string>() == "http_status:404"
+            Arg.Any<string>(), Arg.Any<string>(), Arg.Is<JsonObject>(config =>
+                config["ingress"]!.AsArray().Count == 3
+                && config["ingress"]!.AsArray()[0]!["hostname"]!.GetValue<string>() == installedHttpEndpoint.ResultHost
+                && config["ingress"]!.AsArray()[0]!["service"]!.GetValue<string>() == host
+                && config["ingress"]!.AsArray()[1]!["hostname"]!.GetValue<string>() == "existing.domain"
+                && config["ingress"]!.AsArray()[1]!["service"]!.GetValue<string>() == "http://existing.service:80"
+                && config["ingress"]!.AsArray()[2]!["service"]!.GetValue<string>() == "http_status:404"
             )
         );
     }
@@ -246,21 +205,12 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
                 new() { ["id"] = "recordId5" }
             }
         );
+        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.ResultHost, "test.domain1.zone1").Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
 
-        var application = InstallPackage(
-            Factory<Package>().Generate() with
-            {
-                Contracts =
-                [
-                    new HttpEndpoint
-                    {
-                        ResultHost = "test.domain1.zone1"
-                    }
-                ]
-            }
-        );
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
-        Assert.Equal("zoneId1", httpEndpoint.CloudflareZoneId);
+        var application = InstallPackage(package);
+
+        Assert.Equal("zoneId1", State.GetContract(application, httpEndpoint.Ref).CloudflareZoneId);
 
         CloudflareClient.Received(1).DeleteDnsRecord("zoneId1", "recordId1");
         CloudflareClient.Received(1).DeleteDnsRecord("zoneId1", "recordId2");
@@ -274,13 +224,13 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
         InstallPackage("docker");
         InstallPackage("cloudflare-tunnel");
         var application = InstallPackage("frierun");
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
+        var httpEndpoint = State.GetContract<HttpEndpoint>(application);
         Assert.NotNull(httpEndpoint.CloudflareZoneId);
         CloudflareClient.GetDnsRecords(httpEndpoint.CloudflareZoneId).Returns(
             new List<JsonObject>
             {
-                new() { ["id"] = "recordId1", ["name"] = httpEndpoint.ResultHost },
-                new() { ["id"] = "recordId2", ["name"] = httpEndpoint.ResultHost },
+                new() { ["id"] = "recordId1", ["name"] = httpEndpoint.ResultHost.Value },
+                new() { ["id"] = "recordId2", ["name"] = httpEndpoint.ResultHost.Value },
                 new() { ["id"] = "recordId3", ["name"] = "other.domain" },
                 new() { ["id"] = "recordId4" }
             }
@@ -298,13 +248,10 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
     {
         InstallPackage("docker");
         InstallPackage("cloudflare-tunnel");
-        var application = InstallPackage(
-            Factory<Package>().Generate() with
-            {
-                Contracts = [new HttpEndpoint()]
-            }
-        );
-        var httpEndpoint = application.Contracts.OfType<HttpEndpoint>().Single();
+        var httpEndpoint = Contract<HttpEndpoint>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [httpEndpoint] };
+        var application = InstallPackage(package);
+        var installedHttpEndpoint = State.GetContract(application, httpEndpoint.Ref);
         CloudflareClient.GetTunnelConfiguration(Arg.Any<string>(), Arg.Any<string>())
             .ReturnsForAnyArgs(
                 new JsonObject
@@ -312,8 +259,9 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
                     ["ingress"] = new JsonArray
                     {
                         new JsonObject { ["hostname"] = "other.domain", ["service"] = "http://other.service:80" },
-                        new JsonObject { ["hostname"] = httpEndpoint.ResultHost, ["service"] = "http://endpoint:80" },
-                        new JsonObject { ["hostname"] = httpEndpoint.ResultHost, ["service"] = "http://old:80" },
+                        new JsonObject
+                            { ["hostname"] = installedHttpEndpoint.ResultHost.Value, ["service"] = "http://endpoint:80" },
+                        new JsonObject { ["hostname"] = installedHttpEndpoint.ResultHost.Value, ["service"] = "http://old:80" },
                         new JsonObject { ["service"] = "http_status:404" }
                     }
                 }
@@ -323,12 +271,11 @@ public class CloudflareHttpEndpointHandlerTests : BaseTests
         UninstallApplication(application);
 
         CloudflareClient.Received(1).UpdateTunnelConfiguration(
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Is<JsonObject>(
-                config =>
-                    config["ingress"]!.AsArray().Count == 2
-                    && config["ingress"]!.AsArray()[0]!["hostname"]!.GetValue<string>() == "other.domain"
-                    && config["ingress"]!.AsArray()[0]!["service"]!.GetValue<string>() == "http://other.service:80"
-                    && config["ingress"]!.AsArray()[1]!["service"]!.GetValue<string>() == "http_status:404"
+            Arg.Any<string>(), Arg.Any<string>(), Arg.Is<JsonObject>(config =>
+                config["ingress"]!.AsArray().Count == 2
+                && config["ingress"]!.AsArray()[0]!["hostname"]!.GetValue<string>() == "other.domain"
+                && config["ingress"]!.AsArray()[0]!["service"]!.GetValue<string>() == "http://other.service:80"
+                && config["ingress"]!.AsArray()[1]!["service"]!.GetValue<string>() == "http_status:404"
             )
         );
     }

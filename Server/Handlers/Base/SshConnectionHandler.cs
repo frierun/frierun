@@ -4,12 +4,13 @@ using Renci.SshNet;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class SshConnectionHandler : Handler<SshConnection>, ISshConnectionHandler
+public class SshConnectionHandler(State state) : Handler<SshConnection>(state), ISshConnectionHandler
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(SshConnection contract, string prefix)
+    public override IEnumerable<ContractList> Initialize(SshConnection contract, ApplicationContext context)
     {
-        yield return new ContractInitializeResult(
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
                 Host = contract.Host ?? "",
@@ -17,7 +18,7 @@ public class SshConnectionHandler : Handler<SshConnection>, ISshConnectionHandle
                 Username = contract.Username ?? "",
                 Password = contract.Password ?? ""
             }
-        );
+        };
     }
 
     public override SshConnection Install(SshConnection contract, ExecutionPlan plan)
@@ -36,7 +37,7 @@ public class SshConnectionHandler : Handler<SshConnection>, ISshConnectionHandle
                 contract
             );
         }
-        
+
         try
         {
             using (CreateSftpClient(contract))
@@ -51,7 +52,7 @@ public class SshConnectionHandler : Handler<SshConnection>, ISshConnectionHandle
                 contract
             );
         }
-        
+
 
         return contract;
     }

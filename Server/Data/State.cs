@@ -1,37 +1,88 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics;
+using System.Text.Json.Serialization;
 
 namespace Frierun.Server.Data;
 
 public class State
 {
-    private readonly IList<Application> _applications = [];
-    public event Action<Application> ApplicationAdded = _ => { }; 
-    public event Action<Application> ApplicationRemoved = _ => { }; 
+    private readonly Dictionary<Guid, Contract> _contracts = new();
 
-    [JsonIgnore]
-    public IEnumerable<Contract> Contracts => _applications.SelectMany(application => application.Contracts);
-    
-    public IEnumerable<Application> Applications
-    {
-        get => _applications;
-        init => _applications = new List<Application>(value);
-    }    
-    
+    public event Action<Application> ApplicationAdded = _ => { };
+    public event Action<Application> ApplicationRemoved = _ => { };
+
+    [JsonIgnore] public IEnumerable<Application> Applications => GetContracts<Application>();
+
     /// <summary>
-    /// Adds a newly installed application to the state.
+    /// Lists all installed contracts
     /// </summary>
-    public void AddApplication(Application application)
+    public IReadOnlyDictionary<Guid, Contract> Contracts
     {
-        _applications.Add(application);
-        ApplicationAdded(application);
+        get => _contracts;
+        init => _contracts = new Dictionary<Guid, Contract>(value);
     }
 
     /// <summary>
-    /// Removes an application from the state.
+    /// Gets contract by Guid.
     /// </summary>
-    public void RemoveApplication(Application application)
+    public TContract GetContract<TContract>(Guid id) where TContract : Contract => (TContract)_contracts[id];
+
+    public TContract GetContract<TContract>(ContractId<TContract> contractId) where TContract : Contract =>
+        (TContract)_contracts[contractId.Guid];
+
+    public Contract GetContract(Guid id) => _contracts[id];
+
+    /// <summary>
+    /// Gets contract from the application by name.
+    /// </summary>
+    public TContract GetContract<TContract>(Application app, string name = "")
+        where TContract : Contract
     {
-        _applications.Remove(application);
-        ApplicationRemoved(application);
+        return GetContract(app, new ContractRef<TContract>(name));
+    }
+
+    /// <summary>
+    /// Gets contract from the application by name.
+    /// </summary>
+    public TContract GetContract<TContract>(Application app, ContractRef<TContract> contractRef)
+        where TContract : Contract
+    {
+        var guid = app.ContractRefs[contractRef];
+        return GetContract<TContract>(guid);
+    }
+
+    /// <summary>
+    /// Gets a contract list by type.
+    /// </summary>
+    public IEnumerable<TContract> GetContracts<TContract>() where TContract : Contract
+    {
+        return _contracts.Values.OfType<TContract>();
+    }
+
+    /// <summary>
+    /// Adds a newly installed contract to the state.
+    /// </summary>
+    public void AddContract(Contract contract)
+    {
+        Debug.Assert(contract.Id != Guid.Empty);
+        _contracts[contract.Id] = contract;
+
+        if (contract is Application application)
+        {
+            ApplicationAdded(application);
+        }
+    }
+
+    /// <summary>
+    /// Removes a contract from the state.
+    /// </summary>
+    public void RemoveContract(Contract contract)
+    {
+        Debug.Assert(contract.Id != Guid.Empty);
+        _contracts.Remove(contract.Id);
+
+        if (contract is Application application)
+        {
+            ApplicationRemoved(application);
+        }
     }
 }

@@ -4,15 +4,14 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers;
 
-public class MysqlHandler(Application application)
-    : Handler<Mysql>(application)
+public class MysqlHandler(State state, Application application)
+    : Handler<Mysql>(state, application)
 {
-    private readonly Container _container = application.Contracts.OfType<Container>().Single();
-
-    private readonly string _rootPassword = application.Contracts.OfType<Password>().Single().Value ??
+    private readonly Container _container = state.GetContract<Container>(application);
+    private readonly string _rootPassword = state.GetContract<Password>(application).Value ??
                                             throw new Exception("Root password not found");
 
-    public override IEnumerable<ContractInitializeResult> Initialize(Mysql contract, string prefix)
+    public override IEnumerable<ContractList> Initialize(Mysql contract, ApplicationContext context)
     {
         if (contract.Admin)
         {
@@ -26,30 +25,31 @@ public class MysqlHandler(Application application)
                 yield break;
             }
 
-            yield return new ContractInitializeResult(
-                contract with
+            yield return new ContractList
+            {
+                [context] = contract with
                 {
                     Handler = this,
                     Username = "root",
                     Password = _rootPassword,
                     Host = _container.ContainerName,
-                    DependsOn = contract.DependsOn.Append(contract.Network)
                 }
-            );
+            };
         }
 
-        yield return new ContractInitializeResult(
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
                 Database = contract.Database ?? FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     c => c.Database,
                     "",
                     ["mysql"]
                 ),
                 Username = contract.Username ?? FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     c => c.Username,
                     "",
                     ["root"]
@@ -59,9 +59,8 @@ public class MysqlHandler(Application application)
                     16
                 ),
                 Host = _container.ContainerName,
-                DependsOn = contract.DependsOn.Append(contract.Network)
             }
-        );
+        };
     }
 
     public override Mysql Install(Mysql contract, ExecutionPlan plan)
@@ -71,21 +70,11 @@ public class MysqlHandler(Application application)
         Debug.Assert(contract.Password != null);
 
         var network = plan.GetContract(contract.Network);
-        Debug.Assert(network.Installed);
-
-        if (contract.NetworkName != null && contract.NetworkName != network.NetworkName)
-        {
-            throw new Exception("NetworkName cannot be set");
-        }
-
-        _container.AttachNetwork(network.NetworkName);
+        _container.AttachNetwork(network);
 
         if (contract.Admin)
         {
-            return contract with
-            {
-                NetworkName = network.NetworkName
-            };
+            return contract;
         }
 
         Debug.Assert(contract.Database != null);
@@ -99,10 +88,7 @@ public class MysqlHandler(Application application)
              """
         );
 
-        return contract with
-        {
-            NetworkName = network.NetworkName
-        };
+        return contract;
     }
 
     public override void Uninstall(Mysql contract)
@@ -119,7 +105,8 @@ public class MysqlHandler(Application application)
             );
         }
 
-        _container.DetachNetwork(contract.NetworkName);
+        var network = State.GetContract(contract.Network);
+        _container.DetachNetwork(network);
     }
 
     /// <summary>

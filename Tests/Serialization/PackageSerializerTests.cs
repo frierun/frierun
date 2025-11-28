@@ -1,5 +1,4 @@
 ﻿using Frierun.Server;
-using Frierun.Server.Data;
 
 namespace Frierun.Tests;
 
@@ -26,16 +25,12 @@ public class PackageSerializerTests : BaseTests
             """
             {
                 "name":"frierun",
-                "dependsOn": ["Container:container1"],
-                "dependencyOf": ["Container:container2"]
+                "url": "http://ima.ge/image.png"
             }
             """u8;
         var package = packageSerializer.Load(new MemoryStream(json.ToArray()));
         Assert.NotNull(package);
         Assert.Equal("frierun", package.Name);
-        Assert.Single(package.DependsOn);
-        Assert.Equal(new ContractId<Container>("container1"), package.DependsOn.First());
-        Assert.Single(package.DependencyOf);
-        Assert.Equal(new ContractId<Container>("container2"), package.DependencyOf.First());
+        Assert.Equal("http://ima.ge/image.png", package.Url);
     }
 }

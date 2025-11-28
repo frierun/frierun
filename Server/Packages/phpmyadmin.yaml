@@ -5,7 +5,7 @@ shortDescription: "MySql Server tools/administration"
 fullDescription: "phpMyAdmin is a free software tool written in PHP, intended to handle the administration of MySQL over the Web."
 tags: [ "dev" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "phpmyadmin:latest"
     env:
       PMA_HOST: "{{Mysql:Root:Host}}"
@@ -13,10 +13,11 @@ contracts:
       PMA_PMADB: "{{Mysql::Database}}"
       PMA_CONTROLUSER: "{{Mysql::Username}}"
       PMA_CONTROLPASS: "{{Mysql::Password}}"
+    dependsOn: ["Mysql"]
       
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 80
     
-  - type: "Mysql"
+  Mysql:Root:
     name: "Root"
     admin: true

@@ -9,24 +9,25 @@ public class RedisHandlerTests : TestWithDocker
     {
         var package = new Package(
             Name: "redis-client",
-            Contracts:
-            [
-                new Redis(),
-                new Container(
-                    Name: "redis-client",
-                    ImageName: "redis:7"
-                )
-            ]
+            Contracts: new ContractList
+            {
+                [""] = new Redis(),
+                ["redis-client"] = new Container
+                {
+                    ImageName = "redis:7"
+                }
+            }
         );
         var application = InstallPackage(package);
 
-        var container = application.Contracts
-            .OfType<Container>()
-            .Single(container => container.Name == "redis-client");
-        var database = application.Contracts.OfType<Redis>().Single();
+        var container = Resolve<State>().GetContract<Container>(application, "redis-client");
+        var database = Resolve<State>().GetContract<Redis>(application);
         Assert.True(container.Installed);
         Assert.True(database.Installed);
-        Assert.Equal("redis-client-redis", database.Host);
+
+        var host = database.Host.Value;
+        Assert.NotNull(host);
+        Assert.Equal("redis-client-redis", host);
 
         // try to connect to the database from the client
         var queries = new[]
@@ -42,7 +43,7 @@ public class RedisHandlerTests : TestWithDocker
             var command = new List<string>
             {
                 "redis-cli",
-                "-h", database.Host,
+                "-h", host,
             };
             command.AddRange(query.Split(" "));
             (stdout, _) = await DockerService.ExecInContainer(

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Frierun.Server.Data;
 using File = System.IO.File;
 
@@ -17,10 +18,15 @@ public class StateSerializer(
     {
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Converters =
         {
-            new ContractIdConverter(contractRegistry),
+            new ContractIdConverter(),
             new ContractIdOfTConverter(),
+            new ContractRefConverter(),
+            new ContractRefOfTConverter(),
+            new ContractListConverter(contractRegistry),
+            new ArgumentOfTConverter(),
             new LazyHandlerConverter(lazyHandlerRegistry),
             new PackageConverter(packageRegistry)
         },

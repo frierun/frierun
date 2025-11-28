@@ -7,7 +7,7 @@ fullDescription: "PostgreSQL is a powerful, open source object-relational databa
   feature robustness, and performance."
 tags: [ "storage", "provider" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "postgres:17"
     env:
       POSTGRES_PASSWORD: "{{Password::Value}}"

@@ -5,27 +5,40 @@ namespace Tests.Integration.Handlers.Docker;
 
 public class FileHandlerTests : TestWithDocker
 {
-    private async Task InstallAndCheck(File contract, Func<string, Task> checkContainer)
+    private async Task InstallAndCheck(File contract, Func<string, Task> checkContainer, Parameter? parameter = null)
     {
-        var package = new Package(
-            Name: "test-package",
-            Contracts:
-            [
+        var contracts = new Dictionary<ContractRef, Contract>
+        {
+            {
+                new ContractRef<Container>(),
                 new Container(
                     ImageName: "alpine:latest",
-                    Command: ["tail", "-f", "/dev/null"],
-                    Mounts: new Dictionary<string, ContainerMount> {{"/mnt", new ContainerMount()}}
-                ),
+                    Command: new Argument<IEnumerable<string>>(["tail", "-f", "/dev/null"]),
+                    Mounts: new Dictionary<string, ContainerMount> { { "/mnt", new ContainerMount() } }
+                )
+            },
+            {
+                new ContractRef<File>(),
                 contract
-            ]
+            }
+        };
+
+        if (parameter != null)
+        {
+            contracts[new ContractRef<Parameter>()] = parameter;
+        }
+
+        var package = new Package(
+            Name: "test-package",
+            Contracts: new ContractList(contracts)
         );
 
         var application = InstallPackage(package);
 
-        var volume = application.Contracts.OfType<Volume>().Single();
+        var volume = Resolve<State>().GetContract<Volume>(application);
         Assert.True(volume.Installed);
         Assert.NotNull(volume.VolumeName);
-        var container = application.Contracts.OfType<Container>().Single();
+        var container = Resolve<State>().GetContract<Container>(application);
         Assert.True(container.Installed);
 
         await checkContainer(container.ContainerName);
@@ -34,9 +47,9 @@ public class FileHandlerTests : TestWithDocker
     }
 
     [Fact]
-    public async Task Install_FileWithText_PutsFile()
+    public Task Install_FileWithText_PutsFile()
     {
-        await InstallAndCheck(
+        return InstallAndCheck(
             new File(
                 Path: "test-file",
                 Text: "test-text"
@@ -56,9 +69,9 @@ public class FileHandlerTests : TestWithDocker
     }
 
     [Fact]
-    public async Task Install_FileOwner_ChownFile()
+    public Task Install_FileOwner_ChownFile()
     {
-        await InstallAndCheck(
+        return InstallAndCheck(
             new File(
                 Path: "test-file",
                 Text: "test-text",
@@ -81,9 +94,9 @@ public class FileHandlerTests : TestWithDocker
     }
 
     [Fact]
-    public async Task Install_FileGroup_ChgrpFile()
+    public Task Install_FileGroup_ChgrpFile()
     {
-        await InstallAndCheck(
+        return InstallAndCheck(
             new File(
                 Path: "test-file",
                 Text: "test-text",
@@ -106,9 +119,9 @@ public class FileHandlerTests : TestWithDocker
     }
 
     [Fact]
-    public async Task Install_RootPermissions_SetPermissions()
+    public Task Install_RootPermissions_SetPermissions()
     {
-        await InstallAndCheck(
+        return InstallAndCheck(
             new File(
                 Path: "",
                 Owner: 1000,
@@ -138,19 +151,19 @@ public class FileHandlerTests : TestWithDocker
         var filePath = Path.Combine(directory.FullName, fileName);
         var package = new Package(
             Name: "test-package",
-            Contracts:
-            [
-                new Container(
+            Contracts: new ContractList
+            {
+                [""] = new Container(
                     ImageName: "alpine:latest",
-                    Command: ["tail", "-f", "/dev/null"],
-                    Mounts: new Dictionary<string, ContainerMount> {{"/mnt", new ContainerMount()}}
+                    Command: new Argument<IEnumerable<string>>(["tail", "-f", "/dev/null"]),
+                    Mounts: new Dictionary<string, ContainerMount> { { "/mnt", new ContainerMount() } }
                 ),
-                new Volume(Name: "", LocalPath: directory.FullName),
-                new File(
+                [""] = new Volume(LocalPath: directory.FullName),
+                [""] = new File(
                     Path: fileName,
                     Text: "test-text"
-                ),
-            ]
+                )
+            }
         );
 
         var application = InstallPackage(package);
@@ -161,5 +174,28 @@ public class FileHandlerTests : TestWithDocker
         UninstallApplication(application);
 
         directory.Delete(true);
+    }
+
+    [Fact]
+    public Task Install_FileWithTemplateText_PutsFile()
+    {
+        return InstallAndCheck(
+            new File(
+                Path: "test-file",
+                Text: "pre-text {{Parameter::Value}} post-text"
+            ),
+            async containerName =>
+            {
+                var (stdout, _) = await DockerService.ExecInContainer(
+                    containerName,
+                    [
+                        "cat",
+                        "/mnt/test-file"
+                    ]
+                );
+                Assert.Equal("pre-text value post-text", stdout.Trim());
+            },
+            new Parameter(Value: "value")
+        );
     }
 }

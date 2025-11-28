@@ -13,14 +13,20 @@ public class NetworkHandlerTests : BaseTests
     [Fact]
     public void Install_DifferentPackages_HasSameNetworkName()
     {
-        var package1 = Factory<Package>().Generate() with { Contracts = [Factory<Container>().Generate("udocker")] };
-        var package2 = Factory<Package>().Generate() with { Contracts = [Factory<Container>().Generate("udocker")] };
+        var package1 = Factory<Package>().Generate() with
+        {
+            Contracts = [Contract<Container>().Generate("udocker")]
+        };
+        var package2 = Factory<Package>().Generate() with
+        {
+            Contracts = [Contract<Container>().Generate("udocker")]
+        };
 
         var application1 = InstallPackage(package1);
         var application2 = InstallPackage(package2);
 
-        var network1 = application1.Contracts.OfType<Network>().Single();
-        var network2 = application2.Contracts.OfType<Network>().Single();
+        var network1 = State.GetContract<Network>(application1);
+        var network2 = State.GetContract<Network>(application2);
         Assert.Equal(network1.NetworkName, network2.NetworkName);
     }
 
@@ -29,7 +35,7 @@ public class NetworkHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts = [Factory<Network>().Generate() with { NetworkName = "test" }]
+            Contracts = [Contract<Network>().Set(p => p.NetworkName, "test").Generate()]
         };
 
         Assert.Throws<HandlerNotFoundException>(() => InstallPackage(package));

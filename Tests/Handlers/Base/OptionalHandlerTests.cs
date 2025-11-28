@@ -1,4 +1,5 @@
 ﻿using Frierun.Server.Data;
+using Frierun.Server.Handlers;
 using Frierun.Server.Handlers.Base;
 
 namespace Frierun.Tests.Handlers.Base;
@@ -8,47 +9,56 @@ public class OptionalHandlerTests : BaseTests
     [Fact]
     public void Initialize_WithoutSelectedOption_ReturnsBothOptions()
     {
-        var container = Factory<Container>().Generate();
-        var contract = new Optional("", [container]);
+        var container = Contract<Container>().Generate();
+        var optional = Contract<Optional>()
+            .Set(p => p.Contracts, [container])
+            .Generate();
         var handler = Handler<OptionalHandler>();
 
-        var result = handler.Initialize(contract, "prefix").ToList();
+        var result = handler.Initialize(optional.Contract, new ApplicationContext(optional.Ref, "prefix")).ToList();
 
         Assert.Equal(2, result.Count);
-        Assert.Equal(true, ((Optional)result[0].Contract).Value);
-        Assert.Single(result[0].AdditionalContracts);
-        Assert.Equal(container, result[0].AdditionalContracts.First());
 
-        Assert.Equal(false, ((Optional)result[1].Contract).Value);
-        Assert.Empty(result[1].AdditionalContracts);
+        Assert.Equal(true, ((Optional)result[0][optional.Ref]).Value);
+        Assert.Equal(2, result[0].Count);
+        Assert.Equal(container.Contract, result[0][container.Ref]);
+
+        Assert.Equal(false, ((Optional)result[1][optional.Ref]).Value);
+        Assert.Single(result[1]);
     }
 
     [Fact]
     public void Initialize_WithOptionSelected_ReturnsContract()
     {
-        var container = Factory<Container>().Generate();
-        var contract = new Optional("", [container]) { Value = true };
+        var container = Contract<Container>().Generate();
+        var optional = Contract<Optional>()
+            .Set<bool?>(p => p.Value, true)
+            .Set(p => p.Contracts, [container])
+            .Generate();
         var handler = Handler<OptionalHandler>();
 
-        var result = handler.Initialize(contract, "prefix").ToList();
+        var result = handler.Initialize(optional.Contract, new ApplicationContext(optional.Ref, "prefix")).ToList();
 
         Assert.Single(result);
-        Assert.Equal(true, ((Optional)result[0].Contract).Value);
-        Assert.Single(result[0].AdditionalContracts);
-        Assert.Equal(container, result[0].AdditionalContracts.First());
+        Assert.Equal(true, ((Optional)result[0][optional.Ref]).Value);
+        Assert.Equal(2, result[0].Count);
+        Assert.Equal(container.Contract, result[0][container.Ref]);
     }
-    
+
     [Fact]
     public void Initialize_WithOptionDeselected_ReturnsEmptyList()
     {
-        var container = Factory<Container>().Generate();
-        var contract = new Optional("", [container]) { Value = false };
+        var container = Contract<Container>().Generate();
+        var optional = Contract<Optional>()
+            .Set<bool?>(p => p.Value, false)
+            .Set(p => p.Contracts, [container])
+            .Generate();
         var handler = Handler<OptionalHandler>();
 
-        var result = handler.Initialize(contract, "prefix").ToList();
+        var result = handler.Initialize(optional.Contract, new ApplicationContext(optional.Ref, "prefix")).ToList();
 
         Assert.Single(result);
-        Assert.Equal(false, ((Optional)result[0].Contract).Value);
-        Assert.Empty(result[0].AdditionalContracts);
-    }    
+        Assert.Equal(false, ((Optional)result[0][optional.Ref]).Value);
+        Assert.Single(result[0]);
+    }
 }

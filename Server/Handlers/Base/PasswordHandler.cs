@@ -3,26 +3,20 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class PasswordHandler : Handler<Password>
+public class PasswordHandler(State state) : Handler<Password>(state)
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(Password contract, string prefix)
+    public override IEnumerable<ContractList> Initialize(Password contract, ApplicationContext context)
     {
-        if (contract.Value != null)
+        yield return new ContractList
         {
-            yield return new ContractInitializeResult(
-                contract with { Handler = this }
-            );
-        }
-        else
-        {
-            yield return new ContractInitializeResult(contract with
+            [context] = contract with
             {
                 Handler = this,
-                Value = RandomNumberGenerator.GetString(
+                Value = contract.Value ?? RandomNumberGenerator.GetString(
                     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
                     16
                 )
-            });
-        }
+            }
+        };
     }
 }

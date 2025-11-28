@@ -2,25 +2,30 @@
 
 namespace Frierun.Server.Handlers.Udocker;
 
-public class PortEndpointHandler(Application application) : Handler<PortEndpoint>(application)
+public class PortEndpointHandler(State state, Application application) : Handler<PortEndpoint>(state, application)
 {
-    private readonly SshConnection _connection = application.Contracts.OfType<SshConnection>().Single();
-    
-    public override IEnumerable<ContractInitializeResult> Initialize(PortEndpoint contract, string prefix)
+    private readonly SshConnection _connection = state.GetContract<SshConnection>(application);
+
+    public override IEnumerable<ContractList> Initialize(PortEndpoint contract, ApplicationContext context)
     {
         if (contract.Port == 0)
         {
             yield break;
         }
-        
+
         if (contract.ExternalPort is > 0 and < 1024)
+        {
+            yield break;
+        }
+
+        if (contract.Protocol != Protocol.Tcp)
         {
             yield break;
         }
 
         if (contract.ExternalPort != 0)
         {
-            if (State.Contracts.OfType<PortEndpoint>()
+            if (State.GetContracts<PortEndpoint>()
                 .Any(endpoint => endpoint.Port == contract.ExternalPort && endpoint.Protocol == contract.Protocol))
             {
                 yield break;
@@ -31,7 +36,7 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
             var port = contract.Port;
 
             while (port < 1024
-                   || State.Contracts.OfType<PortEndpoint>()
+                   || State.GetContracts<PortEndpoint>()
                        .Any(endpoint => endpoint.Port == port && endpoint.Protocol == contract.Protocol)
                   )
             {
@@ -45,26 +50,25 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
             contract = contract with { ExternalPort = port };
         }
 
-        yield return new ContractInitializeResult(
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
+                ExternalIp = _connection.Host,
                 Handler = this,
             },
-            [
-                new Container(contract.Container.Name)
-                {
-                    HandlerApplication = Application?.Name,
-                    DependsOn = [contract]
-                }
-            ]
-        );
-    }
-
-    public override PortEndpoint Install(PortEndpoint contract, ExecutionPlan plan)
-    {
-        return contract with
-        {
-            ExternalIp = _connection.Host,
+            [contract.Container.TypedRef] = new Container
+            {
+                Ports =
+                [
+                    new ContainerPort(
+                        InternalPort: contract.Port,
+                        ExternalPort: contract.ExternalPort,
+                        Protocol: contract.Protocol
+                    )
+                ],
+                HandlerApplication = Application?.Name,
+            }
         };
     }
 }

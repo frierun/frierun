@@ -4,17 +4,17 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers;
 
-public class CloudflareHttpEndpointHandler(Application application, ICloudflareClient client)
-    : Handler<HttpEndpoint>(application)
+public class CloudflareHttpEndpointHandler(State state, Application application, ICloudflareClient client)
+    : Handler<HttpEndpoint>(state, application)
 {
-    private readonly Container _container = application.Contracts.OfType<Container>().Single();
-    private readonly CloudflareTunnel _tunnel = application.Contracts.OfType<CloudflareTunnel>().Single();
+    private readonly Container _container = state.GetContract<Container>(application);
+    private readonly CloudflareTunnel _tunnel = state.GetContract<CloudflareTunnel>(application);
 
-    public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
+    public override IEnumerable<ContractList> Initialize(HttpEndpoint contract, ApplicationContext context)
     {
         var zones = client.GetZones();
         (string id, string name) zone;
-        if (contract.ResultHost == null)
+        if (contract.ResultHost.Value == null)
         {
             zone = zones.FirstOrDefault();
             if (zone == default)
@@ -28,16 +28,18 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
 
             contract = contract with
             {
-                ResultHost = FindUniqueName(
-                    prefix,
-                    c => c.ResultHost,
-                    $".{zone.name}"
+                ResultHost = new Argument<string>(
+                    FindUniqueName(
+                        context.Prefix,
+                        c => c.ResultHost,
+                        $".{zone.name}"
+                    )
                 )
             };
         }
         else
         {
-            var rootDomain = contract.ResultHost.Split('.', 2).Last();
+            var rootDomain = contract.ResultHost.Value.Split('.', 2).Last();
             zone = zones.FirstOrDefault(tuple => tuple.name == rootDomain || tuple.name == contract.ResultHost);
             if (zone == default)
             {
@@ -49,27 +51,25 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
             }
         }
 
-        yield return new ContractInitializeResult(
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
                 ResultSsl = true,
                 ResultPort = 443,
                 CloudflareZoneId = zone.id,
-                DependsOn = contract.DependsOn.Append(new Network("")),
-                DependencyOf = contract.DependencyOf.Append(contract.Container),
+                DependsOn = [contract.Container],
             }
-        );
+        };
     }
 
     public override HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
     {
         var container = plan.GetContract(contract.Container);
-        var network = plan.GetContract(container.Network);
-        Debug.Assert(network.Installed);
         Debug.Assert(_tunnel.Installed);
         Debug.Assert(contract.CloudflareZoneId != null);
-        
+
         var config = client.GetTunnelConfiguration(_tunnel.AccountId, _tunnel.TunnelId);
         if (config["ingress"] is not JsonArray ingress || ingress.Count == 0)
         {
@@ -87,40 +87,41 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
             0,
             new JsonObject
             {
-                ["hostname"] = contract.ResultHost,
+                ["hostname"] = contract.ResultHost.Value,
                 ["service"] = $"http://{container.ContainerName}:{contract.Port}"
             }
         );
-        
+
         client.UpdateTunnelConfiguration(
             _tunnel.AccountId,
             _tunnel.TunnelId,
             config
         );
-        
-        DeleteOldDnsRecords(contract.CloudflareZoneId, contract.ResultHost);
-        client.CreateDnsRecord(contract.CloudflareZoneId, new JsonObject
-        {
-            ["type"] = "CNAME",
-            ["name"] = contract.ResultHost,
-            ["content"] = $"{_tunnel.TunnelId}.cfargotunnel.com",
-            ["proxied"] = true
-        });
 
-        _container.AttachNetwork(network.NetworkName);
-        return contract with
-        {
-            NetworkName = network.NetworkName
-        };
+        DeleteOldDnsRecords(contract.CloudflareZoneId, contract.ResultHost);
+        client.CreateDnsRecord(
+            contract.CloudflareZoneId, new JsonObject
+            {
+                ["type"] = "CNAME",
+                ["name"] = contract.ResultHost.Value,
+                ["content"] = $"{_tunnel.TunnelId}.cfargotunnel.com",
+                ["proxied"] = true
+            }
+        );
+
+        var network = plan.GetContract(container.Network);        
+        _container.AttachNetwork(network);
+        
+        return contract;
     }
-    
+
     private void DeleteOldDnsRecords(string cloudflareZoneId, string? resultHost)
     {
         if (resultHost == null)
         {
             return;
         }
-        
+
         foreach (var record in client.GetDnsRecords(cloudflareZoneId))
         {
             if (record["name"]?.GetValue<string>() != resultHost)
@@ -133,6 +134,7 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
             {
                 continue;
             }
+
             client.DeleteDnsRecord(cloudflareZoneId, recordId);
         }
     }
@@ -140,12 +142,13 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
     public override void Uninstall(HttpEndpoint contract)
     {
         Debug.Assert(contract.Installed);
-        Debug.Assert(contract.NetworkName != null);
         Debug.Assert(contract.CloudflareZoneId != null);
-        Debug.Assert(_tunnel.Installed);        
+        Debug.Assert(_tunnel.Installed);
 
-        _container.DetachNetwork(contract.NetworkName);
-        
+        var container = State.GetContract(contract.Container);
+        var network = State.GetContract(container.Network);
+        _container.DetachNetwork(network);
+
         var config = client.GetTunnelConfiguration(_tunnel.AccountId, _tunnel.TunnelId);
         if (config["ingress"] is JsonArray ingress)
         {
@@ -161,7 +164,7 @@ public class CloudflareHttpEndpointHandler(Application application, ICloudflareC
                 ingress.RemoveAt(i);
                 i--;
             }
-            
+
             client.UpdateTunnelConfiguration(_tunnel.AccountId, _tunnel.TunnelId, config);
         }
 

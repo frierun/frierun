@@ -8,5 +8,5 @@
 export type PasswordAllOf = {
   /** @nullable */
   value?: string | null;
-  installed?: boolean;
+  readonly installed?: boolean;
 };

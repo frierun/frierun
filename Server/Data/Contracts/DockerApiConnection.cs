@@ -6,19 +6,10 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record DockerApiConnection(
-    string? Name = null,
     string? Path = null,
     bool? IsPodman = null
-) : Contract<IDockerApiConnectionHandler>(Name ?? ""), IHasStrings
+) : Contract<IDockerApiConnectionHandler>
 {
-    public Contract ApplyStringDecorator(Func<string, string> decorator)
-    {
-        return this with
-        {
-            Path = Path != null ? decorator(Path ?? "") : null
-        };
-    }
-
     /// <summary>
     /// Creates a Docker client using the current configuration.
     /// </summary>
@@ -39,12 +30,17 @@ public record DockerApiConnection(
 
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, other) with
+        return MergeCommon(this, other, out var contract) with
         {
-            Path = OnlyOne(Path, contract.Path),
-            IsPodman = OnlyOne(IsPodman, contract.IsPodman)
+            Path = MergeValue(Path, contract.Path),
+            IsPodman = MergeValue(IsPodman, contract.IsPodman)
         };
+    }
+
+    public override bool IsSubset(Contract other)
+    {
+        return IsSubsetContract(this, other, out var contract)
+               && IsSubsetValue(Path, contract.Path)
+               && IsSubsetValue(IsPodman, contract.IsPodman);
     }
 }

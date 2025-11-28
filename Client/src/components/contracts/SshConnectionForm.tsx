@@ -3,7 +3,7 @@ import {SshConnection,} from "@/api/schemas";
 import {ContractProps} from "@/components/contracts/ContractForm.tsx";
 import BaseForm from "@/components/contracts/BaseForm.tsx";
 
-export default function SshConnectionForm({contract, updateContract}: ContractProps<SshConnection>) {
+export default function SshConnectionForm({contractRef, contract, updateContract}: ContractProps<SshConnection>) {
     const [host, setHost] = useState('');
     const [port, setPort] = useState(22);
     const [username, setUsername] = useState('');
@@ -15,9 +15,9 @@ export default function SshConnectionForm({contract, updateContract}: ContractPr
         setUsername(contract.username ?? '');
         setPassword(contract.password ?? '');
     }, [contract]);
-    
+
     const updateContractValues = (changed: Partial<SshConnection>) => {
-        updateContract({
+        updateContract(contractRef, {
             ...contract,
             host,
             port,
@@ -28,7 +28,7 @@ export default function SshConnectionForm({contract, updateContract}: ContractPr
     }
 
     return (
-        <BaseForm contract={contract} updateContract={updateContract}>
+        <BaseForm contractRef={contractRef} contract={contract} updateContract={updateContract}>
             <div className={"my-1.5"}>
                 <label className={"inline-block w-48"}>
                     Host:

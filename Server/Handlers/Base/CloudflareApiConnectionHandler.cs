@@ -3,7 +3,7 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class CloudflareApiConnectionHandler : Handler<CloudflareApiConnection>, ICloudflareApiConnectionHandler
+public class CloudflareApiConnectionHandler(State state) : Handler<CloudflareApiConnection>(state), ICloudflareApiConnectionHandler
 {
     public override CloudflareApiConnection Install(CloudflareApiConnection contract, ExecutionPlan plan)
     {
@@ -29,7 +29,7 @@ public class CloudflareApiConnectionHandler : Handler<CloudflareApiConnection>, 
 
     public ICloudflareClient CreateClient(CloudflareApiConnection contract)
     {
-        Debug.Assert(contract.Installed);
+        Debug.Assert(contract.Token != null);
         
         return new CloudflareClient(contract.Token);
     }

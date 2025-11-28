@@ -11,12 +11,10 @@ namespace Frierun.Tests;
 public class HandlerRegistryTests : BaseTests
 {
     [Theory]
-    [InlineData(typeof(Dependency), typeof(DependencyHandler))]
     [InlineData(typeof(HttpEndpoint), typeof(PortHttpEndpointHandler))]
     [InlineData(typeof(Parameter), typeof(ParameterHandler))]
-    [InlineData(typeof(Package), typeof(PackageHandler))]
+    [InlineData(typeof(Application), typeof(ApplicationHandler))]
     [InlineData(typeof(Password), typeof(PasswordHandler))]
-    [InlineData(typeof(Substitute), typeof(SubstituteHandler))]
     public void GetHandlers_StaticHandler_ReturnsHandler(Type contractType, Type handlerType)
     {
         var registry = Resolve<HandlerRegistry>();
@@ -32,7 +30,7 @@ public class HandlerRegistryTests : BaseTests
     {
         var registry = Resolve<HandlerRegistry>();
 
-        var result = registry.GetHandlers(typeof(Application));
+        var result = registry.GetHandlers(typeof(Package));
 
         Assert.Empty(result);
     }
@@ -43,7 +41,7 @@ public class HandlerRegistryTests : BaseTests
         InstallPackage("docker");
         InstallPackage("traefik");
         var registry = new HandlerRegistry(
-            Resolve<State>(),
+            State,
             Resolve<IIndex<string, ProviderScopeBuilder>>(),
             Resolve<ILifetimeScope>()
         );
@@ -143,14 +141,12 @@ public class HandlerRegistryTests : BaseTests
     }
 
     [Theory]
-    [InlineData(typeof(DependencyHandler))]
-    [InlineData(typeof(PackageHandler))]
+    [InlineData(typeof(ApplicationHandler))]
     [InlineData(typeof(ParameterHandler))]
     [InlineData(typeof(PasswordHandler))]
     [InlineData(typeof(PortHttpEndpointHandler))]
     [InlineData(typeof(RedisHandler))]
     [InlineData(typeof(SelectorHandler))]
-    [InlineData(typeof(SubstituteHandler))]
     public void GetHandler_StaticHandler_ReturnsHandler(Type handlerType)
     {
         var registry = Resolve<HandlerRegistry>();

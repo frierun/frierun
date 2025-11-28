@@ -31,7 +31,6 @@ public class ContractRegistryTests : BaseTests
     [InlineData(typeof(HttpEndpoint))]
     [InlineData(typeof(Mysql))]
     [InlineData(typeof(Network))]
-    [InlineData(typeof(Package))]
     [InlineData(typeof(Parameter))]
     [InlineData(typeof(Password))]
     [InlineData(typeof(Postgresql))]
@@ -41,12 +40,10 @@ public class ContractRegistryTests : BaseTests
     {
         var contractRegistry = Resolve<ContractRegistry>();
         var faker = Resolve<Faker>();
-        var name = faker.Lorem.Word();
 
-        var contract = contractRegistry.CreateContract(type.Name, name);
+        var contract = contractRegistry.CreateContract(type.Name);
 
         Assert.IsType(type, contract);
-        Assert.Equal(name, contract.Name);
     }
     
     [Theory]
@@ -57,6 +54,6 @@ public class ContractRegistryTests : BaseTests
         var faker = Resolve<Faker>();
         var name = faker.Lorem.Word();
 
-        Assert.Throws<Exception>(() => contractRegistry.CreateContract(invalidType, name));
+        Assert.Throws<Exception>(() => contractRegistry.CreateContract(invalidType));
     }
 }

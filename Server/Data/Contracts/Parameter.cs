@@ -4,22 +4,30 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record Parameter(
-    string Name,
     string? DefaultValue = null,
-    string? Value = null 
-) : Contract(Name)
+    Argument<string>? Value = null 
+) : Contract
 {
     [MemberNotNullWhen(true, nameof(Value))]
-    public override bool Installed { get; init; }
+    public override bool Installed => Id != Guid.Empty;
+
+    public Argument<string> Value { get; init; } = Value ?? new Argument<string>();
+
+    public override Parameter Transform(IArgumentTransformer transformer)
+    {
+        return this with
+        {
+            Value = transformer.Transform(Value),
+            DependsOn = DependsOn.Select(transformer.Transform).ToArray()
+        };
+    }
     
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, contract) with
+        return MergeCommon(this, other, out var contract) with
         {
-            Value = OnlyOne(Value, contract.Value),
-            DefaultValue = OnlyOne(DefaultValue, contract.DefaultValue)
+            Value = Value.Merge(contract.Value),
+            DefaultValue = MergeValue(DefaultValue, contract.DefaultValue)
         };
     }
 }

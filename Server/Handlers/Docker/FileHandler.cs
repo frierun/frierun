@@ -5,19 +5,9 @@ using Mount = Docker.DotNet.Models.Mount;
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class FileHandler(Application application, DockerService dockerService) : Handler<File>(application)
+public class FileHandler(State state, Application application, DockerService dockerService)
+    : Handler<File>(state, application)
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(File contract, string prefix)
-    {
-        yield return new ContractInitializeResult(
-            contract with
-            {
-                Handler = this,
-                DependsOn = contract.DependsOn.Append(contract.Volume)
-            }
-        );
-    }
-
     public override File Install(File contract, ExecutionPlan plan)
     {
         var volume = plan.GetContract(contract.Volume);
@@ -42,7 +32,7 @@ public class FileHandler(Application application, DockerService dockerService) :
         }
         else
         {
-            throw new Exception($"Unknown volume type for volume {volume.Name}");
+            throw new Exception($"Unknown volume type for volume {volume}");
         }
 
         var containerId = dockerService.StartContainer(
@@ -64,9 +54,9 @@ public class FileHandler(Application application, DockerService dockerService) :
 
         var path = $"/mnt/{contract.Path}";
 
-        if (contract.Text != null)
+        if (contract.Text.Value != null)
         {
-            dockerService.PutFile(containerId, path, contract.Text).Wait();
+            dockerService.PutFile(containerId, path, contract.Text.Value).Wait();
         }
 
         if (contract.Owner != null)

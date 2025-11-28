@@ -1,39 +1,38 @@
-﻿using System.Diagnostics;
+﻿namespace Frierun.Server.Data;
 
-namespace Frierun.Server.Data;
-
-public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerable<Contract> alternatives) : IExecutionPlan
+public class ExecutionPlan(
+    Dictionary<ContractRef, Contract> contracts,
+    IEnumerable<ExecutionPlan.Alternative> alternatives
+) : IExecutionPlan
 {
     private readonly HashSet<Application> _requiredApplications = [];
 
-    public IEnumerable<Contract> Contracts => contracts.Values;
-    
+    public record Alternative(ContractRef ContractRef, Contract Contract);
+
+    public ContractList Contracts => new(contracts);
+
     /// <summary>
     /// List of all contracts that are alternatives to the main execution plan.
     /// </summary>
-    public IEnumerable<Contract> Alternatives => alternatives;
+    public IEnumerable<Alternative> Alternatives => alternatives;
 
     /// <summary>
     /// Builds the graph of contracts.
     /// </summary>
-    private DirectedAcyclicGraph<ContractId> BuildGraph()
+    private DirectedAcyclicGraph<ContractRef> BuildGraph()
     {
-        var graph = new DirectedAcyclicGraph<ContractId>();
-        foreach (var contract in contracts.Values)
+        var graph = new DirectedAcyclicGraph<ContractRef>();
+        foreach (var contractRef in contracts.Keys)
         {
-            graph.AddVertex(contract.Id);
+            graph.AddVertex(contractRef);
         }
 
-        foreach (var contract in contracts.Values)
+        foreach (var (contractRef, contract) in contracts)
         {
-            foreach (var dependency in contract.DependsOn)
+            foreach (var dependency in contract.GetDependencies())
             {
-                graph.AddEdge(dependency, contract);
-            }
-
-            foreach (var dependency in contract.DependencyOf)
-            {
-                graph.AddEdge(contract, dependency);
+                var dependencyRef = dependency.Ref ?? dependency.DefaultRef;
+                graph.AddEdge(dependencyRef, contractRef);
             }
         }
 
@@ -41,11 +40,20 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
     }
 
     /// <summary>
-    /// Get contract by id.
+    /// Get contract by ref.
     /// </summary>
-    public Contract GetContract(ContractId contractId)
+    public Contract GetContract(ContractRef contractRef)
     {
-        return contracts[contractId];
+        return contracts[contractRef];
+    }
+
+    /// <summary>
+    /// Get contract by ref.
+    /// </summary>
+    public T GetContract<T>(ContractRef<T> contractRef)
+        where T : Contract
+    {
+        return (T)GetContract((ContractRef)contractRef);
     }
 
     /// <summary>
@@ -54,47 +62,36 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
     public T GetContract<T>(ContractId<T> contractId)
         where T : Contract
     {
-        return (T)GetContract((ContractId)contractId);
+        if (contractId.Guid != Guid.Empty)
+        {
+            return contracts.Values.OfType<T>().First(contract => contract.Id == contractId.Guid);
+        }
+
+        var contractRef = contractId.TypedRef;
+        return (T)contracts[contractRef];
     }
 
-    /// <summary>
-    /// Replaces contract with another one
-    /// </summary>
-    public void ReplaceContract(Contract contract)
-    {
-        Debug.Assert(
-            !contracts.TryGetValue(contract, out var existing) || !existing.Installed,
-            $"Contract is already installed"
-        );
-
-        contracts[contract] = contract;
-    }
 
     /// <summary>
     /// Installs all contracts in the execution plan.
     /// </summary>
-    public Application Install()
+    public Application Install(State state)
     {
         var graph = BuildGraph();
-        var installedContracts = new List<Contract>();
-        graph.RunDfs(
-            contractId =>
+        graph.RunDfs(contractRef =>
             {
-                var contract = GetContract(contractId);
-                Debug.Assert(!contract.Installed);
+                var contract = contracts[contractRef];
+                contract = contract.ResolveArguments(this);
+                contracts[contractRef] = contract;
 
-                var installedContract = contract.Install(this);
-
-                Debug.Assert(installedContract.Id == contractId);
-
-                if (installedContract is not Package)
+                if (!contract.Installed)
                 {
-                    installedContracts.Add(installedContract);
+                    contract = contract.Install(this);
                 }
 
-                contracts[contractId] = installedContract;
+                contracts[contractRef] = contract;
 
-                var handlerApplication = installedContract.Handler?.Application;
+                var handlerApplication = contract.Handler?.Application;
                 if (handlerApplication != null)
                 {
                     _requiredApplications.Add(handlerApplication);
@@ -102,17 +99,32 @@ public class ExecutionPlan(Dictionary<ContractId, Contract> contracts, IEnumerab
             }
         );
 
-        var application = contracts.Values.OfType<Package>().First().Result;
-        Debug.Assert(application != null);
+        var application = CreateApplication();
+        contracts.Values.Where(contract => contract is not Application).ToList().ForEach(state.AddContract);
+        state.AddContract(application);
 
-        return new Application
+        return application;
+    }
+
+    /// <summary>
+    /// Creates an application from the installed contracts.
+    /// </summary>
+    private Application CreateApplication()
+    {
+        var application = contracts.Values.OfType<Application>().First();
+
+        return application with
         {
-            Name = application.Name,
-            Package = application.Package,
-            Description = application.Description,
-            Url = application.Url,
-            Contracts = installedContracts,
-            RequiredApplications = _requiredApplications.Select(app => app.Name).ToList()
+            RequiredApplications = _requiredApplications.Select(app => app.Name).ToList(),
+            ContractRefs = contracts
+                .Where(pair => pair.Value is not Application)
+                .ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value.Id
+                ),
+            DependsOn = contracts
+                .Where(pair => pair.Value is not Application)
+                .Select(pair => new ContractId(pair.Value.Id))
         };
     }
 }

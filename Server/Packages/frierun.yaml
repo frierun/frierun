@@ -2,16 +2,16 @@
 url: "https://github.com/frierun/frierun"
 iconUrl: "/packages/frierun.png"
 contracts:
-  - type: "Container"
+  Container:
     imageName: "ghcr.io/frierun/frierun:latest"
     mounts:
       /App/Frierun: "config"
     
-  - type: "Optional"
+  Optional:Docker socket:
     name: "Docker socket"
-    contracts: 
-      - type: "Container"
+    contracts:
+      Container:
         mountDockerSocket: true
     
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 8080

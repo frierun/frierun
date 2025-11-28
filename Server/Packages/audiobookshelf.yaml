@@ -4,7 +4,7 @@ shortDescription: "Audiobook and podcast server"
 fullDescription: "Audiobookshelf is an open-source self-hosted media server for your audiobooks and podcasts."
 tags: [ "storage" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "ghcr.io/advplyr/audiobookshelf:latest"
     mounts:
       /audiobooks: "audiobooks"
@@ -12,5 +12,5 @@ contracts:
       /config: "config"
       /metadata: "metadata"
     
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 80

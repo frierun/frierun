@@ -5,7 +5,7 @@ fullDescription: "Jellyseerr is a free and open source software application for 
   It integrates with the media server of your choice: Jellyfin, Plex, and Emby."
 tags: [ "network" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "fallenbagel/jellyseerr:latest"
     env:
       LOG_LEVEL: "debug"
@@ -13,5 +13,5 @@ contracts:
     mounts: 
       /app/config: "config"
       
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 5055

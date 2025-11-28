@@ -1,5 +1,4 @@
-﻿import {ExecutionPlanContractsItem} from "@/api/schemas";
-import React, {useEffect, useState} from "react";
+﻿import React, {useEffect, useState} from "react";
 import HttpEndpointForm from "@/components/contracts/HttpEndpointForm.tsx";
 import DomainForm from "@/components/contracts/DomainForm.tsx";
 import VolumeForm from "@/components/contracts/VolumeForm.tsx";
@@ -11,25 +10,21 @@ import ParameterForm from "@/components/contracts/ParameterForm.tsx";
 import PortEndpointForm from "@/components/contracts/PortEndpointForm.tsx";
 import DockerApiConnectionForm from "@/components/contracts/DockerApiConnectionForm.tsx";
 import CloudflareApiConnectionForm from "@/components/contracts/CloudflareApiConnectionForm.tsx";
-
-export type Contract = ExecutionPlanContractsItem;
+import {Alternative, Contract, ContractList} from "@/types.ts";
 
 export type ContractProps<TContract extends Contract> = {
+    contractRef: string;
     contract: TContract;
     variants: TContract[];
     allContracts: Contract[];
-    updateContract: (contract: Contract, isRefetch?: boolean) => void;
+    updateContract: (contractRef: string, contract: Contract|null, isRefetch?: boolean) => void;
 }
 
 type Props = {
-    contract: Contract;
-    alternatives: Contract[];
-    updateContract: (contract: Contract, isRefetch?: boolean) => void;
-    allContracts: Contract[];
-}
-
-const sameContract = (a: Contract, b: Contract) => {
-    return a.type === b.type && a.name === b.name;
+    contractRef: string;
+    alternatives: Alternative[];
+    updateContract: (contractRef: string, contract: Contract|null, isRefetch?: boolean) => void;
+    allContracts: ContractList;
 }
 
 type ContractsByTypeName = {
@@ -52,13 +47,17 @@ const contractForms: Partial<FormsByTypeName> = {
     Volume: VolumeForm,
 }
 
-export default function ContractForm({contract, alternatives, updateContract, allContracts}: Props) {
+export default function ContractForm({contractRef, alternatives, updateContract, allContracts}: Props) {
     const [variants, setVariants] = useState<Contract[]>([]);
+    const contract = allContracts[contractRef];
 
     useEffect(() => {
         setVariants(variants => {
-                const filteredAlternatives = alternatives.filter(alt => sameContract(alt, contract));
-                const refreshVariants = variants.length === 0 || !sameContract(variants[0], contract) || filteredAlternatives.length > 0;
+                const filteredAlternatives = alternatives
+                    .filter(alt => alt.contractRef == contractRef)
+                    .map(alt => alt.contract);
+
+                const refreshVariants = variants.length === 0 || filteredAlternatives.length > 0;
                 if (!refreshVariants) {
                     return variants;
                 }
@@ -66,8 +65,8 @@ export default function ContractForm({contract, alternatives, updateContract, al
                 return [contract, ...filteredAlternatives]
             }
         );
-    }, [contract, alternatives]);
-
+    }, [contract, contractRef, alternatives]);
+    
     if (variants.length == 0) {
         return <></>
     }
@@ -79,12 +78,13 @@ export default function ContractForm({contract, alternatives, updateContract, al
 
     return (
         <ContractForm
+            contractRef={contractRef}
             // @ts-expect-error contract is typed as never
             contract={contract}
             // @ts-expect-error variants are typed as never[]
             variants={variants}
             updateContract={updateContract}
-            allContracts={allContracts}
+            allContracts={Object.entries(allContracts).map(entry => entry[1])}
         />
     )
 }

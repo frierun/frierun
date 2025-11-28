@@ -51,7 +51,7 @@ public class PackageTests : TestWithDocker
     [MemberData(nameof(Packages))]
     public async Task InstallingUninstalling_Package_ShouldCreateDockerContainer(string packageName)
     {
-        var state = Services.GetRequiredService<State>();        
+        var state = Resolve<State>();        
         
         // install package
         var application = InstallPackage(packageName);

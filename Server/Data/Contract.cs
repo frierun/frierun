@@ -1,16 +1,13 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using Frierun.Server.Handlers;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Frierun.Server.Data;
 
-public abstract record Contract<THandler>(
-    string Name,
-    bool Installed = false,
-    IEnumerable<ContractId>? DependsOn = null,
-    IEnumerable<ContractId>? DependencyOf = null,
-    Lazy<IHandler?>? LazyHandler = null)
-    : Contract(Name, Installed, DependsOn, DependencyOf, LazyHandler) where THandler : IHandler
+public abstract record Contract<THandler> : Contract
+    where THandler : IHandler
 {
     [JsonIgnore]
     public new THandler? Handler
@@ -21,11 +18,11 @@ public abstract record Contract<THandler>(
 }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
+[JsonDerivedType(typeof(Application), nameof(Application))]
 [JsonDerivedType(typeof(CloudflareApiConnection), nameof(CloudflareApiConnection))]
 [JsonDerivedType(typeof(CloudflareTunnel), nameof(CloudflareTunnel))]
 [JsonDerivedType(typeof(Container), nameof(Container))]
 [JsonDerivedType(typeof(Daemon), nameof(Daemon))]
-[JsonDerivedType(typeof(Dependency), nameof(Dependency))]
 [JsonDerivedType(typeof(DockerApiConnection), nameof(DockerApiConnection))]
 [JsonDerivedType(typeof(Domain), nameof(Domain))]
 [JsonDerivedType(typeof(File), nameof(File))]
@@ -33,7 +30,6 @@ public abstract record Contract<THandler>(
 [JsonDerivedType(typeof(Mysql), nameof(Mysql))]
 [JsonDerivedType(typeof(Network), nameof(Network))]
 [JsonDerivedType(typeof(Optional), nameof(Optional))]
-[JsonDerivedType(typeof(Package), nameof(Package))]
 [JsonDerivedType(typeof(Parameter), nameof(Parameter))]
 [JsonDerivedType(typeof(Password), nameof(Password))]
 [JsonDerivedType(typeof(PortEndpoint), nameof(PortEndpoint))]
@@ -41,25 +37,21 @@ public abstract record Contract<THandler>(
 [JsonDerivedType(typeof(Redis), nameof(Redis))]
 [JsonDerivedType(typeof(Selector), nameof(Selector))]
 [JsonDerivedType(typeof(SshConnection), nameof(SshConnection))]
-[JsonDerivedType(typeof(Substitute), nameof(Substitute))]
 [JsonDerivedType(typeof(Volume), nameof(Volume))]
-public abstract record Contract(
-    string Name,
-    bool Installed = false,
-    IEnumerable<ContractId>? DependsOn = null,
-    IEnumerable<ContractId>? DependencyOf = null,
-    Lazy<IHandler?>? LazyHandler = null,
-    [property: JsonIgnore] string? HandlerApplication = null
-)
+[SwaggerSchema(Required = ["type"])]
+public abstract record Contract
 {
-    [JsonIgnore] public ContractId Id => ContractId.Create(GetType(), Name);
+    [MemberNotNullWhen(true, nameof(Id), nameof(Handler))]
+    public virtual bool Installed => Id != Guid.Empty;
 
-    [JsonIgnore] public IEnumerable<ContractId> DependsOn { get; init; } = DependsOn ?? [];
-    [JsonIgnore] public IEnumerable<ContractId> DependencyOf { get; init; } = DependencyOf ?? [];
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public Guid Id { get; init; } = Guid.Empty;
+
+    public IEnumerable<ContractId> DependsOn { get; init; } = [];
 
     [JsonPropertyName("handler")]
     [JsonInclude]
-    public Lazy<IHandler?> LazyHandler { get; protected init; } = LazyHandler ?? new Lazy<IHandler?>((IHandler?)null);
+    public Lazy<IHandler?> LazyHandler { get; protected init; } = new((IHandler?)null);
 
     [JsonIgnore]
     public IHandler? Handler
@@ -68,26 +60,79 @@ public abstract record Contract(
         init => LazyHandler = new Lazy<IHandler?>(value);
     }
 
-    public virtual bool Installed { get; init; } = Installed;
+    [JsonIgnore] public string? HandlerApplication { get; init; }
+
+
+    /// <summary>
+    /// Transforms all arguments using the transformer.
+    /// </summary>
+    public virtual Contract Transform(IArgumentTransformer transformer)
+    {
+        return this with
+        {
+            DependsOn = DependsOn.Select(transformer.Transform).ToArray()
+        };
+    }
+
+    /// <summary>
+    /// Resolves all arguments and returns the contract
+    /// </summary>
+    public Contract ResolveArguments(ExecutionPlan plan)
+    {
+        return Transform(new ContractResolver(plan));
+    }
+
+    /// <summary>
+    /// Gets all arguments used by the contract.
+    /// </summary>
+    public IEnumerable<IArgument> GetArguments()
+    {
+        var counter = new ArgumentCounter();
+        Transform(counter);
+        return counter.Arguments;
+    }
+
+    /// <summary>
+    /// List of contracts which must exist.
+    /// </summary>
+    public IEnumerable<ContractRef> GetRequiredContracts()
+    {
+        return GetArguments()
+            .SelectMany(argument => argument.RequiredContracts)
+            .Distinct();
+    }
+
+    /// <summary>
+    /// List of contracts which must be installed before this contract.
+    /// </summary>
+    public IEnumerable<ContractId> GetDependencies()
+    {
+        return GetArguments()
+            .OfType<ContractId>()
+            .Distinct();
+    }
 
     /// <summary>
     /// Merges contracts restrictions of the same type 
     /// </summary>
     public abstract Contract Merge(Contract other);
 
-    public static implicit operator ContractId(Contract contract) => contract.Id;
+    /// <summary>
+    /// Checks if this installed contract is fulfilling the other contract.
+    /// </summary>
+    public virtual bool IsSubset(Contract other)
+    {
+        return false;
+    }
 
     /// <summary>
     /// Installs the contract using the handler.
     /// </summary>
     public Contract Install(ExecutionPlan plan)
     {
-        if (Handler == null)
-        {
-            throw new Exception($"No handler for {Name}");
-        }
-
-        return Handler.Install(this, plan) with { Installed = true };
+        Debug.Assert(!Installed);
+        Debug.Assert(LazyHandler.Value != null, "Handler must be initialized");
+        return LazyHandler.Value.Install(this, plan) with { Id = Guid.CreateVersion7() };
     }
 
     /// <summary>
@@ -96,6 +141,6 @@ public abstract record Contract(
     public void Uninstall()
     {
         Debug.Assert(Installed, "Contract is not installed");
-        Handler?.Uninstall(this);
+        LazyHandler.Value?.Uninstall(this);
     }
 }

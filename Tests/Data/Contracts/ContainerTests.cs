@@ -9,11 +9,10 @@ public class ContainerTests : BaseTests
     {
         var container = Factory<Container>().Generate();
 
-        var result = (Container)new Container(Name: container.Name).Merge(container);
+        var result = (Container)new Container().Merge(container);
 
-        Assert.Equal(container.Name, result.Name);
         Assert.Equal(container.ImageName, result.ImageName);
-        Assert.Equal(container.NetworkName, result.NetworkName);
+        Assert.Equal(container.Network, result.Network);
         Assert.Equal(container.ContainerName, result.ContainerName);
         Assert.Equal(container.Command, result.Command);
         Assert.Equal(container.Network, result.Network);
@@ -26,30 +25,20 @@ public class ContainerTests : BaseTests
         var container2 = new Container();
 
         var result = (Container)container.Merge(container2);
-        Assert.Empty(result.Name);
-        Assert.Null(result.ImageName);
-        Assert.Null(result.NetworkName);
+        Assert.Null(result.ImageName.Value);
+        Assert.Null(result.Network.Ref);
         Assert.Null(result.ContainerName);
-        Assert.Empty(result.Command);
+        Assert.Null(result.Command.Value);
         Assert.Empty(result.Env);
         Assert.Empty(result.Labels);
         Assert.Empty(result.Mounts);
     }
 
     [Fact]
-    public void Merge_ContractsWithDifferentNames_ThrowsException()
-    {
-        var container = Factory<Container>().Generate();
-        var container2 = container with { Name = container.Name + "2" };
-
-        Assert.Throws<MergeException>(() => container.Merge(container2));
-    }
-
-    [Fact]
     public void Merge_ContainerWithDifferentContractType_ThrowsException()
     {
-        var container = Factory<Container>().Generate() with { Name = "" };
-        var volume = Factory<Volume>().Generate() with { Name = "" };
+        var container = Factory<Container>().Generate();
+        var volume = Factory<Volume>().Generate();
 
         Assert.Throws<MergeException>(() => container.Merge(volume));
     }
@@ -59,9 +48,9 @@ public class ContainerTests : BaseTests
     {
         var container = Factory<Container>().Generate() with
         {
-            Env = new Dictionary<string, string> { { "key1", "value1" } }
+            Env = new Dictionary<string, Argument<string>> { { "key1", "value1" } }
         };
-        var container2 = container with { Env = new Dictionary<string, string> { { "key2", "value2" } } };
+        var container2 = container with { Env = new Dictionary<string, Argument<string>> { { "key2", "value2" } } };
 
         var result = (Container)container.Merge(container2);
 
@@ -75,9 +64,9 @@ public class ContainerTests : BaseTests
     {
         var container = Factory<Container>().Generate() with
         {
-            Env = new Dictionary<string, string> { { "key1", "value1" } }
+            Env = new Dictionary<string, Argument<string>> { { "key1", "value1" } }
         };
-        var container2 = container with { Env = new Dictionary<string, string> { { "key1", "value1" } } };
+        var container2 = container with { Env = new Dictionary<string, Argument<string>> { { "key1", "value1" } } };
 
         var result = (Container)container.Merge(container2);
 
@@ -90,10 +79,44 @@ public class ContainerTests : BaseTests
     {
         var container = Factory<Container>().Generate() with
         {
-            Env = new Dictionary<string, string> { { "key1", "value1" } }
+            Env = new Dictionary<string, Argument<string>> { { "key1", "value1" } }
         };
-        var container2 = container with { Env = new Dictionary<string, string> { { "key1", "value2" } } };
+        var container2 = container with { Env = new Dictionary<string, Argument<string>> { { "key1", "value2" } } };
 
         Assert.Throws<MergeException>(() => container.Merge(container2));
+    }
+
+    [Fact]
+    public void GetArguments_SeveralEnvArguments_ReturnsAllArguments()
+    {
+        var container = Factory<Container>().Generate() with
+        {
+            Env = new Dictionary<string, Argument<string>>
+            {
+                { "key1", "value1" },
+                { "key2", "value2" }
+            }
+        };
+
+        var arguments = container.GetArguments().ToList();
+        Assert.Contains(arguments, a => a.ToString() == "value1");
+        Assert.Contains(arguments, a => a.ToString() == "value2");
+    }
+
+    [Fact]
+    public void GetArguments_SeveralLabelArguments_ReturnsAllArguments()
+    {
+        var container = Factory<Container>().Generate() with
+        {
+            Labels = new Dictionary<string, Argument<string>>
+            {
+                { "key1", "value1" },
+                { "key2", "value2" }
+            }
+        };
+
+        var arguments = container.GetArguments().ToList();
+        Assert.Contains(arguments, a => a.ToString() == "value1");
+        Assert.Contains(arguments, a => a.ToString() == "value2");
     }
 }

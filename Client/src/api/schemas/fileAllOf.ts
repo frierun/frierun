@@ -8,10 +8,10 @@
 export type FileAllOf = {
   path: string;
   /** @nullable */
-  text?: string | null;
-  /** @nullable */
   owner?: number | null;
   /** @nullable */
   group?: number | null;
   volume: string;
+  /** @nullable */
+  text: string | null;
 };

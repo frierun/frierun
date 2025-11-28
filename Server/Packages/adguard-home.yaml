@@ -6,20 +6,20 @@ fullDescription: "AdGuard Home is a network-wide software for blocking ads & tra
   With the rise of Internet-Of-Things and connected devices, it becomes more and more important to be able to control your whole network."
 tags: [ "network" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "adguard/adguardhome:latest"
     mounts:
       /opt/adguardhome/work: "data"
       /opt/adguardhome/conf: "config"
     command: [ "--web-addr", "0.0.0.0:80" ]
 
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 80
 
-  - type: "PortEndpoint"
+  PortEndpoint:Tcp:
     port: 53
     protocol: "tcp"
 
-  - type: "PortEndpoint"
+  PortEndpoint:Udp:
     port: 53
     protocol: "udp"

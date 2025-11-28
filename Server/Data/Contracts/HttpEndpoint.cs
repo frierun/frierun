@@ -1,42 +1,48 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using static Frierun.Server.Data.Merger;
 
 namespace Frierun.Server.Data;
 
 public record HttpEndpoint(
-    string? Name = null,
     int Port = 0,
     ContractId<Container>? Container = null,
-    ContractId<Domain>? Domain = null,
-    bool? ResultSsl = null,
-    string? ResultHost = null,
-    int? ResultPort = null,
-    string? NetworkName = null, // for Traefik endpoints
+    Argument<bool?>? ResultSsl = null,
+    Argument<string>? ResultHost = null,
+    Argument<int>? ResultPort = null,
+    string? TraefikRouterName = null, // for Traefik endpoints
     string? CloudflareZoneId = null // for Cloudflare endpoints
-) : Contract(Name ?? $"{Port}{(Container != null ? $" at {Container.Name}" : "")}")
+) : Contract
 {
-    [MemberNotNullWhen(true, nameof(Url))] public override bool Installed { get; init; }
+    public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>();
+    public Argument<bool?> ResultSsl { get; init; } = ResultSsl ?? new Argument<bool?>();
+    public Argument<string> ResultHost { get; init; } = ResultHost ?? new Argument<string>();
+    public Argument<int> ResultPort { get; init; } = ResultPort ?? new Argument<int>();
 
-    public ContractId<Container> Container { get; init; } = Container ?? new ContractId<Container>("");
-    public ContractId<Domain> Domain { get; init; } = Domain ?? new ContractId<Domain>(Name ?? "");
-
+    public override HttpEndpoint Transform(IArgumentTransformer transformer)
+    {
+        return this with
+        {
+            Container = transformer.Transform(Container),
+            ResultSsl = transformer.Transform(ResultSsl),
+            ResultHost = transformer.Transform(ResultHost),
+            ResultPort = transformer.Transform(ResultPort),
+            DependsOn = DependsOn.Select(transformer.Transform).ToArray()
+        };
+    }
+    
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, contract) with
+        return MergeCommon(this, other, out var contract) with
         {
-            Port = OnlyOne(Port, contract.Port, port => port == 0),
-            Container = OnlyOne(Container, contract.Container),
-            Domain = OnlyOne(Domain, contract.Domain),
-            ResultSsl = OnlyOne(ResultSsl, contract.ResultSsl),
-            ResultHost = OnlyOne(ResultHost, contract.ResultHost),
-            ResultPort = OnlyOne(ResultPort, contract.ResultPort),
-            NetworkName = OnlyOne(NetworkName, contract.NetworkName),
-            CloudflareZoneId = OnlyOne(CloudflareZoneId, contract.CloudflareZoneId)
+            Port = MergeValue(Port, contract.Port, port => port == 0),
+            Container = MergeValue(Container, contract.Container),
+            ResultSsl = MergeValue(ResultSsl, contract.ResultSsl),
+            ResultHost = MergeValue(ResultHost, contract.ResultHost),
+            ResultPort = MergeValue(ResultPort, contract.ResultPort),
+            TraefikRouterName = MergeValue(TraefikRouterName, contract.TraefikRouterName),
+            CloudflareZoneId = MergeValue(CloudflareZoneId, contract.CloudflareZoneId)
         };
     }
 
-    [JsonIgnore] public Uri Url => new($"http{(ResultSsl == true ? "s" : "")}://{ResultHost}:{ResultPort}");
+    [JsonIgnore] public UriArgument Url => new(ResultSsl, ResultHost, ResultPort);
 }

@@ -6,5 +6,7 @@
  */
 
 export type CloudflareApiConnectionAllOf = {
-  token: string;
+  /** @nullable */
+  token?: string | null;
+  readonly installed?: boolean;
 };

@@ -4,25 +4,26 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Udocker;
 
-public class DaemonHandler(Application application)
-    : Handler<Daemon>(application)
+public class DaemonHandler(State state, Application application)
+    : Handler<Daemon>(state, application)
 {
     private const string PrefixPath = "/data/data/com.termux/files/usr";
     private const string DaemonsPath = PrefixPath + "/var/service";
-    private readonly SshConnection _connection = application.Contracts.OfType<SshConnection>().Single();
+    private readonly SshConnection _connection = state.GetContract<SshConnection>(application);
 
-    public override IEnumerable<ContractInitializeResult> Initialize(Daemon contract, string prefix)
+    public override IEnumerable<ContractList> Initialize(Daemon contract, ApplicationContext context)
     {
-        yield return new ContractInitializeResult(
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 DaemonName = contract.DaemonName ?? FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     c => c.DaemonName
                 ),
                 Handler = this
             }
-        );
+        };
     }
 
     public override Daemon Install(Daemon contract, ExecutionPlan plan)
@@ -35,12 +36,21 @@ public class DaemonHandler(Application application)
 
         var runContent = new StringBuilder();
         runContent.Append("#!/data/data/com.termux/files/usr/bin/sh\n\n");
-        foreach (var commandPre in contract.PreCommands)
+        if (contract.PreCommands.Value != null)
         {
-            runContent.Append($"{string.Join(' ', commandPre.Select(SshConnection.EscapeArgument))} 2>&1\n");
+            foreach (var commandPre in contract.PreCommands.Value)
+            {
+                runContent.Append($"{string.Join(' ', commandPre.Select(SshConnection.EscapeArgument))} 2>&1\n");
+            }
         }
-        runContent.Append($"exec {string.Join(' ', contract.Command.Select(SshConnection.EscapeArgument))} 2>&1\n");
-        
+
+        if (contract.Command.Value != null)
+        {
+            runContent.Append(
+                $"exec {string.Join(' ', contract.Command.Value.Select(SshConnection.EscapeArgument))} 2>&1\n"
+            );
+        }
+
         sftpClient.WriteAllText(DaemonsPath + "/" + contract.DaemonName + "/run", runContent.ToString());
         sftpClient.ChangePermissions(DaemonsPath + "/" + contract.DaemonName + "/run", 0755);
 
@@ -61,7 +71,7 @@ public class DaemonHandler(Application application)
 
         using var sshClient = _connection.CreateSshClient();
         sshClient.RunCommand("sv-disable " + SshConnection.EscapeArgument(contract.DaemonName)).Dispose();
-        sshClient.RunCommand("rm -rf " + SshConnection.EscapeArgument(DaemonsPath + "/" + contract.DaemonName)).Dispose();
+        sshClient.RunCommand("rm -rf " + SshConnection.EscapeArgument(DaemonsPath + "/" + contract.DaemonName))
+            .Dispose();
     }
-
 }

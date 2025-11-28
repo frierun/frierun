@@ -8,5 +8,5 @@
 export type NetworkAllOf = {
   /** @nullable */
   networkName?: string | null;
-  installed?: boolean;
+  readonly installed?: boolean;
 };

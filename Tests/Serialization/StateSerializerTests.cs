@@ -31,9 +31,9 @@ public class StateSerializerTests : BaseTests
     [Fact]
     public void Load_FileWithApplication_ReturnsNewInstanceOfApplication()
     {
-        var application = Factory<Application>().Generate();
+        var application = Factory<Application>().Generate("installed");
         var state = new State();
-        state.AddApplication(application);
+        state.AddContract(application);
         var stateManager = Resolve<StateSerializer>();
         stateManager.Save(state);
 
@@ -47,9 +47,9 @@ public class StateSerializerTests : BaseTests
     [Fact]
     public void Load_FileWithApplication_ReturnsSameInstanceOfPackage()
     {
-        var application = Factory<Application>().Generate();
+        var application = Factory<Application>().Generate("installed");
         var state = new State();
-        state.AddApplication(application);
+        state.AddContract(application);
         var stateManager = Resolve<StateSerializer>();
         stateManager.Save(state);
 
@@ -62,9 +62,9 @@ public class StateSerializerTests : BaseTests
     [Fact]
     public void Save_StateWithApplication_DoesntSerializePackageContent()
     {
-        var application = Factory<Application>().Generate();
+        var application = Factory<Application>().Generate("installed");
         var state = new State();
-        state.AddApplication(application);
+        state.AddContract(application);
         var stateManager = Resolve<StateSerializer>();
 
         stateManager.Save(state);
@@ -79,7 +79,7 @@ public class StateSerializerTests : BaseTests
     public void Load_FrierunWithTraefikEndpoint_Serialized()
     {
         var stateManager = Resolve<StateSerializer>();
-        var state = Resolve<State>();
+        var state = State;
         InstallPackage("static-zone");
         InstallPackage("docker");
         InstallPackage("traefik");
@@ -89,8 +89,8 @@ public class StateSerializerTests : BaseTests
 
         Assert.NotEmpty(loadedState.Applications);
         Assert.Equal(
-            state.Contracts.OfType<HttpEndpoint>().Single().NetworkName,
-            loadedState.Contracts.OfType<HttpEndpoint>().Single().NetworkName
+            state.GetContracts<HttpEndpoint>().Single().TraefikRouterName,
+            loadedState.GetContracts<HttpEndpoint>().Single().TraefikRouterName
         );
     }
 
@@ -98,39 +98,35 @@ public class StateSerializerTests : BaseTests
     public void Load_FrierunWithDockerVolume_Serialized()
     {
         var stateManager = Resolve<StateSerializer>();
-        var state = Resolve<State>();
+        var state = State;
         InstallPackage("docker");
         InstallPackage(
             "frierun",
-            [
-                new Volume("config", VolumeName: "test"),
-            ]
+            new ContractList { ["config"] = new Volume(VolumeName: "test"), }
         );
 
         var loadedState = stateManager.Load();
 
         Assert.NotEmpty(loadedState.Applications);
-        Assert.NotNull(state.Contracts.OfType<Volume>().Single().VolumeName);
-        Assert.NotNull(loadedState.Contracts.OfType<Volume>().Single().VolumeName);
+        Assert.NotNull(state.GetContracts<Volume>().Single().VolumeName);
+        Assert.NotNull(loadedState.GetContracts<Volume>().Single().VolumeName);
     }
 
     [Fact]
     public void Load_FrierunWithLocalPath_Serialized()
     {
         var stateManager = Resolve<StateSerializer>();
-        var state = Resolve<State>();
+        var state = State;
         InstallPackage("docker");
         InstallPackage(
             "frierun",
-            [
-                new Volume("config", LocalPath: "/test"),
-            ]
+            new ContractList { ["config"] = new Volume(LocalPath: "/test"), }
         );
 
         var loadedState = stateManager.Load();
 
         Assert.NotEmpty(loadedState.Applications);
-        Assert.NotNull(state.Contracts.OfType<Volume>().Single().LocalPath);
-        Assert.NotNull(loadedState.Contracts.OfType<Volume>().Single().LocalPath);
+        Assert.NotNull(state.GetContracts<Volume>().Single().LocalPath);
+        Assert.NotNull(loadedState.GetContracts<Volume>().Single().LocalPath);
     }
 }

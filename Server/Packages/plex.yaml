@@ -6,7 +6,7 @@ fullDescription: "Plex gives you one place to find and access all the media that
     to streaming music, you can enjoy it all in one app, on any device."
 tags: [ "storage" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "plexinc/pms-docker:latest"
     env:
       PLEX_CLAIM: "{{Parameter:PlexClaim:Value}}"
@@ -15,33 +15,33 @@ contracts:
       /transcode: "transcode"
       /data: "media"
 
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 32400
 
-  - type: "PortEndpoint"
+  PortEndpoint:8324:
     port: 8324
     protocol: "tcp"
 
-  - type: "PortEndpoint"
+  PortEndpoint:32469:
     port: 32469
     protocol: "tcp"
 
-  - type: "PortEndpoint"
+  PortEndpoint:1900:
     port: 1900
     protocol: "udp"
 
-  - type: "PortEndpoint"
+  PortEndpoint:32410:
     port: 32410
     protocol: "udp"
 
-  - type: "PortEndpoint"
+  PortEndpoint:32412:
     port: 32412
     protocol: "udp"
 
-  - type: "PortEndpoint"
+  PortEndpoint:32413:
     port: 32413
     protocol: "udp"
 
-  - type: "PortEndpoint"
+  PortEndpoint:32414:
     port: 32414
     protocol: "udp"

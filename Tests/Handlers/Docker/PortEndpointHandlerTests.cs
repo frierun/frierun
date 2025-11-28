@@ -6,57 +6,48 @@ namespace Frierun.Tests.Handlers.Docker;
 
 public class PortEndpointHandlerTests : BaseTests
 {
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void Install_ContainerWithPortEndpoint_InstallEndpointFirst(bool reverseOrder)
+    [Fact]
+    public void Install_ContainerWithPortEndpoint_DependsOnContainer()
     {
         InstallPackage("docker");
-        var container = Factory<Container>().Generate();
-        List<Contract> contracts =
-        [
-            container,
-            Factory<PortEndpoint>().Generate() with { Container = (ContractId<Container>)container.Id }
-        ];
-        if (reverseOrder)
+        var container = Contract<Container>().Generate();
+        var portEndpoint = Contract<PortEndpoint>().Set(p => p.Container, container.Id).Generate();
+        var package = Factory<Package>().Generate() with
         {
-            contracts.Reverse();
-        }
-
-        var package = Factory<Package>().Generate() with { Contracts = contracts };
+            Contracts = [container, portEndpoint]
+        };
 
         var application = InstallPackage(package);
 
-        var installedContainers = application.Contracts.ToList();
-        var endpointIndex = installedContainers.FindIndex(r => r is PortEndpoint);
-        var containerIndex = installedContainers.FindIndex(r => r is Container);
-        Assert.NotEqual(-1, endpointIndex);
-        Assert.NotEqual(-1, containerIndex);
-        Assert.True(endpointIndex < containerIndex);
+
+        Assert.Contains(
+            State.GetContract(application, container.Ref).Id, 
+            State.GetContract(application, portEndpoint.Ref).GetDependencies()
+        );
     }
 
     [Fact]
     public void Install_ContainerWithPortEndpoint_PassesPortToContainer()
     {
         InstallPackage("docker");
-        var container = Factory<Container>().Generate();
-        List<Contract> contracts =
-        [
-            container,
-            Factory<PortEndpoint>().Generate() with { Container = (ContractId<Container>)container.Id }
-        ];
-        var package = Factory<Package>().Generate() with { Contracts = contracts };
+        var container = Contract<Container>().Generate();
+        var port = Contract<PortEndpoint>().Set(p => p.Container, container.Id).Generate();
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts = [container, port]
+        };
 
         var application = InstallPackage(package);
 
-        var endpoint = application.Contracts.OfType<PortEndpoint>().Single();
-        Assert.True(endpoint.Installed);
+        var installedPort = State.GetContract(application, port.Ref);
+        ;
+        Assert.True(installedPort.Installed);
 
         DockerClient.Containers.Received(1).CreateContainerAsync(
             Arg.Is<CreateContainerParameters>(p =>
                 p.HostConfig
-                    .PortBindings[$"{endpoint.Port}/{endpoint.Protocol.ToString().ToLower()}"][0]
-                    .HostPort == endpoint.Port.ToString()
+                    .PortBindings[$"{installedPort.Port}/{installedPort.Protocol.ToString().ToLower()}"][0]
+                    .HostPort == installedPort.Port.ToString()
             ),
             Arg.Any<CancellationToken>()
         );

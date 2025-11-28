@@ -5,7 +5,7 @@ shortDescription: "BitTorrent client"
 fullDescription: "qBittorrent is a cross-platform free and open-source BitTorrent client."
 tags: [ "network" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "lscr.io/linuxserver/qbittorrent:latest"
     env:
       PUID: "1000"
@@ -15,12 +15,13 @@ contracts:
     mounts:
       /config: "config"
       /downloads: "downloads"
+    dependsOn: [ "File:qBittorent.conf" ]
       
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 8080
         
-  - type: "File"
+  File:qBittorent.conf:
+    name: "qBittorent.conf"
     volume: "config"
     path: "qBittorrent/qBittorrent.conf"
     text: "[Preferences]\nWebUI\\Password_PBKDF2=\"@ByteArray(OoaYkBQyA7MDk/P0abXiIA==:Yfx3IsX+S7SU8YGfd9/RjXmicHE0p1WwyWC9lolagkGzZu3G7ucrTIxdzgHh8KMswVJeCtzMj60clUg9l/bwJQ==)\""
-    dependencyOf: [ "Container" ]

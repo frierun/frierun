@@ -4,20 +4,24 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record Network(
-    string Name,
     string? NetworkName = null
-) : Contract(Name)
+) : Contract
 {
     [MemberNotNullWhen(true, nameof(NetworkName))]
-    public override bool Installed { get; init; }
+    public override bool Installed => Id != Guid.Empty;
 
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, contract) with
+        return MergeCommon(this, other, out var contract) with
         {
-            NetworkName = OnlyOne(NetworkName, contract.NetworkName)
+            NetworkName = MergeValue(NetworkName, contract.NetworkName)
         };
     }
+    
+    public override bool IsSubset(Contract other)
+    {
+        return IsSubsetContract(this, other, out var contract)
+               && IsSubsetValue(NetworkName, contract.NetworkName);
+    }
+    
 }

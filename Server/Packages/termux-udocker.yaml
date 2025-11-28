@@ -4,4 +4,4 @@ shortDescription: "Connection to Udocker on Termux"
 fullDescription: "Runs containers using Udocker on Termux"
 tags: [ "provider" ]
 contracts:
-  - type: "SshConnection"
+  SshConnection:

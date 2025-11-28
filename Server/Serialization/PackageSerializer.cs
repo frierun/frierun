@@ -15,10 +15,15 @@ public class PackageSerializer(ILogger<PackageSerializer> logger, ContractRegist
         Converters =
         {
             new ContainerMountConverter(),
-            new ContractIdConverter(contractRegistry),
+            new ContractIdConverter(),
             new ContractIdOfTConverter(),
+            new ContractRefConverter(),
+            new ContractRefOfTConverter(),
+            new ContractListConverter(contractRegistry),
+            new ArgumentOfTConverter(),
             new YamlBoolConverter()
         },
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         NumberHandling = JsonNumberHandling.AllowReadingFromString,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         TypeInfoResolver = new DefaultJsonTypeInfoResolver
@@ -27,8 +32,7 @@ public class PackageSerializer(ILogger<PackageSerializer> logger, ContractRegist
             {
                 JsonExtensions.UnIgnorePropertiesForDeserialize(
                     typeof(Contract),
-                    nameof(Contract.DependsOn),
-                    nameof(Contract.DependencyOf)
+                    nameof(Contract.DependsOn)
                 )
             }
         }
@@ -52,15 +56,24 @@ public class PackageSerializer(ILogger<PackageSerializer> logger, ContractRegist
             {
                 continue;
             }
-            
-            using Stream stream = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var package = Load(stream);
-            if (package is null)
-            {
-                logger.LogWarning("Failed to deserialize package from {FileName}", fileName);
-                continue;
-            }
 
+            using Stream stream = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            Package? package;
+            try
+            {
+                package = Load(stream);
+                if (package is null)
+                {
+                    logger.LogWarning("Failed to deserialize package {FileName}", fileName);
+                    continue;
+                }
+
+            }
+            catch (JsonException e)
+            {
+                logger.LogError(e, "Failed to deserialize package {FileName}", fileName);
+                throw new Exception($"Failed to deserialize package {fileName}", e); 
+            }
             yield return package;
         }
     }
@@ -73,11 +86,11 @@ public class PackageSerializer(ILogger<PackageSerializer> logger, ContractRegist
         var deserializer = new DeserializerBuilder()
             .WithTypeResolver(new StaticTypeResolver())
             .Build();
-        
+
         using StreamReader reader = new(stream);
-        
+
         var obj = deserializer.Deserialize(reader);
-        
+
         var json = JsonSerializer.SerializeToDocument(obj);
         return json.Deserialize<Package>(_serializerOptions);
     }

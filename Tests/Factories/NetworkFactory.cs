@@ -3,18 +3,17 @@ using Network = Frierun.Server.Data.Network;
 
 namespace Frierun.Tests.Factories;
 
-public sealed class NetworkFactory: Faker<Network>
+public sealed class NetworkFactory: ContractFaker<Network>
 {
     public NetworkFactory()
     {
-        CustomInstantiator(_ => new Network(""));
-        RuleFor(p => p.Name, f => f.Lorem.Word());
+        CustomInstantiator(_ => new Network());
         RuleFor(p => p.NetworkName, f => f.Lorem.Word());
 
         RuleSet(
             "udocker", set =>
             {
-                RuleFor(p => p.NetworkName, "udocker");
+                Set(p => p.NetworkName, "udocker");
             }
         );
     }

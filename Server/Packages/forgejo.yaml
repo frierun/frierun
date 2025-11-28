@@ -5,7 +5,7 @@ fullDescription: "Take back control of your software development process,
   self-host your projects and get everyone involved in delivering quality software on the same page."
 tags: [ "dev" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "codeberg.org/forgejo/forgejo:10"
     env:
       USER_UID: "1000"
@@ -13,33 +13,35 @@ contracts:
     mounts:
       /data: "data"
  
-  - type: "Selector"
+  Selector:Database:
     name: "Database"
     options:
       - name: "MySQL"
         contracts:
-          - type: "Container"
+          Container:
             env:
               FORGEJO__database__DB_TYPE: "mysql"
               FORGEJO__database__HOST: "{{Mysql::Host}}"
               FORGEJO__database__NAME: "{{Mysql::Database}}"
               FORGEJO__database__USER: "{{Mysql::Username}}"
               FORGEJO__database__PASSWD: "{{Mysql::Password}}"
+            dependsOn: ["Mysql"]
       - name: "PostgreSQL"
         contracts:
-          - type: "Container"
+          Container:
             env:
               FORGEJO__database__DB_TYPE: "postgres"
               FORGEJO__database__HOST: "{{Postgresql::Host}}"
               FORGEJO__database__NAME: "{{Postgresql::Database}}"
               FORGEJO__database__USER: "{{Postgresql::Username}}"
               FORGEJO__database__PASSWD: "{{Postgresql::Password}}"
+            dependsOn: ["Postgresql"]
       - name: "SQLite"
               
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 3000
     
-  - type: "PortEndpoint"
+  PortEndpoint:Ssh:
     port: 22
     externalPort: 2222
     protocol: "tcp"

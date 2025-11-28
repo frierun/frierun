@@ -4,22 +4,19 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record Domain(
-    string? Name = null,
     string? Value = null,
     bool? IsInternal = null
-) : Contract(Name ?? "")
+) : Contract
 {
     [MemberNotNullWhen(true, nameof(Value), nameof(IsInternal))]
-    public override bool Installed { get; init; }
+    public override bool Installed => Id != Guid.Empty;
     
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, other) with
+        return MergeCommon(this, other, out var contract) with
         {
-            Value = OnlyOne(Value, contract.Value),
-            IsInternal = OnlyOne(IsInternal, contract.IsInternal)       
+            Value = MergeValue(Value, contract.Value),
+            IsInternal = MergeValue(IsInternal, contract.IsInternal)       
         };
     }    
 }

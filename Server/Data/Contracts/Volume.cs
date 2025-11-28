@@ -3,19 +3,23 @@
 namespace Frierun.Server.Data;
 
 public record Volume(
-    string Name,
     string? VolumeName = null,
     string? LocalPath = null
-) : Contract(Name)
+) : Contract
 {
-    public override Contract Merge(Contract other) 
+    public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-        
-        return MergeCommon(this, contract) with
+        return MergeCommon(this, other, out var contract) with
         {
-            VolumeName = OnlyOne(VolumeName, contract.VolumeName),
-            LocalPath = OnlyOne(LocalPath, contract.LocalPath)
+            VolumeName = MergeValue(VolumeName, contract.VolumeName),
+            LocalPath = MergeValue(LocalPath, contract.LocalPath)
         };
+    }
+
+    public override bool IsSubset(Contract other)
+    {
+        return IsSubsetContract(this, other, out var contract)
+               && IsSubsetValue(VolumeName, contract.VolumeName)
+               && IsSubsetValue(LocalPath, contract.LocalPath);
     }
 }

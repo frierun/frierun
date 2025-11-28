@@ -3,95 +3,101 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers;
 
-public class TraefikHttpEndpointHandler(Application application)
-    : Handler<HttpEndpoint>(application)
+public class TraefikHttpEndpointHandler(State state, Application application)
+    : Handler<HttpEndpoint>(state, application)
 {
-    private readonly Container _container = application.Contracts.OfType<Container>().First();
+    private readonly Container _container = state.GetContract<Container>(application);
+    private readonly int _webPort = state.GetContract<PortEndpoint>(application, "Web").ExternalPort;
+    private readonly int _webSecurePort = state.GetContract<PortEndpoint>(application, "WebSecure").ExternalPort;
 
-    private readonly int _webPort = application.Contracts
-        .OfType<PortEndpoint>()
-        .FirstOrDefault(endpoint => endpoint.Name == "Web")
-        ?.ExternalPort ?? 0;
-
-    private readonly int _webSecurePort = application.Contracts
-        .OfType<PortEndpoint>()
-        .FirstOrDefault(endpoint => endpoint.Name == "WebSecure")
-        ?.ExternalPort ?? 0;
-
-    public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
+    public override IEnumerable<ContractList> Initialize(HttpEndpoint contract, ApplicationContext context)
     {
-        yield return new ContractInitializeResult(
-            contract with
-            {
-                Handler = this,
-                DependsOn = contract.DependsOn.Append(new Network("")).Append(contract.Domain),
-                DependencyOf = contract.DependencyOf.Append(contract.Container),
-            }
+        var routerName = contract.TraefikRouterName ?? FindUniqueName(
+            context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
+            c => c.TraefikRouterName
         );
+
+        var domainId = new ContractRef<Domain>(context.Name);
+
+        yield return new ContractList
+        {
+            [context] = contract with
+            {
+                TraefikRouterName = routerName,
+                ResultSsl = new Argument<bool?>(plan =>
+                    GetCertificateResolver(plan.GetContract(domainId)) != null
+                ),
+                ResultHost = new Argument<string>(plan => plan.GetContract(domainId).Value),
+                ResultPort = new Argument<int>(plan =>
+                    GetCertificateResolver(plan.GetContract(domainId)) == null ? _webPort : _webSecurePort
+                ),
+                Handler = this,
+                DependsOn =
+                [
+                    domainId
+                ]
+            },
+            [contract.Container.TypedRef] = new Container
+            {
+                Labels = new Dictionary<string, Argument<string>>
+                {
+                    ["traefik.enable"] = "true",
+                    [$"traefik.http.routers.{routerName}.rule"] = new(plan =>
+                        $"Host(`{plan.GetContract(domainId).Value}`)"
+                    ),
+                    [$"traefik.http.services.{routerName}.loadbalancer.server.port"] = contract.Port.ToString(),
+                    [$"traefik.http.routers.{routerName}.tls"] = new(plan =>
+                        GetCertificateResolver(plan.GetContract(domainId)) == null
+                            ? "false"
+                            : "true"
+                    ),
+                    [$"traefik.http.routers.{routerName}.tls.certresolver"] = new(plan =>
+                        GetCertificateResolver(plan.GetContract(domainId))
+                    )
+                },
+                DependsOn = [domainId]
+            }
+        };
     }
 
     public override HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
     {
-        var domainContract = plan.GetContract(contract.Domain);
-        Debug.Assert(domainContract.Installed);
-        var domain = domainContract.Value;
-        var subdomain = domain.Split('.')[0];
-
         var container = plan.GetContract(contract.Container);
         var network = plan.GetContract(container.Network);
-        Debug.Assert(network.Installed);
+        _container.AttachNetwork(network);
 
-        _container.AttachNetwork(network.NetworkName);
-
-        string? certResolver = null;
-        if (domainContract.IsInternal == false)
-        {
-            if (_webPort == 80)
-            {
-                certResolver = "httpchallenge";
-            }
-            else if (_webSecurePort == 443)
-            {
-                certResolver = "tlschallenge";
-            }
-        }
-
-        var labels = new Dictionary<string, string>
-        {
-            ["traefik.enable"] = "true",
-            [$"traefik.http.routers.{subdomain}.rule"] = $"Host(`{domain}`)",
-            [$"traefik.http.services.{subdomain}.loadbalancer.server.port"] = contract.Port.ToString()
-        };
-
-        if (certResolver != null)
-        {
-            labels[$"traefik.http.routers.{subdomain}.tls"] = "true";
-            labels[$"traefik.http.routers.{subdomain}.tls.certresolver"] = certResolver;
-        }
-
-        plan.ReplaceContract(
-            container.Merge(
-                new Container(
-                    Name: container.Name,
-                    Labels: labels
-                )
-            )
-        );
-
-        return contract with
-        {
-            ResultSsl = certResolver != null,
-            ResultHost = domain,
-            ResultPort = certResolver != null ? _webSecurePort : _webPort,
-            NetworkName = network.NetworkName,
-        };
+        return contract;
     }
 
     public override void Uninstall(HttpEndpoint contract)
     {
-        Debug.Assert(contract.Installed);
-        Debug.Assert(contract.NetworkName != null);
+        var container = State.GetContract(contract.Container);
+        var network = State.GetContract(container.Network);
+        _container.DetachNetwork(network);
+    }
 
-        _container.DetachNetwork(contract.NetworkName);
+    /// <summary>
+    /// Gets traefik certificate resolver, which can be used for the specific domain
+    /// </summary>
+    private string? GetCertificateResolver(Domain domain)
+    {
+        if (domain.IsInternal != false)
+        {
+            return null;
+        }
+
+        if (_webPort == 80)
+        {
+            // ReSharper disable once StringLiteralTypo
+            return "httpchallenge";
+        }
+
+        if (_webSecurePort == 443)
+        {
+            // ReSharper disable once StringLiteralTypo
+            return "tlschallenge";
+        }
+
+        return null;
     }
 }

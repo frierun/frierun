@@ -3,20 +3,34 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers;
 
-public class Handler<TContract>(Application? application = null) : IHandler
+public class Handler<TContract>(State state, Application? application = null) : IHandler
     where TContract : Contract
 {
-    public required State State { protected get; init; }
+    public State State => state;
     public Application? Application => application;
 
-    public virtual IEnumerable<ContractInitializeResult> Initialize(TContract contract, string prefix)
+    public virtual IEnumerable<TContract> Discover()
     {
-        yield return new ContractInitializeResult(
-            contract with
+        return [];
+    }
+
+    public virtual IEnumerable<ContractList> Initialize(TContract contract, ApplicationContext context)
+    {
+        foreach (var installedContract in State.GetContracts<TContract>().Where(c => c.Handler == this))
+        {
+            if (!installedContract.IsSubset(contract))
+                continue;
+            
+            yield return new ContractList { [context] = installedContract };
+        }
+
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this
             }
-        );
+        };
     }
 
     public virtual TContract Install(TContract contract, ExecutionPlan plan)
@@ -29,9 +43,16 @@ public class Handler<TContract>(Application? application = null) : IHandler
         // do nothing
     }
 
-    IEnumerable<ContractInitializeResult> IHandler.Initialize(Contract contract, string prefix)
+    [DebuggerStepThrough]
+    IEnumerable<Contract> IHandler.Discover()
     {
-        return Initialize((TContract)contract, prefix);
+        return Discover();
+    }
+
+    [DebuggerStepThrough]
+    IEnumerable<ContractList> IHandler.Initialize(Contract contract, ApplicationContext context)
+    {
+        return Initialize((TContract)contract, context);
     }
 
     [DebuggerStepThrough]
@@ -60,8 +81,7 @@ public class Handler<TContract>(Application? application = null) : IHandler
         var name = $"{baseName}{suffix}";
 
         while (forbidden?.Contains(name) == true
-               || State.Contracts
-                   .OfType<TContract>()
+               || State.GetContracts<TContract>()
                    .Where(c => c.Handler?.Application == Application)
                    .Any(c => predicate(c) == name)
               )

@@ -1,10 +1,12 @@
 ﻿using Frierun.Server.Data;
-using File = Frierun.Server.Data.File;
 
 namespace Frierun.Server;
 
 public class ContractRegistry
 {
+    /// <summary>
+    /// Gets a contract type by name.
+    /// </summary>
     public Type GetContractType(string contractTypeName)
     {
         var contractType = Type.GetType($"Frierun.Server.Data.{contractTypeName}");
@@ -16,26 +18,35 @@ public class ContractRegistry
         return contractType;
     }
 
-    public Contract CreateContract(ContractId contractId)
+    /// <summary>
+    /// Creates an empty contract by id
+    /// </summary>
+    public Contract CreateContract(ContractRef contractRef)
     {
-        return CreateContract(contractId.Type.Name, contractId.Name);
+        return CreateContract(contractRef.TypeName);
     }
     
-    public Contract CreateContract(string typeName, string name)
+    /// <summary>
+    /// Creates an empty contract by type name and name.
+    /// </summary>
+    public Contract CreateContract(string typeName)
     {
         return typeName switch
         {
-            nameof(Container) => new Container(name),
-            nameof(Domain) => new Domain(name),
-            nameof(HttpEndpoint) => new HttpEndpoint(name),
-            nameof(Mysql) => new Mysql(name),
-            nameof(Network) => new Network(name),
-            nameof(Package) => new Package(name),
-            nameof(Parameter) => new Parameter(name),
-            nameof(Password) => new Password(name),
-            nameof(Postgresql) => new Postgresql(name),
-            nameof(Redis) => new Redis(name),
-            nameof(Volume) => new Volume(name),
+            nameof(CloudflareApiConnection) => new CloudflareApiConnection(),
+            nameof(CloudflareTunnel) => new CloudflareTunnel(),
+            nameof(Container) => new Container(),
+            nameof(DockerApiConnection) => new DockerApiConnection(),
+            nameof(Domain) => new Domain(),
+            nameof(HttpEndpoint) => new HttpEndpoint(),
+            nameof(Mysql) => new Mysql(),
+            nameof(Network) => new Network(),
+            nameof(Parameter) => new Parameter(),
+            nameof(Password) => new Password(),
+            nameof(Postgresql) => new Postgresql(),
+            nameof(Redis) => new Redis(),
+            nameof(SshConnection) => new SshConnection(),
+            nameof(Volume) => new Volume(),
             _ => throw new Exception("Can't create contract type: " + typeName)
         };
     }

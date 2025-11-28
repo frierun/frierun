@@ -18,18 +18,21 @@ public class MysqlHandlerTests : BaseTests
     [Fact]
     public void Install_PackageWithContract_CreatesDatabase()
     {
-        var package = Factory<Package>().Generate() with { Contracts = [new Mysql()] };
+        var mysql = Contract<Mysql>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [mysql] };
 
         var application = InstallPackage(package);
 
-        var database = application.Contracts.OfType<Mysql>().Single();
+        var database = State.GetContract(application, mysql.Ref);
         Assert.True(database.Installed);
-        Assert.Equal(package.Name, database.Username);
-        Assert.Equal(package.Name, database.Database);
+        Assert.StartsWith(package.Name, database.Username);
+        Assert.StartsWith(package.Name, database.Database);
         Assert.Contains(_providerApplication.Name, application.RequiredApplications);
-        Assert.Equal(application.Name, database.NetworkName);
+
+        var network = State.GetContract(database.Network);
+        Assert.Equal(application.Name, network.NetworkName);
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
-            database.NetworkName,
+            network.NetworkName,
             Arg.Any<NetworkConnectParameters>()
         );
     }
@@ -37,18 +40,14 @@ public class MysqlHandlerTests : BaseTests
     [Fact]
     public void Install_PackageWithTwoContracts_OnlyOneNetworkAttached()
     {
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts =
-            [
-                new Mysql("first"),
-                new Mysql("second"),
-            ]
-        };
+        var mysql1 = Contract<Mysql>().Generate();
+        var mysql2 = Contract<Mysql>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [mysql1, mysql2] };
 
         var application = InstallPackage(package);
 
-        Assert.Equal(2, application.Contracts.OfType<Mysql>().Count());
+        Assert.True(State.GetContract(application, mysql1.Ref).Installed);
+        Assert.True(State.GetContract(application, mysql2.Ref).Installed);
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
             application.Name,
             Arg.Any<NetworkConnectParameters>()
@@ -62,8 +61,8 @@ public class MysqlHandlerTests : BaseTests
         {
             Contracts =
             [
-                new Mysql("first"),
-                new Mysql("second"),
+                Contract<Mysql>().Generate(),
+                Contract<Mysql>().Generate()
             ]
         };
         var application = InstallPackage(package);
@@ -77,34 +76,49 @@ public class MysqlHandlerTests : BaseTests
     }
 
     [Fact]
-    public void Initialize_PrefixIsRoot_UserIsNotRoot()
+    public void Initialize_EmptyId_UserAndDatabaseEqualPackageName()
     {
+        var mysql = Factory<Mysql>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = new ContractList { [""] = mysql } };
+
+        var application = InstallPackage(package);
+
+        Assert.Equal(package.Name, application.Name);        
+        Assert.Equal(package.Name, State.GetContract<Mysql>(application).Username);
+        Assert.Equal(package.Name, State.GetContract<Mysql>(application).Database);
+    }
+
+    [Fact]
+    public void Initialize_EmptyIdWithPrefixRoot_UserIsNotRoot()
+    {
+        var mysql = Factory<Mysql>().Generate();
         var package = Factory<Package>().Generate() with
         {
-            Prefix = "root",
-            Contracts = [new Mysql()]
+            Name = "root", Contracts = new ContractList { [""] = mysql }
         };
 
         var application = InstallPackage(package);
 
-        var database = application.Contracts.OfType<Mysql>().Single();
-        Assert.NotEqual(package.Name, database.Username);
+        Assert.Equal(package.Name, application.Name);
+        Assert.NotEqual(package.Name, State.GetContract<Mysql>(application).Username);
+        Assert.Equal(package.Name, State.GetContract<Mysql>(application).Database);
     }
-    
+
     [Fact]
-    public void Initialize_PrefixIsMysql_DatabaseIsNotMysql()
+    public void Initialize_EmptyIdWithPrefixMysql_DatabaseIsNotMysql()
     {
         UninstallApplication(_providerApplication);
         InstallPackage("mariadb");
+        var mysql = Factory<Mysql>().Generate();
         var package = Factory<Package>().Generate() with
         {
-            Prefix = "mysql",
-            Contracts = [new Mysql()]
+            Name = "mysql", Contracts = new ContractList { [""] = mysql }
         };
 
         var application = InstallPackage(package);
 
-        var database = application.Contracts.OfType<Mysql>().Single();
-        Assert.NotEqual(package.Name, database.Database);
-    }    
+        Assert.Equal(package.Name, application.Name);
+        Assert.Equal(package.Name, State.GetContract<Mysql>(application).Username);
+        Assert.NotEqual(package.Name, State.GetContract<Mysql>(application).Database);
+    }
 }

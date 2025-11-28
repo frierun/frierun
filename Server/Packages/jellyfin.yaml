@@ -5,7 +5,7 @@ fullDescription: "Jellyfin enables you to collect, manage, and stream your media
   Run the Jellyfin server on your system and gain access to the leading free-software entertainment system, bells and whistles included."
 tags: [ "storage" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "jellyfin/jellyfin:latest"
     mounts:
       /config: "config"
@@ -14,6 +14,6 @@ contracts:
         volume: "media"
         readOnly: true
     
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 8096
     

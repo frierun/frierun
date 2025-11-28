@@ -5,34 +5,34 @@ namespace Frierun.Server.Data;
 
 public record File(
     string Path,
-    string? Name = null,
-    string? Text = null,
+    Argument<string>? Text = null,
     ContractId<Volume>? Volume = null,
     int? Owner = null,
     int? Group = null
-) : Contract(Name ?? $"{Path}{(Volume != null ? " in " + Volume.Name : "")}"), IHasStrings
+) : Contract
 {
-    public ContractId<Volume> Volume { get; init; } = Volume ?? new ContractId<Volume>("");
-    
-    Contract IHasStrings.ApplyStringDecorator(Func<string, string> decorator)
+    public ContractId<Volume> Volume { get; init; } = Volume ?? new ContractId<Volume>();
+    public Argument<string> Text { get; init; } = Text ?? new Argument<string>();
+
+    public override File Transform(IArgumentTransformer transformer)
     {
         return this with
         {
-            Text = Text == null ? null : decorator(Text),
+            Text = transformer.Transform(Text),
+            Volume = transformer.Transform(Volume),
+            DependsOn = DependsOn.Select(transformer.Transform)
         };
     }
-
+    
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, other) with
+        return MergeCommon(this, other, out var contract) with
         {
-            Path = OnlyOne(Path, contract.Path),
-            Text = OnlyOne(Text, contract.Text),
-            Volume = OnlyOne(Volume, contract.Volume),
-            Owner = OnlyOne(Owner, contract.Owner),
-            Group = OnlyOne(Group, contract.Group)       
+            Path = MergeValue(Path, contract.Path),
+            Text = MergeValue(Text, contract.Text),
+            Volume = MergeValue(Volume, contract.Volume),
+            Owner = MergeValue(Owner, contract.Owner),
+            Group = MergeValue(Group, contract.Group)       
         };
     }
 }

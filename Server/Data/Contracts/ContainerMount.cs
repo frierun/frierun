@@ -5,5 +5,5 @@ public record ContainerMount(
     bool ReadOnly = false
 )
 {
-    public ContractId<Volume> Volume { get; init; } = Volume ?? new ContractId<Volume>("");
+    public ContractId<Volume> Volume { get; init; } = Volume ?? new ContractId<Volume>();
 }

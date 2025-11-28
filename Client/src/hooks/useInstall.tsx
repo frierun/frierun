@@ -2,19 +2,18 @@
 import {useContext} from "react";
 import StateContext from "@/providers/StateContext.tsx";
 import {usePostPackagesIdInstall} from "@/api/endpoints/packages.ts";
-import {Package} from "@/api/schemas";
 import {useQueryClient} from "@tanstack/react-query";
 import {useNavigate} from "react-router-dom";
-import {Contract} from "@/components/contracts/ContractForm.tsx";
+import {ContractList} from "@/types.ts";
 
 type Props = {
-    packageContract: Package;
-    overrides: Contract[] ;
-    prefix: string;
+    packageName: string;
+    overrides: ContractList;
+    applicationName: string;
     setError: (error: string | null) => void;
 }
 
-export default function useInstall({packageContract, overrides, prefix, setError}: Props)
+export default function useInstall({packageName, overrides, applicationName, setError}: Props)
 {
     const {waitForReady} = useContext(StateContext);
     const {mutateAsync, isPending} = usePostPackagesIdInstall();
@@ -24,11 +23,10 @@ export default function useInstall({packageContract, overrides, prefix, setError
     const install = async () => {
         setError(null);
         const result = await mutateAsync({
-            id: packageContract.name,
+            id: packageName,
             data: {
-                ...packageContract,
-                prefix,
-                contracts: Object.entries(overrides).flatMap(([, value]) => value),
+                name: applicationName,
+                contracts: overrides,
             }
         });
 

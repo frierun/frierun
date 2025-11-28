@@ -17,8 +17,7 @@ public class InstallService(
 
         try
         {
-            var application = executionPlan.Install();
-            state.AddApplication(application);
+            var application = executionPlan.Install(state);
             stateSerializer.Save(state);
             return application;
         }

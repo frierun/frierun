@@ -8,7 +8,7 @@ import type { IHandlerLazy } from "./iHandlerLazy";
 
 export interface Contract {
   type: string;
-  name: string;
+  readonly installed?: boolean;
+  id?: string;
   handler?: IHandlerLazy;
-  installed?: boolean;
 }

@@ -2,9 +2,10 @@
 import {ContractProps} from "@/components/contracts/ContractForm.tsx";
 import BaseForm from "@/components/contracts/BaseForm.tsx";
 
-export default function SelectorForm({contract, variants, updateContract}: ContractProps<Selector>) {
+export default function SelectorForm({contractRef, contract, variants, updateContract}: ContractProps<Selector>) {
     return (
         <BaseForm
+            contractRef={contractRef}
             contract={contract}
             variants={variants}
             variantName={contract => contract.value ?? ""}

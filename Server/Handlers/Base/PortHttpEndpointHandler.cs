@@ -2,40 +2,26 @@
 
 namespace Frierun.Server.Handlers.Base;
 
-public class PortHttpEndpointHandler : Handler<HttpEndpoint>
+public class PortHttpEndpointHandler(State state) : Handler<HttpEndpoint>(state)
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(HttpEndpoint contract, string prefix)
+    public override IEnumerable<ContractList> Initialize(HttpEndpoint contract, ApplicationContext context)
     {
-        var portEndpoint = CreatePortEndpoint(contract);
-        yield return new ContractInitializeResult(
-            contract with
-            {
-                Handler = this,
-                DependsOn = contract.DependsOn.Append(portEndpoint),
-                DependencyOf = contract.DependencyOf.Append(contract.Container),
-            },
-            [portEndpoint]
-        );
-    }
-
-    public override HttpEndpoint Install(HttpEndpoint contract, ExecutionPlan plan)
-    {
-        var portEndpoint = plan.GetContract((ContractId<PortEndpoint>)CreatePortEndpoint(contract).Id);
-
-        var url = new Uri($"http://{portEndpoint.ExternalIp}:{portEndpoint.ExternalPort}");
-
-        return contract with
+        var portEndpoint = new PortEndpoint(Protocol.Tcp, contract.Port, Container: contract.Container);
+        var portEndpointId = new ContractRef<PortEndpoint>(context.Name);
+        yield return new ContractList
         {
-            ResultSsl = false,
-            ResultHost = portEndpoint.ExternalIp,
-            ResultPort = portEndpoint.ExternalPort,
+            [context] = contract with
+            {
+                ResultSsl = false,
+                ResultHost = new Argument<string>(plan => plan.GetContract(portEndpointId).ExternalIp),
+                ResultPort = new Argument<int>(plan => plan.GetContract(portEndpointId).ExternalPort),
+                Handler = this,
+                DependsOn =
+                [
+                    portEndpointId,
+                ]
+            },
+            [portEndpointId] = portEndpoint
         };
-    }
-    
-    private static PortEndpoint CreatePortEndpoint(HttpEndpoint contract)
-    {
-        return new PortEndpoint(
-            Protocol.Tcp, contract.Port, Container: contract.Container
-        );
     }
 }

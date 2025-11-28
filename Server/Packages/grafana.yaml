@@ -6,7 +6,7 @@ fullDescription: "Grafana Open Source Software (OSS) enables you to query, visua
   your metrics, logs, and traces wherever they’re stored. "
 tags: [ "dashboard", "dev" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "grafana/grafana-oss:latest"
     env:
       LOG_LEVEL: "debug"
@@ -14,5 +14,5 @@ contracts:
     mounts:
       /var/lib/grafana: "config"
       
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 3000

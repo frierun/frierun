@@ -7,12 +7,12 @@ public interface IContainerHandler : IHandler
     /// <summary>
     /// Attaches the container to a network.
     /// </summary>
-    void AttachNetwork(Container container, string networkName);
+    void AttachNetwork(Container container, Network network);
     
     /// <summary>
     /// Detaches the container from a network.
     /// </summary>
-    void DetachNetwork(Container container, string networkName);
+    void DetachNetwork(Container container, Network network);
     
     /// <summary>
     /// Executes a command in the container.

@@ -7,19 +7,19 @@ fullDescription: "A modern, fully static, fast, secure fully proxied, highly cus
   Easily configured via YAML files or through docker label discovery."
 tags: [ "dashboard" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "ghcr.io/gethomepage/homepage:latest"
     env:
       HOMEPAGE_ALLOWED_HOSTS: "{{HttpEndpoint:frontend:ResultHost}}"
     mounts:
       /app/config: "config"
       
-  - type: "Optional"
+  Optional:Docker socket:
     name: "Docker socket"
     contracts:
-      - type: "Container"
+      Container:
         mountDockerSocket: true
       
-  - type: "HttpEndpoint"
+  HttpEndpoint:frontend:
     name: "frontend"
     port: 3000

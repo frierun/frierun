@@ -4,37 +4,39 @@ shortDescription: "Building workflows/integrations"
 fullDescription: "Stop struggling with your scripts, start creating workflows 10X faster — with n8n"
 tags: [ "network" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "docker.n8n.io/n8nio/n8n:latest"
     env:
-      VUE_APP_URL_BASE_API: "{{HttpEndpoint:5678:ResultHost}}"
-      WEBHOOK_URL: "{{HttpEndpoint:5678:Url}}"
+      VUE_APP_URL_BASE_API: "{{HttpEndpoint::ResultHost}}"
+      WEBHOOK_URL: "{{HttpEndpoint::Url}}"
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
       N8N_RUNNERS_ENABLED: "true"
     mounts:
       /home/node/.n8n: "data"
+    dependsOn: [ "File:data" ]
  
-  - type: "Selector"
+  Selector:Database:
     name: "Database"
     options:
       - name: "PostgreSQL"
         contracts:
-          - type: "Container"
+          Container:
             env:
               DB_TYPE: "postgresdb"
               DB_POSTGRESDB_HOST: "{{Postgresql::Host}}"
               DB_POSTGRESDB_DATABASE: "{{Postgresql::Database}}"
               DB_POSTGRESDB_USER: "{{Postgresql::Username}}"
               DB_POSTGRESDB_PASSWORD: "{{Postgresql::Password}}"
+            dependsOn: ["Postgresql"]
               
       - name: "SQLite"
             
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 5678
     
-  - type: "File"
+  File:data:
+    name: "data"
     volume: "data"
     path: ""
     owner: 1000
     group: 1000
-    dependencyOf: [ "Container" ]    

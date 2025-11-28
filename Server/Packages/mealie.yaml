@@ -6,7 +6,7 @@ fullDescription: "Mealie is an intuitive and easy to use recipe management app.
   and providing you with an easy to use interface to manage your growing collection of recipes."
 tags: [ "storage" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "ghcr.io/mealie-recipes/mealie:latest"
     env:
       ALLOW_SIGNUP: "false"
@@ -16,21 +16,22 @@ contracts:
     mounts:
       /app/data: "data"
  
-  - type: "Selector"
+  Selector:Database:
     name: "Database"
     options:
       - name: "PostgreSQL"
         contracts:
-          - type: "Container"
+          Container:
             env:
               DB_ENGINE: "postgres"
               POSTGRES_SERVER: "{{Postgresql::Host}}"
               POSTGRES_DB: "{{Postgresql::Database}}"
               POSTGRES_USER: "{{Postgresql::Username}}"
               POSTGRES_PASSWORD: "{{Postgresql::Password}}"
+            dependsOn: ["Postgresql"]
               
       - name: "SQLite"
               
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 9000
     

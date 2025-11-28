@@ -1,38 +1,37 @@
 ﻿import {useCallback, useState} from "react";
 import Button from "@/components/Button.tsx";
 import Debug from "@/components/Debug";
-import {Package} from "@/api/schemas";
-import ContractForm, {Contract} from "@/components/contracts/ContractForm.tsx";
+import {Application} from "@/api/schemas";
+import ContractForm from "@/components/contracts/ContractForm.tsx";
 import useInstall from "@/hooks/useInstall.tsx";
+import {Alternative, Contract, ContractList} from "@/types.ts";
 
 type Props = {
-    packageContract: Package;
-    contracts: Contract[];
-    alternatives: Contract[];
-    name: string;
+    packageName: string;
+    application: Application;
+    contracts: ContractList;
+    alternatives: Alternative[];
     setError: (error: string | null) => void;
-    refetch: (overrides: Contract[]) => void;
+    refetch: (overrides: ContractList) => void;
 }
 
-export default function InstallForm({packageContract, contracts, alternatives, name, setError, refetch}: Props) {
-    const [prefix, setPrefix] = useState(packageContract.prefix ?? '');
-    const [overrides, setOverrides] = useState<Contract[]>([]);
+export default function InstallForm({packageName, application, contracts, alternatives, setError, refetch}: Props) {
+    const [prefix, setPrefix] = useState(application.name);
+    const [overrides, setOverrides] = useState<ContractList>({});
 
     const {install, isPending: isInstallPending} = useInstall({
-        packageContract,
+        packageName,
         overrides,
-        prefix,
+        applicationName: prefix,
         setError
     })
 
-    const updateContract = useCallback((contract: Contract, isRefetch?: boolean) => {
+    const updateContract = useCallback((contractRef: string, contract: Contract|null, isRefetch?: boolean) => {
         setOverrides(overrides => {
-            const newOverrides = [
-                ...overrides.filter(c => c.type !== contract.type || c.name !== contract.name),
-            ]
+            const newOverrides = Object.fromEntries(Object.entries(overrides).filter(entry => entry[0] != contractRef));
 
-            if (contracts.find(c => c.type === contract.type && c.name === contract.name) !== contract) {
-                newOverrides.push(contract);
+            if (contracts[contractRef] !== contract && contract !== null) {
+                newOverrides[contractRef] = contract;
             }
 
             if (isRefetch) {
@@ -50,12 +49,12 @@ export default function InstallForm({packageContract, contracts, alternatives, n
                         <div className={"h-12 w-12 rounded flex-shrink-0"}>
                             <img
                                 className={"rounded"}
-                                alt={name}
-                                src={packageContract.iconUrl ?? `https://cdn.jsdelivr.net/gh/selfhst/icons/png/${name}.png`}
+                                alt={packageName}
+                                src={application.package?.iconUrl ?? `https://cdn.jsdelivr.net/gh/selfhst/icons/png/${packageName}.png`}
                             />
                         </div>
                         <h1>
-                            {name}
+                            {packageName}
                         </h1>
                     </div>
                     <div>
@@ -65,7 +64,7 @@ export default function InstallForm({packageContract, contracts, alternatives, n
                     </div>
                 </div>
                 <div className={"my-3"}>
-                    {packageContract.fullDescription ?? ''}
+                    {application.package?.fullDescription ?? ''}
                 </div>
             </div>
             <div className={"lg:w-1/2"}>
@@ -79,10 +78,10 @@ export default function InstallForm({packageContract, contracts, alternatives, n
                             setPrefix(e.target.value);
                         }}/>
                     </div>
-                    {contracts.map(contract => (
+                    {Object.entries(contracts).map(entry => (
                         <ContractForm
-                            key={`${contract.type}:${contract.name}`}
-                            contract={contract}
+                            key={entry[0]}
+                            contractRef={entry[0]}
                             alternatives={alternatives}
                             updateContract={updateContract}
                             allContracts={contracts}

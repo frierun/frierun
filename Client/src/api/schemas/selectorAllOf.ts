@@ -9,6 +9,6 @@ import type { SelectorOption } from "./selectorOption";
 export type SelectorAllOf = {
   /** @nullable */
   value?: string | null;
-  installed?: boolean;
+  readonly installed?: boolean;
   options: SelectorOption[];
 };

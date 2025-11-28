@@ -1,6 +1,5 @@
 ﻿using Bogus;
 using Frierun.Server.Data;
-using Frierun.Server.Handlers;
 using Frierun.Server.Handlers.Base;
 
 namespace Frierun.Tests.Data;
@@ -10,35 +9,29 @@ public class DiscoveryGraphTests : BaseTests
     [Fact]
     public void Next_QueueAndEmptyContracts_QueueHasPriority()
     {
-        var rootContract = Factory<Package>().Generate();
-        var emptyContract = Factory<Package>().Generate();
-        var queuedContract = Factory<Package>().Generate();
+        var empty = Contract<Parameter>().Generate();
+        var root = Contract<Parameter>()
+            .SetHandler<ParameterHandler>()
+            .Set(p => p.DependsOn, [empty.Ref])
+            .Generate();
+        var queued = Contract<Parameter>().Generate();
         var graph = new DiscoveryGraph();
 
-        var result = graph.Apply(
-            new ContractInitializeResult(
-                rootContract with { DependsOn = [emptyContract], Handler = Handler<PackageHandler>() },
-                [queuedContract]
-            )
-        );
+        var result = graph.Apply(root.Ref, [root, queued]);
 
         Assert.True(result);
-        Assert.Equal((queuedContract, queuedContract), graph.Next());
-        Assert.Equal((emptyContract, null), graph.Next());
+        Assert.Equal((Ref: queued.Ref, queued.Contract), graph.Next());
+        Assert.Equal((Ref: empty.Ref, null), graph.Next());
         Assert.Equal((null, null), graph.Next());
     }
 
     [Fact]
     public void Next_SameEmptyContract_ReturnsNull()
     {
-        var rootContract = Factory<Package>().Generate();
+        var root = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
         var graph = new DiscoveryGraph();
 
-        var result = graph.Apply(
-            new ContractInitializeResult(
-                rootContract with { DependsOn = [rootContract], Handler = Handler<PackageHandler>() }
-            )
-        );
+        var result = graph.Apply(root.Ref, [root]);
 
         Assert.True(result);
         Assert.Equal((null, null), graph.Next());
@@ -47,133 +40,158 @@ public class DiscoveryGraphTests : BaseTests
     [Fact]
     public void Next_ContractReinitialization_ReturnsContract()
     {
-        var rootContract = Factory<Package>().Generate() with { Handler = Handler<PackageHandler>() };
+        var root = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
+        var child = Contract<Parameter>().Generate();
         var graph = new DiscoveryGraph();
 
-        Assert.True(graph.Apply(new ContractInitializeResult(rootContract, [rootContract])));
+        var result = graph.Apply(root.Ref, [root, child]);
+        Assert.True(result);
+        var (contractRef, contract) = graph.Next();
+        Assert.Equal(child.Ref, contractRef);
+        Assert.NotNull(contract);
 
-        var (contractId, contract) = graph.Next();
-        Assert.Equal(rootContract.Id, contractId);
+        result = graph.Apply(
+            child.Ref,
+            [
+                child.With(c => c with { Handler = Handler<ParameterHandler>() }),
+                root
+            ]
+        );
+
+        Assert.True(result);
+        (contractRef, contract) = graph.Next();
+        Assert.Equal(root.Ref, contractRef);
         Assert.NotNull(contract);
     }
 
     [Fact]
-    public void Next_ContractReinitializationRecursion_ThrowsException()
+    public void Next_ContractInfiniteRecursion_ThrowsException()
     {
-        var rootContract = Factory<Package>().Generate() with { Handler = Handler<PackageHandler>() };
+        var root = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
+        var child = Contract<Parameter>().Generate();
         var graph = new DiscoveryGraph();
 
-        Assert.True(graph.Apply(new ContractInitializeResult(rootContract, [rootContract])));
-        graph.Next();
-        Assert.True(graph.Apply(new ContractInitializeResult(rootContract, [rootContract])));
-
-        Assert.Throws<Exception>(() => graph.Next());
+        Assert.Throws<Exception>(() =>
+            {
+                for (int i = 0; i < 10000; i++)
+                {
+                    var result = graph.Apply(root.Ref, [root, child]);
+                    Assert.True(result);
+                    graph.Next();
+                }
+            }
+        );
     }
+
+    [Fact]
+    public void Apply_UninitializedContract_MergeContract()
+    {
+        var root = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
+        var child = Contract<Parameter>().Generate();
+
+        var graph = new DiscoveryGraph();
+        graph.Apply(
+            root.Ref,
+            [
+                root,
+                child.With(c => c with { Value = new Argument<string>() })
+            ]
+        );
+        var (nextContractRef, nextContract) = graph.Next();
+        Assert.Equal(child.Ref, nextContractRef);
+        Assert.NotNull(nextContract);
+        Assert.Null(((Parameter)nextContract).Value.Value);
+
+
+        var result = graph.Apply(
+            child.Ref,
+            [
+                child.With(c => c with { DefaultValue = null, Handler = Handler<ParameterHandler>() })
+            ]
+        );
+        Assert.True(result);
+
+        var resultContract = (Parameter)graph.Contracts[child.Ref];
+        Assert.Equal(child.Contract.Value, resultContract.Value);
+        Assert.Equal(child.Contract.DefaultValue, resultContract.DefaultValue);
+    }
+
+
+    [Fact]
+    public void Apply_SameContract_MergeContract()
+    {
+        var contract = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
+        var graph = new DiscoveryGraph();
+
+        Assert.True(graph.Apply(contract.Ref, [contract.With(c => c with { DefaultValue = null })]));
+        Assert.True(graph.Apply(contract.Ref, [contract.With(c => c with { Value = new Argument<string>() })]));
+
+        var resultContract = (Parameter)graph.Contracts[contract.Ref];
+        Assert.Equal(contract.Contract.Value, resultContract.Value);
+        Assert.Equal(contract.Contract.DefaultValue, resultContract.DefaultValue);
+    }
+
+    [Fact]
+    public void Apply_SameConflictingContract_ReturnsFalse()
+    {
+        var contract = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
+        var graph = new DiscoveryGraph();
+
+        Assert.True(graph.Apply(contract.Ref, [contract]));
+        Assert.False(
+            graph.Apply(
+                contract.Ref,
+                [contract.With(c => c with { Value = contract.Contract.Value + "conflict" })]
+            )
+        );
+    }
+
 
     [Fact]
     public void Apply_UpdatedContract_ContractIsReinitialized()
     {
-        var rootContract = Factory<Package>().Generate();
-        var childContract = Factory<Parameter>().Generate();
-        var prefix = Resolve<Faker>().Lorem.Word();
+        var root = Contract<Parameter>()
+            .Set(p => p.Value, new Argument<string>())
+            .SetHandler<ParameterHandler>()
+            .Generate();
+        var child = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
+        var value = Resolve<Faker>().Lorem.Word();
         var graph = new DiscoveryGraph();
 
-        var result = graph.Apply(
-            new ContractInitializeResult(
-                rootContract with { Prefix = null, Handler = Handler<PackageHandler>() }
-            )
-        );
+        var result = graph.Apply(root.Ref, [root]);
         Assert.True(result);
+        Assert.Null(graph.Next().Ref);
 
         result = graph.Apply(
-            new ContractInitializeResult(
-                childContract with { Handler = Handler<ParameterHandler>() },
-                [rootContract with { Prefix = prefix }]
-            )
+            child.Ref,
+            [
+                child,
+                root.With(c => c with { Value = value })
+            ]
         );
         Assert.True(result);
 
-        var (contractId, contract) = graph.Next();
-        Assert.Equal(rootContract.Id, contractId);
+        var (contractRef, contract) = graph.Next();
+        Assert.Equal(root.Ref, contractRef);
         Assert.NotNull(contract);
-        Assert.Equal(prefix, ((Package)contract).Prefix);
-    }
-
-    [Fact]
-    public void Apply_ContractWithIHasStrings_AddedSubstitute()
-    {
-        var rootContract = Factory<Package>().Generate() with
-        {
-            Handler = Handler<PackageHandler>(),
-            ApplicationDescription = "{{Parameter:Test:Value}}"
-        };
-        var rootSubstitute = new Substitute(rootContract);
-        var graph = new DiscoveryGraph();
-
-        Assert.True(graph.Apply(new ContractInitializeResult(rootContract)));
-
-        var (substituteId, substitute) = graph.Next();
-        Assert.Equal(rootSubstitute.Id, substituteId);
-        Assert.NotNull(substitute);
-        Assert.Single(((Substitute)substitute).Matches);
-        Assert.Equal((null, null), graph.Next());
-    }
-
-    [Fact]
-    public void Apply_ContractWithIHasStringsWithoutSubstitutes_NoSubstituteAdded()
-    {
-        var rootContract = Factory<Package>().Generate() with
-        {
-            Handler = Handler<PackageHandler>()
-        };
-        var graph = new DiscoveryGraph();
-
-        Assert.True(graph.Apply(new ContractInitializeResult(rootContract)));
-
-        Assert.Equal((null, null), graph.Next());
-    }
-
-    [Fact]
-    public void Apply_ContractWithIHasStringsIsUpdated_SubstituteRefreshed()
-    {
-        var rootContract = Factory<Package>().Generate() with
-        {
-            Handler = Handler<PackageHandler>(),
-            ApplicationDescription = "{{Parameter:Description:Value}}",
-            ApplicationUrl = null,
-        };
-        var rootSubstitute = new Substitute(rootContract);
-        var graph = new DiscoveryGraph();
-
-        Assert.True(graph.Apply(new ContractInitializeResult(rootContract)));
-        var result = graph.Apply(
-            new ContractInitializeResult(
-                rootContract with { ApplicationUrl = "{{Parameter:Url:Value}}" }
-            )
-        );
-        Assert.True(result);
-
-        var (contractId, contract) = graph.Next();
-        Assert.Equal(rootSubstitute.Id, contractId);
-        Assert.NotNull(contract);
-        Assert.Equal(2, ((Substitute)contract).Matches.Count);
-
-        Assert.Equal((null, null), graph.Next());
+        Assert.Equal(value, ((Parameter)contract).Value);
     }
 
     [Fact]
     public void Apply_ConflictingContracts_ReturnsFalse()
     {
-        var rootContract = Factory<Package>().Generate() with { Handler = Handler<PackageHandler>() };
-        var childContract = Factory<Parameter>().Generate() with { Handler = Handler<ParameterHandler>() };
+        var root = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
+        var child = Contract<Parameter>().SetHandler<ParameterHandler>().Generate();
         var graph = new DiscoveryGraph();
 
-        Assert.True(graph.Apply(new ContractInitializeResult(rootContract)));
+        graph.Apply(root.Ref, [root]);
+
         var result = graph.Apply(
-            new ContractInitializeResult(
-                childContract, 
-                [rootContract with { Prefix = rootContract.Prefix + "_conflict" }]
-            )
+            child.Ref,
+            [
+                child,
+                root.With(c => c with { Value = root.Contract.Value + "_conflict" })
+            ]
         );
 
         Assert.False(result);

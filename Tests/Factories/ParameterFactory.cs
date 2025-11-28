@@ -1,17 +1,13 @@
-﻿using Bogus;
-using Frierun.Server.Data;
+﻿using Frierun.Server.Data;
 
 namespace Frierun.Tests.Factories;
 
-public sealed class ParameterFactory: Faker<Parameter>
+public sealed class ParameterFactory: ContractFaker<Parameter>
 {
-    private readonly HashSet<string?> _uniqueNames = [];
-    
     public ParameterFactory()
     {
-        CustomInstantiator(_ => new Parameter(""));
-        this.UniqueRuleFor(p => p.Name, f => f.Lorem.Word(), _uniqueNames);
+        CustomInstantiator(_ => new Parameter());
         RuleFor(p => p.DefaultValue, f => f.Lorem.Word());
-        RuleFor(p => p.Value, f => f.Lorem.Word());
+        RuleFor(p => p.Value, f => new Argument<string>(f.Lorem.Word()));
     }
 }

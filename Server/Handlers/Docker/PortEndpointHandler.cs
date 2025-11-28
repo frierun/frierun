@@ -2,18 +2,18 @@
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class PortEndpointHandler(Application application) : Handler<PortEndpoint>(application)
+public class PortEndpointHandler(State state, Application application) : Handler<PortEndpoint>(state, application)
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(PortEndpoint contract, string prefix)
+    public override IEnumerable<ContractList> Initialize(PortEndpoint contract, ApplicationContext context)
     {
         if (contract.Port == 0)
         {
             yield break;
         }
-        
+
         if (contract.ExternalPort != 0)
         {
-            if (State.Contracts.OfType<PortEndpoint>()
+            if (State.GetContracts<PortEndpoint>()
                 .Any(endpoint => endpoint.Port == contract.ExternalPort && endpoint.Protocol == contract.Protocol))
             {
                 yield break;
@@ -23,8 +23,8 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
         {
             var port = contract.Port;
 
-            while (State.Contracts.OfType<PortEndpoint>()
-                       .Any(endpoint => endpoint.Port == port && endpoint.Protocol == contract.Protocol)
+            while (State.GetContracts<PortEndpoint>()
+                   .Any(endpoint => endpoint.Port == port && endpoint.Protocol == contract.Protocol)
                   )
             {
                 port += 1000;
@@ -36,28 +36,27 @@ public class PortEndpointHandler(Application application) : Handler<PortEndpoint
 
             contract = contract with { ExternalPort = port };
         }
-        
-        yield return new ContractInitializeResult(
-            contract with
+
+        yield return new ContractList
+        {
+            [context] = contract with
             {
+                // TODO: fill the correct ip of the host
+                ExternalIp = "127.0.0.1",
                 Handler = this,
             },
-            [
-                new Container(contract.Container.Name)
-                {
-                    HandlerApplication = Application?.Name,
-                    DependsOn = [contract]
-                }
-            ]
-        );
-    }
-
-    public override PortEndpoint Install(PortEndpoint contract, ExecutionPlan plan)
-    {
-        // TODO: fill the correct ip of the host
-        return contract with
-        {
-            ExternalIp = "127.0.0.1",
+            [contract.Container.TypedRef] = new Container
+            {
+                Ports =
+                [
+                    new ContainerPort(
+                        InternalPort: contract.Port,
+                        ExternalPort: contract.ExternalPort,
+                        Protocol: contract.Protocol
+                    )
+                ],
+                HandlerApplication = Application?.Name,
+            }
         };
     }
 }

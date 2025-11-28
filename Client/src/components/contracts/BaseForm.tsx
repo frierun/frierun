@@ -1,10 +1,11 @@
 ﻿import {ReactNode, useEffect, useState} from "react";
-import {Contract} from "@/components/contracts/ContractForm.tsx";
+import {Contract} from "@/types.ts";
 
 type Props<TContract extends Contract> = {
+    contractRef: string;
     contract: TContract;
     variants?: TContract[];
-    updateContract: (contract: Contract, isRefetch?: boolean) => void;
+    updateContract: (contractRef: string, contract: Contract, isRefetch?: boolean) => void;
     contractName?: (contract: TContract) => string;
     variantName?: (contract: TContract) => string;
     updateVariant?: () => void;
@@ -13,11 +14,12 @@ type Props<TContract extends Contract> = {
 
 export default function BaseForm<T extends Contract>
 ({
+     contractRef,
      contract,
      variants = [contract],
      updateContract,
      contractName,
-     variantName = contract => contract.handler?.applicationName ?? 'Unknown',
+     variantName = contract => contract.id ?? contract.handler?.applicationName ?? 'New',
      updateVariant,
      children
  }: Props<T>) {
@@ -40,7 +42,7 @@ export default function BaseForm<T extends Contract>
                 <label className={"inline-block w-48"}>
                     {contract.type}
                 </label>
-                {contractName ? contractName(contract) : contract.name}
+                {contractName ? contractName(contract) : contractRef.split(':')[1]}
             </div>
             {variants.length > 1 && (
                 <fieldset className="flex gap-4">
@@ -52,13 +54,13 @@ export default function BaseForm<T extends Contract>
                                 checked={idx === selected}
                                 onChange={() => {
                                     setSelected(idx);
-                                    updateContract(variant, true);
+                                    updateContract(contractRef, variant, true);
                                     if (updateVariant) {
                                         updateVariant();
                                     }
                                 }}
                             />
-                            {variantName ? variantName(variant) : contract.handler?.applicationName ?? 'Unknown'}
+                            {variantName(variant)}
                         </label>
                     ))}
                 </fieldset>

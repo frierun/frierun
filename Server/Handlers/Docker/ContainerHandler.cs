@@ -6,41 +6,107 @@ using Network = Frierun.Server.Data.Network;
 
 namespace Frierun.Server.Handlers.Docker;
 
-public class ContainerHandler(Application application, DockerService dockerService)
-    : Handler<Container>(application), IContainerHandler
+public class ContainerHandler(
+    State state,
+    Application application,
+    DockerService dockerService
+) : Handler<Container>(state, application), IContainerHandler
 {
-    private readonly DockerApiConnection _dockerApiConnection =
-        application.Contracts.OfType<DockerApiConnection>().Single();
+    private readonly DockerApiConnection _dockerApiConnection = state.GetContract<DockerApiConnection>(application);
 
-    public override IEnumerable<ContractInitializeResult> Initialize(Container contract, string prefix)
+    public override IEnumerable<Container> Discover()
     {
-        yield return new ContractInitializeResult(
-            contract with
+        return dockerService.ListContainers().Result
+            .Select(container => dockerService.InspectContainer(container.ID).Result)
+            .OfType<ContainerInspectResponse>()
+            .Select(ConvertToContract)
+            .OfType<Container>();
+    }
+
+    /// <summary>
+    /// Converts docker API response to contract.
+    /// </summary>
+    private Container? ConvertToContract(ContainerInspectResponse container)
+    {
+        var networkName = container.NetworkSettings.Networks.First().Key;
+        var network = State.GetContracts<Network>().FirstOrDefault(network =>
+            network.NetworkName == networkName && network.Handler?.Application == Application
+        );
+
+        if (network == null)
+        {
+            return null;
+        }
+
+        var mounts = new Dictionary<string, ContainerMount>();
+        foreach (var mount in container.Mounts)
+        {
+            if (mount.Type != "volume")
+            {
+                continue;
+            }
+
+            var volume = State.GetContracts<Volume>().FirstOrDefault(volume =>
+                volume.VolumeName == mount.Name && volume.Handler?.Application == Application
+            );
+
+            if (volume == null)
+            {
+                return null;
+            }
+
+            mounts[mount.Destination] = new ContainerMount(volume.Id, !mount.RW);
+        }
+
+        return new Container
+        {
+            ContainerName = container.Name.Trim('/'),
+            Network = network.Id,
+            ImageName = container.Config.Image,
+            MountDockerSocket = false,
+            Mounts = mounts,
+            Labels = container.Config.Labels.ToDictionary(pair => pair.Key, pair => new Argument<string>(pair.Value)),
+            Env = container.Config.Env
+                .Select(env => env.Split('=', 2))
+                .ToDictionary(
+                    pair => pair[0],
+                    pair => new Argument<string>(pair[1])
+                ),
+            Command = new Argument<IEnumerable<string>>(container.Config.Cmd),
+        };
+    }
+
+    public override IEnumerable<ContractList> Initialize(Container contract, ApplicationContext context)
+    {
+        foreach (var installedContract in State.GetContracts<Container>().Where(network => network.Handler == this))
+        {
+            yield return new ContractList { [context] = installedContract };
+        }
+        
+        yield return new ContractList(
+            contract.Mounts.Values.Select(mount => new KeyValuePair<ContractRef, Contract>(
+                    mount.Volume.TypedRef,
+                    new Volume { HandlerApplication = Application?.Name }
+                )
+            )
+        )
+        {
+            [context] = contract with
             {
                 ContainerName = contract.ContainerName ?? FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     c => c.ContainerName
                 ),
-                Labels = new Dictionary<string, string>(contract.Labels)
+                Labels = new Dictionary<string, Argument<string>>(contract.Labels)
                 {
-                    ["com.docker.compose.project"] = prefix,
-                    ["com.docker.compose.service"] = contract.Name
+                    ["com.docker.compose.project"] = context.Prefix,
+                    ["com.docker.compose.service"] = context.Name
                 },
-                Handler = this
+                NetworkAliases = context.Name == "" ? [] : [context.Name],
+                Handler = this,
             },
-            [
-                new Network(contract.Network.Name)
-                {
-                    HandlerApplication = Application?.Name,
-                    DependencyOf = [contract]
-                },
-                ..contract.Mounts.Values.Select(mount => new Volume(mount.Volume.Name)
-                {
-                    HandlerApplication = Application?.Name,
-                    DependencyOf = [contract]
-                }),
-            ]
-        );
+            [contract.Network.TypedRef] = new Network { HandlerApplication = Application?.Name }
+        };
     }
 
     public override Container Install(Container contract, ExecutionPlan plan)
@@ -51,7 +117,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
 
         var dockerParameters = new CreateContainerParameters
         {
-            Cmd = contract.Command.ToList(),
+            Cmd = contract.Command.Value?.ToList() ?? [],
             Env = contract.Env.Select(kv => $"{kv.Key}={kv.Value}").ToList(),
             Image = contract.ImageName,
             HostConfig = new HostConfig
@@ -63,7 +129,11 @@ public class ContainerHandler(Application application, DockerService dockerServi
                 Mounts = new List<Mount>(),
                 PortBindings = new Dictionary<string, IList<PortBinding>>()
             },
-            Labels = new Dictionary<string, string>(contract.Labels),
+            Labels = new Dictionary<string, string>(
+                contract.Labels
+                    .Where(kv => kv.Value.Value != null)
+                    .Select(kv => new KeyValuePair<string, string>(kv.Key, kv.Value.Value!))
+            ),
             Name = contract.ContainerName,
             NetworkingConfig = new NetworkingConfig
             {
@@ -72,7 +142,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
                     {
                         network.NetworkName, new EndpointSettings
                         {
-                            Aliases = contract.Name == "" ? Array.Empty<string>() : new List<string> { contract.Name }
+                            Aliases = [..contract.NetworkAliases]
                         }
                     }
                 }
@@ -80,7 +150,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
         };
 
         // docker socket
-        if (contract.MountDockerSocket)
+        if (contract.MountDockerSocket == true)
         {
             dockerParameters.HostConfig.Mounts.Add(
                 new Mount
@@ -97,13 +167,13 @@ public class ContainerHandler(Application application, DockerService dockerServi
         {
             var volume = plan.GetContract(mount.Volume);
             Debug.Assert(volume.Installed);
-            
+
             var dockerMount = new Mount
             {
                 Target = path,
                 ReadOnly = mount.ReadOnly
             };
-            
+
             if (volume.VolumeName != null)
             {
                 dockerMount.Source = volume.VolumeName;
@@ -121,20 +191,18 @@ public class ContainerHandler(Application application, DockerService dockerServi
 
             dockerParameters.HostConfig.Mounts.Add(dockerMount);
         }
-        
+
         // exposes ports
-        var endpoints = plan.Contracts.OfType<PortEndpoint>().Where(ep => ep.Container == contract);
-        foreach (var endpoint in endpoints)
+        foreach (var port in contract.Ports)
         {
-            Debug.Assert(endpoint.Installed);
-            dockerParameters.HostConfig.PortBindings[$"{endpoint.Port}/{endpoint.Protocol.ToString().ToLower()}"] =
+            dockerParameters.HostConfig.PortBindings[$"{port.InternalPort}/{port.Protocol.ToString().ToLower()}"] =
                 new List<PortBinding>
                 {
                     new()
                     {
-                        HostPort = endpoint.ExternalPort.ToString()
+                        HostPort = port.ExternalPort.ToString()
                     }
-                };            
+                };
         }
 
         var result = dockerService.StartContainer(dockerParameters).Result;
@@ -144,7 +212,7 @@ public class ContainerHandler(Application application, DockerService dockerServi
             throw new Exception("Failed to start container");
         }
 
-        return contract with { NetworkName = network.NetworkName };
+        return contract;
     }
 
     public override void Uninstall(Container container)
@@ -153,16 +221,18 @@ public class ContainerHandler(Application application, DockerService dockerServi
         dockerService.RemoveContainer(container.ContainerName).Wait();
     }
 
-    public void AttachNetwork(Container container, string networkName)
+    public void AttachNetwork(Container container, Network network)
     {
         Debug.Assert(container.Installed);
-        dockerService.AttachNetwork(networkName, container.ContainerName).Wait();
+        Debug.Assert(network.Installed);
+        dockerService.AttachNetwork(network.NetworkName, container.ContainerName).Wait();
     }
 
-    public void DetachNetwork(Container container, string networkName)
+    public void DetachNetwork(Container container, Network network)
     {
         Debug.Assert(container.Installed);
-        dockerService.DetachNetwork(networkName, container.ContainerName).Wait();
+        Debug.Assert(network.Installed);
+        dockerService.DetachNetwork(network.NetworkName, container.ContainerName).Wait();
     }
 
     public (string stdout, string stderr) ExecInContainer(Container container, IList<string> command)

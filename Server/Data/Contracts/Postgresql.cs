@@ -4,32 +4,37 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record Postgresql(
-    string? Name = null,
     ContractId<Network>? Network = null,
     string? Username = null,
     string? Password = null,
     string? Host = null,
     string? Database = null,
-    string? NetworkName = null,
     bool Admin = false
-) : Contract(Name ?? "")
+) : Contract
 {
-    [MemberNotNullWhen(true, nameof(Username), nameof(Password), nameof(Host), nameof(NetworkName))]
-    public override bool Installed { get; init; }
+    [MemberNotNullWhen(true, nameof(Username), nameof(Password), nameof(Host))]
+    public override bool Installed => Id != Guid.Empty;
     
-    public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>("");
+    public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>();
+    
+    public override Postgresql Transform(IArgumentTransformer transformer)
+    {
+        return this with
+        {
+            Network = transformer.Transform(Network),
+            DependsOn = DependsOn.Select(transformer.Transform).ToArray()
+        };
+    }
 
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, contract) with
+        return MergeCommon(this, other, out var contract) with
         {
-            Network = OnlyOne(Network, contract.Network),
-            Username = OnlyOne(Username, contract.Username),
-            Password = OnlyOne(Password, contract.Password),
-            Host = OnlyOne(Host, contract.Host),
-            NetworkName = OnlyOne(NetworkName, contract.NetworkName),
+            Network = MergeValue(Network, contract.Network),
+            Username = MergeValue(Username, contract.Username),
+            Password = MergeValue(Password, contract.Password),
+            Host = MergeValue(Host, contract.Host),
+            Database = MergeValue(Database, contract.Database),
             Admin = Admin || contract.Admin
         };
     }

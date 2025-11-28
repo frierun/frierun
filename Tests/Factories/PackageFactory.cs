@@ -12,7 +12,6 @@ public sealed class PackageFactory : Faker<Package>
     {
         CustomInstantiator(_ => new Package(""));
         this.UniqueRuleFor(p => p.Name, f => f.Lorem.Word(), _uniqueNames);
-        RuleFor(p => p.Prefix, (_, p) => p.Name);
         RuleFor(p => p.Url, f => f.Internet.Url());
         RuleFor(p => p.ApplicationUrl, f => f.Internet.Url());
         RuleFor(p => p.ApplicationDescription, f => f.Lorem.Sentence());

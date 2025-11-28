@@ -1,22 +1,18 @@
-﻿using System.Diagnostics;
-using System.Text.RegularExpressions;
-using Frierun.Server.Handlers;
-
-namespace Frierun.Server.Data;
+﻿namespace Frierun.Server.Data;
 
 public class DiscoveryGraph
 {
-    private readonly HashSet<ContractId> _toReinitialize = [];
-    private readonly HashSet<ContractId> _emptyContracts = [];
-    private readonly Dictionary<ContractId, Contract> _uninitializedContracts = new();
-    
+    private readonly HashSet<ContractRef> _toInitialize = [];
+    private readonly HashSet<ContractRef> _emptyContracts = [];
+
     /// <summary>
     /// Prevents infinite recursion during reinitialization
     /// </summary>
-    private readonly HashSet<ContractId> _reinitializeRecursion = [];
+    private int _count;
 
-    
-    public Dictionary<ContractId, Contract> Contracts { get; } = new();
+    private const int MaxContracts = 1000;
+
+    public Dictionary<ContractRef, Contract> Contracts { get; } = new();
 
     public DiscoveryGraph()
     {
@@ -24,88 +20,71 @@ public class DiscoveryGraph
 
     public DiscoveryGraph(DiscoveryGraph graph)
     {
-        Contracts = new Dictionary<ContractId, Contract>(graph.Contracts);
-        _toReinitialize = [..graph._toReinitialize];
+        Contracts = new Dictionary<ContractRef, Contract>(graph.Contracts);
+        _toInitialize = [..graph._toInitialize];
         _emptyContracts = [..graph._emptyContracts];
-        _uninitializedContracts = new Dictionary<ContractId, Contract>(graph._uninitializedContracts);
-        _reinitializeRecursion = [..graph._reinitializeRecursion];
+        _count = graph._count;
     }
 
     /// <summary>
     /// Returns next contract to initialize.
     /// </summary>
-    public (ContractId?, Contract?) Next()
+    public (ContractRef? Ref, Contract? Contract) Next()
     {
         // reinitializing freshly updated contracts
-        while (_toReinitialize.Count > 0)
+        while (_toInitialize.Count > 0)
         {
-            var contractId = _toReinitialize.First();
-            _toReinitialize.Remove(contractId);
-            if (!_reinitializeRecursion.Add(contractId))
+            var contractRef = _toInitialize.First();
+            _toInitialize.Remove(contractRef);
+            _count++;
+            if (_count > MaxContracts)
             {
                 throw new Exception("Infinite recursion found during contract reinitialization");
             }
-            return (contractId, Contracts[contractId]);
+
+            return (contractRef, Contracts[contractRef]);
         }
 
-        _reinitializeRecursion.Clear();
-
-        // initialize contracts which were defined but not initialized yet
-        while (_uninitializedContracts.Count > 0)
-        {
-            var (contractId, contract) = _uninitializedContracts.First();
-            _uninitializedContracts.Remove(contractId);
-            Debug.Assert(!Contracts.ContainsKey(contractId));
-
-            return (contractId, contract);
-        }
+        _count = 0;
 
         // initialize empty contracts
         while (_emptyContracts.Count > 0)
         {
-            var contractId = _emptyContracts.First();
-            _emptyContracts.Remove(contractId);
-            if (Contracts.ContainsKey(contractId))
+            var contractRef = _emptyContracts.First();
+            _emptyContracts.Remove(contractRef);
+            if (Contracts.ContainsKey(contractRef))
             {
                 continue;
             }
 
-            return (contractId, null);
+            return (contractRef, null);
         }
 
         return (null, null);
     }
-    
+
     /// <summary>
     /// Applies contract initialization result.
     /// </summary>
     /// <returns>True if the result is not conflicting with the graph</returns>
-    public bool Apply(ContractInitializeResult result)
+    public bool Apply(ContractRef initializedContractRef, ContractList result)
     {
-        Debug.Assert(result.Contract.Handler != null, "Initialized contract must have a handler");
-        
-        Contracts[result.Contract] = result.Contract;
-
         try
         {
-            foreach (var additionalContract in result.AdditionalContracts)
+            foreach (var (contractRef, contract) in result)
             {
-                if (Contracts.TryGetValue(additionalContract, out var initializedContract))
+                if (contractRef != initializedContractRef)
                 {
-                    var contract = initializedContract.Merge(additionalContract);
-                    Contracts[contract] = contract;
-                    _toReinitialize.Add(contract);
-                    continue;
+                    _toInitialize.Add(contractRef);
                 }
 
-                if (_uninitializedContracts.TryGetValue(additionalContract, out var uninitializedContract))
+                if (!Contracts.TryGetValue(contractRef, out var oldContract))
                 {
-                    _uninitializedContracts[additionalContract] = uninitializedContract.Merge(additionalContract);
+                    Contracts[contractRef] = contract;
+                    continue;
                 }
-                else
-                {
-                    _uninitializedContracts[additionalContract] = additionalContract;
-                }
+                
+                Contracts[contractRef] = contract.Merge(oldContract);
             }
         }
         catch (MergeException)
@@ -113,57 +92,15 @@ public class DiscoveryGraph
             return false;
         }
 
-        foreach (var contractId in result.Contract.DependsOn)
+        var initializedContract = result[initializedContractRef];
+        foreach (var contractRef in initializedContract.GetRequiredContracts())
         {
-            if (!Contracts.ContainsKey(contractId))
+            if (!Contracts.ContainsKey(contractRef))
             {
-                _emptyContracts.Add(contractId);
+                _emptyContracts.Add(contractRef);
             }
         }
 
-        foreach (var contractId in result.Contract.DependencyOf)
-        {
-            if (!Contracts.ContainsKey(contractId))
-            {
-                _emptyContracts.Add(contractId);
-            }
-        }
-        
-        // Check for Substitute contract
-        if (result.Contract is not IHasStrings hasStrings)
-        {
-            return true;
-        }
-
-        var substitute = new Substitute(result.Contract);
-
-        // remove old substitutes
-        Contracts.Remove(substitute);
-
-        var matches = new Dictionary<string, MatchCollection>();
-
-        hasStrings.ApplyStringDecorator(s =>
-            {
-                var matchCollection = Substitute.InsertionRegex.Matches(s);
-                if (matchCollection.Count > 0)
-                {
-                    matches[s] = matchCollection;
-                }
-
-                return s;
-            }
-        );
-
-        if (matches.Count == 0)
-        {
-            _uninitializedContracts.Remove(substitute);
-            return true;
-        }
-
-        _uninitializedContracts[substitute] = substitute with
-        {
-            Matches = matches
-        };
         return true;
     }
 }

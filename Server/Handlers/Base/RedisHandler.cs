@@ -1,47 +1,35 @@
-﻿using System.Diagnostics;
-using Frierun.Server.Data;
+﻿using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class RedisHandler : Handler<Redis>
+public class RedisHandler(State state) : Handler<Redis>(state)
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(Redis contract, string prefix)
+    public override IEnumerable<ContractList> Initialize(Redis contract, ApplicationContext context)
     {
-        var name = "redis" + (string.IsNullOrEmpty(contract.Name) ? "" : $"-{contract.Name}");
-        var container = contract.Container ?? new ContractId<Container>(name);
+        var name = "redis" + (string.IsNullOrEmpty(context.Name) ? "" : $"-{context.Name}");
+        var containerId = contract.Container ?? new ContractRef<Container>(name);
 
-        var volume = contract.Volume ?? new ContractId<Volume>(name + "-data");
+        var volumeName = contract.Volume?.Name ?? name + "-data";
 
-        yield return new ContractInitializeResult(
-            contract with
+        if (contract.Host.Empty)
+        {
+            contract = contract with { Host = new Argument<string>(plan => plan.GetContract(containerId).ContainerName) };
+        }
+
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
-                DependsOn = contract.DependsOn.Append(container),
-                Container = container
+                DependsOn = [containerId],
+                Container = containerId,
             },
-            [
-                new Container(
-                    Name: container.Name,
-                    ImageName: "redis:7",
-                    Network: contract.Network,
-                    ContainerName: contract.Host,
-                    Mounts: new Dictionary<string, ContainerMount>(){{"/data", new ContainerMount(Volume: volume)}}
-                )
-            ]
-        );
-    }
-
-    public override Redis Install(Redis contract, ExecutionPlan plan)
-    {
-        Debug.Assert(contract.Container != null);
-        
-        var container = plan.GetContract(contract.Container);
-        Debug.Assert(container.Installed);
-        Debug.Assert(contract.Host == null || contract.Host == container.ContainerName);
-
-        return contract with
-        {
-            Host = container.ContainerName
+            [containerId] = new Container(
+                ImageName: "redis:7",
+                Network: new ContractId<Network>(Guid.Empty, contract.Network.Name),
+                ContainerName: contract.Host,
+                Mounts: new Dictionary<string, ContainerMount> { { "/data", new ContainerMount(Volume: new ContractId<Volume>(Guid.Empty, volumeName)) } }
+            )
         };
     }
 }

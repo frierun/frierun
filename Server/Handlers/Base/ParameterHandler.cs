@@ -2,18 +2,17 @@
 
 namespace Frierun.Server.Handlers.Base;
 
-public class ParameterHandler : Handler<Parameter>
+public class ParameterHandler(State state) : Handler<Parameter>(state)
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(Parameter contract, string prefix)
+    public override IEnumerable<ContractList> Initialize(Parameter contract, ApplicationContext context)
     {
-        var value = contract.Value ?? contract.DefaultValue ?? "";
-
-        yield return new ContractInitializeResult(
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
-                Value = value, 
+                Value = contract.Value.Empty ? new Argument<string>(contract.DefaultValue) : contract.Value,
                 Handler = this
             }
-        );
+        };
     }
 }

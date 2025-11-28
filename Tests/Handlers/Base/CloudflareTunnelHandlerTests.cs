@@ -13,23 +13,23 @@ public class CloudflareTunnelHandlerTests : BaseTests
 
         var application = InstallPackage("cloudflare-tunnel");
 
-        var cloudflareTunnel = application.Contracts.OfType<CloudflareTunnel>().Single();
+        var cloudflareTunnel = State.GetContract<CloudflareTunnel>(application);
         Assert.Equal("accountId1", cloudflareTunnel.AccountId);
         Assert.NotNull(cloudflareTunnel.TunnelName);
 
         CloudflareClient.Received(1).CreateTunnel("accountId1", cloudflareTunnel.TunnelName);
         Assert.Equal("tunnel token", cloudflareTunnel.Token);
-        
-        var container = application.Contracts.OfType<Container>().Single();
-        Assert.Equal("cloudflare/cloudflared:latest", container.ImageName);
-        Assert.Equal(["tunnel", "--no-autoupdate", "run", "--token", "tunnel token"], container.Command);
+
+        var container = State.GetContract<Container>(application);
+        Assert.Equal("cloudflare/cloudflared:latest", container.ImageName.Value);
+        Assert.Equal(["tunnel", "--no-autoupdate", "run", "--token", "tunnel token"], container.Command.Value);
     }
 
     [Fact]
     public void Install_NoAccounts_ThrowsHandlerException()
     {
         InstallPackage("docker");
-        CloudflareClient.GetAccounts().Returns(Array.Empty<(string id, string name)>());
+        CloudflareClient.GetAccounts().Returns([]);
 
         var exception = Assert.Throws<HandlerException>(() => InstallPackage("cloudflare-tunnel"));
         Assert.Equal("No Cloudflare accounts found.", exception.Message);
@@ -41,15 +41,14 @@ public class CloudflareTunnelHandlerTests : BaseTests
         InstallPackage("docker");
 
         var application = InstallPackage(
-            "cloudflare-tunnel", [
-                new CloudflareTunnel()
-                {
-                    AccountId = "accountId2"
-                }
-            ]
+            "cloudflare-tunnel",
+            new ContractList
+            {
+                [""] = new CloudflareTunnel { AccountId = "accountId2" }
+            }
         );
 
-        var cloudflareTunnel = application.Contracts.OfType<CloudflareTunnel>().Single();
+        var cloudflareTunnel = State.GetContract<CloudflareTunnel>(application);
         Assert.Equal("accountId2", cloudflareTunnel.AccountId);
     }
 
@@ -58,19 +57,17 @@ public class CloudflareTunnelHandlerTests : BaseTests
     {
         InstallPackage("docker");
 
-        var exception = Assert.Throws<HandlerException>(
-            () => InstallPackage(
-                "cloudflare-tunnel", [
-                    new CloudflareTunnel()
-                    {
-                        AccountId = "invalidAccountId"
-                    }
-                ]
+        var exception = Assert.Throws<HandlerException>(() => InstallPackage(
+                "cloudflare-tunnel",
+                new ContractList
+                {
+                    [""] = new CloudflareTunnel { AccountId = "invalidAccountId" }
+                }
             )
         );
         Assert.Equal($"Account with ID invalidAccountId not found.", exception.Message);
     }
-    
+
     [Fact]
     public void Uninstall_CloudflareTunnel_Success()
     {
@@ -79,7 +76,7 @@ public class CloudflareTunnelHandlerTests : BaseTests
         var application = InstallPackage("cloudflare-tunnel");
 
         Assert.NotNull(application);
-        var cloudflareTunnel = application.Contracts.OfType<CloudflareTunnel>().Single();
+        var cloudflareTunnel = State.GetContract<CloudflareTunnel>(application);
         var accountId = cloudflareTunnel.AccountId;
         var tunnelId = cloudflareTunnel.TunnelId;
         Assert.NotNull(accountId);

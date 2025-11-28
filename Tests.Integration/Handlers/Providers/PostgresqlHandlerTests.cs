@@ -9,7 +9,7 @@ public class PostgresqlHandlerTests : TestWithDocker
     [Fact]
     public async Task Install_PostgresqlContract_CredentialsAreCorrect()
     {
-        var dbPackage = Services.GetRequiredService<PackageRegistry>().Find("postgresql");
+        var dbPackage = Resolve<PackageRegistry>().Find("postgresql");
         Assert.NotNull(dbPackage);
 
         var dbApplication = InstallPackage(dbPackage);
@@ -20,13 +20,13 @@ public class PostgresqlHandlerTests : TestWithDocker
         var package = dbPackage with
         {
             Name = "db-client",
-            Contracts = dbPackage.Contracts.Append(new Postgresql())
+            Contracts = new ContractList(dbPackage.Contracts) { [""] = new Postgresql() }
         };
         var application = InstallPackage(package);
 
-        var container = application.Contracts.OfType<Container>().Single();
+        var container = Resolve<State>().GetContract<Container>(application);
         Assert.True(container.Installed);
-        var database = application.Contracts.OfType<Postgresql>().Single();
+        var database = Resolve<State>().GetContract<Postgresql>(application);
         Assert.True(database.Installed);
         Assert.Equal("db-client", database.Username);
         Assert.Equal("db-client", database.Database);
@@ -55,7 +55,7 @@ public class PostgresqlHandlerTests : TestWithDocker
     [Fact]
     public async Task Install_PostgresqlAdminContract_CredentialsAreCorrect()
     {
-        var dbPackage = Services.GetRequiredService<PackageRegistry>().Find("postgresql");
+        var dbPackage = Resolve<PackageRegistry>().Find("postgresql");
         Assert.NotNull(dbPackage);
 
         var dbApplication = InstallPackage(dbPackage);
@@ -66,13 +66,13 @@ public class PostgresqlHandlerTests : TestWithDocker
         var package = dbPackage with
         {
             Name = "db-client",
-            Contracts = dbPackage.Contracts.Append(new Postgresql(Admin: true))
+            Contracts = new ContractList(dbPackage.Contracts) { [""] = new Postgresql(Admin: true) }
         };
         var application = InstallPackage(package);
 
-        var container = application.Contracts.OfType<Container>().Single();
+        var container = Resolve<State>().GetContract<Container>(application);
         Assert.True(container.Installed);
-        var database = application.Contracts.OfType<Postgresql>().Single();
+        var database = Resolve<State>().GetContract<Postgresql>(application);
         Assert.True(database.Installed);
         Assert.Equal("postgres", database.Username);
         Assert.Null(database.Database);

@@ -4,18 +4,15 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers;
 
-public class PostgresqlHandler(Application application, ILogger<PostgresqlHandler> logger)
-    : Handler<Postgresql>(application)
+public class PostgresqlHandler(State state, Application application, ILogger<PostgresqlHandler> logger)
+    : Handler<Postgresql>(state, application)
 {
-    private readonly Container _container = application.Contracts.OfType<Container>().Single();
+    private readonly Container _container = state.GetContract<Container>(application);
 
-    private readonly string _rootPassword = application.Contracts.OfType<Password>().Single().Value ??
+    private readonly string _rootPassword = state.GetContract<Password>(application).Value ??
                                             throw new Exception("Root password not found");
 
-    public override IEnumerable<ContractInitializeResult> Initialize(
-        Postgresql contract,
-        string prefix
-    )
+    public override IEnumerable<ContractList> Initialize(Postgresql contract, ApplicationContext context)
     {
         if (contract.Admin)
         {
@@ -29,28 +26,29 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
                 yield break;
             }
 
-            yield return new ContractInitializeResult(
-                contract with
+            yield return new ContractList
+            {
+                [context] = contract with
                 {
                     Handler = this,
                     Username = "postgres",
                     Password = _rootPassword,
                     Host = _container.ContainerName,
-                    DependsOn = contract.DependsOn.Append(contract.Network)
                 }
-            );
+            };
         }
 
-        yield return new ContractInitializeResult(
-            contract with
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
                 Database = contract.Database ?? FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     c => c.Database
                 ),
                 Username = contract.Username ?? FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     c => c.Username,
                     "",
                     ["postgres"]
@@ -60,9 +58,8 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
                     16
                 ),
                 Host = _container.ContainerName,
-                DependsOn = contract.DependsOn.Append(contract.Network)
             }
-        );
+        };
     }
 
     public override Postgresql Install(Postgresql contract, ExecutionPlan plan)
@@ -72,21 +69,11 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
         Debug.Assert(contract.Password != null);
 
         var network = plan.GetContract(contract.Network);
-        Debug.Assert(network.Installed);
-        
-        if (contract.NetworkName != null && contract.NetworkName != network.NetworkName)
-        {
-            throw new Exception("NetworkName cannot be set");
-        }
-
-        _container.AttachNetwork(network.NetworkName);
+        _container.AttachNetwork(network);
 
         if (contract.Admin)
         {
-            return contract with
-            {
-                NetworkName = network.NetworkName
-            };
+            return contract;
         }
 
         Debug.Assert(contract.Database != null);
@@ -98,11 +85,8 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
                 $"ALTER DATABASE \"{contract.Database}\" OWNER TO \"{contract.Username}\""
             ]
         );
-
-        return contract with
-        {
-            NetworkName = network.NetworkName
-        };
+        
+        return contract;
     }
 
     public override void Uninstall(Postgresql contract)
@@ -119,7 +103,8 @@ public class PostgresqlHandler(Application application, ILogger<PostgresqlHandle
             );
         }
 
-        _container.DetachNetwork(contract.NetworkName);
+        var network = State.GetContract(contract.Network);
+        _container.DetachNetwork(network);
     }
 
     /// <summary>

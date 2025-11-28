@@ -5,7 +5,7 @@ shortDescription: "SQL database"
 fullDescription: "The world's most popular open source database"
 tags: [ "storage", "provider" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "mysql:8"
     env:
       MYSQL_ROOT_PASSWORD: "{{Password::Value}}"

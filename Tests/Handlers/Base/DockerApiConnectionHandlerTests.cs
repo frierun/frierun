@@ -11,14 +11,14 @@ public class DockerApiConnectionHandlerTests : BaseTests
     {
         var package = Factory<Package>().Generate() with
         {
-            Contracts =
-            [
-                new DockerApiConnection
+            Contracts = new ContractList
+            {
+                [""] = new DockerApiConnection
                 {
                     Path = "wrong_path",
                     Handler = Handler<DockerApiConnectionHandler>()
                 }
-            ]
+            }
         };
 
         var exception = Assert.Throws<HandlerException>(() => InstallPackage(package));

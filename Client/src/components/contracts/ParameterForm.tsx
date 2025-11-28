@@ -3,7 +3,7 @@ import {Parameter} from "@/api/schemas";
 import {ContractProps} from "@/components/contracts/ContractForm.tsx";
 import BaseForm from "@/components/contracts/BaseForm.tsx";
 
-export default function ParameterForm({contract, updateContract}: ContractProps<Parameter>) {
+export default function ParameterForm({contractRef, contract, updateContract}: ContractProps<Parameter>) {
     const [value, setValue] = useState(contract.defaultValue ?? '');
 
     useEffect(() => {
@@ -12,7 +12,7 @@ export default function ParameterForm({contract, updateContract}: ContractProps<
 
     const updateValue = (value: string) => {
         setValue(value);
-        updateContract({
+        updateContract(contractRef, {
             ...contract,
             value: value
         });
@@ -20,6 +20,7 @@ export default function ParameterForm({contract, updateContract}: ContractProps<
 
     return (
         <BaseForm
+            contractRef={contractRef}
             contract={contract}
             updateContract={updateContract}
         >

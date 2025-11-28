@@ -1,29 +1,40 @@
-﻿namespace Frierun.Server.Data;
+﻿using static Frierun.Server.Data.Merger;
 
+namespace Frierun.Server.Data;
 
-public class Application 
+public record Application(
+    string Name,
+    Package? Package = null,
+    Argument<string>? Url = null,
+    Argument<string>? Description = null,
+    IReadOnlyList<string>? RequiredApplications = null,
+    IReadOnlyDictionary<ContractRef, Guid>? ContractRefs = null
+) : Contract
 {
-    public required string Name { get; init; }
-    public Package? Package { get; init; }
-    public string? Url { get; init; }
-    public string? Description { get; init; }
-    public IReadOnlyList<Contract> Contracts { get; init; } = Array.Empty<Contract>();
-    public IReadOnlyList<string> RequiredApplications { get; init; } = Array.Empty<string>();
-    
-    /// <summary>
-    /// Get contract by id.
-    /// </summary>
-    public Contract GetContract(ContractId contractId)
-    {
-        return Contracts.Single(contract => contract.Id == contractId);
-    }
+    public Argument<string> Url { get; init; } = Url ?? new Argument<string>();
+    public Argument<string> Description { get; init; } = Description ?? new Argument<string>();
+    public IReadOnlyList<string> RequiredApplications { get; init; } = RequiredApplications ?? [];
 
-    /// <summary>
-    /// Get contract by id.
-    /// </summary>
-    public T GetContract<T>(ContractId<T> contractId)
-        where T : Contract
+    public IReadOnlyDictionary<ContractRef, Guid> ContractRefs { get; init; } =
+        ContractRefs ?? new Dictionary<ContractRef, Guid>();
+
+    public override Application Transform(IArgumentTransformer transformer)
     {
-        return (T)GetContract((ContractId)contractId);
+        return this with
+        {
+            Url = transformer.Transform(Url),
+            Description = transformer.Transform(Description),
+            DependsOn = DependsOn.Select(transformer.Transform).ToArray()
+        };
+    }
+    
+    public override Application Merge(Contract other)
+    {
+        return MergeCommon(this, other, out var contract) with
+        {
+            Name = MergeValue(Name, contract.Name),
+            Url = Url.Merge(contract.Url),
+            Description = Description.Merge(contract.Description),
+        };
     }
 }

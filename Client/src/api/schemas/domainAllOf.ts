@@ -10,5 +10,5 @@ export type DomainAllOf = {
   value?: string | null;
   /** @nullable */
   isInternal?: boolean | null;
-  installed?: boolean;
+  readonly installed?: boolean;
 };

@@ -3,28 +3,40 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Base;
 
-public class CloudflareTunnelHandler : Handler<CloudflareTunnel>
+public class CloudflareTunnelHandler(State state) : Handler<CloudflareTunnel>(state)
 {
-    public override IEnumerable<ContractInitializeResult> Initialize(CloudflareTunnel contract, string prefix)
+    public override IEnumerable<ContractList> Initialize(CloudflareTunnel contract, ApplicationContext context)
     {
-        yield return new ContractInitializeResult(
-            contract with
+        if (contract.Container == null)
+        {
+            contract = contract with { Container = new ContractRef<Container>() };
+        }
+        
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
                 TunnelName = contract.TunnelName ?? FindUniqueName(
-                    prefix + (contract.Name == "" ? "" : $"-{contract.Name}"),
+                    context.Prefix + (context.Name == "" ? "" : $"-{context.Name}"),
                     tunnel => tunnel.TunnelName
-                ),
-                DependsOn = [contract.CloudflareApiConnection],
-                DependencyOf = [contract.Container],
-            },
-            [
-                new Container(
-                    Name: contract.Container.Name,
-                    ImageName: "cloudflare/cloudflared:latest"
                 )
-            ]
-        );
+            },
+            [contract.Container] = new Container
+            {
+                ImageName = "cloudflare/cloudflared:latest",
+                Command = new Argument<IEnumerable<string>>(plan =>
+                    [
+                        "tunnel",
+                        "--no-autoupdate",
+                        "run",
+                        "--token",
+                        plan.GetContract(new ContractRef<CloudflareTunnel>(context.Name)).Token ?? ""
+                    ]
+                ),
+                DependsOn = [new ContractRef<CloudflareTunnel>(context.Name)]
+            }
+        };
     }
 
     public override CloudflareTunnel Install(CloudflareTunnel contract, ExecutionPlan plan)
@@ -89,14 +101,6 @@ public class CloudflareTunnelHandler : Handler<CloudflareTunnel>
             );
         }
 
-        var container = plan.GetContract(contract.Container);
-        plan.ReplaceContract(
-            container with
-            {
-                Command = ["tunnel", "--no-autoupdate", "run", "--token", tunnel.token]
-            }
-        );
-
         return contract with
         {
             TunnelId = tunnel.id,
@@ -107,8 +111,7 @@ public class CloudflareTunnelHandler : Handler<CloudflareTunnel>
     public override void Uninstall(CloudflareTunnel contract)
     {
         Debug.Assert(contract.Installed);
-        var application = State.Applications.Single(application => application.Contracts.Contains(contract));
-        var cloudflareApiConnection = application.GetContract(contract.CloudflareApiConnection);
+        var cloudflareApiConnection = State.GetContract<CloudflareApiConnection>(contract.CloudflareApiConnection.Guid);
 
         var client = cloudflareApiConnection.CreateClient();
         try

@@ -6,21 +6,21 @@ fullDescription: "Technitium DNS Server is an open source authoritative as well 
   that can be used for self hosting a DNS server for privacy & security."
 tags: [ "network", "dev" ]
 contracts:
-  - type: "Container"
+  Container:
     imageName: "technitium/dns-server:latest"
     env:
       DNS_SERVER_ADMIN_PASSWORD: "{{Password::Value}}"
     mounts:
       /etc/dns: "config"
       
-  - type: "HttpEndpoint"
+  HttpEndpoint:
     port: 5380
     
-  - type: "PortEndpoint"
+  PortEndpoint:Tcp:
     port: 53
     protocol: "tcp"
     
-  - type: "PortEndpoint"
+  PortEndpoint:Udp:
     port: 53
     protocol: "udp"
     

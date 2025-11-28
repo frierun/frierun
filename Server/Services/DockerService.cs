@@ -115,7 +115,7 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
             return true;
         }
 
-        if (container.State == "running")
+        if (container.State == "running" || container.State == "restarting")
         {
             logger.LogDebug("Stopping container {ContainerName}", containerName);
             if (!await client.Containers.StopContainerAsync(container.ID, new ContainerStopParameters()))
@@ -132,9 +132,42 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
 
         return true;
     }
+    
+    /// <summary>
+    /// Lists all containers
+    /// </summary>
+    public async Task<IList<ContainerListResponse>> ListContainers()
+    {
+        try
+        {
+            return await client.Containers.ListContainersAsync(new ContainersListParameters());
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to list containers");
+            return [];
+        }
+    }
+    
+    /// <summary>
+    /// Get container information
+    /// </summary>
+    public async Task<ContainerInspectResponse?> InspectContainer(string containerId)
+    {
+        try
+        {
+            return await client.Containers.InspectContainerAsync(containerId);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to inspect container {containerId}", containerId);
+            return null;
+        }
+    }    
+    
 
     /// <summary>
-    /// Removes volume by name
+    /// Creates volume by name
     /// </summary>
     public async Task<bool> CreateVolume(string volumeName)
     {
@@ -156,6 +189,22 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
         return true;
     }
 
+    /// <summary>
+    /// Lists all volumes
+    /// </summary>
+    public async Task<IList<VolumeResponse>> ListVolumes()
+    {
+        try
+        {
+            var result = await client.Volumes.ListAsync();
+            return result.Volumes;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to list volumes");
+            return [];
+        }
+    }
 
     /// <summary>
     /// Removes volume by name
@@ -176,7 +225,7 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
     }
 
     /// <summary>
-    /// Creates new network for a container group
+    /// Create a new network for a container group
     /// </summary>
     public async Task<bool> CreateNetwork(string networkName)
     {
@@ -198,9 +247,26 @@ public class DockerService(ILogger<DockerService> logger, IDockerClient client)
 
         return true;
     }
+    
+    /// <summary>
+    /// List all networks
+    /// </summary>
+    public async Task<IList<NetworkResponse>> ListNetworks()
+    {
+        try
+        {
+            return await client.Networks.ListNetworksAsync();
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to list networks");
+            return [];
+        }
+    }
+    
 
     /// <summary>
-    /// Removes network
+    /// Remove network
     /// </summary>
     public async Task<bool> RemoveNetwork(string networkName)
     {

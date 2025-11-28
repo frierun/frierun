@@ -7,88 +7,149 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record Container(
-    string? Name = null,
     string? ContainerName = null,
-    string? NetworkName = null,
-    string? ImageName = null,
-    bool MountDockerSocket = false,
+    Argument<string>? ImageName = null,
+    bool? MountDockerSocket = null,
     ContractId<Network>? Network = null,
-    IReadOnlyList<string>? Command = null,
-    IReadOnlyDictionary<string, string>? Env = null,
-    IReadOnlyDictionary<string, string>? Labels = null,
+    IEnumerable<ContainerPort>? Ports = null,
+    Argument<IEnumerable<string>>? Command = null,
+    IEnumerable<string>? NetworkAliases = null,
+    IReadOnlyDictionary<string, Argument<string>>? Env = null,
+    IReadOnlyDictionary<string, Argument<string>>? Labels = null,
     IReadOnlyDictionary<string, ContainerMount>? Mounts = null
-) : Contract<IContainerHandler>(Name ?? ""), IHasStrings
+) : Contract<IContainerHandler>
 {
-    [MemberNotNullWhen(true, nameof(ContainerName), nameof(NetworkName))]
-    public override bool Installed { get; init; }
-    
-    public IReadOnlyList<string> Command { get; init; } = Command ?? [];
-    public IReadOnlyDictionary<string, string> Env { get; init; } = Env ?? new Dictionary<string, string>();
-    public IReadOnlyDictionary<string, string> Labels { get; init; } = Labels ?? new Dictionary<string, string>();
-    public IReadOnlyDictionary<string, ContainerMount> Mounts { get; init; } = Mounts ?? new Dictionary<string, ContainerMount>();
-    
-    [JsonInclude]
-    private IDictionary<string, int> ConnectedNetworks { get; init; } = new Dictionary<string, int>();
+    [MemberNotNullWhen(true, nameof(ContainerName))]
+    public override bool Installed => Id != Guid.Empty;
 
-    
-    public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>("");
-    
-    Contract IHasStrings.ApplyStringDecorator(Func<string, string> decorator)
+    public Argument<IEnumerable<string>> Command { get; init; } = Command ?? new Argument<IEnumerable<string>>();
+
+    public IReadOnlyDictionary<string, Argument<string>> Env { get; init; } =
+        Env ?? new Dictionary<string, Argument<string>>();
+
+    public IReadOnlyDictionary<string, Argument<string>> Labels { get; init; } =
+        Labels ?? new Dictionary<string, Argument<string>>();
+
+    public IReadOnlyDictionary<string, ContainerMount> Mounts { get; init; } =
+        Mounts ?? new Dictionary<string, ContainerMount>();
+
+    public IEnumerable<ContainerPort> Ports { get; init; } = Ports ?? [];
+    public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>();
+    public IEnumerable<string> NetworkAliases { get; init; } = NetworkAliases ?? [];
+    public Argument<string> ImageName { get; init; } = ImageName ?? new Argument<string>();
+
+
+    [JsonInclude] private IDictionary<Guid, int> ConnectedNetworks { get; init; } = new Dictionary<Guid, int>();
+
+    public override Container Transform(IArgumentTransformer transformer)
     {
         return this with
         {
-            Command = Command.Select(decorator).ToList(),
-            Env = Env.ToDictionary(kv => decorator(kv.Key), kv => decorator(kv.Value))
+            ImageName = transformer.Transform(ImageName),
+            Command = transformer.Transform(Command),
+            Network = transformer.Transform(Network),
+            Mounts = Mounts.ToDictionary(
+                pair => pair.Key,
+                pair => pair.Value with
+                {
+                    Volume = transformer.Transform(pair.Value.Volume)
+                }
+            ),
+            Env = Env.ToDictionary(pair => pair.Key, pair => transformer.Transform(pair.Value)),
+            Labels = Labels.ToDictionary(pair => pair.Key, pair => transformer.Transform(pair.Value)),
+            DependsOn = DependsOn.Select(transformer.Transform).ToArray()
         };
     }
-    
+
+    public override Contract Merge(Contract other)
+    {
+        return MergeCommon(this, other, out var contract) with
+        {
+            ContainerName = MergeValue(ContainerName, contract.ContainerName),
+            ImageName = MergeValue(ImageName, contract.ImageName),
+            MountDockerSocket = MergeValue(MountDockerSocket, contract.MountDockerSocket),
+            Network = MergeValue(Network, contract.Network),
+            Ports = Ports.Concat(contract.Ports).Distinct(),
+            Command = MergeValue(Command, contract.Command),
+            NetworkAliases = NetworkAliases.Concat(contract.NetworkAliases).Distinct(),
+            Env = MergeDictionary(Env, contract.Env),
+            Labels = MergeDictionary(Labels, contract.Labels),
+            Mounts = MergeDictionary(Mounts, contract.Mounts)
+        };
+    }
+
+    public override bool IsSubset(Contract other)
+    {
+        return IsSubsetContract(this, other, out var contract)
+               && IsSubsetValue(ContainerName, contract.ContainerName)
+               && IsSubsetArgument(ImageName, contract.ImageName)
+               && IsSubsetValue(MountDockerSocket, contract.MountDockerSocket)
+               && IsSubsetValue(Network, contract.Network)
+               && IsSubsetList(Ports, contract.Ports)
+               && IsSubsetArgument(Command, contract.Command, (value1, value2) => value1.SequenceEqual(value2 ?? []))
+               && IsSubsetList(NetworkAliases, contract.NetworkAliases)
+               && IsSubsetDictionary(Env, contract.Env, (value1, value2) => IsSubsetArgument(value1, value2))
+               && IsSubsetDictionary(Labels, contract.Labels, (value1, value2) => IsSubsetArgument(value1, value2))
+               && IsSubsetDictionary(Mounts, contract.Mounts);
+    }
+
     /// <summary>
     /// Attaches the container to a network.
     /// </summary>
-    public void AttachNetwork(string networkName)
+    public void AttachNetwork(Network network)
     {
+        Debug.Assert(Installed);
         Debug.Assert(Handler != null);
-        if (networkName == NetworkName)
+
+        var networkId = network.Id;
+        Debug.Assert(network.Installed);
+
+        if (network.Id == Network)
         {
             return;
         }
-        
-        if (ConnectedNetworks.TryGetValue(networkName, out var count))
+
+        if (ConnectedNetworks.TryGetValue(networkId, out var count))
         {
-            ConnectedNetworks[networkName] = count + 1;
+            ConnectedNetworks[networkId] = count + 1;
         }
         else
         {
-            ConnectedNetworks[networkName] = 1;
-            Handler.AttachNetwork(this, networkName);
+            ConnectedNetworks[networkId] = 1;
+            Handler.AttachNetwork(this, network);
         }
     }
-    
+
     /// <summary>
     /// Detaches container from a network.
     /// </summary>
-    public void DetachNetwork(string networkName)
+    public void DetachNetwork(Network network)
     {
+        Debug.Assert(network.Installed);
         Debug.Assert(Handler != null);
-        if (networkName == NetworkName)
+        
+        var networkId = network.Id;
+        Debug.Assert(network.Installed);
+
+        if (networkId == Network)
         {
             return;
         }
-        
-        if (ConnectedNetworks.TryGetValue(networkName, out var count))
+
+        if (ConnectedNetworks.TryGetValue(networkId, out var count))
         {
             if (count > 1)
             {
-                ConnectedNetworks[networkName] = count - 1;
+                ConnectedNetworks[networkId] = count - 1;
                 return;
             }
 
-            ConnectedNetworks.Remove(networkName);
+            ConnectedNetworks.Remove(networkId);
         }
 
-        Handler.DetachNetwork(this, networkName);
+        Handler.DetachNetwork(this, network);
     }
-    
+
     /// <summary>
     /// Executes a command in the container.
     /// </summary>
@@ -96,23 +157,5 @@ public record Container(
     {
         Debug.Assert(Handler != null);
         return Handler.ExecInContainer(this, command);
-    }
-
-    public override Contract Merge(Contract other)
-    {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, other) with
-        {
-            ContainerName = OnlyOne(ContainerName, contract.ContainerName),
-            NetworkName = OnlyOne(NetworkName, contract.NetworkName),
-            ImageName = OnlyOne(ImageName, contract.ImageName),
-            MountDockerSocket = MountDockerSocket || contract.MountDockerSocket,
-            Network = OnlyOne(Network, contract.Network),
-            Command = OnlyOne(Command, contract.Command, command => command.Count == 0),
-            Env = MergeDictionaries(Env, contract.Env),
-            Labels = MergeDictionaries(Labels, contract.Labels),
-            Mounts = MergeDictionaries(Mounts, contract.Mounts)
-        };
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using Autofac;
 using Autofac.Core;
 using Autofac.Extensions.DependencyInjection;
@@ -7,6 +8,7 @@ using Docker.DotNet;
 using Frierun.Server;
 using Frierun.Server.Data;
 using Frierun.Server.Handlers;
+using Frierun.Tests.Factories;
 using Frierun.Tests.Handlers;
 using Microsoft.Extensions.DependencyInjection;
 using Renci.SshNet;
@@ -22,9 +24,10 @@ public abstract class BaseTests
     protected ICloudflareClient CloudflareClient => Handler<FakeCloudflareApiConnectionHandler>().Client;
     protected ISshClient SshClient => Handler<FakeSshConnectionHandler>().SshClient;
     protected ISftpClient SftpClient => Handler<FakeSshConnectionHandler>().SftpClient;
+    protected State State => Resolve<State>();
 
     /// <summary>
-    /// Resolve object from the provider.
+    /// Resolve an object from the provider.
     /// </summary>
     protected T Resolve<T>()
         where T : notnull
@@ -61,11 +64,24 @@ public abstract class BaseTests
             .SingleInstance();
 
         // find all factories
-        foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
+        foreach (var type in Assembly.GetExecutingAssembly().GetTypes().Where(type => !type.IsAbstract))
         {
             var iterator = type;
             while (iterator != null)
             {
+                if (iterator.IsGenericType && iterator.GetGenericTypeDefinition() == typeof(ContractFaker<>))
+                {
+                    Debug.Assert(
+                        iterator.BaseType is { IsGenericType: true } &&
+                        iterator.BaseType.GetGenericTypeDefinition() == typeof(Faker<>)
+                    );
+                    ContainerBuilder.RegisterType(type)
+                        .As(iterator)
+                        .As(iterator.BaseType)
+                        .SingleInstance();
+                    break;
+                }
+
                 if (iterator.IsGenericType && iterator.GetGenericTypeDefinition() == typeof(Faker<>))
                 {
                     ContainerBuilder.RegisterType(type).As(iterator).SingleInstance();
@@ -77,8 +93,7 @@ public abstract class BaseTests
         }
 
         // register fake handlers
-        ContainerBuilder.RegisterDecorator<ProviderScopeBuilder>(
-            (_, _, builder) =>
+        ContainerBuilder.RegisterDecorator<ProviderScopeBuilder>((_, _, builder) =>
             {
                 return b =>
                 {
@@ -86,20 +101,20 @@ public abstract class BaseTests
                     b.RegisterType<FakeDockerApiConnectionHandler>()
                         .AsImplementedInterfaces()
                         .SingleInstance()
-                        .OnlyIf(
-                            registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(IDockerApiConnectionHandler)))
+                        .OnlyIf(registryBuilder =>
+                            registryBuilder.IsRegistered(new TypedService(typeof(IDockerApiConnectionHandler)))
                         );
                     b.RegisterType<FakeCloudflareApiConnectionHandler>()
                         .AsImplementedInterfaces()
                         .SingleInstance()
-                        .OnlyIf(
-                            registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(ICloudflareApiConnectionHandler)))
+                        .OnlyIf(registryBuilder =>
+                            registryBuilder.IsRegistered(new TypedService(typeof(ICloudflareApiConnectionHandler)))
                         );
                     b.RegisterType<FakeSshConnectionHandler>()
                         .AsImplementedInterfaces()
                         .SingleInstance()
-                        .OnlyIf(
-                            registryBuilder => registryBuilder.IsRegistered(new TypedService(typeof(ISshConnectionHandler)))
+                        .OnlyIf(registryBuilder =>
+                            registryBuilder.IsRegistered(new TypedService(typeof(ISshConnectionHandler)))
                         );
                 };
             }
@@ -107,7 +122,7 @@ public abstract class BaseTests
 
         return ContainerBuilder;
     }
-    
+
     /// <summary>
     /// Resolve handler of the specified type
     /// </summary> 
@@ -121,7 +136,7 @@ public abstract class BaseTests
         }
 
         return castedHandler;
-    }    
+    }
 
     /// <summary>
     /// Get factory for generating test data.
@@ -130,6 +145,24 @@ public abstract class BaseTests
         where T : class
     {
         return Resolve<Faker<T>>();
+    }
+
+    /// <summary>
+    /// Gets factory for generating contracts
+    /// </summary>
+    protected ContractFaker<T> Contract<T>()
+        where T : Contract
+    {
+        return Resolve<ContractFaker<T>>();
+    }
+
+    /// <summary>
+    /// Create a mock service and registers it in the container.
+    /// </summary>
+    protected T Mock<T>(object?[]? constructorArguments = null)
+        where T : class
+    {
+        return Mock<T, T>(constructorArguments);
     }
 
     /// <summary>
@@ -145,31 +178,25 @@ public abstract class BaseTests
     }
 
     /// <summary>
-    /// Install package by name and returns application. Throw exception if installation fails.
+    /// Install package by name and returns application. Throw an exception if the installation fails.
     /// </summary>
-    protected Application InstallPackage(string name, IEnumerable<Contract>? overrides = null)
+    protected Application InstallPackage(string name, ContractList? overrides = null)
     {
         Resolve<PackageRegistry>().Load();
         var package = Resolve<PackageRegistry>().Find(name)
                       ?? throw new Exception($"Package {name} not found");
 
-        if (overrides != null)
-        {
-            var overridePackage = new Package(name) { Contracts = overrides };
-            package = (Package)package.Merge(overridePackage);
-        }
-
-        return InstallPackage(package);
+        return InstallPackage(package, overrides);
     }
 
     /// <summary>
-    /// Install package by name and returns application. Throw exception if installation fails.
+    /// Install package by name and returns application. Throw an exception if the installation fails.
     /// </summary>
-    protected Application InstallPackage(Package package)
+    protected Application InstallPackage(Package package, ContractList? overrides = null)
     {
         var executionService = Resolve<ExecutionService>();
         var installService = Resolve<InstallService>();
-        var plan = executionService.Create(package);
+        var plan = executionService.Create(package.CreateApplication(null, overrides));
         var application = installService.Handle(plan);
         if (application != null)
         {
@@ -181,7 +208,8 @@ public abstract class BaseTests
         {
             throw stateManager.Exception;
         }
-        throw new Exception($"Failed to install package {package.Name}");
+
+        throw new Exception($"Failed to install package {package}");
     }
 
     /// <summary>

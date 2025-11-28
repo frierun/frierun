@@ -3,12 +3,17 @@ import Root from "./pages/Root.tsx";
 import Package from "./pages/Package.tsx";
 import {StateContextProvider} from "./providers/StateContext.tsx";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
+import Contracts from "@/pages/Contracts.tsx";
 
 
 const router = createBrowserRouter([
     {
         path: "/",
         element: <Root/>,
+    },
+    {
+        path: "/contracts",
+        element: <Contracts/>,
     },
     {
         path: "/packages/:name",

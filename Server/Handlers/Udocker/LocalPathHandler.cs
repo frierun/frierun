@@ -3,23 +3,31 @@ using Frierun.Server.Data;
 
 namespace Frierun.Server.Handlers.Udocker;
 
-public class LocalPathHandler(Application application) : Handler<Volume>(application)
+public class LocalPathHandler(State state, Application application) : Handler<Volume>(state, application)
 {
     private const string HomePath = "/data/data/com.termux/files/home";
 
-    
-    public override IEnumerable<ContractInitializeResult> Initialize(Volume contract, string prefix)
+
+    public override IEnumerable<ContractList> Initialize(Volume contract, ApplicationContext context)
     {
-        if (contract.VolumeName != null)
+        if (contract.Installed)
         {
             yield break;
         }
         
-        yield return new ContractInitializeResult(contract with
+        if (contract.VolumeName != null)
         {
-            LocalPath = contract.LocalPath ?? $"{HomePath}/frierun/{prefix}/{contract.Name}",
-            Handler = this
-        });
+            yield break;
+        }
+
+        yield return new ContractList
+        {
+            [context] = contract with
+            {
+                LocalPath = contract.LocalPath ?? $"{HomePath}/frierun/{context.Prefix}/{context.Name}",
+                Handler = this
+            }
+        };
     }
 
     public override Volume Install(Volume contract, ExecutionPlan plan)

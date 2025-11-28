@@ -90,6 +90,11 @@
           "System.Threading.Tasks.Extensions": "4.5.4"
         }
       },
+      "JetBrains.Annotations": {
+        "type": "Transitive",
+        "resolved": "2025.2.2",
+        "contentHash": "0X56ZRizuHdrnPpgXjWV7f2tQO1FlQg5O1967OGKnI/4ZRNOK642J8L7brM1nYvrxTTU5TP1yRyXLRLaXLPQ8A=="
+      },
       "Microsoft.AspNetCore.OpenApi": {
         "type": "Transitive",
         "resolved": "9.0.0",
@@ -207,6 +212,11 @@
         "resolved": "4.5.1",
         "contentHash": "Rw7ijyl1qqRS0YQD/WycNst8hUUMgrMH4FCn1nNm27M4VxchZ1js3fVjQaANHO5f3sN4isvP4a+Met9Y4YomAg=="
       },
+      "System.CommandLine": {
+        "type": "Transitive",
+        "resolved": "2.0.0-beta6.25358.103",
+        "contentHash": "YE8bPzXelsU4Fm4mHIFKwPHYJ1RT0hr1b5+tiyjFk4YYpA+WKzdYxrvdJVJIoC+2vbtffajA928Qe7xUj0WR4g=="
+      },
       "System.Diagnostics.DiagnosticSource": {
         "type": "Transitive",
         "resolved": "8.0.1",
@@ -278,11 +288,13 @@
           "Autofac": "[8.1.1, )",
           "Autofac.Extensions.DependencyInjection": "[10.0.0, )",
           "Docker.DotNet": "[3.125.15, )",
+          "JetBrains.Annotations": "[2025.2.2, )",
           "Microsoft.AspNetCore.OpenApi": "[9.0.0, )",
           "Microsoft.AspNetCore.SpaProxy": "[9.0.0, )",
           "SSH.NET": "[2025.0.0, )",
           "Swashbuckle.AspNetCore": "[7.1.0, )",
           "Swashbuckle.AspNetCore.Annotations": "[7.1.0, )",
+          "System.CommandLine": "[2.0.0-beta6.25358.103, )",
           "YamlDotNet": "[16.3.0, )"
         }
       }

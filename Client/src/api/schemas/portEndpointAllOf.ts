@@ -12,6 +12,6 @@ export type PortEndpointAllOf = {
   externalPort: number;
   /** @nullable */
   externalIp?: string | null;
-  installed?: boolean;
+  readonly installed?: boolean;
   container: string;
 };

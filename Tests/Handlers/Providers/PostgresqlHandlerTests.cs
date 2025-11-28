@@ -8,7 +8,7 @@ namespace Frierun.Tests.Handlers;
 public class PostgresqlHandlerTests : BaseTests
 {
     private readonly Application _providerApplication;
-    
+
     public PostgresqlHandlerTests()
     {
         InstallPackage("docker");
@@ -18,50 +18,42 @@ public class PostgresqlHandlerTests : BaseTests
     [Fact]
     public void Install_PackageWithContract_CreatesDatabase()
     {
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts =
-            [
-                new Postgresql(),
-            ]
-        };
+        var postgresql = Contract<Postgresql>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [postgresql] };
 
         var application = InstallPackage(package);
 
-        var database = application.Contracts.OfType<Postgresql>().Single();
+        var database = State.GetContract(application, postgresql.Ref);
         Assert.True(database.Installed);
-        Assert.Equal(package.Name, database.Username);
-        Assert.Equal(package.Name, database.Database);
+        Assert.StartsWith(package.Name, database.Username);
+        Assert.StartsWith(package.Name, database.Database);
         Assert.Contains(_providerApplication.Name, application.RequiredApplications);
-        Assert.Equal(application.Name, database.NetworkName);
-        DockerClient.Networks.Received(1).ConnectNetworkAsync(
-            database.NetworkName, 
-            Arg.Any<NetworkConnectParameters>()
-        );
         
-    }    
-    
-    [Fact]
-    public void Install_PackageWithTwoContracts_OnlyOneNetworkAttached()
-    {
-        var package = Factory<Package>().Generate() with
-        {
-            Contracts =
-            [
-                new Postgresql("first"),
-                new Postgresql("second"),
-            ]
-        };
-
-        var application = InstallPackage(package);
-
-        Assert.Equal(2, application.Contracts.OfType<Postgresql>().Count());
+        var network = State.GetContract(database.Network);
+        Assert.Equal(application.Name, network.NetworkName);
         DockerClient.Networks.Received(1).ConnectNetworkAsync(
-            application.Name, 
+            network.NetworkName,
             Arg.Any<NetworkConnectParameters>()
         );
     }
-    
+
+    [Fact]
+    public void Install_PackageWithTwoContracts_OnlyOneNetworkAttached()
+    {
+        var postgresql1 = Contract<Postgresql>().Generate();
+        var postgresql2 = Contract<Postgresql>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [postgresql1, postgresql2] };
+
+        var application = InstallPackage(package);
+
+        Assert.True(State.GetContract(application, postgresql1.Ref).Installed);
+        Assert.True(State.GetContract(application, postgresql2.Ref).Installed);
+        DockerClient.Networks.Received(1).ConnectNetworkAsync(
+            application.Name,
+            Arg.Any<NetworkConnectParameters>()
+        );
+    }
+
     [Fact]
     public void Uninstall_PackageWithTwoContracts_OnlyOneNetworkDetached()
     {
@@ -69,12 +61,12 @@ public class PostgresqlHandlerTests : BaseTests
         {
             Contracts =
             [
-                new Postgresql("first"),
-                new Postgresql("second"),
+                Contract<Postgresql>().Generate(),
+                Contract<Postgresql>().Generate()
             ]
         };
         var application = InstallPackage(package);
-        
+
         Resolve<UninstallService>().Handle(application);
 
         DockerClient.Networks.Received(1).DisconnectNetworkAsync(
@@ -82,19 +74,33 @@ public class PostgresqlHandlerTests : BaseTests
             Arg.Any<NetworkDisconnectParameters>()
         );
     }
-    
+
     [Fact]
-    public void Initialize_PrefixIsPostgres_UserIsNotPostgres()
+    public void Initialize_EmptyId_UserAndDatabaseEqualPackageName()
     {
+        var postgresql = Factory<Postgresql>().Generate();
+        var package = Factory<Package>().Generate() with { Contracts = new ContractList { [""] = postgresql } };
+
+        var application = InstallPackage(package);
+
+        Assert.Equal(package.Name, application.Name);
+        Assert.Equal(package.Name, State.GetContract<Postgresql>(application).Username);
+        Assert.Equal(package.Name, State.GetContract<Postgresql>(application).Database);
+    }
+
+    [Fact]
+    public void Initialize_EmptyIdWithPrefixPostgres_UserIsNotPostgres()
+    {
+        var postgresql = Factory<Postgresql>().Generate();
         var package = Factory<Package>().Generate() with
         {
-            Prefix = "postgres",
-            Contracts = [new Postgresql()]
+            Name = "postgres", Contracts = new ContractList { [""] = postgresql }
         };
 
         var application = InstallPackage(package);
 
-        var database = application.Contracts.OfType<Postgresql>().Single();
-        Assert.NotEqual(package.Name, database.Username);
-    }    
+        Assert.Equal(package.Name, application.Name);
+        Assert.NotEqual(package.Name, State.GetContract<Postgresql>(application).Username);
+        Assert.Equal(package.Name, State.GetContract<Postgresql>(application).Database);
+    }
 }

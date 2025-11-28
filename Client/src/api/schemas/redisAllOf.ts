@@ -10,8 +10,8 @@ export type RedisAllOf = {
   container?: string | null;
   /** @nullable */
   volume?: string | null;
-  /** @nullable */
-  host?: string | null;
-  installed?: boolean;
+  readonly installed?: boolean;
   network: string;
+  /** @nullable */
+  host: string | null;
 };

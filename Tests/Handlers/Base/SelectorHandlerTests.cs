@@ -1,4 +1,5 @@
 ﻿using Frierun.Server.Data;
+using Frierun.Server.Handlers;
 using Frierun.Server.Handlers.Base;
 
 namespace Frierun.Tests.Handlers.Base;
@@ -8,64 +9,69 @@ public class SelectorHandlerTests : BaseTests
     [Fact]
     public void Initialize_WithSelectedOption_ReturnsSingleOption()
     {
-        var selector = new Selector(
-            "selector", [
-                new SelectorOption("option1", [new Container("container1")]),
-                new SelectorOption("option2", [new Container("container2")])
-            ], "option2"
-        );
+        var container1 = Contract<Container>().Generate();
+        var container2 = Contract<Container>().Generate();
+        var selector = Contract<Selector>()
+            .Set(
+                p => p.Options,
+                [
+                    new SelectorOption("option1", [container1]),
+                    new SelectorOption("option2", [container2])
+                ]
+            )
+            .Set(p => p.Value, "option2")
+            .Generate();
         var handler = Handler<SelectorHandler>();
 
-        var result = handler.Initialize(selector, "prefix").ToList();
+        var result = handler.Initialize(selector.Contract, new ApplicationContext(selector.Ref, "prefix")).ToList();
 
-        // Assert
         Assert.Single(result);
-        var resolvedContract = (Selector)result[0].Contract;
-        Assert.Equal("option2", resolvedContract.Value);
-        Assert.Single(result[0].AdditionalContracts);
-        Assert.Equal("container2", result[0].AdditionalContracts.First().Name);
+        Assert.Equal("option2", ((Selector)result[0][selector.Ref]).Value);
+        Assert.Equal(2, result[0].Count);
+        Assert.Equal(container2.Contract, result[0][container2.Ref]);
     }
 
     [Fact]
     public void Initialize_WithoutSelectedOption_ReturnsAllOptions()
     {
-        var selector = new Selector(
-            "selector", [
-                new SelectorOption("option1", [new Container("container1")]),
-                new SelectorOption("option2", [new Container("container2")])
-            ]
-        );
+        var container1 = Contract<Container>().Generate();
+        var container2 = Contract<Container>().Generate();
+        var selector = Contract<Selector>()
+            .Set(
+                p => p.Options,
+                [
+                    new SelectorOption("option1", [container1]),
+                    new SelectorOption("option2", [container2])
+                ]
+            )
+            .Generate();
         var handler = Handler<SelectorHandler>();
 
-        var result = handler.Initialize(selector, "prefix").ToList();
+        var result = handler.Initialize(selector.Contract, new ApplicationContext(selector.Ref, "prefix")).ToList();
 
         Assert.Equal(2, result.Count);
-        var resolvedContract1 = (Selector)result[0].Contract;
-        Assert.Equal("option1", resolvedContract1.Value);
-        Assert.Single(result[0].AdditionalContracts);
-        Assert.Equal("container1", result[0].AdditionalContracts.First().Name);
+        Assert.Equal("option1", ((Selector)result[0][selector.Ref]).Value);
+        Assert.Equal(2, result[0].Count);
+        Assert.Equal(container1.Contract, result[0][container1.Ref]);
 
-        var resolvedContract2 = (Selector)result[1].Contract;
-        Assert.Equal("option2", resolvedContract2.Value);
-        Assert.Single(result[1].AdditionalContracts);
-        Assert.Equal("container2", result[1].AdditionalContracts.First().Name);
+        Assert.Equal("option2", ((Selector)result[1][selector.Ref]).Value);
+        Assert.Equal(2, result[1].Count);
+        Assert.Equal(container2.Contract, result[1][container2.Ref]);
     }
 
     [Fact]
     public void Install_PackageWithSelector_PackageDependsOnSelectorChildren()
     {
-        var contract = Factory<Parameter>().Generate();
-        var selector = new Selector(
-            "selector", [
-                new SelectorOption("option1", [contract]),
-            ]
-        );
-        var package = Factory<Package>().Generate() with { Contracts = new List<Contract> { selector } };
+        var contract = Contract<Parameter>().Generate();
+        var selector = Contract<Selector>()
+            .Set(p => p.Options, [new SelectorOption("option", [contract]),])
+            .Generate();
+        var package = Factory<Package>().Generate() with { Contracts = [selector] };
 
         var application = InstallPackage(package);
 
-        var installedSelector = application.Contracts.OfType<Parameter>().Single();
+        var installedSelector = State.GetContract(application, contract.Ref);
         Assert.True(installedSelector.Installed);
-        Assert.Equal(contract.Value, installedSelector.Value);
+        Assert.Equal(contract.Contract.Value, installedSelector.Value);
     }
 }

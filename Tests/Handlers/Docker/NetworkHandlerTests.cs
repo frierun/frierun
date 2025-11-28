@@ -1,4 +1,5 @@
 ﻿using Frierun.Server.Data;
+using Frierun.Server.Handlers;
 using ContainerHandler = Frierun.Server.Handlers.Udocker.ContainerHandler;
 using NetworkHandler = Frierun.Server.Handlers.Docker.NetworkHandler;
 
@@ -11,15 +12,21 @@ public class NetworkHandlerTests : BaseTests
     {
         var docker = InstallPackage("docker");
         var udocker = InstallPackage("termux-udocker");
-        var container = Factory<Container>().Generate("udocker") with { Handler = Handler<ContainerHandler>(udocker) };
-        var package = Factory<Package>().Generate() with { Contracts = [container] };
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts = [Contract<Container>().SetHandler<ContainerHandler>(udocker).Generate("udocker")]
+        };
         var application = InstallPackage(package);
-        var network = application.Contracts.OfType<Network>().Single();
+        var network = State.GetContract<Network>(application);
         Assert.True(network.Installed);
 
-        var result = Handler<NetworkHandler>(docker).Initialize(new Network(""), network.NetworkName);
+        var result = Handler<NetworkHandler>(docker)
+            .Initialize(
+                new Network(),
+                new ApplicationContext("", network.NetworkName)
+            );
 
-        var dockerNetwork = (Network)result.Single().Contract;
+        var dockerNetwork = result.Single().Values.OfType<Network>().Single();
         Assert.Equal(network.NetworkName, dockerNetwork.NetworkName);
     }
 }

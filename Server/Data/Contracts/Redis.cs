@@ -5,28 +5,35 @@ using static Frierun.Server.Data.Merger;
 namespace Frierun.Server.Data;
 
 public record Redis(
-    string? Name = null,
-    ContractId<Network>? Network = null,
-    ContractId<Container>? Container = null,
-    ContractId<Volume>? Volume = null,
-    string? Host = null
-) : Contract(Name ?? "")
+    ContractRef<Network>? Network = null,
+    ContractRef<Container>? Container = null,
+    ContractRef<Volume>? Volume = null,
+    Argument<string>? Host = null
+) : Contract
 {
-    [MemberNotNullWhen(true, nameof(Host), nameof(Container), nameof(Volume))]
-    public override bool Installed { get; init; }
+    [MemberNotNullWhen(true, nameof(Container), nameof(Volume))]
+    public override bool Installed => Id != Guid.Empty;
 
-    public ContractId<Network> Network { get; init; } = Network ?? new ContractId<Network>("");
+    public ContractRef<Network> Network { get; init; } = Network ?? new ContractRef<Network>("");
+    public Argument<string> Host { get; init; } = Host ?? new Argument<string>();
 
+    public override Redis Transform(IArgumentTransformer transformer)
+    {
+        return this with
+        {
+            Host = transformer.Transform(Host),
+            DependsOn = DependsOn.Select(transformer.Transform).ToArray()
+        };
+    }    
+    
     public override Contract Merge(Contract other)
     {
-        var contract = EnsureSame(this, other);
-
-        return MergeCommon(this, contract) with
+        return MergeCommon(this, other, out var contract) with
         {
-            Network = OnlyOne(Network, contract.Network),
-            Container = OnlyOne(Container, contract.Container),
-            Volume = OnlyOne(Volume, contract.Volume),       
-            Host = OnlyOne(Host, contract.Host)
+            Network = MergeValue(Network, contract.Network),
+            Container = MergeValue(Container, contract.Container),
+            Volume = MergeValue(Volume, contract.Volume),
+            Host = Host.Merge(contract.Host)
         };
     }
 }

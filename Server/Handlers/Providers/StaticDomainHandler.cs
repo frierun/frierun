@@ -2,20 +2,19 @@
 
 namespace Frierun.Server.Handlers;
 
-public class StaticDomainHandler(Application application)
-    : Handler<Domain>(application)
+public class StaticDomainHandler(State state, Application application)
+    : Handler<Domain>(state, application)
 {
-    private readonly string _domainName = application.Contracts
-        .OfType<Parameter>()
-        .First(parameter => parameter.Name == "Domain")
+    private readonly string _domainName = state
+        .GetContract<Parameter>(application, "Domain")
+        .Value
         .Value ?? "";
 
-    private readonly bool _isInternal = application.Contracts
-        .OfType<Selector>()
-        .First(parameter => parameter.Name == "Internal")
+    private readonly bool _isInternal = state
+        .GetContract<Selector>(application, "Internal")
         .Value == "Yes";
 
-    public override IEnumerable<ContractInitializeResult> Initialize(Domain contract, string prefix)
+    public override IEnumerable<ContractList> Initialize(Domain contract, ApplicationContext context)
     {
         if (contract.IsInternal != null && contract.IsInternal != _isInternal)
         {
@@ -33,31 +32,35 @@ public class StaticDomainHandler(Application application)
 
             if (!IsDomainExist(contract.Value))
             {
-                yield return new ContractInitializeResult(contract with { Handler = this, IsInternal = _isInternal });
+                yield return new ContractList
+                {
+                    [context] = contract with { Handler = this, IsInternal = _isInternal }
+                };
             }
 
             yield break;
         }
-        
-        yield return new ContractInitializeResult(
-            contract with
+
+        yield return new ContractList
+        {
+            [context] = contract with
             {
                 Handler = this,
                 Value = FindUniqueName(
-                    prefix,
+                    context.Prefix,
                     c => c.Value,
                     $".{_domainName}"
                 ),
                 IsInternal = _isInternal
             }
-        );
+        };
     }
 
     /// <summary>
-    /// Checks if subdomain is already in use
+    /// Checks if a subdomain is already in use
     /// </summary>
     private bool IsDomainExist(string domain)
     {
-        return State.Contracts.OfType<Domain>().Any(c => c.Value == domain);
+        return State.GetContracts<Domain>().Any(c => c.Value == domain);
     }
 }

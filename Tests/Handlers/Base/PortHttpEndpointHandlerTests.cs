@@ -4,31 +4,41 @@ namespace Frierun.Tests.Handlers.Base;
 
 public class PortHttpEndpointHandlerTests : BaseTests
 {
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void Install_ContainerWithHttpEndpoint_InstallEndpointFirst(bool reverseOrder)
+    [Fact]
+    public void Install_ContainerWithHttpEndpoint_CreatesEndpoint()
     {
         InstallPackage("docker");
-        var container = Factory<Container>().Generate();
-        List<Contract> contracts =
-        [
-            container,
-            Factory<HttpEndpoint>().Generate() with { Container = (ContractId<Container>)container.Id }
-        ];
-        if (reverseOrder)
+        var container = Contract<Container>().Generate();
+        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.Container, container.Id).Generate();
+        var package = Factory<Package>().Generate() with
         {
-            contracts.Reverse();
-        }
-        var package = Factory<Package>().Generate() with { Contracts = contracts };
+            Contracts = [container, httpEndpoint]
+        };
 
         var application = InstallPackage(package);
 
-        var installedContracts = application.Contracts.ToList();
-        var endpointIndex = installedContracts.FindIndex(r => r is PortEndpoint);
-        var containerIndex = installedContracts.FindIndex(r => r is Container);
-        Assert.NotEqual(-1, endpointIndex);
-        Assert.NotEqual(-1, containerIndex);
-        Assert.True(endpointIndex < containerIndex);
+        var resultHttpEndpoint = State.GetContract(application, httpEndpoint.Ref);
+        Assert.False(resultHttpEndpoint.ResultSsl.Value);
+        Assert.Equal(httpEndpoint.Contract.Port, resultHttpEndpoint.ResultPort.Value);
+        Assert.NotNull(resultHttpEndpoint.ResultHost.Value);
+    }
+
+    [Fact]
+    public void Install_ContainerWithHttpEndpoint_DependsOnPortEndpoint()
+    {
+        InstallPackage("docker");
+        var container = Contract<Container>().Generate();
+        var httpEndpoint = Contract<HttpEndpoint>().Set(p => p.Container, container.Id).Generate();
+        var package = Factory<Package>().Generate() with
+        {
+            Contracts = [container, httpEndpoint]
+        };
+
+        var application = InstallPackage(package);
+
+        Assert.Contains( 
+            State.GetContract<PortEndpoint>(application, httpEndpoint.Ref.Name).Id,
+            State.GetContract(application, httpEndpoint.Ref).GetDependencies()
+        );
     }
 }
