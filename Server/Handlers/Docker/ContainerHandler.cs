@@ -78,6 +78,11 @@ public class ContainerHandler(
 
     public override IEnumerable<ContractList> Initialize(Container contract, ApplicationContext context)
     {
+        foreach (var installedContract in State.GetContracts<Container>().Where(network => network.Handler == this))
+        {
+            yield return new ContractList { [context] = installedContract };
+        }
+        
         yield return new ContractList(
             contract.Mounts.Values.Select(mount => new KeyValuePair<ContractRef, Contract>(
                     mount.Volume.TypedRef,
